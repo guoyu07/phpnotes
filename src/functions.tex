@@ -1,0 +1,3080 @@
+\part{PHP Functions}
+
+
+函数是一种可以在任何被需要的时候执行的代码块，PHP提供了超过 700 个内建的函数，因而PHP的真正威力源自于它的函数。
+
+
+
+\chapter{PHP Functions Foundation}
+
+
+
+\section{Function Creatation}
+
+创建 PHP 函数的步骤如下：
+
+\begin{compactitem}
+\item 所有的函数都使用关键词``\texttt{function()}" 来开始
+\item 命名函数 - 函数的名称应该提示出它的功能。函数名称以字母或下划线开头。
+\item 添加``\texttt{\{}" - 开口的花括号之后的部分是函数的代码。
+\item 插入函数代码
+\item 添加一个``\texttt{\}}" - 函数通过关闭花括号来结束。
+\end{compactitem}
+
+比较下面两个简单的函数，在其被调用时能输出名字。
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+<body>
+
+<?php
+function writeMyName() {
+  echo "David Yang";
+}
+
+writeMyName();
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<body>
+
+<?php
+function writeMyName() {
+  return "David Yang";
+}
+
+echo writeMyName();
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+
+
+
+\section{Function Usage}
+
+
+下面的示例演示了如何在PHP脚本中使用定义的函数：
+
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+<title>PHP Function Example</title>
+</head>
+<body>
+
+<?php
+function writeMyName() {
+  echo "David Yang";
+}
+
+echo "Hello world!<br />";
+echo "My name is ";
+writeMyName();
+echo ".<br />That's right, ";
+writeMyName();
+echo " is my name.";
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+\section{Function Parameters}
+
+可以通过添加参数向函数添加更多的功能，其中参数类似一个变量。
+
+每个函数名称后面都有一个括号，比如 writeMyName()，而参数就是在括号中规定的。
+
+下面的例子会输出不同的名字，但姓是相同的：
+
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+<body>
+
+<?php
+function writeMyName($fname)
+  {
+  echo $fname . " Yang.<br />";
+  }
+
+echo "My name is ";
+writeMyName("David");
+
+echo "My name is ";
+writeMyName("Mike");
+
+echo "My name is ";
+writeMyName("John");
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+下面示例中的函数有两个参数：
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+<body>
+<?php
+function writeMyName($fname,$punctuation)
+  {
+  echo $fname . " Yang" . $punctuation . "<br />";
+  }
+
+echo "My name is ";
+writeMyName("David",".");
+
+echo "My name is ";
+writeMyName("Mike","!");
+
+echo "My name is ";
+writeMyName("John","...");
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+
+\section{Function Return Values}
+
+函数也能用于返回值。
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+
+<?php
+function add($x,$y)
+  {
+  $total = $x + $y;
+  return $total;
+  }
+
+echo "1 + 16 = " . add(1,16);
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+
+
+\chapter{PHP Script}
+
+
+现在来编写一些更实用的脚本，比如检查浏览页面的访问者在用什么浏览器。要达到这个目的，需要检查用户的 agent 字符串，它是浏览器发送的 HTTP 请求的一部分。该信息被存储在一个变量中。在 PHP 中，变量总是以一个美元符开头。我们现在感兴趣的变量是 \texttt{\$\_SERVER['HTTP\_USER\_AGENT']}，而\texttt{\$\_SERVER} 是一个特殊的 PHP 保留变量，它包含了 web 服务器提供的所有信息，被称为超全局变量。这些特殊的变量是在 PHP 4.1.0 版本引入的。在这之前使用 \texttt{\$HTTP\_*\_VARS} 数组，如 \texttt{\$HTTP\_SERVER\_VARS}。尽管现在已经不用了，但它们在新版本中仍然存在。
+
+要显示\texttt{\$\_SERVER['HTTP\_USER\_AGENT']}变量，只需简单地进行如下操作：
+
+\begin{lstlisting}[language=PHP]
+<?php 
+echo $_SERVER['HTTP_USER_AGENT']; 
+?>
+\end{lstlisting}
+
+PHP 有很多种不同类型的变量，\texttt{\$\_SERVER} 只是 PHP 自动全局化的变量之一。在以上例子中我们打印了一个数组的单元，而数组是一类非常有用的变量。
+
+可以在一个 PHP 标识中加入多个 PHP 语句，也可以建立一个代码块来做比简单的 echo 更多的事情。例如，如果需要识别 Internet Explorer，可以进行如下操作：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) {
+    echo '正在使用 Internet Explorer。<br />';
+}
+else{
+    echo '你使用的不是Internet Explorer。';
+}
+?>
+\end{lstlisting}
+
+其中，\texttt{strpos()} 是 PHP 的一个内置函数，其功能是在一个字符串中搜索另外一个字符串。例如我们现在需要在 \texttt{\$\_SERVER['HTTP\_USER\_AGENT']}（即所谓的 \texttt{haystack}）变量中寻找 'MSIE'。如果在这个 \texttt{haystack} 中该字符串（即所谓的 \texttt{needle}）被找到（“草里寻针”），则函数返回 \texttt{needle} 在 \texttt{haystack} 中相对于开头的位置；如果没有，则返回 FALSE。如果该函数没有返回 FALSE，则 if 会将条件判断为 TRUE 并运行其花括号 \texttt{\{\}} 内的代码；否则，则不运行这些代码。可以自己尝试利用 if，else 以及其它的函数如 \texttt{strtoupper()} 和 \texttt{strlen()} 来建立类似的脚本。
+
+
+以下我们进一步显示如何进出 PHP 模式，甚至是在一个 PHP 代码块的中间：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) {
+?>
+<h3>strpos() 肯定没有返回假 (FALSE)</h3>
+<p>正在使用 Internet Explorer</p>
+<?php
+} else {
+?>
+<h3>strpos() 肯定返回假 (FALSE)</h3>
+<center><b>没有使用 Internet Explorer</b></center>
+<?php
+}
+?>
+\end{lstlisting}
+
+和以上我们用一个 PHP 的 \texttt{echo} 语句来输出不同的是，我们跳出了 PHP 模式来直接写 HTML 代码。这里很值得注意的一点是，对于这两种情况而言，脚本的逻辑效率是相同的。在判断了 \texttt{strpos()} 函数的返回值是 TRUE 或是 FALSE，也就是判断了字符串 'MSIE' 是否被找到之后，最终只有一个 HTML 块被发送给浏览者。
+
+
+
+
+
+\chapter{PHP Date/Time}
+
+
+\section{date()}
+
+
+
+PHP 的 date() 函数用于格式化时间戳\footnote{时间戳是自 1970 年 1 月 1 日（00:00:00 GMT）以来的秒数，它也被称为 Unix 时间戳（Unix Timestamp）。}或日期，从而产生可读性更好的日期和时间。
+
+\begin{lstlisting}[language=PHP]
+     date(format,timestamp)
+\end{lstlisting}
+
+其中：
+
+\begin{compactitem}
+\item format是必需的，用于规定时间戳的格式。
+\item timestamp是可选的，用于规定时间戳。默认是当前的日期和时间。
+\end{compactitem}
+
+
+date() 函数的第一个参数规定了如何格式化日期/时间，它使用字母来表示日期和时间的格式。下面列出了一些可用的字母：
+
+\begin{compactitem}
+\item d - 月中的天 (01-31)
+\item m - 当前月，以数字计 (01-12)
+\item Y - 当前的年（四位数）
+\end{compactitem}
+
+通过在字母之间插入其他字符，比如 "/"、"." 或者 "-"，这样就可以对日期增加附加格式：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo date("Y/m/d");
+echo "<br />";
+echo date("Y.m.d");
+echo "<br />";
+echo date("Y-m-d");
+?>
+\end{lstlisting}
+
+date() 函数的第二个参数规定了一个时间戳，此参数是可选的。如果没有提供时间戳，将使用当前的时间。
+
+\section{mktime()}
+
+
+mktime() 函数可为指定的日期返回 Unix 时间戳。
+
+\begin{lstlisting}[language=PHP]
+mktime(hour,minute,second,month,day,year,is_dst)
+\end{lstlisting}
+
+下面的示例将使用 mktime() 函数为明天创建一个时间戳。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$tomorrow = mktime(0,0,0,date("m"),date("d")+1,date("Y"));
+echo "明天是".date("Y/m/d", $tomorrow);
+?>
+\end{lstlisting}
+
+PHP date/time 函数允许用户提取并格式化服务器上的日期和时间，当然这些函数依赖于服务器的本地设置（日期/时间函数的行为受到 php.ini 中设置的影响）。date/time 函数是 PHP 核心的组成部分，无需安装即可使用这些函数。
+
+
+\begin{longtable}{|m{90pt}|m{40pt}|m{180pt}|m{60pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+名称	&默认	&描述	&可改变
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Date/Time 配置选项}\\
+\hline
+名称	&默认	&描述	&可改变
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+date.default\_latitude	 &``31.7667"	&规定默认纬度（从 PHP 5 开始可用）。date\_sunrise() 和 date\_sunset() 使用该选项。	&PHP\_INI\_ALL\\
+\hline
+date.default\_longitude	&``35.2333"	&规定默认经度（从 PHP 5 开始可用）。date\_sunrise() 和 date\_sunset() 使用该选项。	&PHP\_INI\_ALL\\
+\hline
+date.sunrise\_zenith		&``90.83"	&规定日出天顶（从 PHP 5 开始可用）。date\_sunrise() 和 date\_sunset() 使用该选项。	&PHP\_INI\_ALL\\
+\hline
+date.sunset\_zenith		&``90.83"	&规定日落天顶（从 PHP 5 开始可用）。date\_sunrise() 和 date\_sunset() 使用该选项。	&PHP\_INI\_ALL\\
+\hline
+date.timezone			&``"	&规定默认时区（从 PHP 5.1 开始可用）。	&PHP\_INI\_ALL\\
+\hline
+\end{longtable}
+
+
+
+
+
+
+\section{PHP Date/Time Functions}
+
+
+
+
+
+
+
+\begin{longtable}{|m{120pt}|m{250pt}|m{20pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+函数	&描述	&PHP
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Date / Time 函数}\\
+\hline
+函数	&描述	&PHP
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+checkdate()						&验证格利高里日期。	&3\\
+\hline
+date\_default\_timezone\_get()	&返回默认时区。	&5\\
+\hline
+date\_default\_timezone\_set()	&设置默认时区。	&5\\
+\hline
+date\_sunrise()					&返回给定的日期与地点的日出时间。	&5\\
+\hline
+date\_sunset()					&返回给定的日期与地点的日落时间。&	5\\
+\hline
+date()							&格式化本地时间／日期。&	3\\
+\hline
+getdate()						&返回日期／时间信息。	&3\\
+\hline
+gettimeofday()					&返回当前时间信息。	&3\\
+\hline
+gmdate()						&格式化 GMT/UTC 日期/时间。	&3\\
+\hline
+gmmktime()						&取得 GMT 日期的 UNIX 时间戳。	&3\\
+\hline
+gmstrftime()					&根据本地区域设置格式化 GMT/UTC 时间/日期。	&3\\
+\hline
+idate()							&将本地时间/日期格式化为整数	&5\\
+\hline
+localtime()						&返回本地时间。	&4\\
+\hline
+microtime()						&返回当前时间的微秒数。	&3\\
+\hline
+mktime()						&返回一个日期的 Unix 时间戳。&	3\\
+\hline
+strftime()						&根据区域设置格式化本地时间/日期。&	3\\
+\hline
+strptime()						&解析由 strftime 生成的日期/时间。&	5\\
+\hline
+strtotime()						&将任何英文文本的日期或时间描述解析为 Unix 时间戳。&	3\\
+\hline
+time()							&返回当前时间的 Unix 时间戳。&	3\\
+\hline
+\end{longtable}
+
+
+
+\section{PHP Date/Time Constants}
+
+
+\begin{longtable}{|m{120pt}|m{250pt}|m{20pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量	&描述	&PHP
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Date / Time 常量}\\
+\hline
+常量	&描述	&PHP
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+DATE\_ATOM	&原子钟格式 (如: 2005-08-15T16:13:03+0000)	 &\\
+\hline
+DATE\_COOKIE	&HTTP Cookies 格式 (如: Sun, 14 Aug 2005 16:13:03 UTC)	 &\\
+\hline
+DATE\_ISO8601&	ISO-8601 (如: 2005-08-14T16:13:03+0000)	 &\\
+\hline
+DATE\_RFC822	&RFC 822 (如: Sun, 14 Aug 2005 16:13:03 UTC)	 &\\
+\hline
+DATE\_RFC850	&RFC 850 (如: Sunday, 14-Aug-05 16:13:03 UTC)	 &\\
+\hline
+DATE\_RFC1036	&RFC 1036 (如: Sunday, 14-Aug-05 16:13:03 UTC)	 &\\
+\hline
+DATE\_RFC1123&	RFC 1123 (如: Sun, 14 Aug 2005 16:13:03 UTC)	 &\\
+\hline
+DATE\_RFC2822&	RFC 2822 (如: Sun, 14 Aug 2005 16:13:03 +0000)	 &\\
+\hline
+DATE\_RSS		&RSS (如: Sun, 14 Aug 2005 16:13:03 UTC)	 &\\
+\hline
+DATE\_W3C	&World Wide Web Consortium \newline (如:2005-08-14T16:13:03+0000)	 &\\
+\hline
+\end{longtable}
+
+
+\chapter{PHP include/require statements}
+
+服务器端包含 (SSI) 用于创建可在多个页面重复使用的函数、页眉、页脚或元素。
+
+在 PHP 中能够在服务器执行 PHP 文件之前把该文件插入另一个 PHP 文件中。include 和 require 语句用于在执行流中向其他文件插入有用的的代码。
+
+include 和 require 很相似，除了在错误处理方面的差异：
+
+\begin{compactitem}
+\item require 会产生致命错误 (E\_COMPILE\_ERROR)，并停止脚本
+\item include 只会产生警告 (E\_WARNING)，脚本将继续
+\end{compactitem}
+
+因此，如果希望继续执行，并向用户输出结果，即使包含文件已丢失，那么可以使用 include。否则，在框架、CMS 或者复杂的 PHP 应用程序编程中，始终使用 require 向执行流引用关键文件。这有助于在某个关键文件意外丢失的情况下，提高应用程序的安全性和完整性。
+
+包含文件省去了大量的工作，这意味着用户可以为所有页面创建标准页头、页脚或者菜单文件。然后，在页头需要更新时，只需更新这个页头包含文件即可。
+
+\begin{lstlisting}[language=PHP]
+include 'filename';
+\end{lstlisting}
+
+或者：
+
+\begin{lstlisting}[language=PHP]
+require 'filename';
+\end{lstlisting}
+
+
+假设有一个标准的页头文件，名为 "header.php"。如需在页面中引用这个页头文件，使用 include/require的示例如下：
+
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PHP Example</title>
+</head>
+<body>
+  <?php include 'header.php'; ?>
+  <h1>Welcome to home page</h1>
+  <p>Some text.</p>
+</body>
+</html>
+\end{lstlisting}
+
+假设现在有一个在所有页面中使用的标准菜单文件，网站中的所有页面均应引用该菜单文件：
+
+\begin{lstlisting}[language=HTML]
+"menu.php":
+
+echo '<a href="/default.php">Home</a>
+<a href="/tutorials.php">Tutorials</a>
+<a href="/references.php">References</a>
+<a href="/examples.php">Examples</a>
+<a href="/about.php">About Us</a>
+<a href="/contact.php">Contact Us</a>';
+\end{lstlisting}
+
+下面是引用这个标准菜单文件的具体的做法：
+
+\begin{lstlisting}[language=HTML]
+<html>
+<body>
+
+<div class="leftmenu">
+<?php include 'menu.php'; ?>
+</div>
+
+<h1>Welcome to my home page.</h1>
+<p>Some text.</p>
+
+</body>
+</html>
+\end{lstlisting}
+
+在PHP可以把变量包含在独立的文件中， 下面是一个示例。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$color='red';
+$car='BMW';
+?>
+\end{lstlisting}
+
+
+通过require/include语句来引用上述的变量的示例如下：
+
+
+\begin{lstlisting}[language=HTML]
+<html>
+<body>
+
+<h1>Welcome to my home page.</h1>
+<?php include 'vars.php';
+  echo "I have a $color $car"; // I have a red BMW
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+
+
+
+
+
+\chapter{PHP Filesystem}
+
+
+
+
+\section{fopen()}
+
+
+fopen() 函数用于在 PHP 中打开文件。此函数的第一个参数含有要打开的文件的名称，第二个参数规定了使用哪种模式来打开文件：
+
+\begin{lstlisting}[language=HTML]
+<html>
+<body>
+
+<?php
+  $file=fopen("welcome.txt","r");
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+文件可能通过下列模式\footnote{如果 fopen() 无法打开指定文件，则返回 0 (false)。}来打开：
+
+
+\begin{longtable}{|m{50pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+模式	&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP fopen() 模式}\\
+\hline
+模式	&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+r	&只读。在文件的开头开始。\\
+\hline
+r+	&读/写。在文件的开头开始。\\
+\hline
+w	&只写。打开并清空文件的内容；如果文件不存在，则创建新文件。\\
+\hline
+w+	&读/写。打开并清空文件的内容；如果文件不存在，则创建新文件。\\
+\hline
+a	&追加。打开并向文件文件的末端进行写操作，如果文件不存在，则创建新文件。\\
+\hline
+a+	&读/追加。通过向文件末端写内容，来保持文件内容。\\
+\hline
+x	&只写。创建新文件。如果文件已存在，则返回 FALSE。\\
+\hline
+x+	&读/写。创建新文件。如果文件已存在，则返回 FALSE 和一个错误。\\
+\hline
+\end{longtable}
+
+如果 fopen() 不能打开指定的文件，下面的例子会生成一段消息：
+
+
+\begin{lstlisting}[language=HTML]
+<html>
+<body>
+
+<?php
+  $file=fopen("welcome.txt","r") or exit("Unable to open file!");
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+
+\section{fclose()}
+
+fclose() 函数用于关闭打开的文件。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$file = fopen("test.txt","r");
+
+//some code to be executed
+
+fclose($file);
+?>
+\end{lstlisting}
+
+
+\section{feof()}
+
+
+feof() 函数检测是否已达到文件的末端 (EOF)。在循环遍历未知长度的数据时，feof() 函数很有用，但是在 w 、a 以及 x 模式下无法读取打开的文件。
+
+
+\begin{lstlisting}[language=PHP]
+if (feof($file)) echo "End of file";
+\end{lstlisting}
+
+
+
+\section{fgets()}
+
+
+fgets() 函数用于从文件中逐行读取文件。在调用该函数之后，文件指针会移动到下一行。
+
+下面的例子逐行读取文件，直到文件末端为止：
+
+
+\begin{lstlisting}[language=PHP]
+$file = fopen("welcome.txt", "r") or exit("Unable to open file!");
+//Output a line of the file until the end is reached
+while(!feof($file))
+  {
+  echo fgets($file). "<br />";
+  }
+fclose($file);
+?>
+\end{lstlisting}
+
+
+\section{fgetc()}
+
+
+fgetc() 函数用于从文件逐字符地读取文件。在调用该函数之后，文件指针会移动到下一个字符。
+
+下面的例子逐字符地读取文件，直到文件末端为止：
+
+\begin{lstlisting}[language=PHP]
+$file = fopen("welcome.txt", "r") or exit("Unable to open file!");
+//Output a line of the file until the end is reached
+while(!feof($file))
+  {
+  echo fgetc($file). "<br />";
+  }
+fclose($file);
+?>
+\end{lstlisting}
+
+
+\section{f\/ile upload}
+
+通过 PHP，允许用户从表单上传文件到服务器。不过，允许用户上传文件是一个巨大的安全风险，因此应该仅仅允许可信的用户执行文件上传操作。
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+<body>
+
+<form action="upload_file.php" method="post"
+enctype="multipart/form-data">
+<label for="file">Filename:</label>
+<input type="file" name="file" id="file" /> 
+<br />
+<input type="submit" name="submit" value="Submit" />
+</form>
+
+</body>
+</html>
+\end{lstlisting}
+
+<form> 标签的 enctype 属性规定了在提交表单时要使用哪种内容类型。在表单需要二进制数据时，比如文件内容，使用``multipart/form-data"。
+
+<input> 标签的 type="file" 属性规定了应该把输入作为文件来处理。举例来说，当在浏览器中预览时，会看到输入框旁边有一个浏览按钮。
+
+通过使用 PHP 的全局数组 \texttt{\$\_FILES}，用户可以从客户计算机向远程服务器上传文件，下面就是``upload\_file.php" 文件中用于上传文件的代码：
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($_FILES["file"]["error"] > 0)
+  {
+  echo "Error: " . $_FILES["file"]["error"] . "<br />";
+  }
+else
+  {
+  echo "Upload: " . $_FILES["file"]["name"] . "<br />";
+  echo "Type: " . $_FILES["file"]["type"] . "<br />";
+  echo "Size: " . ($_FILES["file"]["size"] / 1024) . " Kb<br />";
+  echo "Stored in: " . $_FILES["file"]["tmp_name"];
+  }
+?>
+\end{lstlisting}
+
+其中，第一个参数是表单的 input name，第二个下标可以是``name",``type", ``size", ``tmp\_name" 或``error"。就像这样：
+
+\begin{compactitem}
+\item \texttt{\$\_FILES["file"]["name"]} - 被上传文件的名称
+\item \texttt{\$\_FILES["file"]["type"]} - 被上传文件的类型
+\item \texttt{\$\_FILES["file"]["size"]} - 被上传文件的大小，以字节计
+\item \texttt{\$\_FILES["file"]["tmp\_name"]} - 存储在服务器的文件的临时副本的名称
+\item \texttt{\$\_FILES["file"]["error"]} - 由文件上传导致的错误代码
+\end{compactitem}
+
+注意，这是一种非常简单文件上传方式。基于安全方面的考虑，开发者应当增加有关什么用户有权上传文件的限制。在下面的这个脚本中，我们增加了对文件上传的限制，用户只能上传 .gif 或 .jpeg 文件\footnote{对于 IE，识别 jpg 文件的类型必须是 pjpeg，对于 FireFox，必须是 jpeg。}，文件大小必须小于 20 kb：
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+if ((($_FILES["file"]["type"] == "image/gif")
+|| ($_FILES["file"]["type"] == "image/jpeg")
+|| ($_FILES["file"]["type"] == "image/pjpeg"))
+&& ($_FILES["file"]["size"] < 20000))
+  {
+  if ($_FILES["file"]["error"] > 0)
+    {
+    echo "Error: " . $_FILES["file"]["error"] . "<br />";
+    }
+  else
+    {
+    echo "Upload: " . $_FILES["file"]["name"] . "<br />";
+    echo "Type: " . $_FILES["file"]["type"] . "<br />";
+    echo "Size: " . ($_FILES["file"]["size"] / 1024) . " Kb<br />";
+    echo "Stored in: " . $_FILES["file"]["tmp_name"];
+    }
+  }
+else
+  {
+  echo "Invalid file";
+  }
+
+?>
+\end{lstlisting}
+
+上面的例子在服务器的 PHP 临时文件夹创建了一个被上传文件的临时副本，但是这个临时的复制文件会在脚本结束时消失。要保存被上传的文件，我们需要把它拷贝到另外的位置：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ((($_FILES["file"]["type"] == "image/gif")
+|| ($_FILES["file"]["type"] == "image/jpeg")
+|| ($_FILES["file"]["type"] == "image/pjpeg"))
+&& ($_FILES["file"]["size"] < 20000))
+  {
+  if ($_FILES["file"]["error"] > 0)
+    {
+    echo "Return Code: " . $_FILES["file"]["error"] . "<br />";
+    }
+  else
+    {
+    echo "Upload: " . $_FILES["file"]["name"] . "<br />";
+    echo "Type: " . $_FILES["file"]["type"] . "<br />";
+    echo "Size: " . ($_FILES["file"]["size"] / 1024) . " Kb<br />";
+    echo "Temp file: " . $_FILES["file"]["tmp_name"] . "<br />";
+
+    if (file_exists("upload/" . $_FILES["file"]["name"]))
+      {
+      echo $_FILES["file"]["name"] . " already exists. ";
+      }
+    else
+      {
+      move_uploaded_file($_FILES["file"]["tmp_name"],
+      "upload/" . $_FILES["file"]["name"]);
+      echo "Stored in: " . "upload/" . $_FILES["file"]["name"];
+      }
+    }
+  }
+else
+  {
+  echo "Invalid file";
+  }
+?>
+\end{lstlisting}
+
+这个例子把用户上传的文件保存到名为``upload" 的新文件夹，上面的脚本会检测是否已存在此文件，如果不存在，则把文件拷贝到指定的文件夹。
+
+
+
+\section{PHP Filesystem Functions}
+
+
+Filesystem 函数允许您访问和操作文件系统。Filesystem 函数是 PHP 核心的组成部分，无需安装即可使用这些函数。
+
+文件系统函数的行为受到 php.ini 中设置的影响。
+
+\begin{longtable}{|m{110pt}|m{30pt}|m{150pt}|m{80pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+名称	&默认	&描述	&可改变
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Filesystem 配置选项}\\
+\hline
+名称	&默认	&描述	&可改变
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+allow\_url\_fopen	&	``1"	&本选项激活了 URL 形式的 fopen 封装协议使得可以访问 URL 对象例如文件。\newline 默认的封装协议提供用 ftp 和 http 协议来访问远程文件，一些扩展库例如 zlib 可能会注册更多的封装协议。\newline PHP 4.0.4 版以后可用。&PHP\_INI\_SYSTEM\\
+\hline
+user\_agent			&NULL	&定义 PHP 发送的 User-Agent。\newline PHP 4.3.0 版以后可用。&
+PHP\_INI\_ALL		\\
+\hline
+default\_socket\_timeout&	``60"	&基于 socket 的流的默认超时时间(秒)。\newline PHP 4.3.0 版以后可用。&PHP\_INI\_ALL\\
+\hline
+from				&``"		&定义匿名 ftp 的密码（email 地址）。	&PHP\_INI\_ALL\\
+\hline
+auto\_detect\_line\_endings&	``0"	&当设为 On 时，PHP 将检查通过 fgets() 和 file() 取得的数据中的行结束符号是符合 Unix，MS-DOS，还是 Macintosh 的习惯。\newline 这使得 PHP 可以和 Macintosh 系统交互操作，但是默认值是 Off，因为在检测第一行的 EOL 习惯时会有很小的性能损失，而且在 Unix 系统下使用回车符号作为项目分隔符的人们会遭遇向下不兼容的行为。\newline PHP 4.3.0 版以后可用。&PHP\_INI\_ALL\\
+\hline
+
+\end{longtable}
+
+
+当在 Unix 平台上规定路径时，正斜杠 (/) 用作目录分隔符。而在 Windows 平台上，正斜杠 (/) 和反斜杠 (\textbackslash) 均可使用。
+
+\begin{longtable}{|m{120pt}|m{250pt}|m{20pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+函数	&描述	&PHP
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Filesystem 函数}\\
+\hline
+函数	&描述	&PHP
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+basename()	&返回路径中的文件名部分。	&3\\
+\hline
+chgrp()		&改变文件组。	&3\\
+\hline
+chmod()		&改变文件模式。&	3\\
+\hline
+chown()		&改变文件所有者。&	3\\
+\hline
+clearstatcache()	&清除文件状态缓存。&	3\\
+\hline
+copy()		&复制文件。	&3\\
+\hline
+delete()		&参见 unlink() 或 unset()。&	 \\
+\hline
+dirname()	&返回路径中的目录名称部分。	&3\\
+\hline
+disk\_free\_space()	&返回目录的可用空间。	&4\\
+\hline
+disk\_total\_space()&	返回一个目录的磁盘总容量。&	4\\
+\hline
+diskfreespace()	&disk\_free\_space() 的别名。	&3\\
+\hline
+fclose()	&关闭打开的文件。	&3\\
+\hline
+feof()	&测试文件指针是否到了文件结束的位置。	&3\\
+\hline
+fflush()	&向打开的文件输出缓冲内容。	&4\\
+\hline
+fgetc()	&从打开的文件中返回字符。	&3\\
+\hline
+fgetcsv()	&从打开的文件中解析一行，校验 CSV 字段。	&3\\
+\hline
+fgets()	&从打开的文件中返回一行。	&3\\
+\hline
+fgetss()	&从打开的文件中读取一行并过滤掉 HTML 和 PHP 标记。	&3\\
+\hline
+file()	&把文件读入一个数组中。	&3\\
+\hline
+file\_exists()&	检查文件或目录是否存在。	&3\\
+\hline
+file\_get\_contents()	&将文件读入字符串。	&4\\
+\hline
+file\_put\_contents()&将字符串写入文件。	&5\\
+\hline
+fileatime()	&返回文件的上次访问时间。	&3\\
+\hline
+filectime()	&返回文件的上次改变时间。	&3\\
+\hline
+filegroup()	&返回文件的组 ID。	&3\\
+\hline
+fileinode()	&返回文件的 inode 编号。	&3\\
+\hline
+filemtime()	&返回文件的上次修改时间。	&3\\
+\hline
+fileowner()	&文件的 user ID （所有者）。&	3\\
+\hline
+fileperms()	&返回文件的权限。	&3\\
+\hline
+filesize()	&返回文件大小。	&3\\
+\hline
+filetype()	&返回文件类型。	&3\\
+\hline
+flock()	&锁定或释放文件。	&3\\
+\hline
+fnmatch()	&根据指定的模式来匹配文件名或字符串。	&4\\
+\hline
+fopen()	&打开一个文件或 URL。	&3\\
+\hline
+fpassthru()&	从打开的文件中读数据，直到 EOF，并向输出缓冲写结果。	&3\\
+\hline
+fputcsv()	&将行格式化为 CSV 并写入一个打开的文件中。	&5\\
+\hline
+fputs()	&fwrite() 的别名。	&3\\
+\hline
+fread()	&读取打开的文件。	&3\\
+\hline
+fscanf()	&根据指定的格式对输入进行解析。	&4\\
+\hline
+fseek()	&在打开的文件中定位。	&3\\
+\hline
+fstat()	&返回关于一个打开的文件的信息。	&4\\
+\hline
+ftell()	&返回文件指针的读/写位置	&3\\
+\hline
+ftruncate()	&将文件截断到指定的长度。&	4\\
+\hline
+fwrite()	&写入文件。	&3\\
+\hline
+glob()	&返回一个包含匹配指定模式的文件名/目录的数组。	&4\\
+\hline
+is\_dir()	&判断指定的文件名是否是一个目录。	&3\\
+\hline
+is\_executable()	&判断文件是否可执行。	&3\\
+\hline
+is\_file()	&判断指定文件是否为常规的文件。&	3\\
+\hline
+is\_link()	&判断指定的文件是否是连接。&	3\\
+\hline
+is\_readable()	&判断文件是否可读。	&3\\
+\hline
+is\_uploaded\_file()	&判断文件是否是通过 HTTP POST 上传的。	&3\\
+\hline
+is\_writable()	&判断文件是否可写。	&4\\
+\hline
+is\_writeable()	&is\_writable() 的别名。	&3\\
+\hline
+link()	&创建一个硬连接。	&3\\
+\hline
+linkinfo()	&返回有关一个硬连接的信息。	&3\\
+\hline
+lstat()	&返回关于文件或符号连接的信息。	&3\\
+\hline
+mkdir()	&创建目录。	&3\\
+\hline
+move\_uploaded\_file()	&将上传的文件移动到新位置。	&4\\
+\hline
+parse\_ini\_file()	&解析一个配置文件。	&4\\
+\hline
+pathinfo()	&返回关于文件路径的信息。	&4\\
+\hline
+pclose()	&关闭有 popen() 打开的进程。	&3\\
+\hline
+popen()	&打开一个进程。	&3\\
+\hline
+readfile()	&读取一个文件，并输出到输出缓冲。	&3\\
+\hline
+readlink()	&返回符号连接的目标。	&3\\
+\hline
+realpath()	&返回绝对路径名。	&4\\
+\hline
+rename()	&重名名文件或目录。	&3\\
+\hline
+rewind()	&倒回文件指针的位置。	&3\\
+\hline
+rmdir()	&删除空的目录。	&3\\
+\hline
+set\_file\_buffer()	&设置已打开文件的缓冲大小。	&3\\
+\hline
+stat()	&返回关于文件的信息。	&3\\
+\hline
+symlink()	&创建符号连接。	&3\\
+\hline
+tempnam()	&创建唯一的临时文件。&	3\\
+\hline
+tmpfile()	&建立临时文件。	&3\\
+\hline
+touch()	&设置文件的访问和修改时间。	&3\\
+\hline
+umask()	&改变文件的文件权限。	&3\\
+\hline
+unlink()	&删除文件。	&3\\
+\hline
+\end{longtable}
+
+
+\section{PHP Filesystem Constants}
+
+
+\begin{longtable}{|m{125pt}|m{245pt}|m{20pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量	&描述	&PHP
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Filesystem 常量}\\
+\hline
+常量	&描述	&PHP
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+GLOB\_BRACE	 	 &&\\
+\hline
+GLOB\_ONLYDIR	 &	 &\\
+\hline
+GLOB\_MARK	 	 &&\\
+\hline
+GLOB\_NOSORT	 &	 &\\
+\hline
+GLOB\_NOCHECK	 &	 &\\
+\hline
+GLOB\_NOESCAPE	 &	 &\\
+\hline
+PATHINFO\_DIRNAME&	 	 &\\
+\hline
+PATHINFO\_BASENAME&	 &\\
+\hline	 
+PATHINFO\_EXTENSION&	 &\\
+\hline	 
+FILE\_USE\_INCLUDE\_PATH&&	 	 \\
+\hline
+FILE\_APPEND	 	 &&\\
+\hline
+FILE\_IGNORE\_NEW\_LINES&	 	& \\
+\hline
+FILE\_SKIP\_EMPTY\_LINES	&& 	 \\
+\hline
+\end{longtable}
+
+
+
+\chapter{PHP Cookie}
+
+cookie 是服务器留在用户计算机中的小文件，cookie可以被用于识别用户。每当相同的计算机通过浏览器请求页面时，它同时会发送 cookie。通过 PHP能够创建并取回 cookie 的值。
+
+
+
+\section{setcookie()}
+
+
+setcookie() 函数用于设置 cookie。使用时，setcookie() 函数必须位于 <html> 标签之前。
+
+
+\begin{lstlisting}[language=PHP]
+setcookie(name, value, expire, path, domain);
+\end{lstlisting}
+
+
+在下面的例子中，我们将创建名为 "user" 的 cookie，把为它赋值 "Alex Porter"，同时也规定了此 cookie 在一小时后过期：
+
+\begin{lstlisting}[language=HTML]
+<?php 
+setcookie("user", "Alex Porter", time()+3600);
+?>
+<!DOCTYPE html>
+<html>
+<body>
+
+</body>
+</html>
+\end{lstlisting}
+
+在发送 cookie 时，cookie 的值会自动进行 URL 编码，在取回时进行自动解码（为防止 URL 编码，要使用 setrawcookie() 取而代之）。
+
+
+\section{PHP \$\_COOKIE}
+
+
+PHP 的 \texttt{\$\_COOKIE}变量用于取回 cookie 的值。在下面的例子中取回了名为 "user" 的 cookie 的值，并把它显示在了页面上：
+
+\begin{lstlisting}[language=PHP]
+<?php
+// Print a cookie
+echo $_COOKIE["user"];
+
+// A way to view all cookies
+print_r($_COOKIE);
+?>
+\end{lstlisting}
+
+
+使用 isset() 函数来确认是否已设置了 cookie，示例如下：
+
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+<body>
+
+<?php
+if (isset($_COOKIE["user"]))
+  echo "Welcome " . $_COOKIE["user"] . "!<br />";
+else
+  echo "Welcome guest!<br />";
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+
+当删除 cookie 时，应当使过期日期变更为过去的时间点。
+
+
+\begin{lstlisting}[language=PHP]
+<?php 
+// set the expiration date to one hour ago
+setcookie("user", "", time()-3600);
+?>
+\end{lstlisting}
+
+如果应用程序涉及不支持 cookie 的浏览器，那么开发者就不得不采取其他方法在应用程序中从一张页面向另一张页面传递信息。一种方式是从表单传递数据，下面的表单在用户单击提交按钮时向 "welcome.php" 提交了用户输入：
+
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PHP Example</title>
+</head>
+<body>
+
+<form action="welcome.php" method="post">
+Name: <input type="text" name="name" />
+Age: <input type="text" name="age" />
+<input type="submit" />
+</form>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+
+
+
+\chapter{PHP Session}
+
+当我们运行一个应用程序时，可能会打开它，做些更改，然后关闭它，这个过程很像一次会话，而且在这个过程中计算机清楚你是谁，而且它知道你何时启动应用程序，并在何时终止。但是在因特网上存在一个问题：服务器不知道你是谁以及你做什么，这是由于 HTTP 地址不能维持状态。
+
+通过在服务器上存储用户信息以便随后使用，PHP Session解决了这个问题（比如用户名称、购买商品等），Session即会话，指的是一个用户在一段时间内对某一个站点的一次访问。 不过，会话信息是临时的，在用户离开网站后将被删除。如果需要永久储存信息，可以把数据存储在数据库中。
+
+
+PHP Session\footnote{Session对象在.NET中对应HttpSessionState类，表示“会话状态”，可以保存与当前用户会话相关的信息。}变量用于存储有关用户会话的信息，或更改用户会话的设置。Session变量保存的信息是单一用户的，并且可供应用程序中的所有页面使用。
+
+
+
+Session对象用于存储从一个用户开始访问某个特定的PHP页面起，到用户离开为止，特定的用户会话相关的信息。
+
+Session可以保存变量，该变量只能供一个用户使用，也就是说，每一个网页浏览者都有自己的Session对象变量，即Session对象具有唯一性，因此对于一个Web应用程序而言，所有用户访问到的Application对象的内容是完全一样的，但是不同用户会话访问到的Session对象的内容却各不相同。  
+
+Session的工作机制是为每个访问者创建一个唯一的 id (UID)，并基于这个 UID 来存储变量。UID 存储在 cookie 中，亦或通过 URL 进行传导，因此用户在应用程序的页面切换时，Session对象的变量不会被清除。 
+
+
+\section{PHP Session Lifecycle}
+
+
+One of the most vast misconceptions in the PHP world is how sessions really do work\cite{php_session_lifecycle}. I'm fairly confident most of us know how to start sessions, terminate sessions, regenerate session IDs and easily pass data from 1 page to another. But do you really know how they work inside out?
+
+Storing crucial information in a session is what sessions are all about. They strive on being able to provide the information without leaving it open to tampering or interception. Giving a session some important information is like giving a Jack Russell a bone - it's not letting go of it anytime soon and if any other sod tries to take the bone.
+
+Anything can be unsafe in PHP if the programming is not up to par. Generally speaking, however, sessions are 1 section of the PHP language that is difficult to mess up.
+
+Sessions are conveniently stored server-side. There is no exception to this rule. Many people become confused because sessions use cookies, and cookies, rightfully so, are stored client-side. Sessions, however, are not cookies in the truest form. Cookies are just 1 of the methods of delivering the unique session ID to retrieve the session data.
+
+Remember the times when you used to crack open the cereal boxes to retrieve the free plastic toy from inside? Well, sessions are not quite as exciting as that. In fact, sessions are pretty uneventful on the inside.
+
+\begin{lstlisting}[language=PHP]
+<?php
+  session_start();
+  $_SESSION['myWebsite'] = 'http://www.theqiong.com/';
+  $_SESSION['mySessionId'] = session_id();
+?>
+\end{lstlisting}
+
+Request Header:
+
+\begin{lstlisting}[language=bash]
+GET /test.php HTTP/1.1
+Host: localhost
+Connection: keep-alive
+Cache-Control: max-age=0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36
+Accept-Encoding: gzip,deflate,sdch
+Accept-Language: en-US,en;q=0.8,ja;q=0.6,zh-CN;q=0.4,zh-TW;q=0.2
+\end{lstlisting}
+
+Request Header:
+
+\begin{lstlisting}[language=bash]
+HTTP/1.1 200 OK
+Date: Thu, 28 Nov 2013 14:13:31 GMT
+Server: Apache/2.4.6 (Fedora) PHP/5.5.5 SVN/1.7.13
+X-Powered-By: PHP/5.5.5
+Set-Cookie: PHPSESSID=h589n8vacg3jlrjm82ia11mff3; path=/
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate, post-check=0, pre-check=0
+Pragma: no-cache
+Content-Length: 0
+Keep-Alive: timeout=5, max=100
+Connection: Keep-Alive
+Content-Type: text/html; charset=UTF-8
+\end{lstlisting}
+
+As simple as it may be, it does the job. It creates us a session file which contains our session information. The file is stored as the following filename which is made up of 2 parts: it has prefixed us the word sess\_ which is then followed by our unique session ID.
+
+\verb|sess_h589n8vacg3jlrjm82ia11mff3|
+
+If you open up this file it contains the following information which is simply my array which has been serialized (see \href{http://www.php.net/serialize}{serialize} for further information) and stored.
+
+\verb|myWebsite|s:24:"http://www.theqiong.com/";myId|s:26:"h589n8vacg3jlrjm82ia11mff3";|
+
+This is nothing more than my array broken down into a string. When I execute my file again the session ID will be used to retrieve the above data from the relevant session file and unserialized (see \href{http://www.php.net/unserialize}{unserialize} for further information).
+
+That's all there really is to a session file. Remember that the session file is stored server-side so there is absolutely no need to transfer any information you do not publish in the HTML over the insecure medium we like to call the Internet.
+
+
+
+\section{session\_start()}
+
+
+在用户把用户信息存储到 PHP session 中之前，首先必须通过session\_start() 函数启动会话，而且session\_start() 函数必须位于 <html> 标签之前。
+
+\begin{lstlisting}[language=PHP]
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PHP Session Example</title>
+</head>
+<body>
+
+</body>
+</html>
+\end{lstlisting}
+
+上面的代码会向服务器注册用户的会话，以便可以开始保存用户信息，同时会为用户会话分配一个 UID。
+
+
+
+\section{Session ID}
+
+
+Cookies are the most frequently used due to the extra security they add (not much, but just enough to be the favoured method). The other possible methods are GET (which is sometimes used) and POST.
+
+Unlike GET and POST which can be used in such attacks as \href{http://www.talkphp.com/advanced-php-programming/1063-cross-site-request-forgeries.html}{CSRF} and passed around to potential victims with far too much ease, cookies are just that little more difficult to install on a victim's computer.
+
+You could quite easily send a link to someone and have him either hijack a session on my behalf, or the most common reason would be to fixate session ID (\href{http://www.talkphp.com/tips-tricks/1024-tips-php-security-post1813.html#post1813}{see the following post for more information about session fixation}).
+
+Well, there is an important setting that is set to 1 by default (and should always be set to 1 unless you wish to also support users who do not have cookies enabled - which is not recommended) that prevents the session IDs from being transferred via a GET and to use only cookies - the safest delivery method. That setting is:
+
+\begin{lstlisting}[language=bash]
+session.use_only_cookies
+\end{lstlisting}
+
+
+From the earlier example let's take a look at the cookie that has been created on local computer:
+
+\verb|h589n8vacg3jlrjm82ia11mff3|
+
+The cookie's name is \texttt{PHPSESSID} which is the default name given to a session cookie that is stored client-side. The number you see above is the session ID which will stay with me for the lifetime of my session or until it is regenerated for security purposes.
+
+Upon loading the website where my session ID was created, the cookie is sent to the website and parsed by PHP. The session ID is correctly linked to the session file stored server-side and is then unserialized and placed into the pre-populated PHP array, \texttt{\$\_SESSION}. 
+
+Once issued the \texttt{session\_start()} command to begin session, then we're able to access all the information - even crucial and highly sensitive information, from the \texttt{\$\_SESSION} array.
+
+
+Although you may store highly insensitive information in sessions, be aware that displaying it on your website will mean that crucial information is being sent over the pipes of the Internet. Without using SSL this would be a very insecure method of delivery which would be crying out to be intercepted by Harry the hacker.
+
+
+
+
+\section{PHP \$\_SESSION}
+
+
+存储和取回 session 变量的正确方法是使用 PHP \$\_SESSION 变量：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+session_start();
+// store session data
+$_SESSION['views']=1;
+?>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PHP Session Example</title>
+</head>
+<body>
+
+<?php
+//retrieve session data
+echo "Pageviews=". $_SESSION['views'];
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+
+在下面的例子中，我们创建了一个简单的 page-view 计数器。isset() 函数检测是否已设置 ``views" 变量。如果已设置``views" 变量，我们累加计数器。如果``views" 不存在，则我们创建``views" 变量，并把它设置为 1：
+
+\begin{lstlisting}[language=PHP]
+<?php
+session_start();
+
+if(isset($_SESSION['views']))
+  $_SESSION['views']=$_SESSION['views']+1;
+
+else
+  $_SESSION['views']=1;
+echo "Views=". $_SESSION['views'];
+?>
+\end{lstlisting}
+
+\texttt{\$\_SESSION}变量与\texttt{\$\_POST}、\texttt{\$\_GET}变量相比，\texttt{\$\_SESSION}变量要在\texttt{session\_start()}函数执行后才初始化，而后两者是在PHP页面请求时就已经初始化了。
+
+
+Assume that banking system has absolutely no extra security implemented, and some customer have logged in and been issued a cookie containing their session ID, banking system also erroneously accepts the GET method of delivery though to ensure everybody can use their system. 
+
+Harry decides to go down the route of session fixation and thus sends you the following crafty link:
+
+\verb|http://www.myOnlineBank.com/index.php?sess_id=5aff2|
+
+If you click on it and login. Harry, already knowing your session ID is 5aff2, clicks on the link himself and is able to withdraw your entire life savings of 67 pence.
+
+Nonetheless, the browser name, version, language, etc. are all sent by the end user's browser during the HTTP call. This means that this data may not even be sent at all. It is optional. As long as you know it is optional you can check for if the intended array even exists before using it. This is important because a blank string will always produce the same MD5 or SHA1 (etcetera...) hash. A null string MD5'd will always be d41d8cd98f00b204e9800998ecf8427e no matter how many times you use MD5. Whilst SHA1 will be different to the MD5 string, it will still be the same for every single time you hash the null string using SHA1.
+
+Now that you fully understand the following:
+
+\verb|[Session File] (Server) -> [Cookie File] (Client)|
+
+A session file can simply be opened by anybody who has access to file system. For instance, sessions are stored in the following directory as plain files:
+
+\verb|C:\wamp\www|
+
+Anybody who has access to that directory can read session files and read the session IDs from the filenames. This is why shared hosts can be bad. Typically everybody on a shared hosts shares the same temp folder. This is the most common place where session files are stored. 
+
+Luckily the directory can be moved elsewhere or you can even use a table inside a database to store all your session data. The latter is best saved for another article to keep this 1 short and sweet. The following setting can be changed to alter the destination of session files:
+
+\verb|session.save_path|
+
+\section{unset()}
+
+如果希望删除某些 session 数据，可以使用 unset() 或 session\_destroy() 函数，其中unset() 函数用于释放指定的 session 变量：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+unset($_SESSION['views']);
+?>
+\end{lstlisting}
+
+
+
+\section{session\_distroy()}
+
+
+
+
+通过 session\_destroy() 函数可以彻底终结 session，session\_destroy() 将重置 session，因此将失去所有已存储的 session 数据。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+session_destroy();
+?>
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{PHP Mail}
+
+
+
+
+
+
+\section{mail()}
+
+
+PHP 允许从脚本直接发送电子邮件，基本语法如下：
+
+\begin{lstlisting}[language=PHP]
+mail(to,subject,message,headers,parameters)
+\end{lstlisting}
+
+
+
+
+通过 PHP 发送电子邮件的最简单的方式是发送一封文本 email。在下面的例子中，我们首先声明变量(\$to, \$subject, \$message, \$from, \$headers)，然后我们在 mail() 函数中使用这些变量来发送了一封E-mail：
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+$to = "someone@example.com";
+$subject = "Test mail";
+$message = "Hello! This is a simple email message.";
+$from = "someonelse@example.com";
+$headers = "From: $from";
+mail($to,$subject,$message,$headers);
+echo "Mail Sent.";
+
+?>
+\end{lstlisting}
+
+
+\begin{longtable}{|m{60pt}|m{45pt}|m{190pt}|m{80pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+名称	&默认	&描述	&可改变
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Mail 配置选项}\\
+\hline
+名称	&默认	&描述	&可改变
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+SMTP			&``localhost"	&Windows 专用：SMTP 服务器的 DNS 名称或 IP 地址。	&PHP\_INI\_ALL\\
+\hline
+smtp\_port		&``25"			&Windows 专用：SMTP 段口号。自 PHP 4.3 起可用。&PHP\_INI\_ALL\\
+\hline
+sendmail\_from	&NULL			&Windows 专用：规定从 PHP 发送的邮件中使用的 "from" 地址。&PHP\_INI\_ALL\\
+\hline
+sendmail\_path	&	NULL		&Unix 系统专用：规定sendmail 程序的路径（通常 /usr/sbin/sendmail 或 /usr/lib/sendmail）	&PHP\_INI\_SYSTEM\\
+\hline
+\end{longtable}
+
+
+\section{PHP Mail Functions}
+
+邮件函数是 PHP 核心的组成部分，无需安装即可使用这些函数。
+
+\begin{longtable}{|m{120pt}|m{250pt}|m{20pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+函数	&描述	&PHP
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Mail 函数}\\
+\hline
+函数	&描述	&PHP
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+ezmlm\_hash()	&计算 EZMLM 邮件列表系统所需的散列值。	&3\\
+\hline
+mail()			&允许从脚本中直接发送电子邮件。	&3\\
+\hline
+\end{longtable}
+
+PHP 需要一个已安装且正在运行的邮件系统，以便使邮件函数可用。所用的程序通过在 php.ini 文件中的配置设置进行定义，也就是说，邮件函数的行为受 php.ini 的影响。
+
+
+
+
+
+\begin{longtable}{|m{100pt}|m{280pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+参数	&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP mail() 函数参数}\\
+\hline
+参数	&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+to			&必需。规定 email 接收者。\\
+\hline
+subject\footnote{注释：该参数不能包含任何新行字符。}		&必需。规定 email 的主题。\\
+\hline
+message	&必需。定义要发送的消息。应使用 LF ({\textbackslash}n) 来分隔各行。\\
+\hline
+headers		&可选。规定附加的标题，比如 From、Cc 以及 Bcc。
+			\newline 应当使用 CRLF ({\textbackslash}r{\textbackslash}n) 分隔附加的标题。\\
+\hline
+parameters	&可选。对邮件发送程序规定额外的参数。\\
+\hline
+\end{longtable}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{PHP Mail Form}
+
+
+通过PHP可以在自己的站点制作一个反馈表单。下面的例子向指定的 e-mail 地址发送了一条文本消息：
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<body>
+
+<?php
+if (isset($_REQUEST['email']))
+//if "email" is filled out, send email
+  {
+  //send email
+  $email = $_REQUEST['email'] ; 
+  $subject = $_REQUEST['subject'] ;
+  $message = $_REQUEST['message'] ;
+  mail( "someone@example.com", "Subject: $subject",
+  $message, "From: $email" );
+  echo "Thank you for using our mail form";
+  }
+else
+//if "email" is not filled out, display the form
+  {
+  echo "<form method='post' action='mailform.php'>
+  Email: <input name='email' type='text' /><br />
+  Subject: <input name='subject' type='text' /><br />
+  Message:<br />
+  <textarea name='message' rows='15' cols='40'>
+  </textarea><br />
+  <input type='submit' />
+  </form>";
+  }
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+\begin{compactenum}
+\item 首先，检查是否填写了邮件输入框
+\item 如果未填写（比如在页面被首次访问时），输出 HTML 表单
+\item 如果已填写（在表单被填写后），从表单发送邮件
+\item 当点击提交按钮后，重新载入页面，显示邮件发送成功的消息
+\end{compactenum}
+
+
+
+
+\section{PHP Mail Injection}
+
+在上述PHP e-mail 脚本中，存在着一个漏洞，导致未经授权的用户可通过输入表单在邮件头部插入数据。
+
+假如用户在表单中的输入框内加入这些文本，会出现什么情况呢？
+
+\begin{lstlisting}[language=PHP]
+someone@example.com%0ACc:person2@example.com
+%0ABcc:person3@example.com,person3@example.com,
+anotherperson4@example.com,person5@example.com
+%0ABTo:person6@example.com
+\end{lstlisting}
+
+与往常一样，mail() 函数把上面的文本放入邮件头部，那么现在头部有了额外的 Cc:, Bcc: 以及 To: 字段。当用户点击提交按钮时，这封 e-mail 会被发送到上面所有的地址！
+
+
+\section{PHP Mail Validation}
+
+
+防止 e-mail 注入的最好方法是对输入进行验证。
+
+
+下面的代码与上一节类似，不过已经增加了检测表单中 email 字段的输入验证程序：
+
+\begin{lstlisting}[language=PHP]
+<!DCOTYPE html>
+<html>
+<body>
+<?php
+function spamcheck($field)
+  {
+  //filter_var() sanitizes the e-mail 
+  //address using FILTER_SANITIZE_EMAIL
+  $field=filter_var($field, FILTER_SANITIZE_EMAIL);
+  
+  //filter_var() validates the e-mail
+  //address using FILTER_VALIDATE_EMAIL
+  if(filter_var($field, FILTER_VALIDATE_EMAIL))
+    {
+    return TRUE;
+    }
+  else
+    {
+    return FALSE;
+    }
+  }
+
+if (isset($_REQUEST['email']))
+  {//if "email" is filled out, proceed
+
+  //check if the email address is invalid
+  $mailcheck = spamcheck($_REQUEST['email']);
+  if ($mailcheck==FALSE)
+    {
+    echo "Invalid input";
+    }
+  else
+    {//send email
+    $email = $_REQUEST['email'] ; 
+    $subject = $_REQUEST['subject'] ;
+    $message = $_REQUEST['message'] ;
+    mail("someone@example.com", "Subject: $subject",
+    $message, "From: $email" );
+    echo "Thank you for using our mail form";
+    }
+  }
+else
+  {//if "email" is not filled out, display the form
+  echo "<form method='post' action='mailform.php'>
+  Email: <input name='email' type='text' /><br />
+  Subject: <input name='subject' type='text' /><br />
+  Message:<br />
+  <textarea name='message' rows='15' cols='40'>
+  </textarea><br />
+  <input type='submit' />
+  </form>";
+  }
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+在上面的代码中，我们使用了 PHP 过滤器来对输入进行验证：
+
+\begin{compactitem}
+\item FILTER\_SANITIZE\_EMAIL 从字符串中删除电子邮件的非法字符
+\item FILTER\_VALIDATE\_EMAIL 验证电子邮件地址
+\end{compactitem}
+
+
+
+
+
+\chapter{PHP Filter}
+
+
+
+几乎所有Web应用程序都依赖外部的输入，这些外部数据通常来自用户或其他应用程序（比如Web服务等），通常包括：
+
+\begin{compactitem}
+\item 来自表单的输入数据
+\item Cookies
+\item 服务器变量
+\item 数据库查询结果
+\end{compactitem}
+
+
+
+
+
+
+
+
+PHP 过滤器可以用于验证和过滤来自非安全来源的数据，比如用户的输入。设计PHP的过滤器扩展的目的是使数据过滤更轻松快捷。
+
+如需过滤变量，可以使用下面的过滤器函数之一：
+
+\begin{compactitem}
+\item filter\_var() - 通过一个指定的过滤器来过滤单一的变量
+\item filter\_var\_array() - 通过相同的或不同的过滤器来过滤多个变量
+\item filter\_input - 获取一个输入变量，并对它进行过滤
+\item filter\_input\_array - 获取多个输入变量，并通过相同的或不同的过滤器对它们进行过滤
+\end{compactitem}
+
+
+在下面的例子中，我们用 filter\_var() 函数验证了一个整数：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$int = 123;
+
+if(!filter_var($int, FILTER_VALIDATE_INT))
+ {
+ echo("Integer is not valid");
+ }
+else
+ {
+ echo("Integer is valid");
+ }
+?>
+\end{lstlisting}
+
+上面的代码使用了FILTER\_VALIDATE\_INT过滤器来过滤变量。由于这个整数是合法的，因此代码的输出是：Integer is valid。假如尝试使用一个非整数的变量，则输出是：Integer is not valid。
+
+
+\section{PHP Filter Functions}
+
+
+filter 函数是 PHP 核心的组成部分，无需安装即可使用这些函数。
+
+
+\begin{longtable}{|m{120pt}|m{250pt}|m{20pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+函数	&描述	&PHP
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Filter 函数}\\
+\hline
+函数	&描述	&PHP
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+filter\_has\_var()	&检查是否存在指定输入类型的变量。	&5\\
+\hline
+filter\_id()			&返回指定过滤器的 ID 号。	&5\\
+\hline
+filter\_input()		&从脚本外部获取输入，并进行过滤。	&5\\
+\hline
+filter\_input\_array()&从脚本外部获取多项输入，并进行过滤。	&5\\
+\hline
+filter\_list()			&返回包含所有得到支持的过滤器的一个数组。	&5\\
+\hline
+filter\_var\_array()	&获取多项变量，并进行过滤。	&5\\
+\hline
+filter\_var()			&获取一个变量，并进行过滤。	&5\\
+\hline
+\end{longtable}
+
+
+\section{Validating and Sanitizing}
+
+有两种过滤器：
+
+\begin{compactitem}
+\item Validating 过滤器：
+
+\begin{compactitem}
+\item 用于验证用户输入
+\item 严格的格式规则（比如 URL 或 E-Mail 验证）
+\item 如果成功则返回预期的类型，如果失败则返回 FALSE
+\end{compactitem}
+
+\item Sanitizing 过滤器：
+
+\begin{compactitem}
+\item 用于允许或禁止字符串中指定的字符
+\item 无数据格式规则
+\item 始终返回字符串
+\end{compactitem}
+
+
+\end{compactitem}
+
+
+\section{Options and Flags}
+
+
+选项和标志用于向指定的过滤器添加额外的过滤选项。不同的过滤器有不同的选项和标志。
+
+
+在下面的例子中，我们用 filter\_var() 和``min\_range" 以及``max\_range" 选项验证了一个整数：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$var=300;
+
+$int_options = array(
+"options"=>array
+ (
+ "min_range"=>0,
+ "max_range"=>256
+ )
+);
+
+if(!filter_var($var, FILTER_VALIDATE_INT, $int_options))
+ {
+ echo("Integer is not valid");
+ }
+else
+ {
+ echo("Integer is valid");
+ }
+?>
+\end{lstlisting}
+
+就像上面的代码一样，选项必须放入一个名为``options" 的相关数组中。如果使用标志，则不需在数组内。这里，由于整数是 "300"，它不在指定的范围内，以上代码的输出将是``Integer is not valid"。
+
+
+
+
+
+
+\begin{longtable}{|m{170pt}|m{220pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+ID 名称	&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Filters}\\
+\hline
+ID 名称	&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+
+FILTER\_CALLBACK				&调用用户自定义函数来过滤数据。\\
+\hline
+FILTER\_SANITIZE\_STRING		&去除标签，去除或编码特殊字符。\\
+\hline
+FILTER\_SANITIZE\_STRIPPED	&``string" 过滤器的别名。\\
+\hline
+FILTER\_SANITIZE\_ENCODED	&URL-encode 字符串，去除或编码特殊字符。\\
+\hline
+FILTER\_SANITIZE\_SPECIAL\_CHARS&HTML 转义字符\verb|'"<>&|以及ASCII值小于32的字符。\\
+\hline
+FILTER\_SANITIZE\_EMAIL		&删除所有字符，除了字母、数字以及\newline \verb|!#$%&'*+-/=?^_`{||\verb|}~@.[]| 
+\\
+\hline
+FILTER\_SANITIZE\_URL			&删除所有字符，除了字母、数字以及
+\newline \verb|$-_.+!*'(),{}||\verb|\\^~[]`<>#%";/?:@\&=|
+\\
+\hline
+FILTER\_SANITIZE\_NUMBER\_INT&删除所有字符，除了数字和 \verb|+-|\\
+\hline
+FILTER\_SANITIZE\_NUMBER\_FLOAT&删除所有字符，除了数字、\verb|+-| 以及 .,eE。\\
+\hline
+FILTER\_SANITIZE\_MAGIC\_QUOTES&应用 addslashes()。\\
+\hline
+FILTER\_UNSAFE\_RAW			&不进行任何过滤，去除或编码特殊字符。\\
+\hline
+FILTER\_VALIDATE\_INT			&在指定的范围以整数验证值。\\
+\hline
+FILTER\_VALIDATE\_BOOLEAN	&如果是``1", ``true", ``on" 以及``yes"，则返回 true，如果是``0", ``false", ``off",``no" 以及``"，则返回 false。否则返回 NULL。\\
+\hline
+FILTER\_VALIDATE\_FLOAT		&以浮点数验证值。\\
+\hline
+FILTER\_VALIDATE\_REGEXP		&根据 regexp，兼容 Perl 的正则表达式来验证值。\\
+\hline
+FILTER\_VALIDATE\_URL			&把值作为 URL 来验证。\\
+\hline
+FILTER\_VALIDATE\_EMAIL		&把值作为 e-mail 来验证。\\
+\hline
+FILTER\_VALIDATE\_IP			&把值作为 IP 地址来验证。\\
+\hline
+\end{longtable}
+
+
+\section{Validate Input}
+
+
+验证和过滤用户输入或自定义数据是任何 Web 应用程序的重要组成部分，其中输入过滤是最重要的应用程序安全课题之一。
+
+
+
+
+通过使用过滤器，能够确保应用程序获得正确的输入类型，而且应该始终对外部数据进行过滤。
+
+在下面的验证来自表单的输入的示例中，输入变量``email" 被传到 PHP 页面，我们需要作的第一件事情是确认是否存在我们正在查找的输入数据，然后我们用 filter\_input() 函数过滤输入的数据。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if(!filter_has_var(INPUT_GET, "email"))
+ {
+ echo("Input type does not exist");
+ }
+else
+ {
+ if (!filter_input(INPUT_GET, "email", FILTER_VALIDATE_EMAIL))
+  {
+  echo "E-Mail is not valid";
+  }
+ else
+  {
+  echo "E-Mail is valid";
+  }
+ }
+?>
+\end{lstlisting}
+
+上面的例子有一个通过 "GET" 方法传送的输入变量 (email)：
+
+\begin{compactenum}
+\item 检测是否存在``GET" 类型的 "email" 输入变量
+\item 如果存在输入变量，检测它是否是有效的邮件地址
+\end{compactenum}
+
+
+\section{Sanitize Input}
+
+
+在下面的清理从表单传来的URL的例子中，输入变量``url" 被传到 PHP 页面，接下来，我们首先要确认是否存在我们正在查找的输入数据，然后用 filter\_input() 函数来净化输入数据。
+
+\begin{lstlisting}[language=PHP]
+<?php
+if(!filter_has_var(INPUT_POST, "url"))
+ {
+ echo("Input type does not exist");
+ }
+else
+ {
+ $url = filter_input(INPUT_POST, "url", FILTER_SANITIZE_URL);
+ }
+?>
+\end{lstlisting}
+
+
+上面的例子有一个通过 "POST" 方法传送的输入变量 (url)：
+
+\begin{compactenum}
+\item 检测是否存在 "POST" 类型的 "url" 输入变量
+\item 如果存在此输入变量，对其进行净化（删除非法字符），并将其存储在 \$url 变量中
+\end{compactenum}
+
+假如输入变量类似这样：``http://www.th非e法qiong.com/"，则净化后的 \$url 变量应该是这样的：\verb|http://www.theqiong.com/|
+
+
+\section{Filter Multiple Inputs}
+
+
+表单通常由多个输入字段组成。为了避免对 filter\_var 或 filter\_input 重复调用，我们可以使用 filter\_var\_array 或 the filter\_input\_array 函数。
+
+在下面的示例中，我们使用 filter\_input\_array() 函数来过滤三个 GET 变量。接收到的 GET 变量是一个名字、一个年龄以及一个邮件地址：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$filters = array
+ (
+ "name" => array
+  (
+  "filter"=>FILTER_SANITIZE_STRING
+  ),
+ "age" => array
+  (
+  "filter"=>FILTER_VALIDATE_INT,
+  "options"=>array
+   (
+   "min_range"=>1,
+   "max_range"=>120
+   )
+  ),
+ "email"=> FILTER_VALIDATE_EMAIL,
+ );
+
+$result = filter_input_array(INPUT_GET, $filters);
+
+if (!$result["age"])
+ {
+ echo("Age must be a number between 1 and 120.<br />");
+ }
+elseif(!$result["email"])
+ {
+ echo("E-Mail is not valid.<br />");
+ }
+else
+ {
+ echo("User input is valid");
+ }
+?>
+\end{lstlisting}
+
+
+上面的例子有三个通过 "GET" 方法传送的输入变量 (name, age and email)
+
+\begin{compactenum}
+\item 设置一个数组，其中包含了输入变量的名称，以及用于指定的输入变量的过滤器
+\item 调用 filter\_input\_array 函数，参数包括 GET 输入变量及刚才设置的数组
+\item 检测 \$result 变量中的``age" 和``email" 变量是否有非法的输入。（如果存在非法输入）
+\end{compactenum}
+
+filter\_input\_array() 函数的第二个参数可以是数组或单一过滤器的 ID。如果该参数是单一过滤器的 ID，那么这个指定的过滤器会过滤输入数组中所有的值。
+
+如果该参数是一个数组，那么此数组必须遵循下面的规则：
+
+\begin{compactitem}
+\item 必须是一个关联数组，其中包含的输入变量是数组的键（比如``age" 输入变量）
+\item 此数组的值必须是过滤器的 ID ，或者是规定了过滤器、标志以及选项的数组
+\end{compactitem}
+
+
+\section{Filter Callback}
+
+
+通过使用 FILTER\_CALLBACK 过滤器，可以调用自定义的函数，把它作为一个过滤器来使用。这样，我们就拥有了数据过滤的完全控制权。
+
+可以创建自己的自定义函数，也可以使用已有的 PHP 函数，而且规定准备用到过滤器函数的方法，与规定选项的方法相同。
+
+在下面的例子中，我们使用了一个自定义的函数把所有 "\_" 转换为空格：
+
+\begin{lstlisting}[language=PHP]
+<?php
+function convertSpace($string)
+{
+return str_replace("_", " ", $string);
+}
+
+$string = "Peter_is_a_great_guy!";
+
+echo filter_var($string, FILTER_CALLBACK, array("options"=>"convertSpace"));
+?>
+\end{lstlisting}
+
+
+上面的例子把所有``\_" 转换成空格：
+
+\begin{compactenum}
+\item 创建一个把``\_" 替换为空格的函数
+\item 调用 filter\_var() 函数，它的参数是 FILTER\_CALLBACK 过滤器以及包含我们的函数的数组
+\end{compactenum}
+
+
+
+\chapter{PHP Error Handling}
+
+在创建脚本和 web 应用程序时，错误处理是一个重要的部分。如果代码缺少错误检测编码，那么程序看上去很不专业，也为安全风险敞开了大门。
+
+在 PHP 中，默认的错误处理很简单。一条消息会被发送到浏览器，这条消息带有文件名、行号以及一条描述错误的消息。
+
+PHP中不同的错误处理方法包括：
+
+\begin{compactitem}
+\item 简单的``die()" 语句
+\item 自定义错误和错误触发器
+\item 错误报告
+\end{compactitem}
+
+
+
+
+
+
+\section{Basic Error Handling}
+
+
+
+在操作文本文件的脚本中，如果文件不存在，会产生错误。为了避免用户获得错误消息，我们在访问文件之前检测该文件是否存在：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if(!file_exists("welcome.txt"))
+ {
+ die("File not found");
+ }
+else
+ {
+ $file=fopen("welcome.txt","r");
+ }
+?>
+\end{lstlisting}
+
+die()采用了一个简单的错误处理机制在错误之后终止了脚本。不过，简单地终止脚本并不总是恰当的方式。
+
+
+
+
+
+\section{Custom errors and error triggers}
+
+error 和 logging 函数允许开发者对错误进行处理和记录，从而使得创建一个自定义的错误处理器非常简单，其中：
+
+\begin{compactitem}
+\item error 函数允许用户定义错误处理规则，并修改记录错误的方式。
+\item logging 函数允许用户对应用程序进行日志记录，并把日志消息发送到电子邮件、系统日志或其他的机器。
+\end{compactitem}
+
+
+下面我们很简单地创建了一个专用函数，可以在 PHP 中发生错误时调用该函数。
+
+该函数必须有能力处理至少两个参数 (error level 和 error message)，但是可以接受最多五个参数（可选的：file, line-number 以及 error context）：
+
+\begin{lstlisting}[language=PHP]
+error_function(error_level,error_message,
+error_file,error_line,error_context)
+\end{lstlisting}
+
+\begin{longtable}{|m{80pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+参数	&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP 自定义错误处理器}\\
+\hline
+参数	&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+error\_level	&必需。为用户定义的错误规定错误报告级别。必须是一个值数。\\
+\hline
+error\_message	&必需。为用户定义的错误规定错误消息。\\
+\hline
+error\_file	&可选。规定错误在其中发生的文件名。\\
+\hline
+error\_line	&可选。规定错误发生的行号。\\
+\hline
+error\_context	&可选。规定一个数组，包含了当错误发生时在用的每个变量以及它们的值。\\
+\hline
+\end{longtable}
+
+
+
+
+
+
+
+
+\section{Error Reporting}
+
+下面这些错误报告级别是错误处理程序旨在处理的错误的不同的类型：
+
+\begin{longtable}{|m{20pt}|m{120pt}|m{240pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+值	&常量	&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP 错误报告级别}\\
+\hline
+值	&常量	&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+2	&E\_WARNING			&非致命的 run-time 错误。不暂停脚本执行。\\
+\hline
+8	&E\_NOTICE			&Run-time 通知。脚本发现可能有错误发生，但也可能在脚本正常运行时发生。\\
+\hline
+256&E\_USER\_ERROR		&致命的用户生成的错误。这类似于程序员使用 PHP 函数 trigger\_error() 设置的 E\_ERROR。\\
+\hline
+512&E\_USER\_WARNING	&非致命的用户生成的警告。这类似于程序员使用 PHP 函数 trigger\_error() 设置的 E\_WARNING。\\
+\hline
+1024&E\_USER\_NOTICE	&用户生成的通知。这类似于程序员使用 PHP 函数 trigger\_error() 设置的 E\_NOTICE。\\
+\hline
+4096&E\_RECOVERABLE\_ERROR&可捕获的致命错误。类似 E\_ERROR，但可被用户定义的处理程序捕获。(参见 set\_error\_handler())\\
+\hline
+8191&E\_ALL\footnote{在 PHP 6.0，E\_STRICT 是 E\_ALL 的一部分。}&所有错误和警告，除级别 E\_STRICT 以外。\\
+\hline
+\end{longtable}
+
+
+下面的代码创建一个处理错误的函数：
+
+\begin{lstlisting}[language=PHP]
+function customError($errno, $errstr)
+ { 
+ echo "<b>Error:</b> [$errno] $errstr<br />";
+ echo "Ending Script";
+ die();
+ }
+\end{lstlisting}
+
+
+当这个错误处理函数被触发时，它会取得错误级别和错误消息。然后它会输出错误级别和消息，并终止脚本。
+
+
+创建了一个错误处理函数之后，下一步我们需要确定的是在何时触发该函数。
+
+
+
+\section{Error Handler}
+\label{error_handler}
+
+
+PHP 的默认错误处理程序是内建的错误处理程序，而且PHP允许将自定义错误处理函数改造为脚本运行期间的默认错误处理程序。
+
+
+还可以修改错误处理程序，使其仅应用到某些错误，这样脚本就可以不同的方式来处理不同的错误。不过，下面将针对所有错误来使用我们的自定义错误处理程序：
+
+
+\begin{lstlisting}[language=PHP]
+set_error_handler("customError");
+\end{lstlisting}
+
+由于我们希望自定义函数来处理所有错误，于是set\_error\_handler() 仅使用一个参数，可以添加第二个参数来规定错误级别。下面通过尝试输出不存在的变量，来测试这个错误处理程序：
+
+\begin{lstlisting}[language=PHP]
+<?php
+//error handler function
+function customError($errno, $errstr)
+ { 
+ echo "<b>Error:</b> [$errno] $errstr";
+ }
+
+//set error handler
+set_error_handler("customError");
+
+//trigger error
+echo($test);
+?>
+\end{lstlisting}
+
+以上代码的输出应该类似这样：\verb|Error: [8] Undefined variable: test|
+
+
+\section{Error Trigger}
+
+
+在脚本中用户输入数据的位置，当用户的输入无效时触发错误的很有用的。在 PHP 中，这个任务由 trigger\_error() 完成。
+
+在下面的示例中，如果``test" 变量大于``1"，就会发生错误：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$test=2;
+if ($test>1)
+{
+trigger_error("Value must be 1 or below");
+}
+?>
+\end{lstlisting}
+
+可以在脚本中任何位置触发错误，通过添加的第二个参数，能够规定所触发的错误级别。
+
+可能的错误类型包括：
+
+\begin{compactitem}
+\item E\_USER\_ERROR - 致命的用户生成的 run-time 错误。错误无法恢复。脚本执行被中断。
+\item E\_USER\_WARNING - 非致命的用户生成的 run-time 警告。脚本执行不被中断。
+\item E\_USER\_NOTICE - 默认。用户生成的 run-time 通知。脚本发现了可能的错误，也有可能在脚本运行正常时发生。
+\end{compactitem}
+
+
+在接下来的例子中，如果``test" 变量大于``1"，则发生 E\_USER\_WARNING 错误。如果发生了 E\_USER\_WARNING，我们将使用我们的自定义错误处理程序并结束脚本：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+//error handler function
+function customError($errno, $errstr)
+ { 
+ echo "<b>Error:</b> [$errno] $errstr<br />";
+ echo "Ending Script";
+ die();
+ }
+
+//set error handler
+set_error_handler("customError",E_USER_WARNING);
+
+//trigger error
+$test=2;
+if ($test>1)
+ {
+ trigger_error("Value must be 1 or below",E_USER_WARNING);
+ }
+?>
+\end{lstlisting}
+
+\section{Error Logging}
+
+
+默认地，根据在 php.ini 中的 error\_log 配置，PHP 向服务器的错误记录系统或文件发送错误记录。通过使用 error\_log() 函数，可以向指定的文件或远程目的地发送错误记录，其中通过电子邮件向自己发送错误消息，是一种获得指定错误的通知的好办法。
+
+
+在下面的例子中，如果特定的错误发生，我们将发送带有错误消息的电子邮件，并结束脚本：
+
+\begin{lstlisting}[language=PHP]
+<?php
+//error handler function
+function customError($errno, $errstr)
+ { 
+ echo "<b>Error:</b> [$errno] $errstr<br />";
+ echo "Webmaster has been notified";
+ error_log("Error: [$errno] $errstr",1,
+ "someone@example.com","From: webmaster@example.com");
+}
+
+//set error handler
+set_error_handler("customError",E_USER_WARNING);
+
+//trigger error
+$test=2;
+if ($test>1)
+ {
+ trigger_error("Value must be 1 or below",E_USER_WARNING);
+ }
+?>
+\end{lstlisting}
+
+以上代码的输出应该类似这样：
+
+\begin{lstlisting}[language=PHP]
+Error: [512] Value must be 1 or below
+Webmaster has been notified
+\end{lstlisting}
+
+
+接收自以上代码的邮件类似这样：
+
+\begin{lstlisting}[language=PHP]
+Error: [512] Value must be 1 or below
+\end{lstlisting}
+
+
+但是这个方法不适合所有的错误，常规错误还是应当通过使用默认的 PHP 记录系统在服务器上进行记录。
+
+
+
+\section{PHP Error and Logging Functions}
+
+error 和 logging 函数是 PHP 核心的组成部分，无需安装即可使用这些函数。
+
+
+
+\begin{longtable}{|m{120pt}|m{250pt}|m{20pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+函数	&描述	&PHP
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Error 和 Logging 函数}\\
+\hline
+函数	&描述	&PHP
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+debug\_backtrace()			&生成 backtrace。	&4\\
+\hline
+debug\_print\_backtrace()	&输出 backtrace。	&5\\
+\hline
+error\_get\_last()			&获得最后发生的错误。&	5\\
+\hline
+error\_log()					&向服务器错误记录、文件或远程目标发送一个错误。	&4\\
+\hline
+error\_reporting()			&规定报告哪个错误。	&4\\
+\hline
+restore\_error\_handler()	&恢复之前的错误处理程序。	&4\\
+\hline
+restore\_exception\_handler()&	恢复之前的异常处理程序。	&5\\
+\hline
+set\_error\_handler()		&设置用户自定义的错误处理函数。	&4\\
+\hline
+set\_exception\_handler()	&设置用户自定义的异常处理函数。	&5\\
+\hline
+trigger\_error()				&创建用户自定义的错误消息。	&4\\
+\hline
+user\_error()				&trigger\_error() 的别名。	&4\\
+\hline
+\end{longtable}
+
+
+\section{PHP Error and Logging Constants}
+
+
+\begin{longtable}{|m{20pt}|m{125pt}|m{200pt}|m{20pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+值&常量	&描述	&PHP
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP Error 和 Logging 常量}\\
+\hline
+值&常量	&描述	&PHP
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+1	&E\_ERROR		&致命的运行时错误。错误无法恢复。脚本的执行被中断。	& \\
+\hline
+2	&E\_WARNING	&非致命的运行时错误。脚本的执行不会中断。	 &\\
+\hline
+4	&E\_PARSE		&编译时语法解析错误。解析错误只应该由解析器生成。	 &\\
+\hline
+8	&E\_NOTICE	&运行时提示。可能是错误，也可能在正常运行脚本时发生。	&\\
+\hline 
+16	&E\_CORE\_ERROR	&由 PHP 内部生成的错误。	&4\\
+\hline
+32	&E\_CORE\_WARNING	&由 PHP 内部生成的警告。	&4\\
+\hline
+64	&E\_COMPILE\_ERROR	&由 Zend 脚本引擎内部生成的错误。	&4\\
+\hline
+128&	E\_COMPILE\_WARNING	&由 Zend 脚本引擎内部生成的警告。	&4\\
+\hline
+256&	E\_USER\_ERROR	&由于调用 trigger\_error() 函数生成的运行时错误。&	4\\
+\hline
+512&	E\_USER\_WARNING&由于调用 trigger\_error() 函数生成的运行时警告。&	4\\
+\hline
+1024&	E\_USER\_NOTICE	&由于调用 trigger\_error() 函数生成的运行时提示。&	4\\
+\hline
+2048&	E\_STRICT			&运行时提示。对增强代码的互用性和兼容性有益。	&5\\
+\hline
+4096&	E\_RECOVERABLE\_ERROR\footnote{参阅 \hyperref[error_handler]{set\_error\_handler()}}&可捕获的致命错误。&	5\\
+\hline
+8191&	E\_ALL	&所有的错误和警告，除了 E\_STRICT。	&5\\
+\hline
+\end{longtable}
+
+
+
+
+
+\chapter{PHP Exception}
+
+异常（Exception）用于在指定的错误发生时改变脚本的正常流程，这种情况称为异常。
+
+PHP 5 提供了一种新的面向对象的错误处理方法。当异常被触发时，通常会发生的情况如下：
+
+\begin{compactitem}
+\item 当前代码状态被保存
+\item 代码执行被切换到预定义的异常处理器函数
+\item 根据情况，处理器也许会从保存的代码状态重新开始执行代码，终止脚本执行，或从代码中另外的位置继续执行脚本
+\end{compactitem}
+
+
+
+
+\section{Basic Exception}
+
+
+当异常被抛出时，其后的代码不会继续执行，PHP 会尝试查找匹配的 "catch" 代码块。
+
+
+
+如果异常没有被捕获，而且又没用使用 set\_exception\_handler() 作相应的处理的话，那么将发生一个严重的错误（致命错误），并且输出 "Uncaught Exception" （未捕获异常）的错误消息。
+
+
+在下面的示例中，尝试抛出一个异常，同时不去捕获它：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+//create function with an exception
+function checkNum($number)
+ {
+ if($number>1)
+  {
+  throw new Exception("Value must be 1 or below");
+  }
+ return true;
+ }
+
+//trigger exception
+checkNum(2);
+?>
+\end{lstlisting}
+
+上面的代码会获得类似这样的一个错误：
+
+
+\begin{lstlisting}[language=bash]
+Fatal error: Uncaught exception 'Exception' 
+with message 'Value must be 1 or below' in test.php:6 
+Stack trace: #0 test.php(12): 
+checkNum(28) #1 {main} thrown in test.php on line 6
+\end{lstlisting}
+
+
+
+
+\section{try,throw and catch}
+
+要避免上面例子出现的错误，我们需要创建适当的代码来处理异常。
+
+
+
+
+异常处理程序应当包括：
+
+
+
+\begin{compactenum}
+\item try - 使用异常的函数应该位于 "try" 代码块内。如果没有触发异常，则代码将照常继续执行。但是如果异常被触发，会抛出一个异常。
+\item throw - 这里规定如何触发异常。每一个 "throw" 必须对应至少一个 "catch"
+\item catch - "catch" 代码块会捕获异常，并创建一个包含异常信息的对象
+\end{compactenum}
+
+下面的示例将触发一个异常：
+
+\begin{lstlisting}[language=PHP]
+<?php
+//创建可抛出一个异常的函数
+function checkNum($number)
+ {
+ if($number>1)
+  {
+  throw new Exception("Value must be 1 or below");
+  }
+ return true;
+ }
+
+//在 "try" 代码块中触发异常
+try
+ {
+ checkNum(2);
+ //If the exception is thrown, this text will not be shown
+ echo 'If you see this, the number is 1 or below';
+ }
+
+//捕获异常
+catch(Exception $e)
+ {
+ echo 'Message: ' .$e->getMessage();
+ }
+?>
+\end{lstlisting}
+
+
+上面代码将获得类似这样一个错误：\verb|Message: Value must be 1 or below|
+
+上面的代码抛出了一个异常，并捕获了它：
+
+\begin{compactenum}
+\item 创建 checkNum() 函数。它检测数字是否大于 1。如果是，则抛出一个异常。
+\item 在``try" 代码块中调用 checkNum() 函数。
+\item checkNum() 函数中的异常被抛出
+\item ``catch" 代码块接收到该异常，并创建一个包含异常信息的对象 (\texttt{\$e})。
+\item 通过从这个 exception 对象调用 \texttt{\$e->getMessage()}，输出来自该异常的错误消息
+\end{compactenum}
+
+不过，为了遵循“每个 throw 必须对应一个 catch”的原则，可以设置一个顶层的异常处理器来处理漏掉的错误。
+
+
+
+\section{Custom Exception Class}
+
+创建自定义的异常处理程序非常简单，通过自定义exception类，当 PHP 中发生异常时，可调用其函数，注意该类必须是 Exception 类的一个扩展。
+
+
+这个自定义的 exception 类继承了 PHP 的 Exception 类的所有属性，可向其添加自定义的函数。
+
+
+\begin{compactenum}
+\item 创建 exception 类：
+
+\begin{lstlisting}[language=PHP]
+<?php
+class customException extends Exception
+ {
+ public function errorMessage()
+  {
+  //error message
+  $errorMsg = 'Error on line '.$this->getLine().' in '.$this->getFile()
+  .': <b>'.$this->getMessage().'</b> is not a valid E-Mail address';
+  return $errorMsg;
+  }
+ }
+
+$email = "someone@example...com";
+
+try
+ {
+ //check if 
+ if(filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE)
+  {
+  //throw exception if email is not valid
+  throw new customException($email);
+  }
+ }
+
+catch (customException $e)
+ {
+ //display custom message
+ echo $e->errorMessage();
+ }
+?>
+\end{lstlisting}
+
+
+这个新的类是旧的 Exception 类的副本，外加 errorMessage() 函数。正因为它是旧类的副本，因此它从旧类继承了属性和方法，我们可以使用 Exception 类的方法，比如 getLine() 、 getFile() 以及 getMessage()。
+
+\item 上面的代码抛出了一个异常，并通过一个自定义的 exception 类来捕获它：
+
+\begin{compactenum}
+\item customException() 类是作为旧的 exception 类的一个扩展来创建的。这样它就继承了旧类的所有属性和方法。
+\item 创建 errorMessage() 函数。如果 e-mail 地址不合法，则该函数返回一条错误消息
+\item 把 \$email 变量设置为不合法的 e-mail 地址字符串
+\item 执行 "try" 代码块，由于 e-mail 地址不合法，因此抛出一个异常
+\item "catch" 代码块捕获异常，并显示错误消息
+\end{compactenum}
+
+
+
+
+\end{compactenum}
+
+
+
+\section{Multiple Exceptions}
+
+可以为一段脚本使用多个异常，来检测多种情况。
+
+
+可以使用多个 if..else 代码块，或一个 switch 代码块，或者嵌套多个异常。这些异常能够使用不同的 exception 类，并返回不同的错误消息：
+
+\begin{lstlisting}[language=PHP]
+<?php
+class customException extends Exception
+{
+public function errorMessage()
+{
+//error message
+$errorMsg = 'Error on line '.$this->getLine().' in '.$this->getFile()
+.': <b>'.$this->getMessage().'</b> is not a valid E-Mail address';
+return $errorMsg;
+}
+}
+
+$email = "someone@example.com";
+
+try
+ {
+ //check if 
+ if(filter_var($email, FILTER_VALIDATE_EMAIL) === FALSE)
+  {
+  //throw exception if email is not valid
+  throw new customException($email);
+  }
+ //check for "example" in mail address
+ if(strpos($email, "example") !== FALSE)
+  {
+  throw new Exception("$email is an example e-mail");
+  }
+ }
+
+catch (customException $e)
+ {
+ echo $e->errorMessage();
+ }
+
+catch(Exception $e)
+ {
+ echo $e->getMessage();
+ }
+?>
+\end{lstlisting}
+
+上面的代码测试了两种条件，如何任何条件不成立，则抛出一个异常：
+
+\begin{compactenum}
+\item customException() 类是作为旧的 exception 类的一个扩展来创建的。这样它就继承了旧类的所有属性和方法。
+\item 创建 errorMessage() 函数。如果 e-mail 地址不合法，则该函数返回一个错误消息。
+\item 执行 "try" 代码块，在第一个条件下，不会抛出异常。
+\item 由于 e-mail 含有字符串 "example"，第二个条件会触发异常。
+\item "catch" 代码块会捕获异常，并显示恰当的错误消息
+\end{compactenum}
+
+
+如果没有捕获 customException，紧紧捕获了 base exception，则在那里处理异常。
+
+
+
+
+\section{Re-throwing Exceptions}
+
+有时，当异常被抛出时，开发者也许希望以不同于标准的方式对它进行处理，因此可以在一个 "catch" 代码块中再次抛出异常。
+
+
+对程序员来说，系统错误也许很重要，但是用户对它们并不感兴趣，因此脚本应该对用户隐藏系统错误。
+
+为了让用户更容易使用，开发者可以再次抛出带有对用户比较友好的消息的异常：
+
+\begin{lstlisting}[language=PHP]
+<?php
+class customException extends Exception
+ {
+ public function errorMessage()
+  {
+  //error message
+  $errorMsg = $this->getMessage().' is not a valid E-Mail address.';
+  return $errorMsg;
+  }
+ }
+
+$email = "someone@example.com";
+
+try
+ {
+ try
+  {
+  //check for "example" in mail address
+  if(strpos($email, "example") !== FALSE)
+   {
+   //throw exception if email is not valid
+   throw new Exception($email);
+   }
+  }
+ catch(Exception $e)
+  {
+  //re-throw exception
+  throw new customException($email);
+  }
+ }
+
+catch (customException $e)
+ {
+ //display custom message
+ echo $e->errorMessage();
+ }
+?>
+\end{lstlisting}
+
+上面的代码检测在邮件地址中是否含有字符串 "example"。如果有，则再次抛出异常：
+
+\begin{compactenum}
+\item customException() 类是作为旧的 exception 类的一个扩展来创建的。这样它就继承了旧类的所有属性和方法。
+\item 创建 errorMessage() 函数。如果 e-mail 地址不合法，则该函数返回一个错误消息。
+\item 把 \$email 变量设置为一个有效的邮件地址，但含有字符串``example"。
+\item ``try" 代码块包含另一个``try" 代码块，这样就可以再次抛出异常。
+\item 由于 e-mail 包含字符串``example"，因此触发异常。
+\item ``catch" 捕获到该异常，并重新抛出``customException"。
+\item 捕获到``customException"，并显示一条错误消息。
+\end{compactenum}
+
+如果在其目前的``try" 代码块中异常没有被捕获，则它将在更高层级上查找 catch 代码块。
+
+
+\section{Top Level Exception Handler}
+
+set\_exception\_handler() 函数可设置处理所有未捕获异常的用户定义函数。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function myException($exception)
+{
+echo "<b>Exception:</b> " , $exception->getMessage();
+}
+
+set_exception_handler('myException');
+
+throw new Exception('Uncaught Exception occurred');
+?>
+\end{lstlisting}
+
+以上代码的输出应该类似这样：\verb|Exception:Uncaught Exception ocuured|
+
+在上面的代码中，不存在 "catch" 代码块，而是触发顶层的异常处理程序。应该使用此函数来捕获所有未被捕获的异常。
+
+
+
+
+
+\section{Rules for Exception}
+
+异常处理的规则包括：
+
+\begin{compactitem}
+\item 需要进行异常处理的代码应该放入 try 代码块内，以便捕获潜在的异常。
+\item 每个 try 或 throw 代码块必须至少拥有一个对应的 catch 代码块。
+\item 使用多个 catch 代码块可以捕获不同种类的异常。
+\item 可以在 try 代码块内的 catch 代码块中再次抛出（re-thrown）异常。
+\end{compactitem}
+
+简而言之就是，如果抛出了异常，就必须捕获它。
+
+
+
+
+
+\clearpage
+\bibliographystyle{plainnat}
+\bibliography{phpnotes}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
