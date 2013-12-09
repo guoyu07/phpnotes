@@ -27,6 +27,7 @@
 *.pdfsync
 *.ps
 *.snm
+*.svg
 *.synctex.gz
 *.toc
 *.vrb
