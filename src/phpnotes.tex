@@ -3,6 +3,11 @@
 %type chinese characters
 \usepackage{ctex}
 
+%Bibliography
+\usepackage{chapterbib}
+\usepackage[sectionbib,square,super,sort&compress]{natbib}
+
+
 %generate index of book
 \usepackage{makeidx}
 
@@ -44,6 +49,13 @@
 
 % generate longtable which could across pages.
 \usepackage{longtable}
+
+%
+\usepackage{multirow}
+
+%
+\usepackage{adjustbox}
+
 
 %
 \newcommand\mgape[1]{\gape{$\vcenter{\hbox{#1}}$}}
@@ -122,7 +134,7 @@
 \rule{1pt}{\textheight} % Vertical line
 \hspace*{0.05\textwidth} % Whitespace between the vertical line and title page text
 \parbox[b]{0.75\textwidth}{ % Paragraph box which restricts text to less than the width of the page
-{\noindent\Huge\bfseries A Collection of \\[0.5\baselineskip] PHP}\\[2\baselineskip] % Title
+{\noindent\Huge\bfseries Notes Collection of \\[0.5\baselineskip] PHP}\\[2\baselineskip] % Title
 {\large \textit{PHP}}\\[4\baselineskip] % Tagline or further description
 {\Large \textsc{theqiong.com}} % Author name
 
@@ -225,13 +237,19 @@ morestring=[b]",
 }
 
 
+
+
+
+
+
+
 \setmainfont[Mapping=tex-text]{Minion Pro}
 
 \makeindex
 
 
-\title{PHP Notes}
-\author{穷屌丝联盟}
+\title{{\zihao{1}PHP Notes}}
+\author{{\zihao{3}穷屌丝联盟}}
 \date{\today}
 
 
@@ -252,6 +270,22 @@ morestring=[b]",
 \printindex
 
 \include{introduction}
+
+
+\include{foundation}
+
+
+\include{functions}
+
+
+\include{forms}
+
+
+
+
+
+
+
 
 \end{document}
 

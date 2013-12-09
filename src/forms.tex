@@ -1,0 +1,247 @@
+\part{PHP Form}
+
+PHP 一个很有用的特点体现在它处理 PHP 表单的方式，表单的任何元素都在 PHP 脚本中自动生效。
+
+
+\begin{compactitem}
+\item GET\footnote{对于GET方式，服务器端用Request.QueryString获取变量的值。}
+
+通过HTTP GET机制，把参数数据队列加到提交表单的action属性所指的URL中，值和表单内各个字段一一对应，在URL中可以看到，因此GET安全性非常低，建议用POST方式传输机密信息\footnote{具体来说，在做数据查询时，建议用GET方式，而在做数据添加、修改或删除时，建议用POST方式。}。
+
+通过HTTP GET机制传送的数据量较小，不能大于2KB，因此GET执行效率比POST方法好。
+
+\item POST\footnote{对于POST方式，服务器端用Request.Form获取提交的数据。}
+
+通过HTTP POST机制，将表单内各个字段与其内容放置在HTML header内一起传送到action属性所指的URL地址，用户是看不到这个过程的，因此POST安全性较高。
+
+通过HTTP POST机制传送的数据量较大，一般被默认为不受限制。但理论上，IIS4中最大量为80KB，IIS5中为100KB。
+\end{compactitem}
+
+
+
+
+表单是Web应用程序和用户交互时重要的手段，PHP 的 \textcolor{Blue}{\texttt{\$\_GET}} 和 \textcolor{Blue}{\texttt{\$\_POST}} 用于检索表单中的值，比如用户输入等。
+
+
+
+\begin{compactitem}
+\item \textcolor{Blue}{\texttt{\$\_GET}} 变量用于收集来自 method=``get" 的表单中的值。
+\item \textcolor{Blue}{\texttt{\$\_POST}}变量用于收集来自 method=``post" 的表单中的值。
+\end{compactitem}
+
+
+
+
+
+\chapter{PHP Forms Processing}
+
+Web设计中常见的表单示例如下：
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+<body>
+
+<form action="welcome.php" method="post">
+Name: <input type="text" name="name" />
+Age: <input type="text" name="age" />
+<input type="submit" />
+</form>
+
+</body>
+</html>
+\end{lstlisting}
+
+上面的 HTML 页面实例包含了两个输入框和一个提交按钮。当用户填写了该表单并单击了提交按钮后，页面 welcome.php 将被调用。表单的数据会被送往 "welcome.php" 这个文件，而``welcome.php" 文件类似这样：
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+</head>
+<body>
+
+Welcome <?php echo $_POST["name"]; ?>.<br />
+You are <?php echo $_POST["age"]; ?> years old.
+
+</body>
+</html>
+\end{lstlisting}
+
+更严格的PHP脚本如下：
+
+\begin{lstlisting}[language=PHP]
+Welcome <?php echo htmlspecialchars($_POST['name']); ?>.<br />
+You are <?php echo (int)$_POST["age"]; ?> years old.
+\end{lstlisting}
+
+除了 \texttt{htmlspecialchars()} 和 \texttt{(int)} 部分，这段程序做什么用显而易见。
+
+\texttt{htmlspecialchars()} 使得 HTML 之中的特殊字符被正确的编码，从而不会被使用者在页面注入 HTML 标签或者 Javascript 代码。
+
+我们明确知道age 字段是一个数值，因此将它转换为一个整形值\texttt{(integer)}来自动的消除任何不必要的字符。也可以使用 PHP 的 \texttt{filter} 扩展来自动完成该工作。
+
+PHP 将自动设置 \texttt{\$\_POST['name']} 和 \texttt{\$\_POST['age']} 变量。在这之前我们使用了超全局变量 \texttt{\$\_SERVER}，现在引入超全局变量是 \texttt{\$\_POST}，它包含了所有的 POST 数据。
+
+如果表单提交数据的方法（method）使用的是 \texttt{GET}方法，那么表单中的信息将被储存到超全局变量 \texttt{\$\_GET} 中。
+
+如果并不关心请求数据的来源，也可以用超全局变量 \texttt{\$\_REQUEST}，它包含了所有 \texttt{GET}、\texttt{POST}、\texttt{COOKIE}和 \texttt{FILE}的数据。
+
+也可以在 PHP 中处理 XForms 的输入，尽管用户可能更喜欢使用长久以来支持良好的 HTML 表单。
+
+
+\chapter{PHP Forms Validation}
+
+应该在任何可能的时候对用户输入进行验证，客户端验证的优势在于速度更快，从而可以减轻服务器的负载。
+
+
+不过，任何流量很高以至于不得不担心服务器资源的站点，也有必要担心站点的安全性。如果表单访问的是数据库，就非常有必要采用服务器端的验证。
+
+在服务器验证表单的一种好的方式是，把表单传给它自己，而不是跳转到不同的页面。这样用户就可以在同一张表单页面得到错误信息，也就更容易发现错误了。
+
+
+
+\chapter{PHP \$\_GET}
+
+\textcolor{Blue}{\texttt{\$\_GET}} 变量是一个数组，内容是由 HTTP GET 方法\footnote{HTTP GET 方法不适合大型的变量值，不能超过 100 个字符。}发送的变量名称和值。
+
+
+\textcolor{Blue}{\texttt{\$\_GET}} 变量用于收集来自 method="get" 的表单中的值。从带有 GET 方法的表单发送的信息，对任何人都是可见的（会显示在浏览器的地址栏），并且对发送的信息量也有限制（最多 100 个字符）。
+
+\begin{lstlisting}[language=HTML]
+<form action="welcome.php" method="get">
+Name: <input type="text" name="name" />
+Age: <input type="text" name="age" />
+<input type="submit" />
+</form>
+\end{lstlisting}
+
+当用户点击提交按钮时，发送的 URL 会类似这样：
+
+\begin{lstlisting}[language=bash]
+http://www.domain.com.cn/welcome.php?name=Jim&age=30
+\end{lstlisting}
+
+``welcome.php" 文件通过\textcolor{Blue}{\texttt{\$\_GET}} 变量来获取表单数据时，表单域的名称会自动成为\textcolor{Blue}{\texttt{\$\_GET}}数组中的 ID 键：
+
+\begin{lstlisting}[language=HTML]
+Welcome <?php echo $_GET["name"]; ?>.<br />
+You are <?php echo $_GET["age"]; ?> years old!
+\end{lstlisting}
+
+在使用\textcolor{Blue}{\texttt{\$\_GET}}变量时，所有的变量名和值都会显示在 URL 中。所以在发送密码或其他敏感信息时，不应该使用这个方法。不过，正因为变量显示在 URL 中，因此可以在收藏夹中收藏该页面。在某些情况下，这是很有用的。
+
+
+\chapter{PHP \$\_POST}
+
+\textcolor{Blue}{\texttt{\$\_POST}}变量是一个数组，内容是由 HTTP POST 方法发送的变量名称和值。
+
+
+
+\textcolor{Blue}{\texttt{\$\_POST}}变量用于收集来自 method="post" 的表单中的值。从带有 POST 方法的表单发送的信息，对任何人都是不可见的（不会显示在浏览器的地址栏），并且对发送信息的量也没有限制。
+
+\begin{lstlisting}[language=HTML]
+<form action="welcome.php" method="post">
+Enter your name: <input type="text" name="name" />
+Enter your age: <input type="text" name="age" />
+<input type="submit" />
+</form>
+\end{lstlisting}
+
+当用户点击提交按钮，URL 不会含有任何表单数据，看上去类似这样：
+
+
+\begin{lstlisting}[language=bash]
+http://www.domain.com.cn/welcome.php
+\end{lstlisting}
+
+``welcome.php" 文件现在可以通过\textcolor{Blue}{\texttt{\$\_POST}}变量来获取表单数据时，表单域的名称会自动成为\textcolor{Blue}{\texttt{\$\_POST}}数组中的 ID 键。
+
+\begin{lstlisting}[language=HTML]
+Welcome <?php echo $_POST["name"]; ?>.<br />
+You are <?php echo $_POST["age"]; ?> years old!
+\end{lstlisting}
+
+
+使用\textcolor{Blue}{\texttt{\$\_POST}}，通过 HTTP POST 发送的变量不会显示在 URL 中，而且变量没有长度限制。不过，由于变量不显示在 URL 中，所以无法把页面加入书签。
+
+
+
+
+
+
+
+\chapter{PHP \$\_REQUEST}
+
+
+PHP 的\textcolor{Blue}{\texttt{\$\_REQUEST}}变量包含了\textcolor{Blue}{\texttt{\$\_GET}}, \textcolor{Blue}{\texttt{\$\_POST}}以及\textcolor{Blue}{\texttt{\$\_COOKIE}}的内容。
+
+PHP 的\textcolor{Blue}{\texttt{\$\_REQUEST}}变量可用来取得通过\textcolor{Blue}{\texttt{GET}}和\textcolor{Blue}{\texttt{POST}}等方法发送的表单数据的结果。
+
+
+
+\begin{lstlisting}[language=HTML]
+Welcome <?php echo $_REQUEST["name"]; ?>.<br />
+You are <?php echo $_REQUEST["age"]; ?> years old!
+\end{lstlisting}
+
+
+
+
+
+
+
+\bibliographystyle{plainnat}
+\bibliography{phpnotes}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
