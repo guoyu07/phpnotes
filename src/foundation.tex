@@ -30,15 +30,20 @@ PHP手册中文翻译工作是一项长期而又艰巨的工作，为了让这�
 
 \chapter{PHP Syntax}
 
-\vspace{-20pt}
+\section{PHP tags}
+
 
 
 使用了 PHP 的Web页面将被和通常的 HTML 页面一样处理，可以用通常建立 HTML 页面的方法来建立和编辑它们，但是用户无法在浏览器中通过查看源文档的方式来查看 PHP 的源代码 - 而是只能看到 PHP 文件的输出~——即纯粹的 HTML。这是因为在结果返回浏览器之前，脚本就已经在服务器执行了。
 
+当解析一个PHP文件时，PHP 会寻找起始和结束标记，也就是 \texttt{<?php} 和 \texttt{?>} ，这告诉 PHP 开始和停止解析二者之间的代码。此种解析方式使得 PHP 可以被嵌入到各种不同的文档中去，而任何起始和结束标记之外的部分都会被 PHP 解析器忽略。
 
 
+PHP 的脚本块\footnote{用 \texttt{<?php} 来表示 PHP 标识符的起始，然后放入 PHP 语句并通过加上一个终止标识符 \texttt{?>} 来退出 PHP 模式，可以根据需要在 HTML 文件中开启或关闭 PHP 模式。}以 \texttt{<?php} 开始，以 \texttt{?>} 结束，可以把 PHP 的脚本块放置在文档中的任何位置。
 
-PHP 的脚本块\footnote{用 \texttt{<?php} 来表示 PHP 标识符的起始，然后放入 PHP 语句并通过加上一个终止标识符 \texttt{?>} 来退出 PHP 模式，可以根据需要在 HTML 文件中开启或关闭 PHP 模式。}以 \texttt{<?php} 开始，以 \texttt{?>} 结束，可以把 PHP 的脚本块放置在文档中的任何位置。当然，在支持简写的服务器上，可以使用 \texttt{<?} 和 \texttt{?>} 来开始和结束脚本块。不过，为了达到最好的兼容性，推荐使用标准形式 (\texttt{<?php})，而不是简写形式。
+当然，在支持简写的服务器上，可以使用 短标记\texttt{<?} 和 \texttt{?>} 来开始和结束脚本块,但不鼓励使用。只有通过激活 php.ini 中的 short\_open\_tag 配置指令或者在编译 PHP 时使用了配置选项 \texttt{--enable-short-tags}时才能使用短标记。
+
+为了达到最好的兼容性，推荐使用标准形式 (\texttt{<?php ?>})，而不是简写形式。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -46,7 +51,20 @@ PHP 的脚本块\footnote{用 \texttt{<?php} 来表示 PHP 标识符的起始，
 ?>
 \end{lstlisting}
 
-PHP 文件通常会包含 HTML 标签，就像一个 HTML 文件，以及一些 PHP 脚本代码。
+如果文件内容是纯 PHP 代码，最好在文件末尾删除 PHP 结束标记。这可以避免在 PHP 结束标记之后万一意外加入了空格或者换行符，会导致 PHP 开始输出这些空白，而脚本中此时并无输出的意图。
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo "Hello world";
+
+// ... more code
+
+echo "Last statement";
+
+// 脚本至此结束，而且并无 PHP 结束标记
+\end{lstlisting}
+
+凡是在一对开始和结束标记之外的内容都会被 PHP 解析器忽略，这使得 PHP 文件可以具备混合内容，因此PHP 文件通常会包含 HTML 标签，就像一个 HTML 文件，以及一些 PHP 脚本代码。
 
 在Web服务器根目录（DOCUMENT\_ROOT）下建立一个文件名为 hello.php，然后完成如下内容，它可以向浏览器输出文本 "Hello World"：
 
@@ -64,7 +82,7 @@ PHP 文件通常会包含 HTML 标签，就像一个 HTML 文件，以及一些 
 </html>
 \end{lstlisting}
 
-在浏览器的地址栏里输入 web 服务器的 URL 访问这个文件，在结尾加上“/hello.php”。如果本地开发，那么这个 URL 一般是 http://localhost/hello.php 或者 http://127.0.0.1/hello.php，当然这取决于 web 服务器的设置。如果所有的设置都正确，那么这个文件将被 PHP 解析，浏览器中将会输出如下结果：
+在浏览器的地址栏里输入Web服务器的 URL 访问这个文件，在结尾加上“/hello.php”。如果本地开发，那么这个 URL 一般是 http://localhost/hello.php 或者 http://127.0.0.1/hello.php，当然这取决于 Web 服务器的设置。如果所有的设置都正确，那么这个文件将被 PHP 解析，浏览器中将会输出如下结果：
 
 \begin{lstlisting}[language=HTML]
 <!DOCTYPE html>
@@ -78,11 +96,67 @@ PHP 文件通常会包含 HTML 标签，就像一个 HTML 文件，以及一些 
 </html>
 \end{lstlisting}
 
-该程序非常的简单，它仅仅只是利用了 PHP 的 echo 语句显示了 Hello World。注意，这个范例和其它用 C 或 Perl 语言写的脚本之间的区别~——与用大量的命令来编写程序以输出 HTML 不同的是，PHP 页面就是 HTML，只不过在其中嵌入了一些代码来做一些事情，PHP文件无需被执行或以任何方式指定。服务器会找到该文件并提供给 PHP 进行解释，因为使用了“.php”的扩展名，服务器已被配置成自动传递有着“.php”扩展名的文件给 PHP。
+该程序非常的简单，它仅仅只是利用了 PHP 的 echo 语句显示了 Hello World。注意，这个范例和其它用 C 或 Perl 语言写的脚本之间的区别~——与用大量的命令来编写程序以输出 HTML 不同的是，PHP 页面就是 HTML，只不过在其中嵌入了一些代码来做一些事情。
 
-{\CTEXnoindent\textbf{PHP结束符}}
+\section{PHP \& HTML}
 
-PHP 中的每个代码行都必须以分号\footnote{分号是一种分隔符，用于把指令集区分开来。}结束。
+当 PHP 解释器碰到 \texttt{?>} 结束标记时就简单地将其后内容原样输出（除非马上紧接换行）直到碰到下一个开始标记，要输出大段文本时，跳出 PHP 解析模式通常比将文本通过 echo 或 print 输出更有效率。
+
+例外是处于条件语句中间时，此时 PHP 解释器会根据条件判断来决定哪些输出，哪些跳过。
+
+\begin{lstlisting}[language=PHP]
+<?php if ($expression == true): ?>
+  This will show if the expression is true.
+<?php else: ?>
+  Otherwise this will show.
+<?php endif; ?>
+\end{lstlisting}
+
+上例中 PHP 将跳过条件语句未达成的段落，即使该段落位于 PHP 开始和结束标记之外。由于 PHP 解释器会在条件未达成时直接跳过该段条件语句块，因此 PHP 会根据条件来忽略之。
+
+此外注意如果将 PHP 嵌入到 XML 或 XHTML 中则需要使用 \texttt{<?php ?>} 标记以保持符合标准\footnote{在 PHP 5.2 和之前的版本中，解释器不允许一个文件的全部内容就是一个开始标记 \texttt{<?php}。自 PHP 5.3 起则允许此种文件，但要开始标记后有一个或更多白空格符}。
+
+PHP的开始和结束标记中\texttt{<?php ?>} 和 \texttt{<script language="php"> </script>} 总是可用的。另两种是短标记和 ASP 风格标记，可以在 php.ini 配置文件中打开或关闭。
+
+在以下情况应避免使用短标记：开发需要再次发布的程序或者库，或者在用户不能控制的服务器上开发。因为目标服务器可能不支持短标记。为了代码的移植及发行，确保不要使用短标记。尽管有些人觉得短标记和 ASP 风格标记很方便，但移植性较差，通常不推荐使用。
+
+\begin{lstlisting}[language=PHP]
+1.  <?php echo 'if you want to serve XHTML or XML documents, do it like this'; ?>
+
+2.  <script language="php">
+        echo 'some editors (like FrontPage) don\'t like processing instructions';
+    </script>
+
+3.  <? echo 'this is the simplest, an SGML processing instruction'; ?>
+    <?= expression ?> This is a shortcut for "<? echo expression ?>"
+
+4.  <% echo 'You may optionally use ASP-style tags'; %>
+    <%= $variable; # This is a shortcut for "<% echo . . ." %>
+\end{lstlisting}
+
+上例中的 1 和 2 中使用的标记总是可用的，其中示例 1 中是最常用，并建议使用的。短标记（上例 3）仅在通过 php.ini 配置文件中的指令 short\_open\_tag 打开后才可用\footnote{自 PHP 5.4 起，短格式的 echo 标记 <?= 总会被识别并且合法，而不管 short\_open\_tag 的设置是什么。}，或者在 PHP 编译时加入了 \texttt{--enable-short-tags} 选项，而ASP 风格标记（上例 4）仅在通过 php.ini 配置文件中的指令 asp\_tags 打开后才可用。
+
+Web服务器中的PHP模块设置好以后，而且通过浏览器访问的 URL 确实指向了服务器上的这个文件，那么PHP文件无需被执行或以任何方式指定，服务器会找到该文件并提供给 PHP 进行解释，因为使用了“.php”的扩展名，服务器已被配置成自动传递有着“.php”扩展名的文件给 PHP，但如果只是从本地文件系统调用这个文件，它不会被 PHP 解析。
+
+
+
+\section{PHP Instruction Separations}
+
+同 C 或 Perl 一样，PHP 中的每个代码行都必须以分号\footnote{分号是一种分隔符，用于把指令集区分开来。}结束。
+
+一段 PHP 代码中的结束标记隐含表示了一个分号；在一个 PHP 代码段中的最后一行可以不用分号结束。如果后面还有新行，则代码段的结束标记包含了行结束。
+
+\begin{lstlisting}[language=PHP]
+<?php
+    echo "This is a test";
+?>
+
+<?php echo "This is a test" ?>
+
+<?php echo 'We omitted the last closing tag';
+\end{lstlisting}
+
+文件末尾的 PHP 代码段结束标记可以不要，有些情况下当使用 include 或者 require 时省略掉会更好些，这样不期望的空白符就不会出现在文件末尾，之后仍然可以输出响应标头。在使用输出缓冲时也很便利，就不会看到由包含文件生成的不期望的空白符。
 
 
 
@@ -104,42 +178,1279 @@ PHP 中的每个代码行都必须以分号\footnote{分号是一种分隔符，
 </html>
 \end{lstlisting}
 
-尽管换行在 HTML 中的实际意义不是很大，但适当地使用换行可以使 HTML 代码易读且美观。PHP 会在输出时自动删除其结束符 \texttt{?>} 后的一个换行。该功能主要是针对在一个页面中嵌入多段 PHP 代码或者包含了无实质性输出的 PHP 文件而设计，与此同时也造成了一些疑惑。如果需要在 PHP 结束符 \texttt{?>}之后输出换行的话，可以在其后加一个空格，或者在最后的一个 echo/print 语句中加入一个换行。
+尽管换行在 HTML 中的实际意义不是很大，但适当地使用换行可以使 HTML 代码易读且美观。PHP 会在输出时自动删除其结束符 \texttt{?>} 后的一个换行。该功能主要是针对在一个页面中嵌入多段 PHP 代码或者包含了无实质性输出的 PHP 文件而设计，与此同时也造成了一些疑惑。如果需要在 PHP 结束符 \texttt{?>}之后输出换行的话，可以在其后加一个空格，或者在最后的一个 \texttt{echo/print} 语句中加入一个换行。
 
 
 
-{\CTEXnoindent\textbf{PHP注释}}
-
-与C/C++/C\#/Java 等语言一样，PHP使用 \texttt{//} 来编写单行注释，或者使用 \texttt{/*} 和 \texttt{*/} 来编写大的注释块。
 
 
-\begin{lstlisting}[language=HTML]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
+\section{PHP Comments}
 
+PHP 支持 C/C++/C\#/Java 和 Unix Shell 风格（Perl 风格）的注释，PHP使用 \texttt{//} 来编写单行注释，或者使用 \texttt{/*} 和 \texttt{*/} 来编写大的注释块。
+
+
+\begin{lstlisting}[language=PHP]
 <?php
-
-//This is a comment
-
-/*
-This is
-a comment
-block
-*/
-
+    echo "This is a test"; // This is a one-line c++ style comment
+    /* This is a multi line comment
+       yet another line of comment */
+    echo "This is yet another test";
+    echo 'One Final Test'; # This is a one-line shell-style comment
 ?>
+\end{lstlisting}
 
-</body>
-</html>
+单行注释仅仅注释到行末或者当前的 PHP 代码块，视乎哪个首先出现。这意味着在 \texttt{// ... ?>} 或者 \texttt{\# ... ?>} 之后的 HTML 代码将被显示出来：\texttt{?>} 跳出了 PHP 模式并返回了 HTML 模式，\texttt{//} 或 \texttt{\#} 并不能影响到这一点。如果启用了 asp\_tags 配置选项，其行为和 \texttt{// \%>} 或 \texttt{\# \%>} 相同。不过，\texttt{</script>} 标记在单行注释中不会跳出 PHP 模式。
+
+\begin{lstlisting}[language=PHP]
+<h1>This is an <?php # echo 'simple';?> example</h1>
+<p>The header above will say 'This is an  example'.</p>
+\end{lstlisting}
+
+C 风格的注释在碰到第一个 */ 时结束，因此要确保不要嵌套 C 风格的注释。试图注释掉一大块代码时很容易出现该错误。
+
+\begin{lstlisting}[language=PHP]
+<?php
+ /*
+    echo "This is a test"; /* This comment will cause a problem */
+ */
+?>
 \end{lstlisting}
 
 和客户端的 JavaScript 不同的是，PHP 代码是运行在服务端的。如果在服务器上建立了如上例类似的代码，则在运行该脚本后，客户端就能接收到其结果，但他们无法得知其背后的代码是如何运作的。甚至可以将 web 服务器设置成让 PHP 来处理所有的 HTML 文件，这么一来，用户就无法得知服务端到底做了什么。
 
 如果希望用文本编辑工具\footnote{如果使用 Windows 记事本来编写 PHP 脚本，需要注意在保存文件时，文件的后缀名应该为 .php（记事本将自动在文件名后面加上 .txt 后缀，除非采取以下措施之一来避免这种情况）。当保存文件时，系统会提示指定文件的文件名，这时需要将文件名加上引号（例如 ``hello.php"）。或者，也可以点击“另存为”对话框中的“保存类型”下拉菜单，并将设置改为“所有文件”。这样在输入文件名的时候就不用加引号了。}来处理PHP脚本，必须保证将结果存成了纯文本格式，否则 PHP 将无法读取并运行这些脚本。
+
+
+\chapter{PHP Type}
+
+
+PHP 支持 8 种原始数据类型，其中首先是以下四种标量类型：
+
+\begin{compactitem}
+\item 整型（integer）
+\item 浮点型，也称作 double（float）\footnote{实际上 double 和 float 是相同的，由于一些历史的原因，这两个名称同时存在。}
+\item 布尔型（boolean）
+\item 字符串（string）
+\end{compactitem}
+
+两种复合类型：
+
+\begin{compactitem}
+\item 数组（array）
+\item 对象（object）
+\end{compactitem}
+
+两种特殊类型：
+
+
+\begin{compactitem}
+\item NULL（无类型）
+\item 资源（resource）
+\end{compactitem}
+
+为了确保代码的易读性，还可以引入一些伪类型以及伪变量如下：
+
+\begin{compactitem}
+\item mixed（混合类型）
+\item number（数字类型）
+\item callback（回调类型）
+\item ...
+\end{compactitem}
+
+变量的类型通常不是由程序员设定的，确切地说，是由 PHP 根据该变量使用的上下文在运行时决定的，变量根据其当时的类型在特定场合下会表现出不同的值。如果想查看某个表达式的值和类型，用 var\_dump() 函数。
+
+如果只是想得到一个易读懂的类型的表达方式用于调试，用 gettype() 函数。要查看某个类型，不要用 gettype()，而用 is\_type 函数。以下是一些范例：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a_bool = TRUE;   // a boolean
+$a_str  = "foo";  // a string
+$a_str2 = 'foo';  // a string
+$an_int = 12;     // an integer
+
+echo gettype($a_bool); // prints out:  boolean
+echo gettype($a_str);  // prints out:  string
+
+// If this is an integer, increment it by four
+if (is_int($an_int)) {
+    $an_int += 4;
+}
+
+// If $bool is a string, print it out
+// (does not print out anything)
+if (is_string($a_bool)) {
+    echo "String: $a_bool";
+}
+?>
+\end{lstlisting}
+
+
+如果要将一个变量强制转换为某类型，可以对其使用强制转换或者 settype() 函数。
+
+
+\section{Boolean}
+
+这是最简单的类型。boolean 表达了真值，可以为 TRUE 或 FALSE。
+
+要指定一个布尔值，使用关键字 TRUE 或 FALSE。两个都不区分大小写。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$foo = True; // assign the value TRUE to $foo
+?>
+\end{lstlisting}
+
+通常运算符所返回的 boolean 值结果会被传递给控制流程。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// == 是一个操作符，它检测两个变量是否相等，并返回一个布尔值
+if ($action == "show_version") {
+    echo "The version is 1.23";
+}
+
+// 这样做是不必要的...
+if ($show_separators == TRUE) {
+    echo "<hr>\n";
+}
+
+// ...因为可以使用下面这种简单的方式：
+if ($show_separators) {
+    echo "<hr>\n";
+}
+?>
+\end{lstlisting}
+
+\subsection{Boolean Type Casting}
+
+
+要明确地将一个值转换成 boolean，用 (bool) 或者 (boolean) 来强制转换。但是很多情况下不需要用强制转换，因为当运算符，函数或者流程控制结构需要一个 boolean 参数时，该值会被自动转换。
+
+当转换为 boolean 时，以下值被认为是 FALSE：
+
+\begin{compactitem}
+\item 布尔值 FALSE 本身
+\item 整型值 0（零）
+\item 浮点型值 0.0（零）
+\item 空字符串，以及字符串 "0"
+\item 不包括任何元素的数组
+\item 不包括任何成员变量的对象（仅 PHP 4.0 适用）
+\item 特殊类型 NULL（包括尚未赋值的变量）
+\item 从没有任何标记（tags）的 XML 文档生成的 SimpleXML 对象
+\end{compactitem}
+
+所有其它值\footnote{-1 和其它非零值（不论正负）一样，被认为是 TRUE。}都被认为是 TRUE（包括任何资源类型）。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+var_dump((bool) "");        // bool(false)
+var_dump((bool) 1);         // bool(true)
+var_dump((bool) -2);        // bool(true)
+var_dump((bool) "foo");     // bool(true)
+var_dump((bool) 2.3e5);     // bool(true)
+var_dump((bool) array(12)); // bool(true)
+var_dump((bool) array());   // bool(false)
+var_dump((bool) "false");   // bool(true)
+?>
+\end{lstlisting}
+
+
+\section{Integer}
+
+一个 integer 是集合 $\mathbb{Z}$ = \{..., -2, -1, 0, 1, 2, ...\} 中的一个数。
+
+整型值可以使用十进制，十六进制，八进制或二进制表示，前面可以加上可选的符号（- 或者 +）。
+
+二进制表达的 integer 自 PHP 5.4.0 起可用。
+
+要使用八进制表达，数字前必须加上 0（零）。要使用十六进制表达，数字前必须加上 0x。要使用二进制表达，数字前必须加上 0b。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a = 1234; // 十进制数
+$a = -123; // 负数
+$a = 0123; // 八进制数 (等于十进制 83)
+$a = 0x1A; // 十六进制数 (等于十进制 26)
+?>
+\end{lstlisting}
+
+
+整型 integer 的正式描述为：
+
+\begin{verbatim}
+decimal     : [1-9][0-9]*
+            | 0
+
+hexadecimal : 0[xX][0-9a-fA-F]+
+
+octal       : 0[0-7]+
+
+binary      : 0b[01]+
+
+integer     : [+-]?decimal
+            | [+-]?hexadecimal
+            | [+-]?octal
+            | [+-]?binary
+\end{verbatim}
+
+
+整型数的字长和平台有关，尽管通常最大值是大约二十亿（32 位有符号）。64 位平台下的最大值通常是大约 9E18。PHP 不支持无符号整数。Integer 值的字长可以用常量 PHP\_INT\_SIZE来表示，自 PHP 4.4.0 和 PHP 5.0.5后，最大值可以用常量 PHP\_INT\_MAX 来表示。
+
+
+如果向八进制数传递了一个非法数字（即 8 或 9），则后面其余数字会被忽略。
+
+\begin{lstlisting}[language=PHP]
+<?php
+var_dump(01090); // 八进制 010 = 十进制 8
+?>
+\end{lstlisting}
+
+\subsection{Integer Overflow}
+
+
+如果给定的一个数超出了 integer 的范围，将会被解释为 float。同样如果执行的运算结果超出了 integer 范围，也会返回 float。
+
+32 位系统下的整数溢出示例如下：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$large_number = 2147483647;
+var_dump($large_number);                     // int(2147483647)
+
+$large_number = 2147483648;
+var_dump($large_number);                     // float(2147483648)
+
+$million = 1000000;
+$large_number =  50000 * $million;
+var_dump($large_number);                     // float(50000000000)
+?>
+\end{lstlisting}
+
+64 位系统下的整数溢出示例如下：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$large_number = 9223372036854775807;
+var_dump($large_number);                     // int(9223372036854775807)
+
+$large_number = 9223372036854775808;
+var_dump($large_number);                     // float(9.2233720368548E+18)
+
+$million = 1000000;
+$large_number =  50000000000000 * $million;
+var_dump($large_number);                     // float(5.0E+19)
+?>
+\end{lstlisting}
+
+PHP 中没有整除的运算符。1/2 产生出 float 0.5。值可以舍弃小数部分强制转换为 integer，或者使用 round() 函数可以更好地进行四舍五入。
+
+\begin{lstlisting}[language=PHP]
+<?php
+var_dump(25/7);         // float(3.5714285714286) 
+var_dump((int) (25/7)); // int(3)
+var_dump(round(25/7));  // float(4) 
+?>
+\end{lstlisting}
+
+\subsection{Integer Type Casting}
+
+
+要明确地将一个值转换为 integer，用 (int) 或 (integer) 强制转换。不过大多数情况下都不需要强制转换，因为当运算符，函数或流程控制需要一个 integer 参数时，值会自动转换。还可以通过函数 intval() 来将一个值转换成整型。
+
+\begin{compactitem}
+\item 从布尔值转换
+
+FALSE 将产生出 0（零），TRUE 将产生出 1（壹）。
+
+\item 从浮点型转换
+
+当从浮点数转换成整数时，将向下取整。
+
+\item 从字符串转换
+
+\item 从其它类型转换
+
+没有定义从其它类型转换为整型的行为。不要依赖任何现有的行为，因为它会未加通知地改变。
+
+
+
+\end{compactitem}
+
+
+如果浮点数超出了整数范围（32 位平台下通常为 +/- 2.15e+9 = 2\^{}31，64 位平台下通常为 +/- 9.22e+18 = 2\^{}63），则结果为未定义，因为没有足够的精度给出一个确切的整数结果。在此情况下没有警告，甚至没有任何通知。
+
+另外，决不要将未知的分数强制转换为 integer，这样有时会导致不可预料的结果。
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo (int) ( (0.1+0.7) * 10 ); // 显示 7!
+?>
+\end{lstlisting}
+
+\section{Float}
+
+浮点型（也叫浮点数 float，双精度数 double 或实数 real）可以用以下任一语法定义：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a = 1.234; 
+$b = 1.2e3; 
+$c = 7E-10;
+?>
+\end{lstlisting}
+
+浮点数的形式表示：
+
+\begin{verbatim}
+LNUM          [0-9]+
+DNUM          ([0-9]*[\.]{LNUM}) | ({LNUM}[\.][0-9]*)
+EXPONENT_DNUM [+-]?(({LNUM} | {DNUM}) [eE][+-]? {LNUM})
+\end{verbatim}
+
+
+浮点数的字长和平台相关，尽管通常最大值是 1.8e308 并具有 14 位十进制数字的精度（64 位 IEEE 格式）。
+
+
+\subsection{Float Type Precision}
+
+
+浮点数的精度有限。尽管取决于系统，PHP 通常使用 IEEE 754 双精度格式，则由于取整而导致的最大相对误差为 1.11e-16。非基本数学运算可能会给出更大误差，并且要考虑到进行复合运算时的误差传递。
+
+此外，以十进制能够精确表示的有理数如 0.1 或 0.7，无论有多少尾数都不能被内部所使用的二进制精确表示，因此不能在不丢失一点点精度的情况下转换为二进制的格式。这就会造成混乱的结果：例如，floor((0.1+0.7)*10) 通常会返回 7 而不是预期中的 8，因为该结果内部的表示其实是类似 7.9999999999999991118...。
+
+所以永远不要相信浮点数结果精确到了最后一位，也永远不要比较两个浮点数是否相等。如果确实需要更高的精度，应该使用任意精度数学函数或者 gmp 函数。
+
+如上述警告信息所言，由于内部表达方式的原因，比较两个浮点数是否相等是有问题的。不过还是有迂回的方法来比较浮点数值的。
+
+要测试浮点数是否相等，要使用一个仅比该数值大一丁点的最小误差值。该值也被称为机器极小值（epsilon）或最小单元取整数，是计算中所能接受的最小的差别值。
+
+\$a 和 \$b 在小数点后五位精度内都是相等的。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a = 1.23456789;
+$b = 1.23456780;
+$epsilon = 0.00001;
+
+if(abs($a-$b) < $epsilon) {
+    echo "true";
+}
+?>
+\end{lstlisting}
+
+\subsection{Float Type Casting}
+
+
+在将其他类型转换为浮点数类型时，情况类似于先将值转换成整型，然后再转换成浮点类型，但字符串类型除外。
+
+\subsection{NaN}
+
+某些数学运算会产生一个由常量 NAN 所代表的结果。此结果代表着一个在浮点数运算中未定义或不可表述的值。任何拿此值与其它任何值进行的松散或严格比较的结果都是 FALSE。
+
+由于 NAN 代表着任何不同值，不应拿 NAN 去和其它值进行比较，包括其自身，应该用 is\_nan() 来检查。
+
+
+
+
+\section{String}
+
+一个字符串 string 就是由一系列的字符组成，其中每个字符等同于一个字节。这意味着 PHP 只能支持 256 的字符集，因此不支持 Unicode 。string 最大可以达到 2GB。
+
+
+
+一个字符串可以用 4 种方式表达：
+
+\begin{compactitem}
+\item 单引号
+
+定义一个字符串的最简单的方法是用单引号把它包围起来（字符 \texttt{'}）。
+
+
+\item 双引号
+
+用双引号定义的字符串最重要的特征是变量会被解析。如果字符串是包围在双引号（\texttt{"}）中， PHP 将对一些特殊的字符进行解析\footnote{和单引号字符串一样，转义任何其它字符都会导致反斜线被显示出来。PHP 5.1.1 以前，\texttt{\textbackslash\{\$var\}} 中的反斜线还不会被显示出来。}。
+
+
+
+
+
+
+
+
+\item heredoc 语法结构
+
+第三种表达字符串的方法是用 heredoc 句法结构：<\/<\/<。在该运算符之后要提供一个标识符，然后换行。接下来是字符串 string 本身，最后要用前面定义的标识符作为结束标志。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$str = <<<EOD
+Example of string
+spanning multiple lines
+using heredoc syntax.
+EOD;
+
+/* 含有变量的更复杂示例 */
+class foo
+{
+    var $foo;
+    var $bar;
+
+    function foo()
+    {
+        $this->foo = 'Foo';
+        $this->bar = array('Bar1', 'Bar2', 'Bar3');
+    }
+}
+
+$foo = new foo();
+$name = 'MyName';
+
+echo <<<EOT
+My name is "$name". I am printing some $foo->foo.
+Now, I am printing some {$foo->bar[1]}.
+This should print a capital 'A': \x41
+EOT;
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+My name is "MyName". I am printing some Foo.
+Now, I am printing some Bar2.
+This should print a capital 'A': A
+\end{verbatim}
+
+结束时所引用的标识符必须在该行的第一列，而且，标识符的命名也要像其它标签一样遵守 PHP 的规则：只能包含字母、数字和下划线，并且必须以字母和下划线作为开头。
+
+也可以把 Heredoc 结构用在函数参数中来传递数据：
+
+\begin{lstlisting}[language=PHP]
+<?php
+var_dump(array(<<<EOD
+foobar!
+EOD
+));
+?>
+\end{lstlisting}
+
+在 PHP 5.3.0 以后，也可以用 Heredoc 结构来初始化静态变量和类的属性和常量：
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 静态变量
+function foo()
+{
+    static $bar = <<<LABEL
+Nothing in here...
+LABEL;
+}
+
+// 类的常量、属性
+class foo
+{
+    const BAR = <<<FOOBAR
+Constant example
+FOOBAR;
+
+    public $baz = <<<FOOBAR
+Property example
+FOOBAR;
+}
+?>
+\end{lstlisting}
+
+自 PHP 5.3.0 起还可以在 Heredoc 结构中用双引号来声明标识符：
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo <<<"FOOBAR"
+Hello World!
+FOOBAR;
+?>
+\end{lstlisting}
+
+\item nowdoc 语法结构（自 PHP 5.3.0 起）
+
+就象 heredoc 结构类似于双引号字符串，Nowdoc 结构是类似于单引号字符串的。Nowdoc 结构很象 heredoc 结构，但是 nowdoc 中不进行解析操作。这种结构很适合用于嵌入 PHP 代码或其它大段文本而无需对其中的特殊字符进行转义。与 SGML 的 \texttt{<![CDATA[ ]]>} 结构是用来声明大段的不用解析的文本类似，nowdoc 结构也有相同的特征。
+
+一个 nowdoc 结构也用和 heredocs 结构一样的标记 <<<， 但是跟在后面的标识符要用单引号括起来，即 \texttt{<\/<\/<'EOT'}。Heredoc 结构的所有规则也同样适用于 nowdoc 结构，尤其是结束标识符的规则。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$str = <<<'EOD'
+Example of string
+spanning multiple lines
+using nowdoc syntax.
+EOD;
+
+/* 含有变量的更复杂的示例 */
+class foo
+{
+    public $foo;
+    public $bar;
+
+    function foo()
+    {
+        $this->foo = 'Foo';
+        $this->bar = array('Bar1', 'Bar2', 'Bar3');
+    }
+}
+
+$foo = new foo();
+$name = 'MyName';
+
+echo <<<'EOT'
+My name is "$name". I am printing some $foo->foo.
+Now, I am printing some {$foo->bar[1]}.
+This should not print a capital 'A': \x41
+EOT;
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+My name is "$name". I am printing some $foo->foo.
+Now, I am printing some {$foo->bar[1]}.
+This should not print a capital 'A': \x41
+\end{verbatim}
+
+不象 heredoc 结构，nowdoc 结构可以用在任意的静态数据环境中，最典型的示例是用来初始化类的属性或常量：
+
+\begin{lstlisting}[language=PHP]
+<?php
+class foo {
+    public $bar = <<<'EOT'
+bar
+EOT;
+}
+?>
+\end{lstlisting}
+
+\end{compactitem}
+
+
+\subsection{Character Parsing}
+
+
+
+要表达一个单引号自身，需在它的前面加个反斜线（\textbackslash）来转义。要表达一个反斜线自身，则用两个反斜线（\textbackslash \textbackslash）。其它任何方式的反斜线都会被当成反斜线本身：也就是说如果想使用其它转义序列例如 \textbackslash r 或者 \textbackslash n，并不代表任何特殊含义，就单纯是这两个字符本身。
+
+
+
+不像双引号和 heredoc 语法结构，在单引号字符串中的变量和特殊字符的转义序列将不会被替换。
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo 'this is a simple string';
+
+// 可以录入多行
+echo 'You can also have embedded newlines in 
+strings this way as it is
+okay to do';
+
+// 输出： Arnold once said: "I'll be back"
+echo 'Arnold once said: "I\'ll be back"';
+
+// 输出： You deleted C:\*.*?
+echo 'You deleted C:\\*.*?';
+
+// 输出： You deleted C:\*.*?
+echo 'You deleted C:\*.*?';
+
+// 输出： This will not expand: \n a newline
+echo 'This will not expand: \n a newline';
+
+// 输出： Variables do not $expand $either
+echo 'Variables do not $expand $either';
+?>
+\end{lstlisting}
+
+\begin{table}[!ht]
+\centering
+\caption{转义字符}
+\begin{tabular}{|l|l|}
+\hline
+序列	&含义\\
+\hline
+\texttt{\textbackslash n}	&换行（ASCII 字符集中的 LF 或 0x0A (10)）\\
+\hline
+\texttt{\textbackslash r}	&回车（ASCII 字符集中的 CR 或 0x0D (13)）\\
+\hline
+\texttt{\textbackslash t}	&水平制表符（ASCII 字符集中的 HT 或 0x09 (9)）\\
+\hline
+\texttt{\textbackslash v}	&垂直制表符（ASCII 字符集中的 VT 或 0x0B (11)）（自 PHP 5.2.5 起）\\
+\hline
+\texttt{\textbackslash e}	&Escape（ASCII 字符集中的 ESC 或 0x1B (27)）（自 PHP 5.4.0 起）\\
+\hline
+\texttt{\textbackslash f}	&换页（ASCII 字符集中的 FF 或 0x0C (12)）（自 PHP 5.2.5 起）\\
+\hline
+\texttt{\textbackslash \textbackslash}	&反斜线\\
+\hline
+\texttt{\textbackslash \$}	&美元标记\\
+\hline
+\texttt{\textbackslash "}	&双引号\\
+\hline
+\texttt{\textbackslash [0-7]\{1,3\}}	 &符合该正则表达式序列的是一个以八进制方式来表达的字符\\
+\hline
+\texttt{\textbackslash x[0-9A-Fa-f]\{1,2\}}	 &符合该正则表达式序列的是一个以十六进制方式来表达的字符\\
+\hline
+\end{tabular}
+\end{table}
+
+
+Heredoc 结构就象是没有使用双引号的双引号字符串，这就是说在 heredoc 结构中单引号不用被转义，但是上文中列出的转义序列还可以使用。变量将被替换，但在 heredoc 结构中含有复杂的变量时要格外小心。
+
+要注意的是结束标识符这行除了可能有一个分号（;）外，绝对不能包含其它字符。这意味着标识符不能缩进，分号的前后也不能有任何空白或制表符。更重要的是结束标识符的前面必须是个被本地操作系统认可的换行，比如在 UNIX 和 Mac OS X 系统中是 \textbackslash n，而结束定界符（可能其后有个分号）之后也必须紧跟一个换行。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class foo {
+    public $bar = <<<EOT // Attention: Illegal
+bar
+    EOT;
+}
+?>
+\end{lstlisting}
+
+如果不遵守该规则导致结束标识不“干净”，PHP 将认为它不是结束标识符而继续寻找。如果在文件结束前也没有找到一个正确的结束标识符，PHP 将会在最后一行产生一个解析错误。
+
+Heredocs 结构不能用来初始化类的属性。自 PHP 5.3 起，此限制仅对 heredoc 包含变量时有效。
+
+\subsection{Variable Parsing}
+
+当字符串用双引号或 heredoc 结构定义时，其中的变量将会被解析。
+
+这里共有两种语法规则：一种简单规则，一种复杂规则。简单的语法规则是最常用和最方便的，它可以用最少的代码在一个 string 中嵌入一个变量，一个 array 的值，或一个 object 的属性。
+
+复杂规则语法的显著标记是用花括号包围的表达式。
+
+\begin{compactitem}
+\item 简单语法
+
+当 PHP 解析器遇到一个美元符号（\$）时，它会和其它很多解析器一样，去组合尽量多的标识以形成一个合法的变量名。可以用花括号来明确变量名的界线。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$juice = "apple";
+
+echo "He drank some $juice juice.".PHP_EOL;
+// Invalid. "s" is a valid character for a variable name, but the variable is $juice.
+echo "He drank some juice made of $juices.";
+?>
+\end{lstlisting}
+
+类似的，一个 array 索引或一个 object 属性也可被解析。数组索引要用方括号（]）来表示索引结束的边际，对象属性则是和上述的变量规则相同。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$juices = array("apple", "orange", "koolaid1" => "purple");
+
+echo "He drank some $juices[0] juice.".PHP_EOL;
+echo "He drank some $juices[1] juice.".PHP_EOL;
+echo "He drank some juice made of $juice[0]s.".PHP_EOL; // Won't work
+echo "He drank some $juices[koolaid1] juice.".PHP_EOL;
+
+class people {
+    public $john = "John Smith";
+    public $jane = "Jane Smith";
+    public $robert = "Robert Paulsen";
+    
+    public $smith = "Smith";
+}
+
+$people = new people();
+
+echo "$people->john drank some $juices[0] juice.".PHP_EOL;
+echo "$people->john then said hello to $people->jane.".PHP_EOL;
+echo "$people->john's wife greeted $people->robert.".PHP_EOL;
+echo "$people->robert greeted the two $people->smiths."; // Won't work
+?>
+\end{lstlisting}
+
+如果想要表达更复杂的结构，请用复杂语法。
+
+\item 复杂（花括号）语法
+
+复杂语法不是因为其语法复杂而得名，而是因为它可以使用复杂的表达式。
+
+任何具有 string 表达的标量变量，数组单元或对象属性都可使用此语法。只需简单地像在 string 以外的地方那样写出表达式，然后用花括号 \{ 和 \} 把它括起来即可。由于 \{ 无法被转义，只有 \$ 紧挨着 \{ 时才会被识别。可以用 \{\textbackslash \$ 来表达 \{\$。下面的示例可以更好的解释：
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 显示所有错误
+error_reporting(E_ALL);
+
+$great = 'fantastic';
+
+// 无效，输出: This is { fantastic}
+echo "This is { $great}";
+
+// 有效，输出： This is fantastic
+echo "This is {$great}";
+echo "This is ${great}";
+
+// 有效
+echo "This square is {$square->width}00 centimeters broad."; 
+
+// 有效，只有通过花括号语法才能正确解析带引号的键名
+echo "This works: {$arr['key']}";
+
+// 有效
+echo "This works: {$arr[4][3]}";
+
+// 这是错误的表达式，因为就象 $foo[bar] 的格式在字符串以外也是错的一样。
+// 换句话说，只有在 PHP 能找到常量 foo 的前提下才会正常工作；这里会产生一个
+// E_NOTICE (undefined constant) 级别的错误。
+echo "This is wrong: {$arr[foo][3]}"; 
+
+// 有效，当在字符串中使用多重数组时，一定要用括号将它括起来
+echo "This works: {$arr['foo'][3]}";
+
+// 有效
+echo "This works: " . $arr['foo'][3];
+
+echo "This works too: {$obj->values[3]->name}";
+
+echo "This is the value of the var named $name: {${$name}}";
+
+echo "This is the value of the var named by the return value of getName(): {${getName()}}";
+
+echo "This is the value of the var named by the return value of \$object->getName(): {${$object->getName()}}";
+
+// 无效，输出： This is the return value of getName(): {getName()}
+echo "This is the return value of getName(): {getName()}";
+?>
+\end{lstlisting}
+
+也可以在字符串中用此语法通过变量来调用类的属性。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class foo {
+    var $bar = 'I am bar.';
+}
+
+$foo = new foo();
+$bar = 'bar';
+$baz = array('foo', 'bar', 'baz', 'quux');
+echo "{$foo->$bar}\n";
+echo "{$foo->$baz[1]}\n";
+?>
+\end{lstlisting}
+
+函数、方法、静态类变量和类常量只有在 PHP 5 以后才可在 \{\$\} 中使用。然而，只有在该字符串被定义的命名空间中才可以将其值作为变量名来访问。只单一使用花括号 (\{\}) 无法处理从函数或方法的返回值或者类常量以及类静态变量的值。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 显示所有错误
+error_reporting(E_ALL);
+
+class beers {
+    const softdrink = 'rootbeer';
+    public static $ale = 'ipa';
+}
+
+$rootbeer = 'A & W';
+$ipa = 'Alexander Keith\'s';
+
+// 有效，输出： I'd like an A & W
+echo "I'd like an {${beers::softdrink}}\n";
+
+// 也有效，输出： I'd like an Alexander Keith's
+echo "I'd like an {${beers::$ale}}\n";
+?>
+\end{lstlisting}
+
+\end{compactitem}
+
+
+\subsection{String Operation}
+
+
+string 中的字符可以通过一个从 0 开始的下标，用类似 array 结构中的方括号包含对应的数字来访问和修改，比如 \$str[42]。可以把 string 当成字符组成的 array。函数 substr() 和 substr\_replace() 可用于操作多于一个字符的情况。当然，string 也可用花括号访问，比如 \$str\{42\}，但是由于PHP 的字符串在内部是字节组成的数组，因此用花括号访问或修改字符串对多字节字符集很不安全，实际上仅应对单字节编码例如 ISO-8859-1 的字符串进行此类操作。
+
+用 [\/] 或 \{\} 访问任何其它类型（不包括数组或具有相应接口的对象实现）的变量只会无声地返回 NULL。PHP 5.5 增加了直接在字符串原型中用 [\/] 或 \{\} 访问字符的支持。
+
+用超出字符串长度的下标写入将会拉长该字符串并以空格填充。非整数类型下标会被转换成整数。非法下标类型会产生一个 E\_NOTICE 级别错误。用负数下标写入字符串时会产生一个 E\_NOTICE 级别错误，用负数下标读取字符串时返回空字符串。写入时只用到了赋值字符串的第一个字符。用空字符串赋值则赋给的值是 NULL 字符。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 取得字符串的第一个字符
+$str = 'This is a test.';
+$first = $str[0];
+
+// 取得字符串的第三个字符
+$third = $str[2];
+
+// 取得字符串的最后一个字符
+$str = 'This is still a test.';
+$last = $str[strlen($str)-1]; 
+
+// 修改字符串的最后一个字符
+$str = 'Look at the sea';
+$str[strlen($str)-1] = 'e';
+?>
+\end{lstlisting}
+
+自 PHP 5.4 起字符串下标必须为整数或可转换为整数的字符串，否则会发出警告。之前例如 "foo" 的下标会无声地转换成 0。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$str = 'abc';
+
+var_dump($str['1']);
+var_dump(isset($str['1']));
+
+var_dump($str['1.0']);
+var_dump(isset($str['1.0']));
+
+var_dump($str['x']);
+var_dump(isset($str['x']));
+
+var_dump($str['1x']);
+var_dump(isset($str['1x']));
+?>
+\end{lstlisting}
+
+以上例程在PHP 5.3中的输出：
+
+\begin{verbatim}
+string(1) "b"
+bool(true)
+string(1) "b"
+bool(true)
+string(1) "a"
+bool(true)
+string(1) "b"
+bool(true)
+\end{verbatim}
+
+以上例程在PHP 5.4中的输出：
+
+\begin{verbatim}
+string(1) "b"
+bool(true)
+
+Warning: Illegal string offset '1.0' in /tmp/t.php on line 7
+string(1) "b"
+bool(false)
+
+Warning: Illegal string offset 'x' in /tmp/t.php on line 9
+string(1) "a"
+bool(false)
+string(1) "b"
+bool(false)
+\end{verbatim}
+
+字符串可以用 \texttt{'.'}（点）运算符连接起来，注意 \texttt{'+'}（加号）运算符没有这个功能。
+
+对于 string 的操作有很多有用的函数。高级的查找与替换功能可以参考正则表达式函数或 Perl 兼容正则表达式函数。另外还有 URL 字符串函数，也有加密/解密字符串的函数（mcrypt 和 mhash）等。
+
+\subsection{String Type Casting}
+
+一个值可以通过在其前面加上 (string) 或用 strval() 函数来转变成字符串。在一个需要字符串的表达式中，会自动转换为 string。比如在使用函数 echo 或 print 时，或在一个变量和一个 string 进行比较时，就会发生这种转换。类型和类型转换可以更好的解释下面的事情，也可参考函数 settype()。
+
+一个布尔值 boolean 的 TRUE 被转换成 string 的 "1"。Boolean 的 FALSE 被转换成 ""（空字符串）。这种转换可以在 boolean 和 string 之间相互进行。
+
+一个整数 integer 或浮点数 float 被转换为数字的字面样式的 string（包括 float 中的指数部分）。使用指数计数法的浮点数（4.1E+6）也可转换。在脚本的区域（category LC\_NUMERIC）中定义了十进制小数点字符。
+
+数组 array 总是转换成字符串 "Array"，因此， echo 和 print 无法显示出该数组的内容。要显示某个单元，可以用 echo \$arr['foo'] 这种结构。要显示整个数组内容见下文。
+
+在 PHP 4 中对象 object 总是被转换成字符串 "Object"，如果为了调试原因需要打印出对象的值，请继续阅读下文。为了得到对象的类的名称，可以用 get\_class() 函数。自 PHP 5 起，适当时可以用 \_\_toString 方法。
+
+资源 resource 总会被转变成 "Resource id \#1" 这种结构的字符串，其中的 1 是 PHP 在运行时分配给该 resource 的唯一值。不要依赖此结构，可能会有变更。要得到一个 resource 的类型，可以用函数 get\_resource\_type()。
+
+NULL 总是被转变成空字符串。
+
+如上面所说的，直接把 array，object 或 resource 转换成 string 不会得到除了其类型之外的任何有用信息。可以使用函数 print\_r() 和 var\_dump() 列出这些类型的内容。
+
+大部分的 PHP 值可以转变成 string 来永久保存，这被称作串行化，可以用函数 serialize() 来实现。如果 PHP 引擎设定支持 WDDX，PHP 值也可被串行化为格式良好的 XML 文本。
+
+当一个字符串被当作一个数值来取值，其结果和类型如下：
+
+如果该字符串没有包含 '.'，'e' 或 'E' 并且其数字值在整型的范围之内（由 PHP\_INT\_MAX 所定义），该字符串将被当成 integer 来取值。其它所有情况下都被作为 float 来取值。
+
+该字符串的开始部分决定了它的值。如果该字符串以合法的数值开始，则使用该数值，否则其值为 0（零）。合法数值由可选的正负号，后面跟着一个或多个数字（可能有小数点），再跟着可选的指数部分。指数部分由 'e' 或 'E' 后面跟着一个或多个数字构成。
+
+更多信息可以参考 Unix 手册中的 strtod(3)。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$foo = 1 + "10.5";                // $foo is float (11.5)
+$foo = 1 + "-1.3e3";              // $foo is float (-1299)
+$foo = 1 + "bob-1.3e3";           // $foo is integer (1)
+$foo = 1 + "bob3";                // $foo is integer (1)
+$foo = 1 + "10 Small Pigs";       // $foo is integer (11)
+$foo = 4 + "10.2 Little Piggies"; // $foo is float (14.2)
+$foo = "10.0 pigs " + 1;          // $foo is float (11)
+$foo = "10.0 pigs " + 1.0;        // $foo is float (11)     
+?>
+\end{lstlisting}
+
+上述示例可以通过复制/粘贴到下面的代码中来显示：
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo "\$foo==$foo; type is " . gettype ($foo) . "<br />\n";
+?>
+\end{lstlisting}
+
+PHP使用函数 ord() 和 chr() 实现 ASCII 码和字符间的转换，而不是像在 C 语言中的那样，通过将一个字符转换成整数以得到其ASCII码。
+
+
+\subsection{String Structure}
+
+PHP 中的 string 的实现方式是一个由字节组成的数组再加上一个整数指明缓冲区长度。并无如何将字节转换成字符的信息，由程序员来决定。字符串由什么值来组成并无限制；特别的，其值为 \colorbox{lightgray}{\texttt{0}}（“NUL bytes”）的字节可以处于字符串任何位置（不过有几个函数，在本手册中被称为非“二进制安全”的，也许会把 NUL 字节之后的数据全都忽略）。
+
+字符串类型的此特性解释了为什么 PHP 中没有单独的“byte”类型 - 已经用字符串来代替了。返回非文本值的函数 - 例如从网络套接字读取的任意数据 - 仍会返回字符串。
+
+由于 PHP 并不特别指明字符串的编码，那字符串到底是怎样编码的呢？例如字符串 \colorbox{lightgray}{\texttt{"á"}} 到底是等于 \colorbox{lightgray}{\texttt{"\textbackslash xE1"}}（ISO-8859-1），\colorbox{lightgray}{\texttt{"\textbackslash xC3\textbackslash xA1"}}（UTF-8，C form），\colorbox{lightgray}{\texttt{"\textbackslash x61\textbackslash xCC\textbackslash x81"}}（UTF-8，D form）还是任何其它可能的表达呢？答案是字符串会被按照该脚本文件相同的编码方式来编码。因此如果一个脚本的编码是 ISO-8859-1，则其中的字符串也会被编码为 ISO-8859-1，以此类推。不过这并不适用于激活了 Zend Multibyte 时；此时脚本可以是以任何方式编码的（明确指定或被自动检测）然后被转换为某种内部编码，然后字符串将被用此方式编码。注意脚本的编码有一些约束（如果激活了 Zend Multibyte 则是其内部编码）- 这意味着此编码应该是 ASCII 的兼容超集，例如 UTF-8 或 ISO-8859-1。不过要注意，依赖状态的编码其中相同的字节值可以用于首字母和非首字母而转换状态，这可能会造成问题。
+
+当然了，要做到有用，操作文本的函数必须假定字符串是如何编码的。不幸的是，PHP 关于此的函数有很多变种：
+
+\begin{compactitem}
+\item 某些函数假定字符串是以单字节编码的，但并不需要将字节解释为特定的字符。例如 substr()， strpos()， strlen() 和 strcmp()。理解这些函数的另一种方法是它们作用于内存缓冲区，即按照字节和字节下标操作。
+\item 某些函数被传递入了字符串的编码方式，也可能会假定默认无此信息。例如 htmlentities() 和 mbstring 扩展中的大部分函数。
+\item 其它函数使用了当前区域（见 setlocale()），但是逐字节操作。例如 strcasecmp()， strtoupper() 和 ucfirst()。这意味着这些函数只能用于单字节编码，而且编码要与区域匹配。例如 \colorbox{lightgray}{\texttt{strtoupper("á")}} 在区域设定正确并且 \colorbox{lightgray}{\texttt{á}} 是单字节编码时会返回 \colorbox{lightgray}{\texttt{"Á"}}。如果是用 UTF-8 编码则不会返回正确结果，其结果根据当前区域有可能返回损坏的值。
+\item 最后一些函数会假定字符串是使用某特定编码的，通常是 UTF-8。intl 扩展和 PCRE（上例中仅在使用了 u 修饰符时）扩展中的大部分函数都是这样。尽管这是由于其特殊用途， utf8\_decode() 会假定 UTF-8 编码而 utf8\_encode() 会假定 ISO-8859-1 编码。
+
+
+
+\end{compactitem}
+
+最后，要书写能够正确使用 Unicode 的程序依赖于很小心地避免那些可能会损坏数据的函数。要使用来自于 intl 和 mbstring 扩展的函数。不过使用能处理 Unicode 编码的函数只是个开始。不管用何种语言提供的函数，最基本的还是了解 Unicode 规格。例如一个程序如果假定只有大写和小写，那可是大错特错。
+
+
+\section{Array}
+
+PHP 中的数组实际上是一个有序映射。映射是一种把 values 关联到 keys 的类型。此类型在很多方面做了优化，因此可以把它当成真正的数组，或列表（向量），散列表（是映射的一种实现），字典，集合，栈，队列以及更多可能性。由于数组元素的值也可以是另一个数组，树形结构和多维数组也是允许的。
+
+可以用 array() 语言结构来新建一个数组。它接受任意数量用逗号分隔的 \colorbox{lightgray}{\texttt{键（key） => 值（value）}}对。
+
+\begin{verbatim}
+array(  key =>  value
+     , ...
+     )
+// 键（key）可是是一个整数 integer 或字符串 string
+// 值（value）可以是任意类型的值
+\end{verbatim}
+
+最后一个数组单元之后的逗号可以省略。通常用于单行数组定义中，例如常用 \colorbox{lightgray}{\texttt{array(1, 2)}} 而不是 \colorbox{lightgray}{\texttt{array(1, 2, )}}。对多行数组定义通常保留最后一个逗号，这样要添加一个新单元时更方便。
+
+自 5.4 起可以使用短数组定义语法，用 \colorbox{lightgray}{\texttt{[]}} 替代 \colorbox{lightgray}{\texttt{array()}}。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = array(
+    "foo" => "bar",
+    "bar" => "foo",
+);
+
+// 自 PHP 5.4 起
+$array = [
+    "foo" => "bar",
+    "bar" => "foo",
+];
+?>
+\end{lstlisting}
+
+其中，key 可以是 integer 或者 string，value 可以是任意类型。此外 key 会有如下的强制转换：
+
+\begin{compactitem}
+\item 包含有合法整型值的字符串会被转换为整型。例如键名 \colorbox{lightgray}{\texttt{"8"}} 实际会被储存为 \colorbox{lightgray}{\texttt{8}}。但是 \colorbox{lightgray}{\texttt{"08"}} 则不会强制转换，因为其不是一个合法的十进制数值。
+\item 浮点数也会被转换为整型，意味着其小数部分会被舍去。例如键名 \colorbox{lightgray}{\texttt{8.7}} 实际会被储存为 \colorbox{lightgray}{\texttt{8}}。
+\item 布尔值也会被转换成整型。即键名 \colorbox{lightgray}{\texttt{true}} 实际会被储存为 \colorbox{lightgray}{\texttt{1}} 而键名 \colorbox{lightgray}{\texttt{false}} 会被储存为 \colorbox{lightgray}{\texttt{0}}。
+\item Null 会被转换为空字符串，即键名 \colorbox{lightgray}{\texttt{null}} 实际会被储存为 \colorbox{lightgray}{\texttt{""}}。
+\item 数组和对象不能被用为键名。坚持这么做会导致警告：\colorbox{lightgray}{\texttt{Illegal offset type}}。
+\end{compactitem}
+
+如果在数组定义中多个单元都使用了同一个键名，则只使用了最后一个，之前的都被覆盖了。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = array(
+    1    => "a",
+    "1"  => "b",
+    1.5  => "c",
+    true => "d",
+);
+var_dump($array);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{verbatim}
+array(1) {
+  [1]=>
+  string(1) "d"
+}
+\end{verbatim}
+
+上例中所有的键名都被强制转换为 1，则每一个新单元都会覆盖前一个的值，最后剩下的只有一个 \colorbox{lightgray}{\texttt{"d"}}。
+
+PHP 数组可以同时含有 integer 和 string 类型的键名，因为 PHP 实际并不区分索引数组和关联数组。
+
+如果对给出的值没有指定键名，则取当前最大的整数索引值，而新的键名将是该值加一。如果指定的键名已经有了值，则该值会被覆盖。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = array(
+    "foo" => "bar",
+    "bar" => "foo",
+    100   => -100,
+    -100  => 100,
+);
+var_dump($array);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{verbatim}
+array(4) {
+  ["foo"]=>
+  string(3) "bar"
+  ["bar"]=>
+  string(3) "foo"
+  [100]=>
+  int(-100)
+  [-100]=>
+  int(100)
+}
+\end{verbatim}
+
+key 为可选项。如果未指定，PHP 将自动使用之前用过的最大 integer 键名加上 1 作为新的键名。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = array("foo", "bar", "hallo", "world");
+var_dump($array);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{verbatim}
+array(4) {
+  [0]=>
+  string(3) "foo"
+  [1]=>
+  string(3) "bar"
+  [2]=>
+  string(5) "hallo"
+  [3]=>
+  string(5) "world"
+}
+\end{verbatim}
+
+还可以只对某些单元指定键名而对其它的空置：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = array(
+         "a",
+         "b",
+    6 => "c",
+         "d",
+);
+var_dump($array);
+?>
+\end{lstlisting}
+
+
+以上例程会输出：
+
+
+\begin{verbatim}
+array(4) {
+  [0]=>
+  string(1) "a"
+  [1]=>
+  string(1) "b"
+  [6]=>
+  string(1) "c"
+  [7]=>
+  string(1) "d"
+}
+\end{verbatim}
+
+可以看到最后一个值 "d" 被自动赋予了键名 7。这是由于之前最大的整数键名是 6。
+
+\subsection{Array Operation}
+
+数组单元可以通过 \colorbox{lightgray}{\texttt{array[key]}} 语法来访问。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = array(
+    "foo" => "bar",
+    42    => 24,
+    "multi" => array(
+         "dimensional" => array(
+             "array" => "foo"
+         )
+    )
+);
+
+var_dump($array["foo"]);
+var_dump($array[42]);
+var_dump($array["multi"]["dimensional"]["array"]);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{verbatim}
+string(3) "bar"
+int(24)
+string(3) "foo"
+\end{verbatim}
+
+方括号和花括号可以互换使用来访问数组单元（例如 \$array[42] 和 \$array\{42\} 在上例中效果相同）。
+
+自 PHP 5.4 起可以用数组间接引用函数或方法调用的结果。之前只能通过一个临时变量。
+
+自 PHP 5.5 起可以用数组间接引用一个数组原型。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function getArray() {
+    return array(1, 2, 3);
+}
+
+// on PHP 5.4
+$secondElement = getArray()[1];
+
+// previously
+$tmp = getArray();
+$secondElement = $tmp[1];
+
+// or
+list(, $secondElement) = getArray();
+?>
+\end{lstlisting}
+
+试图访问一个未定义的数组键名与访问任何未定义变量一样：会导致 E\_NOTICE 级别错误信息，其结果为 NULL。
+
+可以通过明示地设定其中的值来修改一个已有数组。
+
+这是通过在方括号内指定键名来给数组赋值实现的。也可以省略键名，在这种情况下给变量名加上一对空的方括号（\colorbox{lightgray}{\texttt{[]}}）。
+
+\begin{verbatim}
+$arr[key] = value;
+$arr[] = value;
+// key 可以是 integer 或 string
+// value 可以是任意类型的值
+\end{verbatim}
+
+如果 \colorbox{lightgray}{\texttt{\$arr}} 还不存在，将会新建一个，这也是另一种新建数组的方法。不过并不鼓励这样做，因为如果 \colorbox{lightgray}{\texttt{\$arr}} 已经包含有值（例如来自请求变量的 string）则此值会保留而 \colorbox{lightgray}{\texttt{[]}} 实际上代表着字符串访问运算符。初始化变量的最好方式是直接给其赋值。。
+
+要修改某个值，通过其键名给该单元赋一个新值。要删除某键值对，对其调用 unset() 函数。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array(5 => 1, 12 => 2);
+
+$arr[] = 56;    // This is the same as $arr[13] = 56;
+                // at this point of the script
+
+$arr["x"] = 42; // This adds a new element to
+                // the array with key "x"
+                
+unset($arr[5]); // This removes the element from the array
+
+unset($arr);    // This deletes the whole array
+?>
+\end{lstlisting}
+
+如上所述，如果给出方括号但没有指定键名，则取当前最大整数索引值，新的键名将是该值加上 1（但是最小为 0）。如果当前还没有整数索引，则键名将为 0。
+注意这里所使用的最大整数键名不一定当前就在数组中。它只要在上次数组重新生成索引后曾经存在过就行了。以下面的例子来说明：
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个简单的数组
+$array = array(1, 2, 3, 4, 5);
+print_r($array);
+
+// 现在删除其中的所有元素，但保持数组本身不变:
+foreach ($array as $i => $value) {
+    unset($array[$i]);
+}
+print_r($array);
+
+// 添加一个单元（注意新的键名是 5，而不是你可能以为的 0）
+$array[] = 6;
+print_r($array);
+
+// 重新索引：
+$array = array_values($array);
+$array[] = 7;
+print_r($array);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{verbatim}
+Array
+(
+    [0] => 1
+    [1] => 2
+    [2] => 3
+    [3] => 4
+    [4] => 5
+)
+Array
+(
+)
+Array
+(
+    [5] => 6
+)
+Array
+(
+    [0] => 6
+    [1] => 7
+)
+\end{verbatim}
+
+
+
+\section{Object}
+
+
+
+
+
+
+\section{Resource}
+
+
+
+
+
+\section{NULL}
+
+
+
+
+
+\section{Callback}
+
+
 
 
 
