@@ -8,9 +8,71 @@
 
 \chapter{PHP Forms Processing}
 
+\vspace{-30pt}
 
-PHP 一个很有用的特点体现在它处理 PHP 表单的方式，表单的任何元素都在 PHP 脚本中自动生效。
+表单是Web应用程序和用户交互时重要的手段，Web设计中常见的表单示例如下：
 
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+<head>
+<title>PHP POST Example</title>
+</head>
+<body>
+
+<form action="welcome.php" method="post">
+Name: <input type="text" name="name" />
+Age: <input type="text" name="age" />
+<input type="submit" />
+</form>
+</body>
+</html>
+\end{lstlisting}
+
+
+
+
+上面的 HTML 页面实例包含了两个输入框和一个提交按钮。当用户填写了该表单并单击了提交按钮后，页面 welcome.php 将被调用。表单的数据会被送往 "welcome.php" 这个文件，而``welcome.php" 文件类似这样：
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome</title>
+</head>
+<body>
+
+Welcome <?php echo $_POST["name"]; ?>. You are <?php echo $_POST["age"]; ?> years old.
+</body>
+</html>
+\end{lstlisting}
+
+PHP 的 \textcolor{Blue}{\texttt{\$\_GET}} 变量和 \textcolor{Blue}{\texttt{\$\_POST}} 变量用于检索表单中的值，比如用户输入等。
+
+\begin{compactitem}
+\item \textcolor{Blue}{\texttt{\$\_GET}} 变量用于收集来自 method=``get" 的表单中的值。
+\item \textcolor{Blue}{\texttt{\$\_POST}}变量用于收集来自 method=``post" 的表单中的值。
+\end{compactitem}
+
+更严格的PHP脚本如下：
+
+\begin{lstlisting}[language=PHP]
+Welcome <?php echo htmlspecialchars($_POST['name']); ?>.<br />
+You are <?php echo (int)$_POST["age"]; ?> years old.
+\end{lstlisting}
+
+
+\texttt{htmlspecialchars()} 使得 HTML 之中的特殊字符被正确的编码，从而不会被使用者在页面注入 HTML 标签或者 Javascript 代码。
+
+
+
+我们明确知道age字段是一个数值，因此将它转换为一个整形值\texttt{(integer)}来自动的消除任何不必要的字符。也可以使用 PHP 的 \texttt{filter} 扩展来自动完成该工作。
+
+除了 \texttt{htmlspecialchars()} 和 \texttt{(int)} 部分，这段程序做什么用显而易见。
+
+PHP 一个很有用的特点体现在它处理 PHP 表单的方式。当一个表单提交给 PHP 脚本时，表单的任何元素都在 PHP 脚本中自动生效，因此PHP 将自动设置 \texttt{\$\_POST['name']} 和 \texttt{\$\_POST['age']} 变量。在这之前我们使用了超全局变量 \texttt{\$\_SERVER}，现在引入超全局变量是 \texttt{\$\_POST}，它包含了所有的 \texttt{POST} 数据。
+
+如果表单提交数据的方法（method）使用的是 \texttt{GET}方法，那么表单中的信息将被储存到超全局变量 \texttt{\$\_GET} 中。
 
 \begin{compactitem}
 \item GET\footnote{对于GET方式，服务器端用Request.QueryString获取变量的值。}
@@ -26,75 +88,95 @@ PHP 一个很有用的特点体现在它处理 PHP 表单的方式，表单的�
 通过HTTP POST机制传送的数据量较大，一般被默认为不受限制。但理论上，IIS4中最大量为80KB，IIS5中为100KB。
 \end{compactitem}
 
+也可以在 PHP 中处理 XForms 的输入，尽管用户可能更喜欢使用长久以来支持良好的 HTML 表单。
 
 
+如果并不关心请求数据的来源，也可以用超全局变量 \texttt{\$\_REQUEST}，它包含了所有 \texttt{GET}、\texttt{POST}、\texttt{COOKIE}和 \texttt{FILE}的数据\footnote{超全局数组例如 \texttt{\$\_POST} 和 \texttt{\$\_GET}，自 PHP 4.1.0 起可用。}。
 
-表单是Web应用程序和用户交互时重要的手段，PHP 的 \textcolor{Blue}{\texttt{\$\_GET}} 和 \textcolor{Blue}{\texttt{\$\_POST}} 用于检索表单中的值，比如用户输入等。
-
-
-
-\begin{compactitem}
-\item \textcolor{Blue}{\texttt{\$\_GET}} 变量用于收集来自 method=``get" 的表单中的值。
-\item \textcolor{Blue}{\texttt{\$\_POST}}变量用于收集来自 method=``post" 的表单中的值。
-\end{compactitem}
-
-Web设计中常见的表单示例如下：
-
-\begin{lstlisting}[language=HTML]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
-<form action="welcome.php" method="post">
-Name: <input type="text" name="name" />
-Age: <input type="text" name="age" />
-<input type="submit" />
-</form>
-
-</body>
-</html>
-\end{lstlisting}
-
-上面的 HTML 页面实例包含了两个输入框和一个提交按钮。当用户填写了该表单并单击了提交按钮后，页面 welcome.php 将被调用。表单的数据会被送往 "welcome.php" 这个文件，而``welcome.php" 文件类似这样：
-
-\begin{lstlisting}[language=HTML]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
-Welcome <?php echo $_POST["name"]; ?>.<br />
-You are <?php echo $_POST["age"]; ?> years old.
-
-</body>
-</html>
-\end{lstlisting}
-
-更严格的PHP脚本如下：
+通常，PHP 不会改变传递给脚本中的变量名，但是应该注意到点（句号）不是 PHP 变量名中的合法字符，因此变量名中的点和空格会被转换成下划线。例如 \texttt{<input name="a.b" />} 变成了 \texttt{\$\_REQUEST["a\_b"]}。
 
 \begin{lstlisting}[language=PHP]
-Welcome <?php echo htmlspecialchars($_POST['name']); ?>.<br />
-You are <?php echo (int)$_POST["age"]; ?> years old.
+<?php
+$varname.ext;  /* 非法变量名 */
+?>
 \end{lstlisting}
 
-除了 \texttt{htmlspecialchars()} 和 \texttt{(int)} 部分，这段程序做什么用显而易见。
+这时，解析器看到是一个名为 \$varname 的变量，后面跟着一个字符串连接运算符，后面跟着一个裸字符串（即没有加引号的字符串，且不匹配任何已知的健名或保留字）\texttt{'ext'}。很明显这不是想要的结果，因此出于此原因，要注意 PHP 将会自动将变量名中的点替换成下划线。
 
-\texttt{htmlspecialchars()} 使得 HTML 之中的特殊字符被正确的编码，从而不会被使用者在页面注入 HTML 标签或者 Javascript 代码。
+当提交表单时，可以用一幅图像代替标准的提交按钮，用类似这样的标记：
+\begin{lstlisting}[language=HTML]
+<input type="image" src="image.gif" name="sub" />
+\end{lstlisting}
 
-我们明确知道age 字段是一个数值，因此将它转换为一个整形值\texttt{(integer)}来自动的消除任何不必要的字符。也可以使用 PHP 的 \texttt{filter} 扩展来自动完成该工作。
+当用户点击到图像中的某处时，相应的表单会被传送到服务器，并加上两个变量 sub\_x 和 sub\_y。它们包含了用户点击图像的坐标。有经验的用户可能会注意到被浏览器发送的实际变量名包含的是一个点而不是下划线（即 sub.x 和 sub.y），但 PHP 自动将点转换成了下划线。
 
-PHP 将自动设置 \texttt{\$\_POST['name']} 和 \texttt{\$\_POST['age']} 变量。在这之前我们使用了超全局变量 \texttt{\$\_SERVER}，现在引入超全局变量是 \texttt{\$\_POST}，它包含了所有的 POST 数据。
 
-如果表单提交数据的方法（method）使用的是 \texttt{GET}方法，那么表单中的信息将被储存到超全局变量 \texttt{\$\_GET} 中。
 
-如果并不关心请求数据的来源，也可以用超全局变量 \texttt{\$\_REQUEST}，它包含了所有 \texttt{GET}、\texttt{POST}、\texttt{COOKIE}和 \texttt{FILE}的数据。
 
-也可以在 PHP 中处理 XForms 的输入，尽管用户可能更喜欢使用长久以来支持良好的 HTML 表单。
+根据特定的设置和个人的喜好，有很多种方法访问 HTML 表单中的数据。例如：
+
+\begin{verbatim}
+<?php
+// 自 PHP 4.1.0 起可用
+   echo $_POST['username'];
+   echo $_REQUEST['username'];
+   
+   import_request_variables('p', 'p_');
+   echo $p_username;
+
+// 自 PHP 5.0.0 起，这些长格式的预定义变量
+// 可用 register_long_arrays 指令关闭。
+
+   echo $HTTP_POST_VARS['username'];
+
+// 如果 PHP 指令 register_globals = on 时可用。不过自
+// PHP 4.2.0 起默认值为 register_globals = off。
+// 不提倡使用/依赖此种方法。
+
+   echo $username;
+?>
+\end{verbatim}
+
+使用 GET 表单也类似，只不过要用适当的 GET 预定义变量。在 PHP 4.2.0 之前 register\_globals 的默认值是 on。PHP 社区不鼓励依赖此指令，建议在编码时假定其为 off。
+
+
+GET 也适用于 \texttt{QUERY\_STRING}（URL 中在“?”之后的信息）。因此，举例说，http://www.example.com/test.php?id=3 包含有可用 \texttt{\$\_GET['id']} 来访问的 GET 数据。
+
+另外，magic\_quotes\_gpc 配置指令影响到 GET，POST 和 COOKIE 的值。如果打开，值 \texttt{(It's "PHP!")} 会自动转换成 \texttt{(It\textbackslash 's \textbackslash "PHP!\textbackslash ")}。十多年前对数据库的插入需要如此转义，如今已经过时了，应该关闭。
+
+
+PHP 也懂得表单变量上下文中的数组，例如可以将相关的变量编成组，或者用此特性从多选输入框中取得值。例如，将一个表单 POST 给自己并在提交时显示数据：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
+    echo '<pre>';
+
+    print_r($_POST);
+    echo '<a href="'. $_SERVER['PHP_SELF'] .'">Please try again</a>';
+
+    echo '</pre>';
+} else {
+?>
+<form action="<?php echo $_SERVER['PHP_SELF']; ?>" method="post">
+    Name:  <input type="text" name="personal[name]"><br />
+    Email: <input type="text" name="personal[email]"><br />
+    Beer: <br>
+    <select multiple name="beer[]">
+        <option value="warthog">Warthog</option>
+        <option value="guinness">Guinness</option>
+        <option value="stuttgarter">Stuttgarter Schwabenbr</option>
+    </select><br />
+    <input type="hidden" name="action" value="submitted" />
+    <input type="submit" name="submit" value="submit me!" />
+</form>
+<?php
+}
+?>
+\end{lstlisting}
+
+
+
 
 
 \chapter{PHP Forms Validation}
