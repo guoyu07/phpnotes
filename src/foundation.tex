@@ -98,6 +98,27 @@ echo "Last statement";
 
 该程序非常的简单，它仅仅只是利用了 PHP 的 echo 语句显示了 Hello World。注意，这个范例和其它用 C 或 Perl 语言写的脚本之间的区别~——与用大量的命令来编写程序以输出 HTML 不同的是，PHP 页面就是 HTML，只不过在其中嵌入了一些代码来做一些事情。
 
+
+有两种通过 PHP 来输出文本的基础指令：echo 和 print。在上面的例子中就是使用echo 语句来输出文本 "Hello World"。
+
+下面建立一个最著名的 PHP 脚本，调用函数 \texttt{phpinfo()}，将会看到很多有关自己系统的有用信息，例如预定义变量、已经加载的 PHP 模块和配置信息。
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PHP Example</title>
+</head>
+<body>
+<?php
+  phpinfo();
+?>
+</body>
+</html>
+\end{lstlisting}
+
+尽管换行在 HTML 中的实际意义不是很大，但适当地使用换行可以使 HTML 代码易读且美观。PHP 会在输出时自动删除其结束符 \texttt{?>} 后的一个换行。该功能主要是针对在一个页面中嵌入多段 PHP 代码或者包含了无实质性输出的 PHP 文件而设计，与此同时也造成了一些疑惑。如果需要在 PHP 结束符 \texttt{?>}之后输出换行的话，可以在其后加一个空格，或者在最后的一个 \texttt{echo/print} 语句中加入一个换行。
+
 \section{PHP \& HTML}
 
 当 PHP 解释器碰到 \texttt{?>} 结束标记时就简单地将其后内容原样输出（除非马上紧接换行）直到碰到下一个开始标记，要输出大段文本时，跳出 PHP 解析模式通常比将文本通过 echo 或 print 输出更有效率。
@@ -160,25 +181,7 @@ Web服务器中的PHP模块设置好以后，而且通过浏览器访问的 URL 
 
 
 
-有两种通过 PHP 来输出文本的基础指令：echo 和 print。在上面的例子中就是使用echo 语句来输出文本 "Hello World"。
 
-下面建立一个最著名的 PHP 脚本，调用函数 \texttt{phpinfo()}，将会看到很多有关自己系统的有用信息，例如预定义变量、已经加载的 PHP 模块和配置信息。
-
-\begin{lstlisting}[language=HTML]
-<!DOCTYPE html>
-<html>
-<head>
-  <title>PHP Example</title>
-</head>
-<body>
-<?php
-  phpinfo();
-?>
-</body>
-</html>
-\end{lstlisting}
-
-尽管换行在 HTML 中的实际意义不是很大，但适当地使用换行可以使 HTML 代码易读且美观。PHP 会在输出时自动删除其结束符 \texttt{?>} 后的一个换行。该功能主要是针对在一个页面中嵌入多段 PHP 代码或者包含了无实质性输出的 PHP 文件而设计，与此同时也造成了一些疑惑。如果需要在 PHP 结束符 \texttt{?>}之后输出换行的话，可以在其后加一个空格，或者在最后的一个 \texttt{echo/print} 语句中加入一个换行。
 
 
 
@@ -2754,8 +2757,8 @@ PHP 向它运行的任何脚本提供了大量的预定义常量。不过很多�
 
 %%
 \multicolumn{2}{r}{}
-名称	&说明
 \tabularnewline\hline
+名称	&说明
 \endhead
 %%
 
@@ -3274,7 +3277,7 @@ echo ++$a + $a++; // may print 4 or 5
 
 \section{Arithmetic Operators}
 
-\begin{longtable}{|m{35pt}|m{180pt}|m{80pt}|m{30pt}|}
+\begin{longtable}{|m{35pt}|m{130pt}|m{50pt}|m{150pt}|}
 %head
 \multicolumn{4}{r}{}
 \tabularnewline\hline
@@ -3298,7 +3301,7 @@ echo ++$a + $a++; // may print 4 or 5
 \endlastfoot
 %endlastfoot
 \hline
--\$a &Negate		&-\$a					&\$a 的负值。\\
+- &Negate		&-\$a					&\$a 的负值。\\
 \hline
 +	&Addition		&\$a + \$b		&\$a 和 \$b 的和。\\
 \hline
@@ -3310,10 +3313,7 @@ echo ++$a + $a++; // may print 4 or 5
 \hline
 \%	&Modulus (division remainder)	&\$a \% \$b &\$a 除以 \$b 的余数。\\
 \hline
-++	&Increment		& x=5 \newline x++	 &x=6\\
-\hline
--\/-	&Decrement	&x=5 \newline x-\/-	&x=4\\
-\hline
+
 
 \end{longtable}
 
@@ -3442,7 +3442,7 @@ $o = &new C;
 
 位运算符允许对整型数中指定的位进行求值和操作。
 
-\begin{longtable}{|m{60pt}|m{100pt}|m{200pt}|}
+\begin{longtable}{|m{35pt}|m{80pt}|m{270pt}|}
 %head
 \multicolumn{3}{r}{}
 \tabularnewline\hline
@@ -3466,17 +3466,17 @@ $o = &new C;
 \endlastfoot
 %endlastfoot
 \hline
-\$a \& \$b	&And（按位与）	&将把 \$a 和 \$b 中都为 1 的位设为 1。\\
+\$a \& \$b	&AND(按位与)	&将把 \$a 和 \$b 中都为 1 的位设为 1。\\
 \hline
-\$a | \$b	&Or（按位同或）	&将把 \$a 和 \$b 中任何一个为 1 的位设为 1。\\
+\$a | \$b	&OR(按位同或)	&将把 \$a 和 \$b 中任何一个为 1 的位设为 1。\\
 \hline
-\$a \^{} \$b	&Xor（按位异或）	&将把 \$a 和 \$b 中一个为 1 另一个为 0 的位设为 1。\\
+\$a \^{} \$b	&XOR(按位异或)&将把 \$a 和 \$b 中一个为 1 另一个为 0 的位设为 1。\\
 \hline
-\~{} \$a		&Not（按位取反）	&将 \$a 中为 0 的位设为 1，反之亦然。\\
+\~{} \$a		&NOT(按位取反)&将 \$a 中为 0 的位设为 1，反之亦然。\\
 \hline
-\$a <\/< \$b &	Shift left（左移）&	将 \$a 中的位向左移动 \$b 次（每一次移动都表示“乘以 2”）。\\
+\$a <\/< \$b &Shift left(左移)&	将 \$a 中的位向左移动 \$b 次（每一次移动都表示“乘以 2”）。\\
 \hline
-\$a >\/> \$b &	Shift right（右移）&	将 \$a 中的位向右移动 \$b 次（每一次移动都表示“除以 2”）。\\
+\$a >\/> \$b &Shift right(右移)&	将 \$a 中的位向右移动 \$b 次（每一次移动都表示“除以 2”）。\\
 \hline
 \end{longtable}
 
@@ -4015,8 +4015,8 @@ Expression: 0 = -4 << 62
 
 比较运算符允许对两个值进行比较。
 
-
-\begin{longtable}{|m{50pt}|m{80pt}|m{80pt}|m{150pt}|}
+\zihao{6}
+\begin{longtable}{|m{30pt}|m{90pt}|m{40pt}|m{180pt}|}
 %head
 \multicolumn{4}{r}{}
 \tabularnewline\hline
@@ -4046,9 +4046,9 @@ Expression: 0 = -4 << 62
 \hline
 !\/=	&is not equal&	\$a != \$b				&TRUE，如果类型转换后 \$a 不等于 \$b。\\
 \hline
-<\/>&is not equal	&\$a <\/> \$b 			&TRUE，如果类型转换后 \$a 不等于 \$b。
+<\/>&is not equal	&\$a <\/> \$b 			&TRUE，如果类型转换后 \$a 不等于 \$b。\\
 \hline
-!==& not strict equal& \$a !== \$b 	&TRUE，如果 \$a 不等于 \$b，或者它们的类型不同。
+!==& not strict equal& \$a !== \$b 	&TRUE，如果 \$a 不等于 \$b，或者它们的类型不同。\\
 \hline
 >	&is greater than	&\$a > \$b				&TRUE，如果 \$a 严格大于 \$b。\\
 \hline
@@ -4061,17 +4061,193 @@ Expression: 0 = -4 << 62
 
 \end{longtable}
 
+\zihao{5}
 
 如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换为数值并且比较按照数值来进行。此规则也适用于 switch 语句。当用 === 或 !== 进行比较时则不进行类型转换，因为此时类型和数值都要比对。
 
+\begin{lstlisting}[language=PHP]
+<?php
+var_dump(0 == "a"); // 0 == 0 -> true
+var_dump("1" == "01"); // 1 == 1 -> true
+var_dump("10" == "1e1"); // 10 == 10 -> true
+var_dump(100 == "1e2"); // 100 == 100 -> true
+
+switch ("a") {
+case 0:
+    echo "0";
+    break;
+case "a": // never reached because "a" is already matched with 0
+    echo "a";
+    break;
+}
+?>
+\end{lstlisting}
+
+对于多种类型，比较运算符根据下表比较（按顺序）。
+
+
+\zihao{6}
+\begin{longtable}{|m{90pt}|m{90pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+运算数 1 类型	&运算数 2 类型	&结果
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP 比较多种类型}\\
+\hline
+运算数 1 类型	&运算数 2 类型	&结果
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+null 或 string	&string	&将 NULL 转换为 \texttt{""}，进行数字或词汇比较\\
+\hline
+bool 或 null	&任何其它类型	&转换为 bool，FALSE < TRUE\\
+\hline
+object	&object	 &内置类可以定义自己的比较，不同类不能比较，相同类和数组同样方式比较属性（PHP 4 中），PHP 5 有其自己的说明\\
+\hline
+string，resource 或 number	&string，resource 或 number	&将字符串和资源转换成数字，按普通数学比较\\
+\hline
+array	&array	 &具有较少成员的数组较小，如果运算数 1 中的键不存在于运算数 2 中则数组无法比较，否则挨个值比较\\
+\hline
+object	&任何其它类型	&object 总是更大\\
+\hline
+array	&任何其它类型	&array 总是更大\\
+\hline
+\end{longtable}
 
 
 
-\section{Logical Operators}
+\zihao{5}
+
+由于浮点数 float 的内部表达方式，因此不应比较两个浮点数是否相等。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 数组是用标准比较运算符这样比较的
+function standard_array_compare($op1, $op2)
+{
+    if (count($op1) < count($op2)) {
+        return -1; // $op1 < $op2
+    } elseif (count($op1) > count($op2)) {
+        return 1; // $op1 > $op2
+    }
+    foreach ($op1 as $key => $val) {
+        if (!array_key_exists($key, $op2)) {
+            return null; // uncomparable
+        } elseif ($val < $op2[$key]) {
+            return -1;
+        } elseif ($val > $op2[$key]) {
+            return 1;
+        }
+    }
+    return 0; // $op1 == $op2
+}
+?>
+\end{lstlisting}
+
+另一个条件运算符是“?:”（或三元）运算符 。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+ // Example usage for: Ternary Operator
+ $action = (empty($_POST['action'])) ? 'default' : $_POST['action'];
+
+ // The above is identical to this if/else statement
+ if (empty($_POST['action'])) {
+     $action = 'default';
+ } else {
+     $action = $_POST['action'];
+ }
+
+ ?>
+\end{lstlisting}
+
+表达式 (expr1) ? (expr2) : (expr3) 在 expr1 求值为 TRUE 时的值为 expr2，在 expr1 求值为 FALSE 时的值为 expr3。
+
+自 PHP 5.3 起，可以省略三元运算符中间那部分。表达式 expr1 ?: expr3 在 expr1 求值为 TRUE 时返回 expr1，否则返回 expr3。
+
+需要注意的是，三元运算符是个语句，因此其求值不是变量，而是语句的结果。如果想通过引用返回一个变量这点就很重要。在一个通过引用返回的函数中语句 return \$var == 42 ? \$a : \$b; 将不起作用，以后的 PHP 版本会为此发出一条警告。建议避免将三元运算符堆积在一起使用。当在一条语句中使用多个三元运算符时会造成 PHP 运算结果不清晰，示例如下：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 乍看起来下面的输出是 'true'
+echo (true?'true':false?'t':'f');
+
+// 然而，上面语句的实际输出是't'，因为三元运算符是从左往右计算的
+
+// 下面是与上面等价的语句，但更清晰
+echo ((true ? 'true' : 'false') ? 't' : 'f');
+
+// here, you can see that the first expression is evaluated to 'true', which
+// in turn evaluates to (bool)true, thus returning the true branch of the
+// second ternary expression.
+?>
+\end{lstlisting}
+
+
+\section{Error Control Operators}
+
+PHP 支持一个错误控制运算符：@。当将其放置在一个 PHP 表达式之前，该表达式可能产生的任何错误信息都被忽略掉。
+
+如果用 set\_error\_handler() 设定了自定义的错误处理函数，仍然会被调用，但是此错误处理函数可以（并且也应该）调用 error\_reporting()，而该函数在出错语句前有 @ 时将返回 0。
+
+如果激活了 track\_errors 特性，表达式所产生的任何错误信息都被存放在变量 \$php\_errormsg 中。此变量在每次出错时都会被覆盖，所以如果想用它的话就要尽早检查。
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* Intentional file error */
+$my_file = @file ('non_existent_file') or
+    die ("Failed opening file: error was '$php_errormsg'");
+
+// this works for any expression, not just functions:
+$value = @$cache[$key];
+// will not issue a notice if the index $key doesn't exist.
+
+?>
+\end{lstlisting}
+
+@ 运算符只对表达式有效。对新手来说一个简单的规则就是：如果能从某处得到值，就能在它前面加上 @ 运算符。例如，可以把它放在变量，函数和 include 调用，常量，等等之前。不能把它放在函数或类的定义之前，也不能用于条件结构例如 if 和 foreach 等。
+
+目前的“@”错误控制运算符前缀甚至使导致脚本终止的严重错误的错误报告也失效。这意味着如果在某个不存在或者敲错了字母的函数调用前用了“@”来抑制错误信息，那脚本会没有任何迹象显示原因而死在那里。
 
 
 
-\begin{longtable}{|m{35pt}|m{60pt}|m{200pt}|m{30pt}|}
+\section{Execution Operators}
+
+
+PHP 支持一个执行运算符：反引号（\texttt{``}），注意这不是单引号！
+
+PHP 将尝试将反引号中的内容作为外壳命令来执行，并将其输出信息返回（即，可以赋给一个变量而不是简单地丢弃到标准输出）。使用反引号运算符“\texttt{`}”的效果与函数 shell\_exec() 相同。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$output = `ls -al`;
+echo "<pre>$output</pre>";
+?>
+\end{lstlisting}
+
+反引号运算符在激活了安全模式或者关闭了 shell\_exec() 时是无效的。与其它某些语言不同的是，反引号不能在双引号字符串中使用。
+
+
+\section{Incrementing/Decrementing Operators}
+
+
+\begin{longtable}{|m{35pt}|m{130pt}|m{50pt}|m{150pt}|}
 %head
 \multicolumn{4}{r}{}
 \tabularnewline\hline
@@ -4080,7 +4256,7 @@ Expression: 0 = -4 << 62
 %endhead
 
 %firsthead
-\caption{PHP 逻辑运算符}\\
+\caption{PHP 算术运算符}\\
 \hline
 运算符	&说明	&示例	&结果
 \endfirsthead
@@ -4095,13 +4271,442 @@ Expression: 0 = -4 << 62
 \endlastfoot
 %endlastfoot
 \hline
-\&\&	&and	 				&x=6 \newline y=3 \newline (x < 10 \&\& y > 1) returns true&true\\
+++\$a	&Increment		&  前加	&\$a 的值加一，然后返回 \$a。\\
 \hline
-||		&or	 					& x=6 \newline y=3 \newline (x==5 || y==5) returns false&false\\
+\$a++	&Increment		&后加	& 返回 \$a，然后将 \$a 的值加一。\\
 \hline
-!		&not	 				& x=6 \newline y=3 \newline !(x==y) returns true		&true\\
+-\/-\$a	&Decrement	&前减	&\$a 的值减一， 然后返回 \$a。\\
+\hline
+\$a-\/- 	&Decrement	&后减	&返回 \$a，然后将 \$a 的值减一。\\
 \hline
 \end{longtable}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo "<h3>Postincrement</h3>";
+$a = 5;
+echo "Should be 5: " . $a++ . "<br />\n";
+echo "Should be 6: " . $a . "<br />\n";
+
+echo "<h3>Preincrement</h3>";
+$a = 5;
+echo "Should be 6: " . ++$a . "<br />\n";
+echo "Should be 6: " . $a . "<br />\n";
+
+echo "<h3>Postdecrement</h3>";
+$a = 5;
+echo "Should be 5: " . $a-- . "<br />\n";
+echo "Should be 4: " . $a . "<br />\n";
+
+echo "<h3>Predecrement</h3>";
+$a = 5;
+echo "Should be 4: " . --$a . "<br />\n";
+echo "Should be 4: " . $a . "<br />\n";
+?>
+\end{lstlisting}
+
+在处理字符变量的算数运算时，PHP 沿袭了 Perl 的习惯，而非 C 的。例如，在 Perl 中 \colorbox{lightgray}{\texttt{\$a = 'Z'; \$a++;}} 将把 \texttt{\$a} 变成\texttt{'AA'}，而在 C 中，\colorbox{lightgray}{\texttt{a = 'Z'; a++;}} 将把 \texttt{a} 变成 \texttt{'['}（\texttt{'Z'} 的 ASCII 值是 90，\texttt{'['} 的 ASCII 值是 91）。注意字符变量只能递增，不能递减，并且只支持纯字母（a-z 和 A-Z）。递增/递减其他字符变量则无效，原字符串没有变化。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$i = 'W';
+for ($n=0; $n<6; $n++) {
+    echo ++$i . "\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+X
+Y
+Z
+AA
+AB
+AC
+\end{verbatim}
+
+递增或递减布尔值没有效果。
+
+
+
+
+\section{Logical Operators}
+
+
+
+\begin{longtable}{|l|l|l|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+示例&运算符		&结果
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP 逻辑运算符}\\
+\hline
+示例&运算符		&结果
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+\$a and \$b&AND（逻辑与）&TRUE，如果 \$a 和 \$b 都为 TRUE。\\
+\hline
+\$a or \$b 	&OR（逻辑或）&TRUE，如果 \$a 或 \$b 任一为 TRUE。\\
+\hline
+\$a xor \$b&XOR（逻辑异或）&TRUE，如果 \$a 或 \$b 任一为 TRUE，但不同时是。\\
+\hline
+! \$a &NOT（逻辑非）&TRUE，如果 \$a 不为 TRUE。\\
+\hline
+\$a\&\&	\$b&AND（逻辑与）&TRUE，如果 \$a 和 \$b 都为 TRUE。\\
+\hline
+\$a||\$b&OR（逻辑或）		& TRUE，如果 $a 或 $b 任一为 TRUE。\\
+\hline
+\end{longtable}
+
+“与”和“或”有两种不同形式运算符的原因是它们运算的优先级不同。
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+// --------------------
+// foo() 根本没机会被调用，被运算符“短路”了
+
+$a = (false && foo());
+$b = (true  || foo());
+$c = (false and foo());
+$d = (true  or  foo());
+
+// --------------------
+// "||" 比 "or" 的优先级高
+
+// 表达式 (false || true) 的结果被赋给 $e
+// 等同于：($e = (false || true))
+$e = false || true;
+
+// 常量 false 被赋给 $f，true 被忽略
+// 等同于：(($f = false) or true)
+$f = false or true;
+
+var_dump($e, $f);
+
+// --------------------
+// "&&" 比 "and" 的优先级高
+
+// 表达式 (true && false) 的结果被赋给 $g
+// 等同于：($g = (true && false))
+$g = true && false;
+
+// 常量 true 被赋给 $h，false 被忽略
+// 等同于：(($h = true) and false)
+$h = true and false;
+
+var_dump($g, $h);
+?>
+\end{lstlisting}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+bool(true)
+bool(false)
+bool(false)
+bool(true)
+\end{verbatim}
+
+\section{String Operators}
+
+
+有两个字符串（string）运算符。第一个是连接运算符（“.”），它返回其左右参数连接后的字符串。第二个是连接赋值运算符（“.=”），它将右边参数附加到左边的参数之后。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a = "Hello ";
+$b = $a . "World!"; // now $b contains "Hello World!"
+
+$a = "Hello ";
+$a .= "World!";     // now $a contains "Hello World!"
+?>
+\end{lstlisting}
+
+\section{Array Operators}
+
+\begin{longtable}{|l|l|l|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+示例&运算符		&结果
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP 数组运算符}\\
+\hline
+示例&运算符		&结果
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+\$a + \$b		&联合	&\$a 和 \$b 的联合。\\
+\hline
+\$a == \$b	&相等	&如果 \$a 和 \$b 具有相同的键/值对则为 TRUE。\\
+\hline
+\$a === \$b	&全等	&如果 \$a 和 \$b 具有相同的键/值对并且顺序和类型都相同则为 TRUE。\\
+\hline
+\$a != \$b	&不等	&如果 \$a 不等于 \$b 则为 TRUE。\\
+\hline
+\$a <> \$b	&不等	&如果 \$a 不等于 \$b 则为 TRUE。\\
+\hline
+\$a !== \$b	&不全等	&如果 \$a 不全等于 \$b 则为 TRUE。\\
+\hline
+\end{longtable}
+
++ 运算符把右边的数组元素附加到左边的数组后面，两个数组中都有的键名，则只用左边数组中的，右边的被忽略。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a = array("a" => "apple", "b" => "banana");
+$b = array("a" => "pear", "b" => "strawberry", "c" => "cherry");
+
+$c = $a + $b; // Union of $a and $b
+echo "Union of \$a and \$b: \n";
+var_dump($c);
+
+$c = $b + $a; // Union of $b and $a
+echo "Union of \$b and \$a: \n";
+var_dump($c);
+?>
+\end{lstlisting}
+
+执行后，此脚本会显示：
+
+\begin{verbatim}
+Union of $a and $b:
+array(3) {
+  ["a"]=>
+  string(5) "apple"
+  ["b"]=>
+  string(6) "banana"
+  ["c"]=>
+  string(6) "cherry"
+}
+Union of $b and $a:
+array(3) {
+  ["a"]=>
+  string(4) "pear"
+  ["b"]=>
+  string(10) "strawberry"
+  ["c"]=>
+  string(6) "cherry"
+}
+\end{verbatim}
+
+数组中的单元如果具有相同的键名和值则比较时相等。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a = array("apple", "banana");
+$b = array(1 => "banana", "0" => "apple");
+
+var_dump($a == $b); // bool(true)
+var_dump($a === $b); // bool(false)
+?>
+\end{lstlisting}
+
+
+\section{Type Operators}
+
+
+instanceof 用于确定一个 PHP 变量是否属于某一类 class 的实例：
+
+\begin{lstlisting}[language=PHP]
+<?php
+class MyClass
+{
+}
+
+class NotMyClass
+{
+}
+$a = new MyClass;
+
+var_dump($a instanceof MyClass);
+var_dump($a instanceof NotMyClass);
+?>
+\end{lstlisting}
+
+
+以上例程会输出：
+
+\begin{verbatim}
+bool(true)
+bool(false)
+\end{verbatim}
+
+instanceof也可用来确定一个变量是不是继承自某一父类的子类的实例：
+
+\begin{lstlisting}[language=PHP]
+<?php
+class ParentClass
+{
+}
+
+class MyClass extends ParentClass
+{
+}
+
+$a = new MyClass;
+
+var_dump($a instanceof MyClass);
+var_dump($a instanceof ParentClass);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+bool(true)
+bool(true)
+\end{verbatim}
+
+检查一个对象是否不是某个类的实例，可以使用逻辑运算符 not。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class MyClass
+{
+}
+
+$a = new MyClass;
+var_dump(!($a instanceof stdClass));
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+bool(true)
+\end{verbatim}
+
+最后，instanceof也可用于确定一个变量是不是实现了某个接口的对象的实例:
+
+\begin{lstlisting}[language=PHP]
+<?php
+interface MyInterface
+{
+}
+
+class MyClass implements MyInterface
+{
+}
+
+$a = new MyClass;
+
+var_dump($a instanceof MyClass);
+var_dump($a instanceof MyInterface);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+bool(true)
+bool(true)
+\end{verbatim}
+
+虽然 instanceof 通常直接与类名一起使用，但也可以使用对象或字符串变量：
+
+\begin{lstlisting}[language=PHP]
+<?php
+interface MyInterface
+{
+}
+
+class MyClass implements MyInterface
+{
+}
+
+$a = new MyClass;
+$b = new MyClass;
+$c = 'MyClass';
+$d = 'NotMyClass';
+
+var_dump($a instanceof $b); // $b is an object of class MyClass
+var_dump($a instanceof $c); // $c is a string 'MyClass'
+var_dump($a instanceof $d); // $d is a string 'NotMyClass'
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+bool(true)
+bool(true)
+bool(false)
+\end{verbatim}
+
+
+如果被检测的变量不是对象，instanceof 并不发出任何错误信息而是返回 FALSE。不允许用来检测常量。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a = 1;
+$b = NULL;
+$c = imagecreate(5, 5);
+var_dump($a instanceof stdClass); // $a is an integer
+var_dump($b instanceof stdClass); // $b is NULL
+var_dump($c instanceof stdClass); // $c is a resource
+var_dump(FALSE instanceof stdClass);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+bool(false)
+bool(false)
+bool(false)
+PHP Fatal error:  instanceof expects an object instance, constant given
+\end{verbatim}
+
+
+然而 instanceof 的使用还有一些陷阱必须了解。在 PHP 5.1.0 之前，如果要检查的类名称不存在，instanceof 会调用 \_\_autoload()。另外，如果该类没有被装载则会产生一个致命错误。可以通过使用动态类引用或用一个包含类名的字符串变量来避开这种问题：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$d = 'NotMyClass';
+var_dump($a instanceof $d); // no fatal error here
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+bool(false)
+\end{verbatim}
+
+instanceof 运算符是 PHP 5 引进的，在此之前用 is\_a()，但是后来 is\_a() 被废弃而用 instanceof 替代了。不过自 PHP 5.3.0 起，又恢复使用 is\_a() 了。
+
 
 
 
@@ -4189,7 +4794,7 @@ $h = $g += 10;      /* first, $g is incremented by 10 and ends with the
 
 \chapter{PHP Statements}
 
-
+任何 PHP 脚本都是由一系列语句构成的。一条语句可以是一个赋值语句，一个函数调用，一个循环，一个条件语句或者甚至是一个什么也不做的语句（空语句）。语句通常以分号结束。此外，还可以用花括号将一组语句封装成一个语句组。语句组本身可以当作是一行语句。
 
 
 if、elseif 以及 else 语句用于执行基于不同条件的不同动作。
@@ -4210,6 +4815,17 @@ if、elseif 以及 else 语句用于执行基于不同条件的不同动作。
 与 if...else 配合使用，在若干条件之一成立时执行一个代码块
 \end{compactitem}
 
+if 结构是很多语言包括 PHP 在内最重要的特性之一，它允许按照条件执行代码片段。PHP 的 if 结构和 C 语言相似：
+
+\begin{verbatim}
+<?php
+if (expr)
+  statement
+?>
+\end{verbatim}
+
+expr 按照布尔求值。如果 expr 的值为 TRUE，PHP 将执行 statement，如果值为 FALSE ——将忽略 statement。
+
 
 
 \subsection{if...else statements}
@@ -4224,17 +4840,45 @@ else
 \end{lstlisting}
 
 
+如果 \$a 大于 \$b，则以下例子将显示 a is bigger than b：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a > $b)
+  echo "a is bigger than b";
+?>
+\end{lstlisting}
+
+经常需要按照条件执行不止一条语句，当然并不需要给每条语句都加上一个 if 子句。可以将这些语句放入语句组中。例如，如果 \$a 大于 \$b，以下代码将显示 a is bigger than b 并且将 \$a 的值赋给 \$b：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a > $b) {
+  echo "a is bigger than b";
+  $b = $a;
+}
+?>
+\end{lstlisting}
+
+if 语句可以无限层地嵌套在其它 if 语句中，这给程序的不同部分的条件执行提供了充分的弹性。
+
+经常需要在满足某个条件时执行一条语句，而在不满足该条件时执行其它语句，这正是 else 的功能。else 延伸了 if 语句，可以在 if 语句中的表达式的值为 FALSE 时执行语句。例如以下代码在 \$a 大于 \$b 时显示 a is bigger than b，反之则显示 a is NOT bigger than b：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a > $b) {
+  echo "a is greater than b";
+} else {
+  echo "a is NOT greater than b";
+}
+?>
+\end{lstlisting}
+
 如果当前日期是周五，下面的代码将输出 "Have a nice weekend!"，否则会输出 "Have a nice day!"：
 
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
 <?php
 $d=date("D");
 if ($d=="Fri")
@@ -4242,21 +4886,11 @@ if ($d=="Fri")
 else
   echo "Have a nice day!"; 
 ?>
-
-</body>
-</html>
 \end{lstlisting}
 
 如果需要在条件成立或不成立时执行多行代码，应该把这些代码行包括在花括号中：
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
 <?php
 $d=date("D");
 if ($d=="Fri")
@@ -4266,16 +4900,16 @@ if ($d=="Fri")
   echo "See you on Monday!";
   }
 ?>
-
-</body>
-</html>
 \end{lstlisting}
+
+else 语句仅在 if 以及 elseif（如果有的话）语句中的表达式的值为 FALSE 时执行。
 
 
 \subsection{elseif statements}
 
+elseif，和此名称暗示的一样，是 if 和 else 的组合。和 else 一样，它延伸了 if 语句，可以在原来的 if 表达式值为 FALSE 时执行不同语句。
 
-如果希望在多个条件之一成立时执行代码，使用 elseif 语句：
+但是和 else 不一样的是，它仅在 elseif 的条件表达式值为 TRUE 时执行语句。如果希望在多个条件之一成立时执行代码，可以使用 elseif 语句：
 
 \begin{lstlisting}[language=PHP]
 if (condition)
@@ -4286,16 +4920,23 @@ else
   code to be executed if condition is false; 
 \end{lstlisting}
 
+以下代码将根据条件分别显示 a is bigger than b，a equal to b 或者 a is smaller than b：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a > $b) {
+    echo "a is bigger than b";
+} elseif ($a == $b) {
+    echo "a is equal to b";
+} else {
+    echo "a is smaller than b";
+}
+?>
+\end{lstlisting}
+
 如果当前日期是周五，下面的例子会输出 "Have a nice weekend!"，如果是周日，则输出 "Have a nice Sunday!"，否则输出 "Have a nice day!"：
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
 <?php
 $d=date("D");
 if ($d=="Fri")
@@ -4305,11 +4946,36 @@ elseif ($d=="Sun")
 else
   echo "Have a nice day!"; 
 ?>
-
-</body>
-</html>
 \end{lstlisting}
 
+在同一个 if 语句中可以有多个 elseif 部分，其中第一个表达式值为 TRUE（如果有的话）的 elseif 部分将会执行。在 PHP 中，也可以写成“else if”（两个单词），它和“elseif”（一个单词）的行为完全一样。句法分析的含义有少许区别（如果你熟悉 C 语言的话，与之行为相同），但是底线是两者会产生完全一样的行为。
+
+elseif 的语句仅在之前的 if 和所有之前 elseif 的表达式值为 FALSE，并且当前的 elseif 表达式值为 TRUE 时执行。
+
+必须要注意的是 elseif 与 else if 只有在类似上例中使用花括号的情况下才认为是完全相同。如果用冒号来定义 if/elseif 条件，那就不能用两个单词的 else if，否则 PHP 会产生解析错误。
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+/* 不正确的使用方法： */
+if($a > $b):
+    echo $a." is greater than ".$b;
+else if($a == $b): // 将无法编译
+    echo "The above line causes a parse error.";
+endif;
+
+
+/* 正确的使用方法： */
+if($a > $b):
+    echo $a." is greater than ".$b;
+elseif($a == $b): // 注意使用了一个单词的 elseif
+    echo $a." equals ".$b;
+else:
+    echo $a." is neither greater than or equal to ".$b;
+endif;
+
+?>
+\end{lstlisting}
 
 
 \section{Select statements}
@@ -4319,7 +4985,9 @@ PHP 中的switch 语句用于执行基于多个不同条件的不同动作，通
 
 \subsection{switch...case...default statements}
 
+switch 语句类似于具有同一个表达式的一系列 if 语句。很多场合下需要把同一个变量（或表达式）与很多不同的值比较，并根据它等于哪个值来执行不同的代码。这正是 switch 语句的用途。
 
+和其它语言不同的是，switch/case 作的是松散比较，而且continue 语句作用到 switch 上的作用类似于 break。如果在循环中有一个 switch 并希望 continue 到外层循环中的下一轮循环，用 continue 2。
 
 \begin{lstlisting}[language=PHP]
 switch (expression)
@@ -4337,6 +5005,35 @@ default:
 }
 \end{lstlisting}
 
+下面两个例子使用两种不同方法实现同样的事，一个用一系列的 if 和 elseif 语句，另一个用 switch 语句：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($i == 0) {
+    echo "i equals 0";
+} elseif ($i == 1) {
+    echo "i equals 1";
+} elseif ($i == 2) {
+    echo "i equals 2";
+}
+
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+}
+?>
+\end{lstlisting}
+
+为避免错误，理解 switch 是怎样执行的非常重要。switch 语句一行接一行地执行（实际上是语句接语句）。开始时没有代码被执行。仅当一个 case 语句中的值和 switch 表达式的值匹配时 PHP 才开始执行语句，直到 switch 的程序段结束或者遇到第一个 break 语句为止。如果不在 case 的语句段最后写上 break 的话，PHP 将继续执行下一个 case 中的语句段。
+
+
 switch语句的工作原理如下：
 
 \begin{compactenum}
@@ -4348,32 +5045,102 @@ switch语句的工作原理如下：
 \end{compactenum}
 
 
+
+
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
 <?php
-switch ($x)
-{
-case 1:
-  echo "Number 1";
-  break;
-case 2:
-  echo "Number 2";
-  break;
-case 3:
-  echo "Number 3";
-  break;
-default:
-  echo "No number between 1 and 3";
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+    case 1:
+        echo "i equals 1";
+    case 2:
+        echo "i equals 2";
 }
 ?>
+\end{lstlisting}
 
-</body>
-</html>
+这里如果 \$i 等于 0，PHP 将执行所有的 echo 语句！如果 \$i 等于 1，PHP 将执行后面两条 echo 语句。只有当 \$i 等于 2 时，才会得到“预期”的结果——只显示“i equals 2”。所以，别忘了 break 语句就很重要（即使在某些情况下故意想避免提供它们时）。
+
+在 switch 语句中条件只求值一次并用来和每个 case 语句比较。在 elseif 语句中条件会再次求值。如果条件比一个简单的比较要复杂得多或者在一个很多次的循环中，那么用 switch 语句可能会快一些。
+
+在一个 case 中的语句也可以为空，这样只不过将控制转移到了下一个 case 中的语句。
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch ($i) {
+    case 0:
+    case 1:
+    case 2:
+        echo "i is less than 3 but not negative";
+        break;
+    case 3:
+        echo "i is 3";
+}
+?>
+\end{lstlisting}
+
+
+一个 case 的特例是 default。它匹配了任何和其它 case 都不匹配的情况。例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+    default:
+        echo "i is not equal to 0, 1 or 2";
+}
+?>
+\end{lstlisting}
+
+
+case 表达式可以是任何求值为简单类型的表达式，即整型或浮点数以及字符串。不能用数组或对象，除非它们被解除引用成为简单类型。
+
+switch 支持替代语法的流程控制。
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch ($i):
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+    default:
+        echo "i is not equal to 0, 1 or 2";
+endswitch;
+?>
+\end{lstlisting}
+
+
+允许使用分号代替 case 语句后的冒号，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch($beer)
+{
+    case 'tuborg';
+    case 'carlsberg';
+    case 'heineken';
+        echo 'Good choice';
+    break;
+    default;
+        echo 'Please make a new selection...';
+    break;
+}
+?>
 \end{lstlisting}
 
 \section{Loop statements}
@@ -4397,7 +5164,14 @@ PHP 中的循环语句用于执行相同的代码块指定的次数，循环语�
 
 \subsection{while statements}
 
-只要指定的条件成立，while 语句将重复执行代码块。
+while 循环是 PHP 中最简单的循环类型。它和 C 语言中的 while 表现地一样。while 语句的基本格式是：
+
+\begin{verbatim}
+while (expr)
+    statement
+\end{verbatim}
+
+while 语句的含意很简单，它告诉 PHP只要指定的条件（while 表达式）成立，while 语句将重复执行代码块。
 
 
 \begin{lstlisting}[language=PHP]
@@ -4408,13 +5182,6 @@ code to be executed;
 下面的例子示范了一个循环，只要变量 i 小于或等于 5，代码就会一直循环执行下去。循环每循环一次，变量就会递增 1：
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
 <?php 
 $i=1;
 while($i<=5)
@@ -4423,15 +5190,51 @@ while($i<=5)
   $i++;
   }
 ?>
-
-</body>
-</html>
 \end{lstlisting}
+
+表达式的值在每次开始循环时检查，所以即使这个值在循环语句中改变了，语句也不会停止执行，直到本次循环结束。有时候如果 while 表达式的值一开始就是 FALSE，则循环语句一次都不会执行。
+
+和 if 语句一样，可以在 while 循环中用花括号括起一个语句组，或者用替代语法：
+
+\begin{verbatim}
+while (expr):
+    statement
+    ...
+endwhile;
+\end{verbatim}
+
+下面两个例子完全一样，都显示数字 1 到 10：
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* example 1 */
+
+$i = 1;
+while ($i <= 10) {
+    echo $i++;  /* the printed value would be
+                    $i before the increment
+                    (post-increment) */
+}
+
+/* example 2 */
+
+$i = 1;
+while ($i <= 10):
+    print $i;
+    $i++;
+endwhile;
+?>
+\end{lstlisting}
+
 
 
 \subsection{do...while statements}
 
-do...while 语句会至少执行一次代码 - 然后，只要条件成立，就会重复进行循环。
+do-while 循环和 while 循环非常相似，区别在于表达式的值是在每次循环结束时检查而不是开始时。和一般的 while 循环主要的区别是，do...while 语句会至少执行一次代码（表达式的真值在每次循环结束后检查） - 然后，只要条件成立，就会重复进行循环。
+
+这种情况在一般的 while 循环中是不一定的，它们在循环开始时检查表达式的真值，如果一开始就为 FALSE 则整个循环立即终止，一次都不执行。
+
+do-while 循环只有一种语法：
 
 \begin{lstlisting}[language=PHP]
 do
@@ -4444,13 +5247,6 @@ while (condition);
 下面的例子将对 i 的值进行一次累加，然后，只要 i 小于 5 的条件成立，就会继续累加下去：
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
 <?php 
 $i=0;
 do {
@@ -4459,14 +5255,53 @@ do {
 }
 while ($i<5);
 ?>
-
-</body>
-</html>
 \end{lstlisting}
+
+而下面的循环将正好运行一次，因为经过第一次循环后，当检查表达式的真值时，其值为 FALSE（\$i 不大于 0）而导致循环终止。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$i = 0;
+do {
+   echo $i;
+} while ($i > 0);
+?>
+\end{lstlisting}
+
+
+C 语言用户可能熟悉另一种不同的 do-while 循环用法，把语句放在 do-while(0) 之中，在循环内部用 break 语句来结束执行循环。以下代码片段示范了此方法：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+do {
+    if ($i < 5) {
+        echo "i is not big enough";
+        break;
+    }
+    $i *= $factor;
+    if ($i < $minimum_limit) {
+        break;
+    }
+    echo "i is ok";
+
+    /* process i */
+
+} while(0);
+?>
+\end{lstlisting}
+
+如果还不能立刻理解也不用担心。即使不用此“特性”也照样可以写出强大的代码来。自 PHP 5.3.0 起，还可以使用 goto 来跳出循环。
+
 
 \subsection{for statements}
 
-如果已经确定了代码块的重复执行次数，则可以使用 for 语句。
+如果已经确定了代码块的重复执行次数，则可以使用 for 语句。for 循环是 PHP 中最复杂的循环结构，它的行为和 C 语言的相似。 
+
+for 循环的语法是：
+
+
+
 
 \begin{lstlisting}[language=PHP]
 for (initialization; condition; increment)
@@ -4475,7 +5310,23 @@ for (initialization; condition; increment)
 }
 \end{lstlisting}
 
-for 语句有三个参数。第一个参数初始化变量，第二个参数保存条件，第三个参数包含执行循环所需的增量。如果 initialization 或 increment 参数中包括了多个变量，需要用逗号进行分隔。而条件必须计算为 true 或者 false。
+
+
+
+for 语句有三个参数。第一个参数初始化变量，第二个参数保存条件，第三个参数包含执行循环所需的增量。
+
+\begin{compactitem}
+\item 第一个参数（initialization）会在循环开始前无条件求值（并执行）一次。
+\item 第二个参数（condition）在每次循环开始前求值，如果值为 TRUE，则继续循环，执行嵌套的循环语句。如果值为 FALSE，则终止循环。
+\item 第一个参数（increment）在每次循环之后被求值（并执行）。
+\end{compactitem}
+
+
+
+
+每个表达式都可以为空或包括逗号分隔的多个表达式，如果 initialization 或 increment 参数中包括了多个变量，需要用逗号进行分隔，但所有用逗号分隔的表达式都会计算，但只取最后一个结果。条件必须计算为 true 或者 false，因为如果为空意味着将无限循环下去（和 C 一样，PHP 暗中认为其值为 TRUE）。
+
+这可能不像想象中那样没有用，因为经常会希望用有条件的 break 语句来结束循环而不是用 for 的表达式真值判断。
 
 \begin{lstlisting}[language=PHP]
 for (initialization; condition; increment)
@@ -4487,27 +5338,104 @@ for (initialization; condition; increment)
 下面的例子会把文本 "Hello World!" 显示 5 次：
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
 <?php
 for ($i=1; $i<=5; $i++)
 {
   echo "Hello World!<br />";
 }
 ?>
-
-</body>
-</html>
 \end{lstlisting}
+
+考虑以下的例子，它们都显示数字 1 到 10：
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* example 1 */
+
+for ($i = 1; $i <= 10; $i++) {
+    echo $i;
+}
+
+/* example 2 */
+
+for ($i = 1; ; $i++) {
+    if ($i > 10) {
+        break;
+    }
+    echo $i;
+}
+
+/* example 3 */
+
+$i = 1;
+for (;;) {
+    if ($i > 10) {
+        break;
+    }
+    echo $i;
+    $i++;
+}
+
+/* example 4 */
+
+for ($i = 1, $j = 0; $i <= 10; $j += $i, print $i, $i++);
+?>
+\end{lstlisting}
+
+
+在 for 循环中用空的表达式在很多场合下会很方便。
+
+PHP 也支持用冒号的 for 循环的替代语法。
+
+
+\begin{verbatim}
+for (expr1; expr2; expr3):
+    statement;
+    ...
+endfor;
+\end{verbatim}
+
+为了对数组进行遍历，可以使用如下的代码示例：
+
+\begin{lstlisting}[language=PHP]
+<?php
+/*
+ * 此数组将在遍历的过程中改变其中某些单元的值
+ */
+$people = Array(
+        Array('name' => 'Kalle', 'salt' => 856412), 
+        Array('name' => 'Pierre', 'salt' => 215863)
+        );
+
+for($i = 0; $i < sizeof($people); ++$i)
+{
+    $people[$i]['salt'] = rand(000000, 999999);
+}
+?>
+\end{lstlisting}
+
+以上代码可能执行很慢，因为每次循环时都要计算一遍数组的长度。由于数组的长度始终不变，可以用一个中间变量来储存数组长度以优化而不是不停调用 count()：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$people = Array(
+        Array('name' => 'Kalle', 'salt' => 856412), 
+        Array('name' => 'Pierre', 'salt' => 215863)
+        );
+
+for($i = 0, $size = sizeof($people); $i < $size; ++$i)
+{
+    $people[$i]['salt'] = rand(000000, 999999);
+}
+?>
+\end{lstlisting}
+
 
 \subsection{foreach statements}
 
-foreach 语句用于循环遍历数组。每进行一次循环，当前数组元素的值就会被赋值给 value 变量（数组指针会逐一地移动） - 以此类推。
+foreach 语法结构提供了遍历数组的简单方式，而且foreach 语句仅能够应用于用于循环遍历数组和对象，如果尝试应用于其他数据类型的变量，或者未初始化的变量将发出错误信息。
+
+每进行一次循环，当前数组元素的值就会被赋值给 value 变量（数组指针会逐一地移动） - 以此类推。
 
 
 \begin{lstlisting}[language=PHP]
@@ -4517,16 +5445,25 @@ foreach (array as value)
 }
 \end{lstlisting}
 
+具体来说，foreach有两种语法：
+
+\begin{verbatim}
+foreach (array_expression as $value)
+    statement
+foreach (array_expression as $key => $value)
+    statement
+\end{verbatim}
+
+第一种格式遍历给定的 array\_expression 数组。每次循环中，当前单元的值被赋给 \$value 并且数组内部的指针向前移一步（因此下一次循环中将会得到下一个单元）。
+
+第二种格式做同样的事，只除了当前单元的键名也会在每次循环中被赋给变量 \$key。
+
+
+
+
 下面的例子示范了一个循环，这个循环可以输出给定数组的值：
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
 <?php
 $arr=array("one", "two", "three");
 
@@ -4535,14 +5472,801 @@ foreach ($arr as $value)
   echo "Value: " . $value . "<br />";
 }
 ?>
+\end{lstlisting}
+
+
+当 foreach 开始执行时，数组内部的指针会自动指向第一个单元，这意味着不需要在 foreach 循环之前调用 reset()。由于 foreach 依赖内部数组指针，在循环中修改其值将可能导致意外的行为，而且foreach 不支持用“@”来抑制错误信息的能力。
+
+
+可以很容易地通过在 \$value 之前加上 \& 来修改数组的元素，此方法将以引用赋值而不是拷贝一个值。
+
+
+PHP还能够自定义遍历对象。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array(1, 2, 3, 4);
+foreach ($arr as &$value) {
+    $value = $value * 2;
+}
+// $arr is now array(2, 4, 6, 8)
+unset($value); // 最后取消掉引用
+?>
+\end{lstlisting}
+
+\$value 的引用仅在被遍历的数组可以被引用时才可用（例如是个变量）。以下代码则无法运行：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+foreach (array(1, 2, 3, 4) as &$value) {
+    $value = $value * 2;
+}
+
+?>
+\end{lstlisting}
+
+这里，数组最后一个元素的 \$value 引用在 foreach 循环之后仍会保留。建议使用 unset() 来将其销毁。
+
+用户可能注意到了以下的代码功能完全相同：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array("one", "two", "three");
+reset($arr);
+while (list(, $value) = each($arr)) {
+    echo "Value: $value<br>\n";
+}
+
+foreach ($arr as $value) {
+    echo "Value: $value<br />\n";
+}
+?>
+\end{lstlisting}
+
+以下代码功能也完全相同：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array("one", "two", "three");
+reset($arr);
+while (list($key, $value) = each($arr)) {
+    echo "Key: $key; Value: $value<br />\n";
+}
+
+foreach ($arr as $key => $value) {
+    echo "Key: $key; Value: $value<br />\n";
+}
+?>
+\end{lstlisting}
+
+
+下面是示范用法的更多例子：
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* foreach example 1: value only */
+
+$a = array(1, 2, 3, 17);
+
+foreach ($a as $v) {
+   echo "Current value of \$a: $v.\n";
+}
+
+/* foreach example 2: value (with its manual access notation printed for illustration) */
+
+$a = array(1, 2, 3, 17);
+
+$i = 0; /* for illustrative purposes only */
+
+foreach ($a as $v) {
+    echo "\$a[$i] => $v.\n";
+    $i++;
+}
+
+/* foreach example 3: key and value */
+
+$a = array(
+    "one" => 1,
+    "two" => 2,
+    "three" => 3,
+    "seventeen" => 17
+);
+
+foreach ($a as $k => $v) {
+    echo "\$a[$k] => $v.\n";
+}
+
+/* foreach example 4: multi-dimensional arrays */
+$a = array();
+$a[0][0] = "a";
+$a[0][1] = "b";
+$a[1][0] = "y";
+$a[1][1] = "z";
+
+foreach ($a as $v1) {
+    foreach ($v1 as $v2) {
+        echo "$v2\n";
+    }
+}
+
+/* foreach example 5: dynamic arrays */
+
+foreach (array(1, 2, 3, 4, 5) as $v) {
+    echo "$v\n";
+}
+?>
+\end{lstlisting}
+
+
+
+PHP 5.5 增添了遍历一个数组的数组的功能并且把嵌套的数组解包到循环变量中，只需将 list() 作为值提供，从而用 list() 给嵌套的数组解包。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = [
+    [1, 2],
+    [3, 4],
+];
+
+foreach ($array as list($a, $b)) {
+    // $a contains the first element of the nested array,
+    // and $b contains the second element.
+    echo "A: $a; B: $b\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+A: 1; B: 2
+A: 3; B: 4
+\end{verbatim}
+
+list() 中的单元可以少于嵌套数组的，此时多出来的数组单元将被忽略：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = [
+    [1, 2],
+    [3, 4],
+];
+
+foreach ($array as list($a)) {
+    // Note that there is no $b here.
+    echo "$a\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+1
+3
+\end{verbatim}
+
+如果 list() 中列出的单元多于嵌套数组则会发出一条消息级别的错误信息：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = [
+    [1, 2],
+    [3, 4],
+];
+
+foreach ($array as list($a, $b, $c)) {
+    echo "A: $a; B: $b; C: $c\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{verbatim}
+Notice: Undefined offset: 2 in example.php on line 7
+A: 1; B: 2; C: 
+
+Notice: Undefined offset: 2 in example.php on line 7
+A: 3; B: 4; C: 
+\end{verbatim}
+
+\section{Break statements}
+
+break 结束当前 for，foreach，while，do-while 或者 switch 结构的执行。
+
+break 可以接受一个可选的数字参数\footnote{在PHP 5.4.0以后，\texttt{break 0;} 不再合法，这在之前的版本被解析为 \texttt{break 1;}。另外，取消变量作为参数传递（例如 \texttt{\$num = 2; break \$num;}）。}来决定跳出几重循环。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array('one', 'two', 'three', 'four', 'stop', 'five');
+while (list (, $val) = each($arr)) {
+    if ($val == 'stop') {
+        break;    /* You could also write 'break 1;' here. */
+    }
+    echo "$val<br />\n";
+}
+
+/* 使用可选参数 */
+
+$i = 0;
+while (++$i) {
+    switch ($i) {
+    case 5:
+        echo "At 5<br />\n";
+        break 1;  /* 只退出 switch. */
+    case 10:
+        echo "At 10; quitting<br />\n";
+        break 2;  /* 退出 switch 和 while 循环 */
+    default:
+        break;
+    }
+}
+?>
+\end{lstlisting}
+
+
+
+
+\section{Continue stataments}
+
+
+continue 在循环结构用用来跳过本次循环中剩余的代码并在条件求值为真时开始执行下一次循环。在 PHP 中 switch 语句被认为是可以使用 continue 的一种循环结构。
+
+continue 接受一个可选的数字参数来决定跳过几重循环到循环结尾。默认值是 1\footnote{在PHP 5.4.0以后，\texttt{continue 0;} 不再合法。这在之前的版本被解析为 \texttt{continue 1;}，而且取消变量作为参数传递（例如 \texttt{\$num = 2; continue \$num;}）。}，即跳到当前循环末尾。
+
+\begin{lstlisting}[language=PHP]
+<?php
+while (list ($key, $value) = each($arr)) {
+    if (!($key % 2)) { // skip odd members
+        continue;
+    }
+    do_something_odd($value);
+}
+
+$i = 0;
+while ($i++ < 5) {
+    echo "Outer<br />\n";
+    while (1) {
+        echo "Middle<br />\n";
+        while (1) {
+            echo "Inner<br />\n";
+            continue 3;
+        }
+        echo "This never gets output.<br />\n";
+    }
+    echo "Neither does this.<br />\n";
+}
+?>
+\end{lstlisting}
+
+省略 continue 后面的分号会导致混淆。以下例子示意了不应该这样做。
+
+\begin{lstlisting}[language=PHP]
+<?php
+  for ($i = 0; $i < 5; ++$i) {
+      if ($i == 2)
+          continue
+      print "$i\n";
+  }
+?>
+\end{lstlisting}
+
+我们希望得到的结果是：
+
+\begin{verbatim}
+0
+1
+3
+4
+\end{verbatim}
+
+可实际的输出是：
+
+\begin{verbatim}
+2
+\end{verbatim}
+
+这是因为整个 \texttt{continue print "\$i\textbackslash n";} 被当做单一的表达式而求值，所以 print 函数只有在 \texttt{\$i == 2} 为真时才被调用（print 的值被当成了上述的可选数字参数而传递给了 continue）。
+
+
+\section{Declare statements}
+
+declare 结构用来设定一段代码的执行指令。declare 的语法和其它流程控制结构相似：
+
+\begin{verbatim}
+declare (directive)
+    statement
+\end{verbatim}
+
+directive 部分允许设定 declare 代码段的行为。目前只认识两个指令：ticks以及 encoding，其中encoding 是 PHP 5.3.0 新增指令。
+
+declare 代码段中的 statement 部分将被执行——怎样执行以及执行中有什么副作用出现取决于 directive 中设定的指令。
+
+declare 结构也可用于全局范围，影响到其后的所有代码（但如果有 declare 结构的文件被其它文件包含，则对包含它的父文件不起作用）。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// these are the same:
+
+// you can use this:
+declare(ticks=1) {
+    // entire script here
+}
+
+// or you can use this:
+declare(ticks=1);
+// entire script here
+?>
+\end{lstlisting}
+
+\subsection{Ticks}
+
+Tick（时钟周期）是一个在 declare 代码段中解释器每执行 N 条可计时的低级语句就会发生的事件。N 的值是在 declare 中的 directive 部分用 ticks=N 来指定的。
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+declare(ticks=1);
+
+// A function called on each tick event
+function tick_handler()
+{
+    echo "tick_handler() called\n";
+}
+
+register_tick_function('tick_handler');
+
+$a = 1;
+
+if ($a > 0) {
+    $a += 2;
+    print($a);
+}
+
+?>
+\end{lstlisting}
+
+不是所有语句都可计时。通常条件表达式和参数表达式都不可计时。
+
+在每个 tick 中出现的事件是由 register\_tick\_function() 来指定的，而且每个 tick 中可以出现多个事件。
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+function tick_handler()
+{
+  echo "tick_handler() called\n";
+}
+
+$a = 1;
+tick_handler();
+
+if ($a > 0) {
+    $a += 2;
+    tick_handler();
+    print($a);
+    tick_handler();
+}
+tick_handler();
+
+?>
+\end{lstlisting}
+
+\subsection{Encoding}
+
+可以用 encoding 指令来对每段脚本指定其编码方式。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+declare(encoding='ISO-8859-1');
+// code here
+?>
+\end{lstlisting}
+
+
+
+当和命名空间结合起来时 declare 的唯一合法语法是 \colorbox{lightgray}{\texttt{declare(encoding='...');}}，其中 \texttt{...} 是编码的值，而 \colorbox{lightgray}{\texttt{declare(encoding='...') \{\}}} 将在与命名空间结合时产生解析错误。
+
+在 PHP 5.3 中除非在编译时指定了 \texttt{--enable-zend-multibyte}，否则 declare 中的 encoding 值会被忽略，而且除非用 phpinfo()，否则 PHP 不会显示出是否在编译时指定了 \texttt{--enable-zend-multibyte}。
+
+\section{Return statements}
+
+如果在一个函数中调用 return 语句，将立即结束此函数的执行并将它的参数作为函数的值返回。 return 也会终止 eval() 语句或者脚本文件的执行。
+
+如果在全局范围中调用，则当前脚本文件中止运行。如果当前脚本文件是被 include 的或者 require 的，则控制交回调用文件。此外，如果当前脚本是被 include 的，则 return 的值会被当作 include 调用的返回值。如果在主脚本文件中调用 return，则脚本中止运行。如果当前脚本文件是在 php.ini 中的配置选项 auto\_prepend\_file 或者 auto\_append\_file 所指定的，则此脚本文件中止运行。
+
+既然 return 是语言结构而不是函数，因此其参数没有必要用括号将其括起来。通常都不用括号，实际上也应该不用，这样可以降低 PHP 的负担。
+
+如果没有提供参数，则一定不能用括号，此时返回 NULL。如果调用 return 时加上了括号却又没有参数会导致解析错误。
+
+当用引用返回值时永远不要使用括号，这样行不通。只能通过引用返回变量，而不是语句的结果。如果使用 return (\$a); 时其实不是返回一个变量，而是表达式 (\$a) 的值（当然，此时该值也正是 \$a 的值）。
+
+
+
+\section{include/require statements}
+
+服务器端包含 (SSI) 用于创建可在多个页面重复使用的函数、页眉、页脚或元素。在 PHP 中能够在服务器执行 PHP 文件之前把该文件插入另一个 PHP 文件中。
+
+include 和 require 语句用于在执行流中向其他文件插入有用的的代码。
+
+include 和 require 很相似，都用于包含并运行指定文件，区别在于错误处理方面的差异：
+
+\begin{compactitem}
+\item require 会产生致命错误 (E\_COMPILE\_ERROR)，并停止脚本
+\item include 只会产生警告 (E\_WARNING)，脚本将继续
+\end{compactitem}
+
+require 在出错时产生 E\_COMPILE\_ERROR 级别的错误。换句话说将导致脚本中止而 include 只产生警告（E\_WARNING），但脚本会继续运行。
+
+因此，如果希望继续执行，并向用户输出结果，即使包含文件已丢失，那么可以使用 include。否则，在框架、CMS 或者复杂的 PHP 应用程序编程中，始终使用 require 向执行流引用关键文件。这有助于在某个关键文件意外丢失的情况下，提高应用程序的安全性和完整性。
+
+被包含文件先按参数给出的路径寻找，如果没有给出目录（只有文件名）时则按照 include\_path 指定的目录寻找。如果在 include\_path 下没找到该文件则 include 最后才在调用脚本文件所在的目录和当前工作目录下寻找。如果最后仍未找到文件则 include 结构会发出一条警告；这一点和 require 不同，后者会发出一个致命错误。
+
+如果定义了路径——不管是绝对路径（在 Windows 下以盘符或者 \textbackslash 开头，在 Unix/Linux 下以 / 开头）还是当前目录的相对路径（以 . 或者 .. 开头）——include\_path 都会被完全忽略。例如一个文件以 ../ 开头，则解析器会在当前目录的父目录下寻找该文件。
+
+\begin{lstlisting}[language=PHP]
+include 'filename';
+\end{lstlisting}
+
+或者：
+
+\begin{lstlisting}[language=PHP]
+require 'filename';
+\end{lstlisting}
+
+当一个文件被包含时，其中所包含的代码继承了 include 所在行的变量范围。从该处开始，调用文件在该行处可用的任何变量在被调用的文件中也都可用。不过所有在包含文件中定义的函数和类都具有全局作用域。
+
+
+
+
+
+在PHP可以把变量包含在独立的文件中， 下面是一个示例。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$color='red';
+$car='BMW';
+?>
+\end{lstlisting}
+
+
+通过require/include语句来引用上述的变量的示例如下：
+
+
+\begin{lstlisting}[language=HTML]
+<html>
+<body>
+
+<h1>Welcome to my home page.</h1>
+<?php include 'vars.php';
+  echo "I have a $color $car"; // I have a red BMW
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+如果 include 出现于调用文件中的一个函数里，则被调用的文件中所包含的所有代码将表现得如同它们是在该函数内部定义的一样。所以它将遵循该函数的变量范围。此规则的一个例外是魔术常量，它们是在发生包含之前就已被解析器处理的。
+
+\begin{lstlisting}[language=HTML]
+<?php
+
+function foo()
+{
+    global $color;
+
+    include 'vars.php';
+
+    echo "A $color $fruit";
+}
+
+/* vars.php is in the scope of foo() so     *
+ * $fruit is NOT available outside of this  *
+ * scope.  $color is because we declared it *
+ * as global.                               */
+
+foo();                    // A green apple
+echo "A $color $fruit";   // A green
+
+?>
+\end{lstlisting}
+
+当一个文件被包含时，语法解析器在目标文件的开头脱离 PHP 模式并进入 HTML 模式，到文件结尾处恢复。由于此原因，目标文件中需要作为 PHP 代码执行的任何代码都必须被包括在有效的 PHP 起始和结束标记之中。
+
+如果“URL fopen wrappers”在 PHP 中被激活（默认配置），可以用 URL（通过 HTTP 或者其它支持的封装协议）而不是本地文件来指定要被包含的文件\footnote{Windows 版本的 PHP 在 4.3.0 版之前不支持通过此函数访问远程文件，即使已经启用 allow\_url\_fopen。}。如果目标服务器将目标文件作为 PHP 代码解释，则可以用适用于 HTTP GET 的 URL 请求字符串来向被包括的文件传递变量。严格的说这和包含一个文件并继承父文件的变量空间并不是一回事；该脚本文件实际上已经在远程服务器上运行了，而本地脚本则包括了其结果。
+
+远程文件可能会经远程服务器处理（根据文件后缀以及远程服务器是否在运行 PHP 而定），但必须产生出一个合法的 PHP 脚本，因为其将被本地服务器处理。如果来自远程服务器的文件应该在远端运行而只输出结果，那用 readfile() 函数更好。另外还要格外小心以确保远程的脚本产生出合法并且是所需的代码。通过 HTTP 进行的 include操作的示例如下：
+
+
+\begin{lstlisting}[language=HTML]
+<?php
+
+/* This example assumes that www.example.com is configured to parse .php *
+ * files and not .txt files. Also, 'Works' here means that the variables *
+ * $foo and $bar are available within the included file.                 */
+
+// Won't work; file.txt wasn't handled by www.example.com as PHP
+include 'http://www.example.com/file.txt?foo=1&bar=2';
+
+// Won't work; looks for a file named 'file.php?foo=1&bar=2' on the
+// local filesystem.
+include 'file.php?foo=1&bar=2';
+
+// Works.
+include 'http://www.example.com/file.php?foo=1&bar=2';
+
+$foo = 1;
+$bar = 2;
+include 'file.txt';  // Works.
+include 'file.php';  // Works.
+
+?>
+\end{lstlisting}
+
+处理返回值：在失败时 include 返回 FALSE 并且发出警告。成功的包含则返回 1，除非在包含文件中另外给出了返回值。可以在被包括的文件中使用 return 语句来终止该文件中程序的执行并返回调用它的脚本。同样也可以从被包含的文件中返回值。可以像普通函数一样获得 include 调用的返回值。不过这在包含远程文件时却不行，除非远程文件的输出具有合法的 PHP 开始和结束标记（如同任何本地文件一样）。可以在标记内定义所需的变量，该变量在文件被包含的位置之后就可用了。
+
+
+\begin{lstlisting}[language=HTML]
+return.php
+<?php
+
+$var = 'PHP';
+
+return $var;
+
+?>
+
+noreturn.php
+<?php
+
+$var = 'PHP';
+
+?>
+
+testreturns.php
+<?php
+
+$foo = include 'return.php';
+
+echo $foo; // prints 'PHP'
+
+$bar = include 'noreturn.php';
+
+echo $bar; // prints 1
+
+?>
+\end{lstlisting}
+
+
+\$bar 的值为 1 是因为 include 成功运行了。注意以上例子中的区别。第一个在被包含的文件中用了 return 而另一个没有。如果文件不能被包含，则返回 FALSE 并发出一个 E\_WARNING 警告。因为是一个语言构造器而不是一个函数，不能被 可变函数 调用。
+
+如果在包含文件中定义有函数，这些函数不管是在 return 之前还是之后定义的，都可以独立在主文件中使用。如果文件被包含两次，PHP 5 发出致命错误因为函数已经被定义，但是 PHP 4 不会对在 return 之后定义的函数报错。推荐使用 include\_once 而不是检查文件是否已包含并在包含文件中有条件返回。
+
+另一个将 PHP 文件“包含”到一个变量中的方法是用输出控制函数结合 include 来捕获其输出，例如：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$string = get_include_contents('somefile.php');
+
+function get_include_contents($filename) {
+    if (is_file($filename)) {
+        ob_start();
+        include $filename;
+        $contents = ob_get_contents();
+        ob_end_clean();
+        return $contents;
+    }
+    return false;
+}
+
+?>
+\end{lstlisting}
+
+要在脚本中自动包含文件，参见 php.ini 中的 auto\_prepend\_file 和 auto\_append\_file 配置选项。
+
+包含文件省去了大量的工作，这意味着用户可以为所有页面创建标准页头、页脚或者菜单文件。然后，在页头需要更新时，只需更新这个页头包含文件即可。假设有一个标准的页头文件，名为 "header.php"。如需在页面中引用这个页头文件，使用 include/require的示例如下：
+
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PHP Example</title>
+</head>
+<body>
+  <?php include 'header.php'; ?>
+  <h1>Welcome to home page</h1>
+  <p>Some text.</p>
+</body>
+</html>
+\end{lstlisting}
+
+假设现在有一个在所有页面中使用的标准菜单文件，网站中的所有页面均应引用该菜单文件：
+
+\begin{lstlisting}[language=HTML]
+"menu.php":
+
+echo '<a href="/default.php">Home</a>
+<a href="/tutorials.php">Tutorials</a>
+<a href="/references.php">References</a>
+<a href="/examples.php">Examples</a>
+<a href="/about.php">About Us</a>
+<a href="/contact.php">Contact Us</a>';
+\end{lstlisting}
+
+下面是引用这个标准菜单文件的具体的做法：
+
+\begin{lstlisting}[language=HTML]
+<html>
+<body>
+
+<div class="leftmenu">
+<?php include 'menu.php'; ?>
+</div>
+
+<h1>Welcome to my home page.</h1>
+<p>Some text.</p>
 
 </body>
 </html>
 \end{lstlisting}
 
 
+\subsection{require\_once}
+
+require\_once 语句和 require 语句完全相同，唯一区别是 PHP 会检查该文件是否已经被包含过，如果是则不会再次包含。
+
+\subsection{include\_once}
+
+include\_once 语句在脚本执行期间包含并运行指定文件。此行为和 include 语句类似，唯一区别是如果该文件中已经被包含过，则不会再次包含。如同此语句名字暗示的那样，只会包含一次。
+
+include\_once 可以用于在脚本执行期间同一个文件有可能被包含超过一次的情况下，想确保它只被包含一次以避免函数重定义，变量重新赋值等问题。
+
+在 PHP 4中，\_once 的行为在不区分大小写字母的操作系统（例如 Windows）中有所不同，例如：
 
 
+\begin{lstlisting}[language=PHP]
+<?php
+include_once "a.php"; // 这将包含 a.php
+include_once "A.php"; // 这将再次包含 a.php！（仅 PHP 4）
+?>
+\end{lstlisting}
+
+此行为在 PHP 5 中改了，例如在 Windows 中路径先被规格化，因此 C:\textbackslash PROGRA\~{}1\textbackslash A.php 和 C:\textbackslash Program Files\textbackslash a.php 的实现一样，文件只会被包含一次。
+
+
+\section{Goto statements}
+
+goto\footnote{goto 操作符仅在 PHP 5.3及以上版本有效。} 操作符可以用来跳转到程序中的另一位置。该目标位置可以用目标名称加上冒号来标记，而跳转指令是 goto 之后接上目标位置的标记。
+
+PHP 中的 goto 有一定限制，目标位置只能位于同一个文件和作用域，也就是说无法跳出一个函数或类方法，也无法跳入到另一个函数。也无法跳入到任何循环或者 switch 结构中。可以跳出循环或者 switch，通常的用法是用 goto 代替多层的 break。
+
+\begin{lstlisting}[language=PHP]
+<?php
+goto a;
+echo 'Foo';
+ 
+a:
+echo 'Bar';
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Bar
+\end{verbatim}
+
+\begin{lstlisting}[language=PHP]
+<?php
+for($i=0,$j=50; $i<100; $i++) {
+  while($j--) {
+    if($j==17) goto end; 
+  }  
+}
+echo "i = $i";
+end:
+echo 'j hit 17';
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+j hit 17
+\end{verbatim}
+
+以下写法无效：
+
+\begin{lstlisting}[language=PHP]
+<?php
+goto loop;
+for($i=0,$j=50; $i<100; $i++) {
+  while($j--) {
+    loop:
+  }
+}
+echo "$i = $i";
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Fatal error: 'goto' into loop or switch statement is disallowed in
+script on line 2
+\end{verbatim}
+
+
+\section{Alternative syntax}
+
+
+PHP 提供了一些流程控制的替代语法，包括 if，while，for，foreach 和 switch。替代语法的基本形式是把左花括号（\{）换成冒号（:），把右花括号（\}）分别换成 endif;，endwhile;，endfor;，endforeach; 以及 endswitch;。
+
+\begin{lstlisting}[language=PHP]
+<?php if ($a == 5): ?>
+A is equal to 5
+<?php endif; ?>
+\end{lstlisting}
+
+
+在上面的例子中，HTML 内容“A is equal to 5”用替代语法嵌套在 if 语句中。该 HTML 的内容仅在 \$a 等于 5 时显示。
+
+替代语法同样可以用在 else 和 elseif 中。下面是一个包括 elseif 和 else 的 if 结构用替代语法格式写的例子：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a == 5):
+    echo "a equals 5";
+    echo "...";
+elseif ($a == 6):
+    echo "a equals 6";
+    echo "!!!";
+else:
+    echo "a is neither 5 nor 6";
+endif;
+?>
+\end{lstlisting}
+
+不支持在同一个控制块内混合使用两种语法。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
 
 \chapter{PHP Array}
 

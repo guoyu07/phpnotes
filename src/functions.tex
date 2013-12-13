@@ -3,34 +3,123 @@
 
 函数是一种可以在任何被需要的时候执行的代码块，PHP提供了超过 700 个内建的函数，因而PHP的真正威力源自于它的函数。
 
+PHP 有很多标准的函数和结构。还有一些函数需要和特定地 PHP 扩展模块一起编译，否则在使用它们的时候就会得到一个致命的“未定义函数”错误。
+
+例如，要使用 image 函数中的 imagecreatetruecolor()，需要在编译 PHP 的时候加上 GD 的支持。或者，要使用 mysql\_connect() 函数，就需要在编译 PHP 的时候加上 MySQL 支持。有很多核心函数已包含在每个版本的 PHP 中如字符串和变量函数。调用 phpinfo() 或者 get\_loaded\_extensions() 可以得知 PHP 加载了那些扩展库。同时还应该注意，很多扩展库默认就是有效的。
+
+通过阅读和理解一个函数的原型，可以确认一个函数将返回什么，或者函数是否直接作用于传递的参数。例如， str\_replace() 函数将返回修改过的字符串，而 usort() 却直接作用于传递的参数变量本身。
+
+
+
+如果传递给函数的参数类型与实际的类型不一致，例如将一个 array 传递给一个 string 类型的变量，那么函数的返回值是不确定的。在这种情况下，通常函数会返回 NULL。但这仅仅是一个惯例，并不一定如此。
+
+了解这些重要的（常常是细微的）差别是编写正确的 PHP 代码的关键。
+
 
 
 \chapter{PHP Functions Foundation}
 
+\vspace{-30pt}
+
+\section{Function Prototype}
 
 
-\section{Function Creatation}
 
-创建 PHP 函数的步骤如下：
+函数的定义又可以称为函数原型，一个函数可由以下的语法来定义：
+
+\begin{lstlisting}[language=PHP]
+<?php
+function foo($arg_1, $arg_2, /* ..., */ $arg_n)
+{
+    echo "Example function.\n";
+    return $retval;
+}
+?>
+\end{lstlisting}
+
+
 
 \begin{compactitem}
 \item 所有的函数都使用关键词``\texttt{function()}" 来开始
-\item 命名函数 - 函数的名称应该提示出它的功能。函数名称以字母或下划线开头。
+\item 命名函数 - 函数的名称应该提示出它的功能，函数名称以字母或下划线开头。
 \item 添加``\texttt{\{}" - 开口的花括号之后的部分是函数的代码。
 \item 插入函数代码
 \item 添加一个``\texttt{\}}" - 函数通过关闭花括号来结束。
 \end{compactitem}
 
+函数定义首先会告诉我们函数返回什么类型的值，以及函数有多少个变量。任何有效的 PHP 代码都有可能出现在函数内部，还可以包括其它函数和类定义。
+
+
+函数名和 PHP 中的其它标识符命名规则相同，即有效的函数名应该以字母或下划线开始，后面跟字母、数字或下划线。
+
+函数名是大小写无关的，不过在调用函数的时候，使用其在定义时相同的形式是个好习惯。
+
+可以用正则表达式将函数名规则表示为：\colorbox{lightgray}{\texttt{[a-zA-Z\_\textbackslash x7f-\textbackslash xff][a-zA-Z0-9\_\textbackslash x7f-\textbackslash xff]*}}。
+
+下面用函数 strlen() 的定义作为第一个范例：
+
+\begin{verbatim}
+strlen
+(PHP 4, PHP 5)
+strlen -- 获取字符串长度
+说明
+int strlen ( string str )
+返回给定的字符串 string 的长度。
+\end{verbatim}
+
+\begin{table}
+\centering
+\caption{函数原型}
+\begin{tabular}{|l|l|}
+\hline
+组成部分	&说明\\
+\hline
+strlen	 &函数名称。\\
+\hline
+(PHP 4, PHP 5)	& strlen() 在 PHP 4 和 PHP 5 的所有版本中都存在。\\
+\hline
+int	 &该函数返回的值的类型，这里为整型 integer（即以数字来衡量的字符串的长度）。\\
+\hline
+( string str )	 &第一个参数，在该函数中名为 str，且类型为 string。\\
+\hline
+\end{tabular}
+\end{table}
+
+可以将以上函数的定义写成一般形式：
+
+\begin{verbatim}
+返回类型          函数名           ( 参数类型          参数名 )
+returned type    function name    ( parameter type   parameter name )
+\end{verbatim}
+
+很多函数都有多个变量，例如 in\_array()。其函数原型如下：
+
+\begin{verbatim}
+ bool in_array ( mixed $needle, array $haystack [, bool $strict])
+\end{verbatim}
+
+ in\_array() 返回一个“布尔”值，成功（如果在参数 haystack 中能找到参数 needle）则返回 TRUE, 或者在失败时返回 FALSE（如果在参数 haystack 中找不到参数 needle）。第一个参数被命名为 needle 且其类型不定，因此我们将其称为“混和”类型。该混和类型的 needle 参数（我们要找的对象）可以是一个标量的值（字符串、整数、或者浮点数），或者一个数组。haystack（我们寻找的范围）是第二个参数。第三个可选参数被命名为 strict。所有的可选参数都用 [ 方括号 ] 括起来。
+
+
+有的函数包含更复杂的 PHP 版本信息，例如：
+
+\begin{verbatim}
+(PHP 4 >= 4.3.0, PHP 5)
+\end{verbatim}
+
+它意味着该函数不可在 PHP 3 中使用，只可在 PHP 4.3.0 及以后发布的版本中使用。
+
+
+
+
+
+
 比较下面两个简单的函数，在其被调用时能输出名字。
 
-\begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
+\vspace{-20pt}
 
+\begin{tabular}{m{180pt}m{5pt}m{180pt}}
+\begin{lstlisting}[language=PHP]
 <?php
 function writeMyName() {
   echo "David Yang";
@@ -38,16 +127,8 @@ function writeMyName() {
 
 writeMyName();
 ?>
-
-</body>
-</html>
-\end{lstlisting}
-
+\end{lstlisting} && 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<body>
-
 <?php
 function writeMyName() {
   return "David Yang";
@@ -55,29 +136,78 @@ function writeMyName() {
 
 echo writeMyName();
 ?>
+\end{lstlisting}\\
+\end{tabular}
 
-</body>
-</html>
-\end{lstlisting}
-
-
+\vspace{-20pt}
 
 
+
+函数无需在调用之前被定义，除非是下面两个例子中函数是有条件被定义时。
+
+\begin{tabular}{m{190pt}m{2pt}m{190pt}}
+/* 有条件的函数 */ 
+\begin{lstlisting}[language=PHP]
+<?php
+$makefoo = true;
+/* 不能在此处调用foo()函数，
+   因为它还不存在，但可以调用bar()函数。*/
+bar();
+if ($makefoo) {
+  function foo()
+  {
+    echo "I don't exist until program execution reaches me.\n";
+  }
+}
+/* 现在可以安全调用函数 foo()了，
+   因为 $makefoo 值为真 */
+if ($makefoo) foo();
+function bar()
+{
+  echo "I exist immediately upon program start.\n";
+}
+?>
+\end{lstlisting}&&/* 函数中的函数 */ 
+\begin{lstlisting}[language=PHP]
+<?php
+function foo()
+{
+  function bar()
+  {
+    echo "I don't exist until foo() is called.\n";
+  }
+}
+
+/* 现在还不能调用bar()函数，因为它还不存在 */
+
+foo();
+
+/* 现在可以调用bar()函数了，因为foo()函数
+   的执行使得bar()函数变为已定义的函数 */
+
+bar();
+
+?>
+\end{lstlisting}\\
+\end{tabular}
+
+\vspace{-20pt}
+
+当一个函数是有条件被定义时，其定义必须在调用之前先处理。
 
 \section{Function Usage}
+
+PHP 中的所有函数和类都具有全局作用域，可以定义在一个函数之内而在之外调用，反之亦然。
+
+PHP 不支持函数重载，也不可能取消定义或者重定义已声明的函数。
+
+PHP 的函数支持可变数量的参数和默认参数。
 
 
 下面的示例演示了如何在PHP脚本中使用定义的函数：
 
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title>PHP Function Example</title>
-</head>
-<body>
-
 <?php
 function writeMyName() {
   echo "David Yang";
@@ -90,29 +220,46 @@ echo ".<br />That's right, ";
 writeMyName();
 echo " is my name.";
 ?>
-
-</body>
-</html>
 \end{lstlisting}
+
+\section{Recursive Functions}
+
+
+在 PHP 中可以调用递归函数。但是要避免递归函数/方法调用超过 100-200 层，因为可能会使堆栈崩溃从而使当前脚本终止。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function recursion($a)
+{
+    if ($a < 20) {
+        echo "$a\n";
+        recursion($a + 1);
+    }
+}
+?>
+\end{lstlisting}
+
+
+
 
 
 \section{Function Parameters}
 
-可以通过添加参数向函数添加更多的功能，其中参数类似一个变量。
+每个函数名称后面都有一个括号，比如 writeMyName()，而参数就是在括号中规定的，而且参数是从左向右求值的。
 
-每个函数名称后面都有一个括号，比如 writeMyName()，而参数就是在括号中规定的。
+\begin{lstlisting}[language=PHP]
+<?php
+function takes_array($input)
+{
+    echo "$input[0] + $input[1] = ", $input[0]+$input[1];
+}
+?>
+\end{lstlisting}
 
 下面的例子会输出不同的名字，但姓是相同的：
 
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
-
 <?php
 function writeMyName($fname)
   {
@@ -128,20 +275,14 @@ writeMyName("Mike");
 echo "My name is ";
 writeMyName("John");
 ?>
-
-</body>
-</html>
 \end{lstlisting}
+
+可以通过添加参数向函数添加更多的功能，其中参数类似一个变量。通过参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表。
+
 
 下面示例中的函数有两个参数：
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-<body>
 <?php
 function writeMyName($fname,$punctuation)
   {
@@ -157,24 +298,130 @@ writeMyName("Mike","!");
 echo "My name is ";
 writeMyName("John","...");
 ?>
-
-</body>
-</html>
 \end{lstlisting}
+
+
+
+PHP 在用户自定义函数中支持可变数量的参数列表。其实很简单，只需使用 func\_num\_args()， func\_get\_arg()，和 func\_get\_args() 函数即可。
+
+可变参数并不需要特别的语法，参数列表仍按函数定义的方式传递给函数，并按通常的方式使用这些参数。
+
+\section{Parameter passing}
+
+
+
+PHP 支持按值传递参数（默认），通过引用传递参数以及默认参数\footnote{自 PHP 5 起，默认值才可以通过引用传递。}，而且PHP也支持可变长度参数列表。
+
+
+默认情况下，函数参数通过值传递（因而即使在函数内部改变参数的值，它并不会改变函数外部的值）。如果希望允许函数修改它的参数值，必须通过引用传递参数。
+
+如果想要函数的一个参数总是通过引用传递，可以在函数定义中该参数的前面加上符号 \&：
+
+\begin{lstlisting}[language=PHP]
+<?php
+function add_some_extra(&$string)
+{
+    $string .= 'and something extra.';
+}
+$str = 'This is a string, ';
+add_some_extra($str);
+echo $str;    // outputs 'This is a string, and something extra.'
+?>
+\end{lstlisting}
+
+
+函数可以定义 C++ 风格的标量参数默认值，如下所示：
+
+\begin{lstlisting}[language=PHP]
+<?php
+function makecoffee($type = "cappuccino")
+{
+    return "Making a cup of $type.\n";
+}
+echo makecoffee();
+echo makecoffee(null);
+echo makecoffee("espresso");
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Making a cup of cappuccino.
+Making a cup of .
+Making a cup of espresso.
+\end{verbatim}
+
+PHP 还允许使用数组 array 和特殊类型 NULL 作为默认参数，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+function makecoffee($types = array("cappuccino"), $coffeeMaker = NULL)
+{
+    $device = is_null($coffeeMaker) ? "hands" : $coffeeMaker;
+    return "Making a cup of ".join(", ", $types)." with $device.\n";
+}
+echo makecoffee();
+echo makecoffee(array("cappuccino", "lavazza"), "teapot");
+?>
+\end{lstlisting}
+
+
+默认值必须是常量表达式，不能是诸如变量，类成员，或者函数调用等。
+
+注意当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧；否则，函数将不会按照预期的情况工作。考虑下面的代码片断：
+
+\begin{lstlisting}[language=PHP]
+<?php
+function makeyogurt($type = "acidophilus", $flavour)
+{
+    return "Making a bowl of $type $flavour.\n";
+}
+
+echo makeyogurt("raspberry");   // won't work as expected
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Warning: Missing argument 2 in call to makeyogurt() in 
+/usr/local/etc/httpd/htdocs/phptest/functest.html on line 41
+Making a bowl of raspberry .
+\end{verbatim}
+
+
+现在，比较上面的例子和这个例子：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function makeyogurt($flavour, $type = "acidophilus")
+{
+    return "Making a bowl of $type $flavour.\n";
+}
+
+echo makeyogurt("raspberry");   // works as expected
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Making a bowl of acidophilus raspberry.
+\end{verbatim}
 
 
 
 \section{Function Return Values}
 
-函数也能用于返回值。
+函数也能用于返回值，值通过使用可选的返回语句返回\footnote{注：如果省略了 return，则返回值为 NULL。}。
+
+可以返回包括数组和对象的任意类型，返回语句会立即中止函数的运行，并且将控制权交回调用该函数的代码行。
+
+
 
 \begin{lstlisting}[language=PHP]
-<!DOCTYPE html>
-<html>
-<head>
-<title></title>
-</head>
-
 <?php
 function add($x,$y)
   {
@@ -184,12 +431,204 @@ function add($x,$y)
 
 echo "1 + 16 = " . add(1,16);
 ?>
-
-</body>
-</html>
 \end{lstlisting}
 
 
+函数不能返回多个值，但可以通过返回一个数组来得到类似的效果。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function small_numbers()
+{
+    return array (0, 1, 2);
+}
+list ($zero, $one, $two) = small_numbers();
+?>
+\end{lstlisting}
+
+从函数返回一个引用，必须在函数声明和指派返回值给一个变量时都使用引用运算符 \&：
+
+\begin{lstlisting}[language=PHP]
+<?php
+function &returns_reference()
+{
+    return $someref;
+}
+
+$newref =& returns_reference();
+?>
+\end{lstlisting}
+
+
+\chapter{Variable functions}
+
+
+PHP 支持可变函数的概念。这意味着如果一个变量名后有圆括号，PHP 将寻找与变量的值同名的函数，并且尝试执行它。可变函数可以用来实现包括回调函数，函数表在内的一些用途。
+
+
+可变函数不能用于例如 echo， print， unset()， isset()， empty()， include， require 以及类似的语言结构。需要使用自己的包装函数来将这些结构用作可变函数。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function foo() {
+    echo "In foo()<br />\n";
+}
+
+function bar($arg = '') {
+    echo "In bar(); argument was '$arg'.<br />\n";
+}
+
+// 使用 echo 的包装函数
+function echoit($string)
+{
+    echo $string;
+}
+
+$func = 'foo';
+$func();        // This calls foo()
+
+$func = 'bar';
+$func('test');  // This calls bar()
+
+$func = 'echoit';
+$func('test');  // This calls echoit()
+?>
+\end{lstlisting}
+
+
+也可以用可变函数的语法来调用一个对象的方法。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Foo
+{
+    function Variable()
+    {
+        $name = 'Bar';
+        $this->$name(); // This calls the Bar() method
+    }
+
+    function Bar()
+    {
+        echo "This is Bar";
+    }
+}
+
+$foo = new Foo();
+$funcname = "Variable";
+$foo->$funcname();   // This calls $foo->Variable()
+
+?>
+\end{lstlisting}
+
+当调用静态方法时，函数调用要比静态属性优先：
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Foo
+{
+    static $variable = 'static property';
+    static function Variable()
+    {
+        echo 'Method Variable called';
+    }
+}
+
+echo Foo::$variable; // This prints 'static property'. It does need a $variable in this scope.
+$variable = "Variable";
+Foo::$variable();  // This calls $foo->Variable() reading $variable in this scope.
+
+?>
+\end{lstlisting}
+
+
+\chapter{Anonymous functions}
+
+匿名函数（Anonymous functions），也叫闭包函数（closures），允许 临时创建一个没有指定名称的函数。最经常用作回调函数（callback）参数的值。当然，也有其它应用的情况。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo preg_replace_callback('~-([a-z])~', function ($match) {
+    return strtoupper($match[1]);
+}, 'hello-world');
+// 输出 helloWorld
+?>
+\end{lstlisting}
+
+闭包函数也可以作为变量的值来使用。PHP 会自动把此种表达式转换成内置类 Closure 的对象实例。把一个 closure 对象赋值给一个变量的方式与普通变量赋值的语法是一样的，最后也要加上分号。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$greet = function($name)
+{
+    printf("Hello %s\r\n", $name);
+};
+
+$greet('World');
+$greet('PHP');
+?>
+\end{lstlisting}
+
+Closure 对象也会从父作用域中继承类属性。这些变量都必须在函数或类的头部声明。从父作用域中继承变量与使用全局变量是不同的。全局变量存在于一个全局的范围，无论当前在执行的是哪个函数。而 closure 的父作用域则是声明该 closure 的函数（不一定要是它被调用的函数）。示例如下：
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 一个基本的购物车，包括一些已经添加的商品和每种商品的数量。
+// 其中有一个方法用来计算购物车中所有商品的总价格，该方法使
+// 用了一个 closure 作为回调函数。
+class Cart
+{
+    const PRICE_BUTTER  = 1.00;
+    const PRICE_MILK    = 3.00;
+    const PRICE_EGGS    = 6.95;
+
+    protected   $products = array();
+    
+    public function add($product, $quantity)
+    {
+        $this->products[$product] = $quantity;
+    }
+    
+    public function getQuantity($product)
+    {
+        return isset($this->products[$product]) ? $this->products[$product] :
+               FALSE;
+    }
+    
+    public function getTotal($tax)
+    {
+        $total = 0.00;
+        
+        $callback =
+            function ($quantity, $product) use ($tax, &$total)
+            {
+                $pricePerItem = constant(__CLASS__ . "::PRICE_" .
+                    strtoupper($product));
+                $total += ($pricePerItem * $quantity) * ($tax + 1.0);
+            };
+        
+        array_walk($this->products, $callback);
+        return round($total, 2);;
+    }
+}
+
+$my_cart = new Cart;
+
+// 往购物车里添加条目
+$my_cart->add('butter', 1);
+$my_cart->add('milk', 3);
+$my_cart->add('eggs', 6);
+
+// 打出出总价格，其中有 5% 的销售税.
+print $my_cart->getTotal(0.05) . "\n";
+// 最后结果是 54.29
+?>
+\end{lstlisting}
+
+匿名函数目前是通过 Closure 类来实现的，可以在 closure 中使用 func\_num\_args()， func\_get\_arg() 和 func\_get\_args()。
+
+自PHP 5.3.0起，可以使用匿名函数。自PHP 5.4.0起，\$this 可用于匿名函数。
 
 
 \chapter{PHP Script}
@@ -488,106 +927,7 @@ DATE\_W3C	&World Wide Web Consortium \newline (如:2005-08-14T16:13:03+0000)	 &\
 \end{longtable}
 
 
-\chapter{PHP include/require statements}
 
-服务器端包含 (SSI) 用于创建可在多个页面重复使用的函数、页眉、页脚或元素。
-
-在 PHP 中能够在服务器执行 PHP 文件之前把该文件插入另一个 PHP 文件中。include 和 require 语句用于在执行流中向其他文件插入有用的的代码。
-
-include 和 require 很相似，除了在错误处理方面的差异：
-
-\begin{compactitem}
-\item require 会产生致命错误 (E\_COMPILE\_ERROR)，并停止脚本
-\item include 只会产生警告 (E\_WARNING)，脚本将继续
-\end{compactitem}
-
-因此，如果希望继续执行，并向用户输出结果，即使包含文件已丢失，那么可以使用 include。否则，在框架、CMS 或者复杂的 PHP 应用程序编程中，始终使用 require 向执行流引用关键文件。这有助于在某个关键文件意外丢失的情况下，提高应用程序的安全性和完整性。
-
-包含文件省去了大量的工作，这意味着用户可以为所有页面创建标准页头、页脚或者菜单文件。然后，在页头需要更新时，只需更新这个页头包含文件即可。
-
-\begin{lstlisting}[language=PHP]
-include 'filename';
-\end{lstlisting}
-
-或者：
-
-\begin{lstlisting}[language=PHP]
-require 'filename';
-\end{lstlisting}
-
-
-假设有一个标准的页头文件，名为 "header.php"。如需在页面中引用这个页头文件，使用 include/require的示例如下：
-
-
-\begin{lstlisting}[language=HTML]
-<!DOCTYPE html>
-<html>
-<head>
-  <title>PHP Example</title>
-</head>
-<body>
-  <?php include 'header.php'; ?>
-  <h1>Welcome to home page</h1>
-  <p>Some text.</p>
-</body>
-</html>
-\end{lstlisting}
-
-假设现在有一个在所有页面中使用的标准菜单文件，网站中的所有页面均应引用该菜单文件：
-
-\begin{lstlisting}[language=HTML]
-"menu.php":
-
-echo '<a href="/default.php">Home</a>
-<a href="/tutorials.php">Tutorials</a>
-<a href="/references.php">References</a>
-<a href="/examples.php">Examples</a>
-<a href="/about.php">About Us</a>
-<a href="/contact.php">Contact Us</a>';
-\end{lstlisting}
-
-下面是引用这个标准菜单文件的具体的做法：
-
-\begin{lstlisting}[language=HTML]
-<html>
-<body>
-
-<div class="leftmenu">
-<?php include 'menu.php'; ?>
-</div>
-
-<h1>Welcome to my home page.</h1>
-<p>Some text.</p>
-
-</body>
-</html>
-\end{lstlisting}
-
-在PHP可以把变量包含在独立的文件中， 下面是一个示例。
-
-\begin{lstlisting}[language=PHP]
-<?php
-$color='red';
-$car='BMW';
-?>
-\end{lstlisting}
-
-
-通过require/include语句来引用上述的变量的示例如下：
-
-
-\begin{lstlisting}[language=HTML]
-<html>
-<body>
-
-<h1>Welcome to my home page.</h1>
-<?php include 'vars.php';
-  echo "I have a $color $car"; // I have a red BMW
-?>
-
-</body>
-</html>
-\end{lstlisting}
 
 
 
@@ -605,16 +945,10 @@ $car='BMW';
 
 fopen() 函数用于在 PHP 中打开文件。此函数的第一个参数含有要打开的文件的名称，第二个参数规定了使用哪种模式来打开文件：
 
-\begin{lstlisting}[language=HTML]
-<html>
-<body>
-
+\begin{lstlisting}[language=PHP]
 <?php
   $file=fopen("welcome.txt","r");
 ?>
-
-</body>
-</html>
 \end{lstlisting}
 
 文件可能通过下列模式\footnote{如果 fopen() 无法打开指定文件，则返回 0 (false)。}来打开：
@@ -667,15 +1001,9 @@ x+	&读/写。创建新文件。如果文件已存在，则返回 FALSE 和一�
 
 
 \begin{lstlisting}[language=HTML]
-<html>
-<body>
-
 <?php
   $file=fopen("welcome.txt","r") or exit("Unable to open file!");
 ?>
-
-</body>
-</html>
 \end{lstlisting}
 
 
