@@ -14,6 +14,12 @@
 %modify the headheight at least 13.5pt
 \usepackage[headheight=13.6pt]{geometry}
 
+\usepackage{caption}
+\DeclareCaptionType [fileext=loe]{example}[Example][List of Examples]
+
+\usepackage{subfig}                 % put before fvrb-ex
+\newsubfloat[position=bottom,listofformat=subsimple]{example}
+
 %
 \usepackage{fontspec}
 
@@ -267,6 +273,7 @@ morestring=[b]",
 \tableofcontents
 \listoffigures
 \listoftables
+\listofexamples
 \printindex
 
 \include{introduction}
@@ -278,7 +285,11 @@ morestring=[b]",
 \include{functions}
 
 
+\include{mysql}
+
+
 \include{objects}
+
 
 
 \include{forms}
