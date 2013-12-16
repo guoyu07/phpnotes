@@ -14,11 +14,11 @@
 %modify the headheight at least 13.5pt
 \usepackage[headheight=13.6pt]{geometry}
 
-\usepackage{caption}
-\DeclareCaptionType [fileext=loe]{example}[Example][List of Examples]
-
-\usepackage{subfig}                 % put before fvrb-ex
-\newsubfloat[position=bottom,listofformat=subsimple]{example}
+%%\usepackage{caption}
+%%\DeclareCaptionType [fileext=loe]{example}[Example][List of Examples]
+%%
+%%\usepackage{subfig}                 % put before fvrb-ex
+%%\newsubfloat[position=bottom,listofformat=subsimple]{example}
 
 %
 \usepackage{fontspec}
@@ -243,7 +243,14 @@ morestring=[b]",
 }
 
 
-
+\newcounter{examplecounter}
+\newenvironment{example}{\begin{quote}%
+    \refstepcounter{examplecounter}%
+  \textbf{Example \arabic{examplecounter}}%
+  \quad
+}{%
+\end{quote}%
+}
 
 
 
@@ -273,7 +280,7 @@ morestring=[b]",
 \tableofcontents
 \listoffigures
 \listoftables
-\listofexamples
+%%\listofexamples
 \printindex
 
 \include{introduction}
@@ -283,6 +290,9 @@ morestring=[b]",
 
 
 \include{functions}
+
+
+\include{references}
 
 
 \include{mysql}
@@ -296,6 +306,8 @@ morestring=[b]",
 
 \include{forms}
 
+
+\include{exceptions}
 
 
 
