@@ -1,4 +1,4 @@
-\part{PHP Exceptions}
+\part{Exceptions}
 
 
 
@@ -573,11 +573,528 @@ throw new Exception('Uncaught Exception occurred');
 简而言之就是，如果抛出了异常，就必须捕获它。
 
 
-\chapter{Predefined Exceptions}
+\chapter{Exception}
 
 
-Exception是所有异常的基类。
+Exception是所有异常的基类\footnote{自PHP 5.1.0起，引入Exception类。}。
+
+\textbf{Exception类摘要}
+
+\begin{lstlisting}[language=PHP]
+Exception {
+  /* 属性 */
+  protected string $message ;
+  protected int $code ;
+  protected string $file ;
+  protected int $line ;
+  /* 方法 */
+  public __construct ([ string $message = "" [, int $code = 0 [, Exception $previous = NULL ]]] )
+  final public string getMessage ( void )
+  final public Exception getPrevious ( void )
+  final public int getCode ( void )
+  final public string getFile ( void )
+  final public int getLine ( void )
+  final public array getTrace ( void )
+  final public string getTraceAsString ( void )
+  public string __toString ( void )
+  final private void __clone ( void )
+}
+\end{lstlisting}
+
+
+\textbf{Exception类属性}
+
+\begin{compactitem}
+\item message
+
+异常消息内容
+\item code
+
+异常代码
+\item file
+
+抛出异常的文件名
+\item line
+
+抛出异常在该文件中的行号
+
+\end{compactitem}
+
+
+
+\textbf{Exception类方法}
+
+\begin{compactitem}
+\item Exception::\_\_construct — 异常构造函数
+\item Exception::getMessage — 获取异常消息内容
+\item Exception::getPrevious — 返回异常链中的前一个异常
+\item Exception::getCode — 获取异常代码
+\item Exception::getFile — 获取发生异常的程序文件名称
+\item Exception::getLine — 获取发生异常的代码在文件中的行号
+\item Exception::getTrace — 获取异常追踪信息
+\item Exception::getTraceAsString — 获取字符串类型的异常追踪信息
+\item Exception::\_\_toString — 将异常对象转换为字符串
+\item Exception::\_\_clone — 异常克隆
+\end{compactitem}
+
+\section{Exception::\_\_construct}
+
+
+Exception::\_\_construct —— 异常构造函数\footnote{自PHP 5.3.0起，增加previous参数。}。
+
+
+\begin{lstlisting}[language=PHP]
+public Exception::__construct() ([ string $message = "" [, int $code = 0 [, Exception $previous = NULL ]]] )
+\end{lstlisting}
 
 
 
 
+\textbf{参数}
+
+\begin{compactitem}
+\item message
+抛出的异常消息内容，The message is NOT binary safe.
+\item code
+异常代码。
+\item previous
+异常链中的前一个异常。
+\end{compactitem}
+
+
+\section{Exception::getMessage}
+
+Exception::getMessage — 获取异常消息内容，返回字符串类型的异常消息内容。此函数没有参数。
+
+\begin{lstlisting}[language=PHP]
+final public string Exception::getMessage ( void )
+\end{lstlisting}
+
+
+
+
+\begin{example}
+Exception::getMessage()示例
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Exception("Some error message");
+} catch(Exception $e) {
+    echo $e->getMessage();
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+Some error message
+\end{verbatim}
+
+\section{Exception::getPrevious}
+
+Exception::getPrevious — 返回异常链中的前一个异常（ Exception::\_\_construct()方法的第三个参数），否则返回NULL。此函数没有参数。
+
+\begin{lstlisting}[language=PHP]
+final public Exception Exception::getPrevious ( void )
+\end{lstlisting}
+
+
+
+\begin{example}
+Exception::getPrevious()示例 - 追踪异常，并循环打印。
+\begin{lstlisting}[language=PHP]
+<?php
+class MyCustomException extends Exception {}
+
+function doStuff() {
+    try {
+        throw new InvalidArgumentException("You are doing it wrong!", 112);
+    } catch(Exception $e) {
+        throw new MyCustomException("Something happend", 911, $e);
+    }
+}
+
+
+try {
+    doStuff();
+} catch(Exception $e) {
+    do {
+        printf("%s:%d %s (%d) [%s]\n", $e->getFile(), $e->getLine(), $e->getMessage(), $e->getCode(), get_class($e));
+    } while($e = $e->getPrevious());
+}
+?>
+\end{lstlisting}
+\end{example}
+
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+/home/bjori/ex.php:8 Something happend (911) [MyCustomException]
+/home/bjori/ex.php:6 You are doing it wrong! (112) [InvalidArgumentException]
+\end{verbatim}
+
+
+
+
+\section{Exception::getCode}
+
+
+Exception::getCode — 获取并返回整型（integer）类型的异常代码，此函数没有参数。
+
+
+\begin{lstlisting}[language=PHP]
+final public int Exception::getCode ( void )
+\end{lstlisting}
+
+
+
+\begin{example}
+Exception::getCode()示例
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Exception("Some error message", 30);
+} catch(Exception $e) {
+    echo "The exception code is: " . $e->getCode();
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+
+\begin{verbatim}
+The exception code is: 30
+\end{verbatim}
+
+\section{Exception::getFile}
+
+
+Exception::getFile — 获取并返回发生异常的程序文件名称，此函数没有参数。
+
+\begin{lstlisting}[language=PHP]
+final public string Exception::getFile ( void )
+\end{lstlisting}
+
+
+
+\begin{example}
+Exception::getFile()示例
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Exception;
+} catch(Exception $e) {
+    echo $e->getFile();
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+/home/bjori/tmp/ex.php
+\end{verbatim}
+
+
+\section{Exception::getLine}
+
+Exception::getLine — 获取并返回发生异常的代码在文件中的行号，此函数没有参数。
+
+
+\begin{lstlisting}[language=PHP]
+final public int Exception::getLine ( void )
+\end{lstlisting}
+
+
+
+
+\begin{example}
+Exception::getLine()示例
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Exception("Some error message");
+} catch(Exception $e) {
+    echo "The exception was thrown on line: " . $e->getLine();
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+The exception was thrown on line: 3
+\end{verbatim}
+
+
+\section{Exception::getTrace}
+
+Exception::getTrace — 获取并返回异常追踪信息的数组（array），此函数没有参数。
+
+\begin{lstlisting}[language=PHP]
+final public array Exception::getTrace ( void )
+\end{lstlisting}
+
+
+
+
+\begin{example}
+Exception::getTrace()示例
+\begin{lstlisting}[language=PHP]
+<?php
+function test() {
+ throw new Exception;
+}
+
+try {
+ test();
+} catch(Exception $e) {
+ var_dump($e->getTrace());
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+array(1) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(22) "/home/bjori/tmp/ex.php"
+    ["line"]=>
+    int(7)
+    ["function"]=>
+    string(4) "test"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+\end{verbatim}
+
+
+\section{Exception::getTraceAsString}
+
+
+Exception::getTraceAsString — 获取并返回字符串类型的异常追踪信息。此函数没有参数。
+
+
+\begin{lstlisting}[language=PHP]
+final public string Exception::getTraceAsString ( void )
+\end{lstlisting}
+
+
+
+\begin{example}
+Exception::getTraceAsString()示例
+\begin{lstlisting}[language=PHP]
+<?php
+function test() {
+    throw new Exception;
+}
+
+try {
+    test();
+} catch(Exception $e) {
+    echo $e->getTraceAsString();
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+#0 /home/bjori/tmp/ex.php(7): test()
+#1 {main}
+\end{verbatim}
+
+\section{Exception::\_\_toString}
+
+Exception::\_\_toString — 将异常对象转换为字符串并返回。此函数没有参数。
+
+\begin{lstlisting}[language=PHP]
+public string Exception::__toString ( void )
+\end{lstlisting}
+
+
+
+\begin{example}
+Exception::\_\_toString()示例
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Exception("Some error message");
+} catch(Exception $e) {
+    echo $e;
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+exception 'Exception' with message 'Some error message' in /home/bjori/tmp/ex.php:3
+Stack trace:
+#0 {main}
+\end{verbatim}
+
+
+\section{Exception::\_\_clone}
+
+Exception::\_\_clone — 尝试异常克隆。因为异常被不允许克隆，因而这将导致一个致命错误。此函数没有参数，没有返回值。
+
+\begin{lstlisting}[language=PHP]
+final private void Exception::__clone ( void )
+\end{lstlisting}
+
+
+
+\chapter{ErrorException}
+
+错误异常\footnote{自PHP 5.1.0起，引入ErrorException类。}。
+
+\textbf{ErrorException类摘要}
+
+
+
+\begin{lstlisting}[language=PHP]
+ErrorException extends Exception {
+  /* 属性 */
+   protected int $severity ;
+  /* 方法 */
+  public __construct ([ string $message = "" [, int $code = 0 [, int $severity = 1 [, string $filename = __FILE__ [, int $lineno = __LINE__ [, Exception $previous = NULL ]]]]]] )
+  final public int getSeverity ( void )
+  /* 继承的方法 */
+  final public string Exception::getMessage ( void )
+  final public Exception Exception::getPrevious ( void )
+  final public int Exception::getCode ( void )
+  final public string Exception::getFile ( void )
+  final public int Exception::getLine ( void )
+  final public array Exception::getTrace ( void )
+  final public string Exception::getTraceAsString ( void )
+  public string Exception::__toString ( void )
+  final private void Exception::__clone ( void )
+}
+\end{lstlisting}
+
+\textbf{ErrorException类属性}
+
+\begin{compactitem}
+\item severity
+异常级别
+\end{compactitem}
+
+
+\textbf{ErrorException类方法}
+
+\begin{compactitem}
+\item ErrorException::\_\_construct — 异常构造函数
+\item ErrorException::getSeverity — 获取异常的严重程度
+\end{compactitem}
+
+
+
+\begin{example}
+使用 set\_error\_handler()函数将错误信息托管至ErrorException
+\begin{lstlisting}[language=PHP]
+<?php
+function exception_error_handler($errno, $errstr, $errfile, $errline ) {
+    throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+}
+set_error_handler("exception_error_handler");
+
+/* Trigger exception */
+strpos();
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+Fatal error: Uncaught exception 'ErrorException' with message 'Wrong parameter count for strpos()' in /home/bjori/tmp/ex.php:8
+Stack trace:
+#0 [internal function]: exception_error_handler(2, 'Wrong parameter...', '/home/bjori/php...', 8, Array)
+#1 /home/bjori/php/cleandocs/test.php(8): strpos()
+#2 {main}
+  thrown in /home/bjori/tmp/ex.php on line 8
+\end{verbatim}
+
+
+
+\section{ErrorException::\_\_construct}
+
+
+ErrorException::\_\_construct — 异常构造函数\footnote{自PHP 5.3.0起，增加previous参数。}。
+
+\begin{lstlisting}[language=PHP]
+public ErrorException::__construct() ([ string $message = "" [, int $code = 0 [, int $severity = 1 [, string $filename = __FILE__ [, int $lineno = __LINE__ [, Exception $previous = NULL ]]]]]] )
+\end{lstlisting}
+
+\begin{compactitem}
+\item message
+抛出的异常消息内容。
+\item code
+异常代码。
+\item severity
+异常的严重级别。
+\item filename
+抛出异常所在的文件名。
+\item lineno
+抛出异常所在的行号。
+\item previous
+异常链中的前一个异常。
+\end{compactitem}
+
+
+\section{ErrorException::getSeverity}
+
+ErrorException::getSeverity — 获取并返回异常的严重程度，此函数没有参数。
+
+
+\begin{lstlisting}[language=PHP]
+final public int ErrorException::getSeverity ( void )
+\end{lstlisting}
+
+
+\begin{example}
+ErrorException::getSeverity() 例子
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new ErrorException("Exception message", 0, 75);
+} catch(ErrorException $e) {
+    echo "This exception severity is: " . $e->getSeverity();
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+This exception severity is: 75
+\end{verbatim}
+
+
+
+
+
+
+
+
+
+\bibliographystyle{plainnat}
+\bibliography{phpnotes}
+\clearpage
