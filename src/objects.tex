@@ -1253,6 +1253,767 @@ class b implements a
 接口加上类型约束，提供了一种很好的方式来确保某个对象包含有某些方法。
 
 
+\section{Predefined Interfaces and Classes}
+
+
+
+\subsection{Traversable interface}
+
+
+Traversable interface是检测一个类是否可以使用 foreach 进行遍历的接口，该接口是无法被单独实现的基本抽象接口。
+
+这是一个无法在 PHP 脚本中实现的内部引擎接口。IteratorAggregate 或 Iterator 接口可以用来代替它。
+
+
+Traversable interface必须由 IteratorAggregate 或 Iterator 接口实现，但实现此接口的内建类可以使用 foreach 进行遍历而无需实现 IteratorAggregate 或 Iterator 接口。
+
+\begin{lstlisting}[language=PHP]
+Traversable {
+}
+\end{lstlisting}
+
+这个接口没有任何方法，它的作用仅仅是作为所有可遍历类的基本接口。
+
+While you cannot implement this interface, you can use it in your checks to determine if something is usable in for each. Here is what I use if I'm expecting something that must be iterable via foreach.
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+    if( !is_array( $items ) && !$items instanceof Traversable )
+        //Throw exception here
+?>
+\end{lstlisting}
+
+
+\subsection{Iterator interface}
+
+
+
+Iterator interface是可在内部迭代自己的外部迭代器或类的接口。
+
+
+
+\begin{lstlisting}[language=PHP]
+Iterator extends Traversable {
+  /* 方法 */
+  abstract public mixed current ( void )
+  abstract public scalar key ( void )
+  abstract public void next ( void )
+  abstract public void rewind ( void )
+  abstract public boolean valid ( void )
+}
+\end{lstlisting}
+
+\textbf{Iterator interface方法}
+
+\begin{compactitem}
+\item Iterator::current — 返回当前元素
+\item Iterator::key — 返回当前元素的键
+\item Iterator::next — 向前移动到下一个元素
+\item Iterator::rewind — 返回到迭代器的第一个元素
+\item Iterator::valid — 检查当前位置是否有效
+\end{compactitem}
+
+PHP 已经提供了一些用于日常任务的迭代器。
+
+\begin{example}
+Iterator Interface基本用法
+\begin{lstlisting}[language=PHP]
+<?php
+class myIterator implements Iterator {
+    private $position = 0;
+    private $array = array(
+        "firstelement",
+        "secondelement",
+        "lastelement",
+    );  
+
+    public function __construct() {
+        $this->position = 0;
+    }
+
+    function rewind() {
+        var_dump(__METHOD__);
+        $this->position = 0;
+    }
+
+    function current() {
+        var_dump(__METHOD__);
+        return $this->array[$this->position];
+    }
+
+    function key() {
+        var_dump(__METHOD__);
+        return $this->position;
+    }
+
+    function next() {
+        var_dump(__METHOD__);
+        ++$this->position;
+    }
+
+    function valid() {
+        var_dump(__METHOD__);
+        return isset($this->array[$this->position]);
+    }
+}
+
+$it = new myIterator;
+
+foreach($it as $key => $value) {
+    var_dump($key, $value);
+    echo "\n";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+这个例子展示了使用 foreach 时，迭代器方法的调用顺序。
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+string(18) "myIterator::rewind"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(0)
+string(12) "firstelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(1)
+string(13) "secondelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(2)
+string(11) "lastelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+\end{verbatim}
+
+
+\textbf{Iterator::current}
+
+Iterator::current — 返回当前元素，此函数没有参数，可返回任何类型。
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed Iterator::current ( void )
+\end{lstlisting}
+
+\textbf{Iterator::key}
+
+
+Iterator::key — 返回当前元素的键，此函数没有参数。成功返回标量，失败则返回 NULL并分发 E\_NOTICE 级错误。
+
+\begin{lstlisting}[language=PHP]
+abstract public scalar Iterator::key ( void )
+\end{lstlisting}
+
+
+\textbf{Iterator::next}
+
+Iterator::next — 移动当前位置到下一个元素。此函数没有参数，并且任何值返回都将被忽略。
+
+\begin{lstlisting}[language=PHP]
+abstract public void Iterator::next ( void )
+\end{lstlisting}
+
+此方法在 foreach 循环之后被调用。
+
+\textbf{Iterator::rewind}
+
+Iterator::rewind — 返回到迭代器的第一个元素，此函数没有参数，并且任何值返回都将被忽略。
+
+\begin{lstlisting}[language=PHP]
+abstract public void Iterator::rewind ( void )
+\end{lstlisting}
+
+当开始一个 foreach 循环时，这是第一个被调用的方法。它将不会在 foreach 循环之后被调用。
+
+
+\textbf{Iterator::valid}
+
+Iterator::valid — 检查当前位置是否有效，此函数没有参数。返回至将被转换为布尔类型，成功时返回 TRUE， 或者在失败时返回 FALSE。
+
+\begin{lstlisting}[language=PHP]
+abstract public boolean Iterator::valid ( void )
+\end{lstlisting}
+
+此方法在 Iterator::rewind() 和 Iterator::next() 方法之后被调用以此用来检查当前位置是否有效。
+
+
+\subsection{IteratorAggregate interface}
+
+IteratorAggregate interface —— 创建外部迭代器的接口。
+
+
+\begin{lstlisting}[language=PHP]
+IteratorAggregate extends Traversable {
+/* 方法 */
+abstract public Traversable getIterator ( void )
+}
+\end{lstlisting}
+
+
+\textbf{IteratorAggregate方法}
+
+\begin{compactitem}
+\item IteratorAggregate::getIterator — 获取一个外部迭代器
+\end{compactitem}
+
+\begin{example}
+基本用法
+\begin{lstlisting}[language=PHP]
+<?php
+class myData implements IteratorAggregate {
+    public $property1 = "Public property one";
+    public $property2 = "Public property two";
+    public $property3 = "Public property three";
+
+    public function __construct() {
+        $this->property4 = "last property";
+    }
+
+    public function getIterator() {
+        return new ArrayIterator($this);
+    }
+}
+
+$obj = new myData;
+
+foreach($obj as $key => $value) {
+    var_dump($key, $value);
+    echo "\n";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+string(9) "property1"
+string(19) "Public property one"
+
+string(9) "property2"
+string(19) "Public property two"
+
+string(9) "property3"
+string(21) "Public property three"
+
+string(9) "property4"
+string(13) "last property"
+\end{verbatim}
+
+
+\textbf{IteratorAggregate::getIterator}
+
+IteratorAggregate::getIterator — 该接口实现了 Iterator 或 Traversable 接口的类的一个实例，可以获取并返回一个外部迭代器，此函数没有参数，失败时抛出 Exception。
+
+
+\subsection{ArrayAccess interface}
+
+
+ArrayAccess interface提供像访问数组一样访问对象的能力的接口。
+
+
+
+\begin{lstlisting}[language=PHP]
+ArrayAccess {
+  /* 方法 */
+  abstract public boolean offsetExists ( mixed $offset )
+  abstract public mixed offsetGet ( mixed $offset )
+  abstract public void offsetSet ( mixed $offset , mixed $value )
+  abstract public void offsetUnset ( mixed $offset )
+}
+\end{lstlisting}
+
+\textbf{ArrayAccess接口方法}
+
+\begin{compactitem}
+\item ArrayAccess::offsetExists — 检查一个偏移位置是否存在
+\item ArrayAccess::offsetGet — 获取一个偏移位置的值
+\item ArrayAccess::offsetSet — 设置一个偏移位置的值
+\item ArrayAccess::offsetUnset — 复位一个偏移位置的值
+\end{compactitem}
+
+
+\begin{example}
+Basic usage
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements arrayaccess {
+    private $container = array();
+    public function __construct() {
+        $this->container = array(
+            "one"   => 1,
+            "two"   => 2,
+            "three" => 3,
+        );
+    }
+    public function offsetSet($offset, $value) {
+        if (is_null($offset)) {
+            $this->container[] = $value;
+        } else {
+            $this->container[$offset] = $value;
+        }
+    }
+    public function offsetExists($offset) {
+        return isset($this->container[$offset]);
+    }
+    public function offsetUnset($offset) {
+        unset($this->container[$offset]);
+    }
+    public function offsetGet($offset) {
+        return isset($this->container[$offset]) ? $this->container[$offset] : null;
+    }
+}
+
+$obj = new obj;
+
+var_dump(isset($obj["two"]));
+var_dump($obj["two"]);
+unset($obj["two"]);
+var_dump(isset($obj["two"]));
+$obj["two"] = "A value";
+var_dump($obj["two"]);
+$obj[] = 'Append 1';
+$obj[] = 'Append 2';
+$obj[] = 'Append 3';
+print_r($obj);
+?>
+\end{lstlisting}
+\end{example}
+
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+bool(true)
+int(2)
+bool(false)
+string(7) "A value"
+obj Object
+(
+    [container:obj:private] => Array
+        (
+            [one] => 1
+            [three] => 3
+            [two] => A value
+            [0] => Append 1
+            [1] => Append 2
+            [2] => Append 3
+        )
+
+)
+\end{verbatim}
+
+
+
+\textbf{ArrayAccess::offsetExists}
+
+ArrayAccess::offsetExists — 检查一个偏移位置是否存在。
+
+
+\begin{lstlisting}[language=PHP]
+abstract public boolean ArrayAccess::offsetExists ( mixed $offset )
+\end{lstlisting}
+
+\begin{compactitem}
+\item offset
+需要检查的偏移位置。
+\end{compactitem}
+
+对一个实现了 ArrayAccess 接口的对象使用 isset() 或 empty() 时，此方法将执行，成功时返回 TRUE， 或者在失败时返回 FALSE。如果一个非布尔型返回值被返回，将被转换为布尔型。
+
+当使用 empty() 并且仅当 ArrayAccess::offsetExists() 返回 TRUE 时， ArrayAccess::offsetGet() 将被调用以检查是为否空。
+
+
+\begin{example}
+ArrayAccess::offsetExists() 范例
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements arrayaccess {
+    public function offsetSet($offset, $value) {
+        var_dump(__METHOD__);
+    }
+    public function offsetExists($var) {
+        var_dump(__METHOD__);
+        if ($var == "foobar") {
+            return true;
+        }
+        return false;
+    }
+    public function offsetUnset($var) {
+        var_dump(__METHOD__);
+    }
+    public function offsetGet($var) {
+        var_dump(__METHOD__);
+        return "value";
+    }
+}
+
+$obj = new obj;
+
+echo "Runs obj::offsetExists()\n";
+var_dump(isset($obj["foobar"]));
+
+echo "\nRuns obj::offsetExists() and obj::offsetGet()\n";
+var_dump(empty($obj["foobar"]));
+
+echo "\nRuns obj::offsetExists(), *not* obj:offsetGet() as there is nothing to get\n";
+var_dump(empty($obj["foobaz"]));
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+Runs obj::offsetExists()
+string(17) "obj::offsetExists"
+bool(true)
+
+Runs obj::offsetExists() and obj::offsetGet()
+string(17) "obj::offsetExists"
+string(14) "obj::offsetGet"
+bool(false)
+
+Runs obj::offsetExists(), *not* obj:offsetGet() as there is nothing to get
+string(17) "obj::offsetExists"
+bool(true)
+\end{verbatim}
+
+\textbf{ArrayAccess::offsetGet}
+
+ArrayAccess::offsetGet — 获取并返回指定偏移位置的值，可返回任何类型。
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed ArrayAccess::offsetGet ( mixed $offset )
+\end{lstlisting}
+
+\begin{compactitem}
+\item offset
+需要获取的偏移位置。
+\end{compactitem}
+
+当检查一个偏移位置是否为 empty() 时，此方法被执行。
+
+
+Starting with PHP 5.3.4, the prototype checks were relaxed and it's possible for implementations of this method to return by reference. This makes indirect modifications to the overloaded array dimensions of ArrayAccess objects possible.
+
+A direct modification is one that replaces completely the value of the array dimension, as in \$obj[6] = 7. An indirect modification, on the other hand, only changes part of the dimension, or attempts to assign the dimension by reference to another variable, as in \$obj[6][7] = 7 or \$var =\& \$obj[6]. Increments with ++ and decrements with -- are also implemented in a way that requires indirect modification.
+
+While direct modification triggers a call to ArrayAccess::offsetSet(), indirect modification triggers a call to ArrayAccess::offsetGet(). In that case, the implementation of ArrayAccess::offsetGet() must be able to return by reference, otherwise an E\_NOTICE message is raised.
+
+
+\textbf{ArrayAccess::offsetSet}
+
+ArrayAccess::offsetSet — 设置一个偏移位置的值
+
+
+\begin{lstlisting}[language=PHP]
+abstract public void ArrayAccess::offsetSet ( mixed $offset , mixed $value )
+\end{lstlisting}
+
+为指定的偏移位置设置一个值，并且没有返回值。
+
+
+\begin{compactitem}
+\item offset
+待设置的偏移位置。
+\item value
+需要设置的值。
+\end{compactitem}
+
+如果另一个值不可用，那么 offset 参数将被设置为 NULL，就像下面的例子。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arrayaccess[] = "first value";
+$arrayaccess[] = "second value";
+print_r($arrayaccess);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Array
+(
+    [0] => first value
+    [1] => second value
+)
+\end{verbatim}
+
+\textbf{ArrayAccess::offsetUnset}
+
+ArrayAccess::offsetUnset — 复位一个偏移位置的值，执行时没有返回值。
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public void ArrayAccess::offsetUnset ( mixed $offset )
+\end{lstlisting}
+
+\begin{compactitem}
+\item offset
+待复位的偏移位置。
+\end{compactitem}
+
+当使用 (unset) 进行类型转换时，该方法不会被调用。
+
+
+\subsection{Serializable interface}
+
+自定义序列化的接口。
+
+实现此接口的类将不再支持 \_\_sleep() 和 \_\_wakeup()。不论何时，只要有实例需要被序列化，serialize 方法都将被调用。它将不会调用 \_\_destruct() 或有其他影响，除非程序化地调用此方法。当数据被反序列化时，类将被感知并且调用合适的 unserialize() 方法而不是调用 \_\_construct()。如果需要执行标准的构造器，你应该在这个方法中进行处理。
+
+
+
+\begin{lstlisting}[language=PHP]
+Serializable {
+  /* 方法 */
+  abstract public string serialize ( void )
+  abstract public mixed unserialize ( string $serialized )
+}
+\end{lstlisting}
+
+\begin{compactitem}
+\item Serializable::serialize — 对象的字符串表示
+\item Serializable::unserialize — 构造对象
+\end{compactitem}
+
+
+\begin{example}
+Basic usage
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements Serializable {
+    private $data;
+    public function __construct() {
+        $this->data = "My private data";
+    }
+    public function serialize() {
+        return serialize($this->data);
+    }
+    public function unserialize($data) {
+        $this->data = unserialize($data);
+    }
+    public function getData() {
+        return $this->data;
+    }
+}
+
+$obj = new obj;
+$ser = serialize($obj);
+
+$newobj = unserialize($ser);
+
+var_dump($newobj->getData());
+?>
+\end{lstlisting}
+\end{example}
+
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+string(15) "My private data"
+\end{verbatim}
+
+
+\textbf{Serializable::serialize}
+
+Serializable::serialize — 返回对象的字符串表示或者 NULL，此函数没有参数。如果返回除了字符串或 NULL 之外的其他类型，将抛出 Exception。
+
+
+\begin{lstlisting}[language=PHP]
+abstract public string Serializable::serialize ( void )
+\end{lstlisting}
+
+这个方法担当着对象析构器的角色。在此方法之后， \_\_destruct() 方法将不会被调用，返回没有序列化之前的原始值。
+
+
+\textbf{Serializable::unserialize}
+
+Serializable::unserialize — 构造对象，在反序列化对象时被调用。
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed Serializable::unserialize ( string $serialized )
+\end{lstlisting}
+
+\begin{compactitem}
+\item serialized
+对象的字符串表示
+\end{compactitem}
+
+这个方法担当着对象构造器的角色。在此方法之后， \_\_construct() 将不会被调用。
+
+
+\subsection{Closure class}
+
+
+Closure 类用于代表匿名函数的类，匿名函数（在 PHP 5.3 中被引入）会产生这个类型的对象。
+
+在过去，这个类被认为是一个实现细节，但现在可以依赖它做一些事情。自 PHP 5.4 起，这个类带有一些方法，允许在匿名函数创建后对其进行更多的控制。
+
+除了此处列出的方法，还有一个 \_\_invoke 方法。这是为了与其他实现了 \_\_invoke()魔术方法 的对象保持一致性，但调用匿名函数的过程与它无关。
+
+\begin{lstlisting}[language=PHP]
+Closure {
+  /* 方法 */
+  __construct ( void )
+  public static Closure bind ( Closure $closure , object $newthis [, mixed $newscope = 'static' ] )
+  public Closure bindTo ( object $newthis [, mixed $newscope = 'static' ] )
+}
+\end{lstlisting}
+
+\begin{compactitem}
+\item Closure::\_\_construct — 用于禁止实例化的构造函数
+\item Closure::bind — 复制一个闭包，绑定指定的\$this对象和类作用域。
+\item Closure::bindTo — 复制当前闭包对象，绑定指定的\$this对象和类作用域。
+\end{compactitem}
+
+
+\textbf{Closure::\_\_construct}
+
+Closure::\_\_construct — 用于禁止实例化的构造函数，此函数没有参数。
+
+\begin{lstlisting}[language=PHP]
+Closure::__construct ( void )
+\end{lstlisting}
+
+这个方法仅用于禁止实例化一个 Closure 类的对象。这个类的对象的创建方法写在匿名函数页。
+
+
+该方法没有返回值，它只是简单的触发一个错误 （类型是 E\_RECOVERABLE\_ERROR）。
+
+\textbf{Closure::bind}
+
+Closure::bind — 复制一个闭包，绑定指定的\$this对象和类作用域。
+
+\begin{lstlisting}[language=PHP]
+public static Closure Closure::bind ( Closure $closure , object $newthis [, mixed $newscope = 'static' ] )
+\end{lstlisting}
+
+这个方法是 Closure::bindTo() 的静态版本，用于返回一个新的 Closure 对象 或者在失败时返回 FALSE。
+
+\begin{compactitem}
+\item closure
+需要绑定的匿名函数。
+\item newthis
+需要绑定到匿名函数的对象，或者 NULL 创建未绑定的闭包。
+\item newscope
+想要绑定给闭包的类作用域，或者 'static' 表示不改变。如果传入一个对象，则使用这个对象的类型名。 类作用域用来决定在闭包中 \$this 对象的 私有、保护方法 的可见性。 
+
+The class scope to which associate the closure is to be associated, or 'static' to keep the current one. If an object is given, the type of the object will be used instead. This determines the visibility of protected and private methods of the bound object.
+
+\end{compactitem}
+
+\begin{example}
+Closure::bind() 实例
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    private static $sfoo = 1;
+    private $ifoo = 2;
+}
+$cl1 = static function() {
+    return A::$sfoo;
+};
+$cl2 = function() {
+    return $this->ifoo;
+};
+
+$bcl1 = Closure::bind($cl1, null, 'A');
+$bcl2 = Closure::bind($cl2, new A(), 'A');
+echo $bcl1(), "\n";
+echo $bcl2(), "\n";
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+1
+2
+\end{verbatim}
+
+\textbf{Closure::bindTo}
+
+Closure::bindTo — 复制当前闭包对象，绑定指定的\$this对象和类作用域，返回新创建的 Closure 对象 或者在失败时返回 FALSE。
+
+\begin{lstlisting}[language=PHP]
+public Closure Closure::bindTo ( object $newthis [, mixed $newscope = 'static' ] )
+\end{lstlisting}
+
+创建并返回一个 匿名函数， 它与当前对象的函数体相同、绑定了同样变量，但可以绑定不同的对象，也可以绑定新的类作用域。
+
+如果你只是想要复制一个匿名函数，可以用 cloning 代替。
+
+“绑定的对象”决定了函数体中的 \$this 的取值，“类作用域”代表一个类型、决定在这个匿名函数中能够调用哪些 私有 和 保护 的方法。 也就是说，此时 \$this 可以调用的方法，与 newscope 类的成员函数是相同的。
+
+静态闭包不能有绑定的对象（ newthis 参数的值应该设为 NULL）不过仍然可以用 bubdTo 方法来改变它们的类作用域。
+
+This function will ensure that for a non-static closure, having a bound instance will imply being scoped and vice-versa. To this end, non-static closures that are given a scope but a NULL instance are made static and non-static non-scoped closures that are given a non-null instance are scoped to an unspecified class.
+
+\begin{compactitem}
+\item newthis
+绑定给匿名函数的一个对象，或者 NULL 来取消绑定。
+\item newscope
+关联到匿名函数的类作用域，或者 'static' 保持当前状态。如果是一个对象，则使用这个对象的类型为心得类作用域。 这会决定绑定的对象的 保护、私有成员 方法的可见性。
+\end{compactitem}
+
+
+\begin{example}
+Closure::bindTo() 实例
+\begin{lstlisting}[language=PHP]
+<?php
+
+class A {
+    function __construct($val) {
+        $this->val = $val;
+    }
+    function getClosure() {
+        //returns closure bound to this object and scope
+        return function() { return $this->val; };
+    }
+}
+
+$ob1 = new A(1);
+$ob2 = new A(2);
+
+$cl = $ob1->getClosure();
+echo $cl(), "\n";
+$cl = $cl->bindTo($ob2);
+echo $cl(), "\n";
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+1
+2
+\end{verbatim}
+
+
+
 \chapter{Traits}
 
 
