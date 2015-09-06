@@ -1,23 +1,32 @@
 \part{Class and Objects}
 
 
-自 PHP 5 起完全重写了对象模型以得到更佳性能和更多特性。这是自 PHP 4 以来的最大变化。PHP 5 具有完整的对象模型。
 
-PHP 5 中的新特性包括访问控制，抽象类和 final 类与方法，附加的魔术方法，接口，对象复制和类型约束。
 
-PHP 对待对象的方式与引用和句柄相同，即每个变量都持有对象的引用，而不是整个对象的拷贝。
+
 
 
 \chapter{Introduction}
 
+
+自PHP 4以来的最大变化是PHP 5完全重写了对象模型以得到更佳性能和更多特性。
+
+从PHP 5开始具备了完整的对象模型，现在PHP应用程序可以不再使用面向过程的方式进行开发，也不再需要按照代码书写的顺序基本一致的方向来从上而下执行。
+
+PHP5对待对象的方式与引用和句柄相同，即每个变量都持有对象的引用，而不是整个对象的拷贝。另外，PHP已经可以支持访问控制，抽象类和 final 类与方法，附加的魔术方法，接口，对象复制和类型约束等面向对象特性。
+
+
+
 \section{class}
+
+从结构体更进一步，类是一种封装了类对象的属性和方法的复合数据类型，因此创建一个类就相当于创造了一种新的数据类型。
 
 
 每个类的定义都以关键字 class 开头，后面跟着类名，后面跟着一对花括号，里面包含有类的属性与方法的定义。
 
 类名可以是任何非 PHP 保留字的合法标签。一个合法类名以字母或下划线开头，后面跟着若干字母，数字或下划线。以正则表达式表示为：\colorbox{lightgray}{\texttt{[a-zA-Z\_\textbackslash x7f-\textbackslash xff][a-zA-Z0-9\_\textbackslash x7f-\textbackslash xff]*}}。
 
-一个类可以包含有属于自己的常量，变量（称为“属性”）以及函数（称为“方法”）。
+一个类可以包含有属于自己的常量、变量（称为“属性”）以及函数（称为“方法”）。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -88,6 +97,8 @@ $this is not defined.
 
 
 \section{new}
+
+作为一个复杂的数据类型，或者说一个对象的模板，类必须至少进行一次实例化才能使用。
 
 要创建一个类的实例，必须使用 new 关键字。当创建新对象时该对象总是被赋值，除非该对象定义了构造函数并且在出错时抛出了一个异常。类应在被实例化之前定义（某些情况下则必须这样）。
 
@@ -183,9 +194,39 @@ bool(true)
 
 \section{extends}
 
-一个类可以在声明中用 extends 关键字继承另一个类的方法和属性。PHP不支持多重继承，一个类只能继承一个基类。
+一个类可以在声明中用 extends 关键字继承另一个类的方法和属性，但是父类不能调用子类的任何方法。
 
-被继承的方法和属性可以通过用同样的名字重新声明被覆盖。但是如果父类定义方法时使用了 final，则该方法不可被覆盖。可以通过 parent:: 来访问被覆盖的方法或属性。
+PHP不支持多重继承，一个类只能继承一个基类。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class ProjectManager extends Employee
+{
+	var $project_name;
+	var $sub_employees = array();
+	
+	function ProjectManager($id, $name, $birthday, $salary){
+		$this->Employee($id, $name, $birthday, $salary);
+	}
+	
+	function setProjectName($pjName){
+		$this->project_name = $pjName;
+	}
+	function getProjectName(){
+		return $this->project_name;
+	}
+	
+	function addEmployee(&$employee){
+		$this->sub_employee[] = &$employee;
+	}
+}
+?>
+\end{lstlisting}
+
+被继承的方法和属性可以通过用同样的名字重新声明被覆盖。
+
+如果父类定义方法时使用了 final，则该方法不可被覆盖，可以通过 parent:: 来访问被覆盖的方法或属性。
 
 当覆盖方法时，参数必须保持一致否则 PHP 将发出 E\_STRICT 级别的错误信息。但构造函数例外，构造函数可在被覆盖时使用不同的参数。
 
@@ -239,7 +280,9 @@ NS\ClassName
 
 \chapter{PHP Class Attributes}
 
-类的变量成员叫做“属性”，或者叫“字段”、“特征”。属性声明\footnote{为了向后兼容 PHP 4，PHP 5 声明属性依然可以直接使用关键字 var 来替代（或者附加于）public，protected 或 private，但是已不再需要 var 了。在 PHP 5.0 到 5.1.3，var 会被认为是废弃的，而且抛出 E\_STRICT 警告，但是 5.1.3 之后就不再认为是废弃，也不会抛出警告。如果直接使用 var 声明属性，而没有用 public，protected 或 private 之一，PHP 5 会将其视为 public。}是由关键字 public，protected 或者 private 开头，然后跟一个普通的变量声明来组成。
+类的成员变量叫做“属性”（或者叫“字段”、“特征”），可以是基本的数据类型，也可以是其他对象。
+
+属性声明是由关键字 public，protected 或者 private 开头，然后跟一个普通的变量声明来组成。
 
 属性中的变量可以初始化，但是初始化的值必须是常数，这里的常数是指 PHP 脚本在编译阶段时就可以得到其值，而不依赖于运行时的信息才能求值。
 
@@ -282,12 +325,65 @@ EOT;
 \end{lstlisting}
 
 
+\chapter{PHP Class Method}
+
+类的方法也称为类的成员方法，其作用相当于函数，方法只能在类的内部定义。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Employee
+{
+	var $id;
+	var $name;
+	var $birthday;
+	var $salary;
+	
+	function setId($id){
+		$this->id = $id;
+	}
+	function setName($name){
+		$this->name = strtoupper($name);
+	}
+	function setBirthday($birthday){
+		$this->birthday = $birthday;
+	}
+	function setSalary($salary){
+		$this->salary = $salary;
+	}
+	
+	function getId(){
+		return $this->id;
+	}
+	function getName(){
+		return $this->name;
+	}
+	function getBirthday(){
+		return $this->birthday;
+	}
+	function getSalary(){
+		return $this->salary;
+	}
+	
+	function getEmployeeInfo(){
+		$info = "员工号：" . $this->getId() . " | ";
+		$info .= "姓名：" . $this->getName() . " | ";
+		$info .= "生日：" . $this->getBirthday() . " | ";
+		$info .= "工资：" . $this->getSalary() . "<br />";
+
+		return $info;
+	}
+}
+?>
+\end{lstlisting}
+
 在类的成员方法里面，可以用 ->（对象运算符）：\$this->property（其中 property 是该属性名）这种方式来访问非静态属性。静态属性则是用 ::（双冒号）：self::\$property 来访问。
+
+
 
 当一个方法在类定义内部被调用时，有一个可用的伪变量 \$this。\$this 是一个到主叫对象的引用（通常是该方法所从属的对象，但如果是从第二个对象静态调用时也可能是另一个对象）。
 
 
-
+为了向后兼容 PHP 4，PHP 5 声明属性依然可以直接使用关键字 var 来替代（或者附加于）public，protected 或 private，但是已不再需要 var 了。在 PHP 5.0 到 5.1.3，var 会被认为是废弃的，而且抛出 E\_STRICT 警告，但是 5.1.3 之后就不再认为是废弃，也不会抛出警告。如果直接使用 var 声明属性，而没有用 public，protected 或 private 之一，PHP 5 会将其视为 public。
 
 
 
@@ -445,15 +541,82 @@ Fatal error: Class 'MissingException' not found in testMissingException.php on l
 
 \chapter{Constructors and Destructors}
 
+除了使用new关键字来实例化类之外，还可以使用构造函数来进行对象初始化。
 
-\section{Constructors}
+\begin{compactitem}
+\item 构造函数和类同名；
+\item 构造函数用于初始化类的对象实例；
+\item 构造函数没有返回值。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Employee
+{
+	var $id;
+	var $name;
+	var $birthday;
+	var $salary;
+	
+	function setId($id){
+		$this->id = $id;
+	}
+	function setName($name){
+		$this->name = strtoupper($name);
+	}
+	function setBirthday($birthday){
+		$this->birthday = $birthday;
+	}
+	function setSalary($salary){
+		$this->salary = $salary;
+	}
+	
+	function getId(){
+		return $this->id;
+	}
+	function getName(){
+		return $this->name;
+	}
+	function getBirthday(){
+		return $this->birthday;
+	}
+	function getSalary(){
+		return $this->salary;
+	}
+	
+	function getEmployeeInfo(){
+		$info = "员工号：" . $this->getId() . " | ";
+		$info .= "姓名：" . $this->getName() . " | ";
+		$info .= "生日：" . $this->getBirthday() . " | ";
+		$info .= "工资：" . $this->getSalary() . "<br />";
+
+		return $info;
+	}
+
+	function Employee($id, $name, $birthday, $salary){
+		$this->setId($id);
+		$this->setName($name);
+		$this->setBirthday($birthday);
+		$this->setSalary($salary);
+	}
+}
+?>
+\end{lstlisting}
+
+\section{Constructor}
+
+
+
 
 
 \begin{lstlisting}[language=PHP]
 void __construct ([ mixed $args [, $... ]] )
 \end{lstlisting}
 
-PHP 5 允行开发者在一个类中定义一个方法作为构造函数。具有构造函数的类会在每次创建新对象时先调用此方法，所以非常适合在使用对象之前做一些初始化工作。
+PHP 5 允行用户在一个类中定义一个方法作为构造函数，具有构造函数的类会在每次创建新对象时先调用此方法，所以非常适合在使用对象之前做一些初始化工作。
+
+
 
 如果子类中定义了构造函数则不会隐式调用其父类的构造函数。要执行父类的构造函数，需要在子类的构造函数中调用 parent::\_\_construct()。如果子类没有定义构造函数则会如同一个普通的类方法一样从父类继承（假如没有被定义为 private 的话）。
 

@@ -1,7 +1,11 @@
 \part{Functions}
 
+PHP提供了超过 700 个内建的函数，函数只需被编译一次就可以多次调用，因而PHP的真正威力源自于它的函数。
 
-函数是一种可以在任何被需要的时候执行的代码块，PHP提供了超过 700 个内建的函数，因而PHP的真正威力源自于它的函数。
+
+具体来说，函数是一种可以在任何被需要的时候执行的代码块，并且函数可以接受一组参数，然后返回操作结果。
+
+
 
 PHP 有很多标准的函数和结构。还有一些函数需要和特定地 PHP 扩展模块一起编译，否则在使用它们的时候就会得到一个致命的“未定义函数”错误。
 
@@ -19,13 +23,12 @@ PHP 有很多标准的函数和结构。还有一些函数需要和特定地 PHP
 
 \chapter{Introduction}
 
-\vspace{-30pt}
 
 \section{Function Prototype}
 
 
 
-函数的定义又可以称为函数原型，一个函数可由以下的语法来定义：
+函数的定义又可以称为函数原型，可以使用function声明自定义函数。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -92,13 +95,15 @@ int	 &该函数返回的值的类型，这里为整型 integer（即以数字来
 returned type    function name    ( parameter type   parameter name )
 \end{verbatim}
 
-很多函数都有多个变量，例如 in\_array()。其函数原型如下：
+
+
+很多函数（例如 in\_array()）都有多个变量，其函数原型如下：
 
 \begin{verbatim}
  bool in_array ( mixed $needle, array $haystack [, bool $strict])
 \end{verbatim}
 
- in\_array() 返回一个“布尔”值，成功（如果在参数 haystack 中能找到参数 needle）则返回 TRUE, 或者在失败时返回 FALSE（如果在参数 haystack 中找不到参数 needle）。第一个参数被命名为 needle 且其类型不定，因此我们将其称为“混和”类型。该混和类型的 needle 参数（我们要找的对象）可以是一个标量的值（字符串、整数、或者浮点数），或者一个数组。haystack（我们寻找的范围）是第二个参数。第三个可选参数被命名为 strict。所有的可选参数都用 [ 方括号 ] 括起来。
+in\_array() 返回一个“布尔”值，成功（如果在参数 haystack 中能找到参数 needle）则返回 TRUE, 或者在失败时返回 FALSE（如果在参数 haystack 中找不到参数 needle）。第一个参数被命名为 needle 且其类型不定，因此我们将其称为“混和”类型。该混和类型的 needle 参数（我们要找的对象）可以是一个标量的值（字符串、整数、或者浮点数），或者一个数组。haystack（我们寻找的范围）是第二个参数。第三个可选参数被命名为 strict。所有的可选参数都用 [ 方括号 ] 括起来。
 
 
 有的函数包含更复杂的 PHP 版本信息，例如：
@@ -116,7 +121,6 @@ returned type    function name    ( parameter type   parameter name )
 
 比较下面两个简单的函数，在其被调用时能输出名字。
 
-\vspace{-20pt}
 
 \begin{tabular}{m{180pt}m{5pt}m{180pt}}
 \begin{lstlisting}[language=PHP]
@@ -138,8 +142,6 @@ echo writeMyName();
 ?>
 \end{lstlisting}\\
 \end{tabular}
-
-\vspace{-20pt}
 
 
 
@@ -191,9 +193,56 @@ bar();
 \end{lstlisting}\\
 \end{tabular}
 
-\vspace{-20pt}
+
 
 当一个函数是有条件被定义时，其定义必须在调用之前先处理。
+
+\section{Function Iteration}
+
+PHP中的函数可以在被调用之前定义，也可以在被调用之后定义，但是在某些情况下需要对函数的定义增加限制条件。
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo cal_circle_area(0.5);
+
+function cal_circle_area($radius){
+	return M_PI * ($radius * $radius);
+}
+?>
+\end{lstlisting}
+
+在函数的迭代中，低版本的PHP无法使用高版本PHP提供的更简便和实用的函数，同时还需要保证在不同版本中的兼容性，因此在使用PHP内置函数之前需要判断函数是否已被定义。
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* 如果file_get_contents()函数不存在，则使用自定义的file_get_contents()函数版本 */
+if(!function_exists("file_get_contents")){
+	function file_get_contents($filename){
+		$handle = fopen($filename,"r");
+		$contents = fread($handle,filesize($filename));
+		fclose($handle);
+		return $contents;
+	}
+}
+
+$string = file_get_contents("data.txt"); // 函数调用
+?>
+\end{lstlisting}
+
+
+function\_exists()函数用于检查指定的函数是否存在，这样在不同版本的PHP环境之间切换时可以提高可移植性。
+
+\begin{compactitem}
+\item 在低版本的PHP环境中使用自定义的函数；
+\item 在高版本的PHP环境中直接使用PHP内置的同名函数。
+\end{compactitem}
+
+在上述的示例中，如果PHP版本小于4.2.0的环境中将会使用用户自己实现的file\_get\_contents()函数，反之则可以直接使用PHP内置的file\_get\_contents()函数。不过，为防止系统无法找到函数定义，需要在调用函数之前预先定义函数。
+
+
+
+
+
 
 \section{Function Usage}
 
@@ -225,7 +274,7 @@ echo " is my name.";
 \section{Recursive Functions}
 
 
-在 PHP 中可以调用递归函数。但是要避免递归函数/方法调用超过 100-200 层，因为可能会使堆栈崩溃从而使当前脚本终止。
+在 PHP 中可以调用递归函数，不过要避免递归函数/方法调用超过 100-200 层，否则可能导致堆栈崩溃并使当前脚本终止。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -239,11 +288,28 @@ function recursion($a)
 ?>
 \end{lstlisting}
 
+递归本身是一种算法，即一个对象部分地包含自己，或者用自己给自己定义，例如PHP语言名称（PHP: Hypertext Preprocessor）本身就是递归的。
+
+如果一个过程直接或间接地调用自己，那么就称其为递归的过程，例如数学上的阶乘函数、幂函数和斐波那契数列等的定义和计算都是递归的。
 
 
+\begin{lstlisting}[language=PHP]
+<?php
+function Fractorial($n){
+	if($n==0)
+		return 1;
+	else
+		return n*Fractorial(n-1);
+}
+?>
+\end{lstlisting}
+
+递归函数必须要有终止递归的条件，否则函数将进入无限循环。
+
+在使用PHP开发应用程序时，递归的应用包括文件目录的搜索和删除等，不过需要注意设计不合理的递归运算可能需要耗费大量的系统资源，因此在使用递归解决问题时需要限制递归的层数。
 
 
-\section{Function Parameters}
+\section{Function Parameter}
 
 每个函数名称后面都有一个括号，比如 writeMyName()，而参数就是在括号中规定的，而且参数是从左向右求值的。
 
@@ -277,10 +343,9 @@ writeMyName("John");
 ?>
 \end{lstlisting}
 
-可以通过添加参数向函数添加更多的功能，其中参数类似一个变量。通过参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表。
+可以通过添加参数向函数添加更多的功能，其中参数类似一个变量。
 
-
-下面示例中的函数有两个参数：
+函数的参数列表是以逗号分隔的变量和常量的列表，可以将外部信息通过参数列表传入函数。例如，下面示例中的函数的参数列表包含两个参数：
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -300,22 +365,70 @@ writeMyName("John","...");
 ?>
 \end{lstlisting}
 
+\begin{compactitem}
+\item 在定义PHP函数时，带有默认值的参数必须放在参数列表的末尾。
+\item 在调用PHP函数时，将自动为没有赋值的参数赋予对应类型类型的默认值。
+\end{compactitem}
+
+PHP 在用户自定义函数中支持可变数量的参数列表，只需使用 func\_num\_args()， func\_get\_arg()，和 func\_get\_args() 函数。
+
+\begin{compactitem}
+\item func\_get\_args()函数作用于自定义函数内部，返回一个包含所有传递给函数的参数的数组。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function more_args(){
+	$args = func_get_args();
+	foreach($args as $current_arg){
+		echo $current_arg . PATH_SEPARATOR;
+	}
+}
+more_args("A","B","C");
+?>
+\end{lstlisting}
+
+\item func\_num\_args()函数返回参数的总数。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function more_args(){
+	$num = func_num_args();
+	for($i=0; $i<$num; $i++){
+		$current_arg = func_get_arg($i);
+		echo $current_arg . PATH_SEPARATOR;
+	}
+}
+?>
+\end{lstlisting}
 
 
-PHP 在用户自定义函数中支持可变数量的参数列表。其实很简单，只需使用 func\_num\_args()， func\_get\_arg()，和 func\_get\_args() 函数即可。
+\item func\_num\_arg()函数接受一个数字参数，并返回指定的参数。
+
+\end{compactitem}
+
+
 
 可变参数并不需要特别的语法，参数列表仍按函数定义的方式传递给函数，并按通常的方式使用这些参数。
+
+
 
 \section{Parameter passing}
 
 
 
-PHP 支持按值传递参数（默认），通过引用传递参数以及默认参数\footnote{自 PHP 5 起，默认值才可以通过引用传递。}，而且PHP也支持可变长度参数列表。
+PHP 支持按值传递参数，通过引用传递参数以及默认参数\footnote{自 PHP 5 起，默认值才可以通过引用传递。}，而且PHP也支持可变长度参数列表。
 
 
-默认情况下，函数参数通过值传递（因而即使在函数内部改变参数的值，它并不会改变函数外部的值）。如果希望允许函数修改它的参数值，必须通过引用传递参数。
+默认情况下，函数参数通过值传递（因而即使在函数内部改变参数的值，它并不会改变函数外部的值）。
 
-如果想要函数的一个参数总是通过引用传递，可以在函数定义中该参数的前面加上符号 \&：
+\begin{compactitem}
+\item 如果希望函数内部的改变不影响到函数外部，可以按值来传递参数。
+\item 如果希望允许函数修改它的参数值，必须通过引用传递参数。
+\end{compactitem}
+
+变量和变量地址类似于旅馆中的房间和房间号码，PHP中的引用就是变量的“房间号码”，通过号码可以很容易找到变量。
+
+引用可以高效地处理大型变量、数组和对象，使用引用向函数传递参数时可以在函数定义中的对应参数的前面加上符号 \&。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -329,8 +442,15 @@ echo $str;    // outputs 'This is a string, and something extra.'
 ?>
 \end{lstlisting}
 
+\begin{compactitem}
+\item C语言变量的指针是符号表的别名，指针和变量本身存储在不同的内存地址中。
+\item PHP变量的引用和变量具有相同的内容（内存地址）。
+\end{compactitem}
 
-函数可以定义 C++ 风格的标量参数默认值，如下所示：
+
+
+
+PHP函数可以定义 C++ 风格的标量参数默认值，如下所示：
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -415,11 +535,15 @@ Making a bowl of acidophilus raspberry.
 
 \section{Function Return Values}
 
-函数也能用于返回值，值通过使用可选的返回语句返回\footnote{注：如果省略了 return，则返回值为 NULL。}。
+函数也能用于返回值，值通过使用可选的返回语句返回。
 
-可以返回包括数组和对象的任意类型，返回语句会立即中止函数的运行，并且将控制权交回调用该函数的代码行。
+显式的return语句表示函数执行结束，并返回执行结果。如果省略了return，则返回值为NULL，这样函数的作用和过程类似。
 
 
+
+函数可以返回的值包括数组和对象的任意类型，返回语句会立即中止函数的运行，并且将控制权交回调用该函数的代码行。
+
+函数的参数和返回值类型都是不受限制的，可以是标量，也可以是对象或资源，而且实际上参数列表和return都不是必须的。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -695,6 +819,636 @@ if (strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE') !== FALSE) {
 \chapter{PHP Array}
 
 
+\section{Key}
+
+\subsection{array\_values()}
+
+array\_values()函数可以返回数组中的所有值，而且忽略原始的键名，并使用顺序的数字对数组重新索引。
+
+\begin{lstlisting}[language=PHP]
+array array_values ( array $input )
+\end{lstlisting}
+
+\subsection{array\_keys()}
+
+array\_keys()函数可以返回一个数组中的所有键，其返回值是一个包含数字或字符串的键名数组。
+
+
+
+\begin{lstlisting}[language=PHP]
+array array_keys ( array $array [, mixed $search_value [, bool $strict = false ]] )
+\end{lstlisting}
+
+
+array\_values()和array\_keys()函数都把数组作为一维的进行处理，并且保持元素值或键名的原始顺序。
+
+
+\subsection{array\_flip()}
+
+array_flip() 返回一个反转后的 array，例如 trans 中的键名变成了值，而 trans 中的值成了键名。
+
+
+\begin{lstlisting}[language=PHP]
+array array_flip ( array $trans )
+\end{lstlisting}
+
+
+值和键名的交换是有条件的，数组的值可以重复将导致交换后的数组中发生覆盖。
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{in\_array()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+bool in_array ( mixed $needle , array $haystack [, bool $strict = FALSE ] )
+\end{lstlisting}
+
+\subsection{array\_search()}
+
+array\_search()函数和in\_array()函数的参数相同，而且都支持对数据类型的严格判断。
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+mixed array_search ( mixed $needle , array $haystack [, bool $strict = false ] )
+\end{lstlisting}
+
+
+\subsection{array\_key\_exists()}
+
+
+array\_key\_exists()函数可以检索给定的键名（索引）是否存在于数组中。
+
+\begin{lstlisting}[language=PHP]
+bool array_key_exists ( mixed $key , array $search )
+\end{lstlisting}
+
+数组的键名是唯一的，也无需对其数据类型进行判断，因此在检索给定的键名时使用isset()函数是一个更好的选择。
+
+
+\begin{lstlisting}[language=PHP]
+if(array_key_exists("num",$var_array)){
+	echo $var_array[$key];
+}
+
+// isset()是更为常见的解决方案
+if(isset($var_array["num"])){
+	echo $var_array[$key];
+}
+\end{lstlisting}
+
+\section{Pointer}
+
+指针是PHP数组的内部组织机制，内部指针指向一个数组单元，或者说对应着一个数组元素。
+
+\begin{compactitem}
+\item 在数组初始化时，或者将一个数组赋值给另一个数组时，指针将指向数组最开始的元素；
+\item 在数组初始化后，通过移动或改变指针位置，可以访问数组的任意元素。
+\end{compactitem}
+
+\subsection{current()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+mixed current ( array &$array )
+\end{lstlisting}
+
+
+\subsection{key()}
+
+
+\begin{lstlisting}[language=PHP]
+mixed key ( array &$array )
+\end{lstlisting}
+
+
+\subsection{prev()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+mixed prev ( array &$array )
+\end{lstlisting}
+
+\subsection{next()}
+
+
+
+\begin{lstlisting}[language=PHP]
+mixed next ( array &$array )
+\end{lstlisting}
+
+
+\subsection{end()}
+
+
+
+\begin{lstlisting}[language=PHP]
+mixed end ( array &$array )
+\end{lstlisting}
+
+
+\subsection{reset()}
+
+
+
+\begin{lstlisting}[language=PHP]
+mixed reset ( array &$array )
+\end{lstlisting}
+
+
+\subsection{each()}
+
+each()函数返回数组当前元素的一个键名/值的构造数组，并使数组指针向前移动一位。
+
+\begin{lstlisting}[language=PHP]
+array each ( array &$array )
+\end{lstlisting}
+
+
+\subsection{list()}
+
+each()和list()可以配合使用来进行数组的遍历操作，不过list()仅能用于数字索引的数组，并假定数字索引从0开始。
+
+用户可以使用下面的表达式来直接获得数组中的当前元素的键名和值。
+
+
+\begin{lstlisting}[language=PHP]
+list($index, $fruit) = each($arr)
+\end{lstlisting}
+
+\section{Variable}
+
+
+extract()和compact()函数可以进行数组和变量之间的转换，并且转换后的数组元素的键名和变量名，以及元素的值和元素的值保持着对应的关系。
+
+
+\subsection{extract()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+int extract ( array &$var_array [, int $extract_type = EXTR_OVERWRITE [, string $prefix = NULL ]] )
+\end{lstlisting}
+
+\subsection{compact()}
+
+
+
+\begin{lstlisting}[language=PHP]
+array compact ( mixed $varname [, mixed $... ] )
+\end{lstlisting}
+
+\section{Segment}
+
+
+对于较大的数组，可以进行分段来提高操作效率。
+
+\subsection{array\_slice()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+array array_slice ( array $array , int $offset [, int $length = NULL [, bool $preserve_keys = false ]] )
+\end{lstlisting}
+
+
+\subsection{array\_splice()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{array\_chunk()}
+
+
+\begin{lstlisting}[language=PHP]
+array array_chunk ( array $input , int $size [, bool $preserve_keys = false ] )
+\end{lstlisting}
+
+
+\section{Padding}
+
+\subsection{array\_pad()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+array array_pad ( array $input , int $pad_size , mixed $pad_value )
+\end{lstlisting}
+
+\section{Stack}
+
+PHP数组也可以作为栈（数组栈）使用，栈底指向数组的第一个元素，栈顶指向数组中的最后一个元素。
+
+对数组栈的操作包括入栈和出栈，而且PHP提供了array\_push()和array\_pop()函数来实现数组栈元素的压入和弹出。
+
+\subsection{array\_push()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{array\_pop()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\section{Queue}
+
+
+
+PHP数组可以实现对队列的模拟，这样就可以在队列的一端插入数组，并且在另一侧删除数据，这样最先进入队列的数据将最先离开队列。
+
+\begin{compactitem}
+\item 允许插入的一端称为队尾，即数组的第一个元素；
+\item 允许删除的一端称为队头，即数组的最后一个元素。
+\end{compactitem}
+
+
+\subsection{array\_shift()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{array\_unshift()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{Callback}
+
+回调机制允许用户使用自定义的方法对数据进行操作，例如回调函数可以用于对数组的处理。
+
+
+\subsection{array\_walk()}
+
+array\_walk()函数可以使用用户自定义的函数来对数组中的每个成员进行处理，因此也称为单一数组回调处理函数。
+
+
+
+\begin{lstlisting}[language=PHP]
+bool array_walk ( array &$array , callable $funcname [, mixed $userdata = NULL ] )
+\end{lstlisting}
+
+在array\_walk()函数中使用回调函数可以直接改变数组的元素值，但是对于键名的更改是无效的。
+
+
+\subsection{array\_map()}
+
+
+
+\begin{lstlisting}[language=PHP]
+array array_map ( callable $callback , array $arr1 [, array $... ] )
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+回调函数平行作用于相应的数组元素上，因此array\_map()函数用于两个或多个数组时，它们的长度应该相同，否则最短的数组将用NULL元素进行扩充。
+
+和使用单个数组不同，array\_map()函数忽略多个数组中的键名，并统一分配数字索引作为键名。
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{array\_filter()}
+
+
+
+\begin{lstlisting}[language=PHP]
+array array_filter ( array $input [, callable $callback = "" ] )
+\end{lstlisting}
+
+\subsection{array\_reduce()}
+
+array_reduce() 将回调函数 function 迭代地作用到 input 数组中的每一个单元中，从而将数组简化为单一的值。
+
+\begin{lstlisting}[language=PHP]
+mixed array_reduce ( array $input , callable $function [, mixed $initial = NULL ] )
+\end{lstlisting}
+
+
+
+\section{Sort}
+
+PHP可以通过元素或索引进行排序，也可以使用自然排序法或用户自定义的排序方法等进行排序。
+
+\subsection{sort()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{rsort()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{usort()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{asort()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{arsort()}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{uasort()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{ksort()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{krsort()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\subsection{uksort()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{natsort()}
+
+
+natsort()函数可以使用自然排序法对包含文件名的数组进行排序，而且排序结构忽略键名。
+
+natsort()函数对大小写不敏感，如果需要使用键名和值对应的“自然排序”，可以使用uasort()和strnatcmp()函数的替代方式。
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{Computation}
+
+
+通常情况下，对数组的计算包括求数组内部的所有元素之和，或者把数组作为一个集合进行处理，以及对两个或多个数组进行合并，计算数组之间的差集或交集等。
+
+\subsection{array\_sum()}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{array\_merge()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{array\_merge\_recursive()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{array\_diff()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{array\_intersect()}
+
+和计算数组的差集类似，数组的交集仅计算多维数组中的一维，因此需要使用索引进行依次计算才能正确地处理多维数组。
+
+在交集运算的结果数组中，键名将保持不变。
+
+
+
+
+\subsection{array\_intersect\_assoc()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{Unique}
+
+\subsection{array\_unique()}
+
+array\_unique()函数可以移除数组中重复的值，并且返回以恶没有重复元素的新数组。
+
+一般情况下，数组中的重复元素指元素的字符串表达式相同，新的数组中将会保留元素原始的键名。
+
+
+
+
+\section{Reverse}
+
+
+\subsection{array\_reverse()}
+
+
+
+\section{Random}
+
+
+\subsection{array\_rand()}
+
+
+
+array\_rand()从数组中随机取出一个或多个单元，并返回随机条目的一个或多个键。
+
+
+\begin{lstlisting}[language=PHP]
+mixed array_rand ( array $input [, int $num_req = 1 ] )
+\end{lstlisting}
+
+
+在下面的示例中使用随机数发生器种子来随机输出字符串。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+// 设置随机数发生器种子
+srand((float)microtime() * 10000000);
+
+$servers = array("UNIX","Linux","Windows","Mac OS X","Solaris");
+$rand_keys = array_rand($servers,2);
+print $servers[$rand_keys[0]]."\n";
+print $servers[$rand_keys[1]]."\n";
+?>
+\end{lstlisting}
+
+在处理随机问题时，通常必须首先设置随机发生器的种子，这样才能让随机数功能正常执行。
+
+
+\subsection{shuffle()}
+
+
+shuffle()函数可以将数组的顺序打乱，其实质也是一个随机化过程，因此需要设置随机数发生器种子。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$numbers = range(1,20);
+srand((float)microtimes() * 1000000);
+shuffle($numbers);
+
+// 循环输出
+while(list(,$number) = each ($numbers))
+{
+	echo "$number = ";
+}
+?>
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\section{Range}
+
+\subsection{range()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+array range ( mixed $start , mixed $limit [, number $step = 1 ] )
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
 
 
 
@@ -943,9 +1697,92 @@ DATE\_W3C	&World Wide Web Consortium \newline (如:2005-08-14T16:13:03+0000)	 &\
 \chapter{PHP Filesystem}
 
 
+在物理磁盘的上层的抽象层是文件系统，因此用户的角度来看，数据、信息和程序等都是以文件的形式存储在物理磁盘上。
+
+文件的大小并不是固定的，因此一个文件通常需要对应磁盘上的一个或多个存储单元，目录（或文件夹）可以用来对文件进行有效地区分和管理。
+
+从广义上来说，物理磁盘、文件和目录是操作系统固有地组成部分，通称为文件系统。
+
+\section{filetype()}
+
+PHP基于UNIX系统模型来设计对文件系统的操作，因此PHP的文件系统操作函数类似于UNIX的shell命令。
 
 
-\section{fopen()}
+
+
+PHP将文件划分为file、dir、block、link、fifo、char和unknown等类型。
+
+\begin{table}
+\centering
+\begin{tabular}{|l|l|}
+\hline
+file & 普通文件\\
+\hline
+dir & 目录\\
+\hline
+block & 设备文件\\
+\hline
+link & 符号链接\\
+\hline
+fifo & 命名管道\\
+\hline
+char & 套接字\\
+\hline
+unknown & 未知类型，使用非UNIX结构的文件\\
+\hline
+\end{tabular}
+\end{table}
+
+
+Windows没有提供UNIX的文件系统特性，而是通过其自己的实现来对绝大多数函数进行兼容，不过只能支持file、dir和unknown等文件类型。
+
+
+\subsection{is\_file()}
+
+
+
+\subsection{is\_dir()}
+
+
+
+\subsection{is\_link()}
+
+
+\subsection{stat()}
+
+
+\subsection{lstat(}
+
+
+\subsection{clearstatcache()}
+
+
+PHP通过缓存stat()、lstat()等相关函数的返回信息来提供更快的性能，不过在某些情况下，用户可能需要清除被缓存的信息。
+
+
+例如，在一个脚本中多次检查同一个文件，而且该文件在脚本执行期间可能被删除或修改，因此需要使用clearstatcache()来清除文件状态缓存。
+
+\section{Operation}
+
+
+文件处理包括文件读、写、删除、锁定，以及检查文件类型、文件完整性等。
+
+
+为了读取或写入一个本地文件，首先需要以特定方式（只读、只写或可读可写等）打开文件，然后在系统获得对文件的控制权后，就可以执行相应的读写操作。
+
+
+在文件处理操作结束后，需要及时关闭文件来释放资源。
+
+
+除了操作本地文件之外，只要激活php.ini中的“allow\_url\_fopen”选项，PHP也支持访问远程文件。
+
+
+
+
+
+\subsection{fopen()}
+
+
 
 
 fopen() 函数用于在 PHP 中打开文件。此函数的第一个参数含有要打开的文件的名称，第二个参数规定了使用哪种模式来打开文件：
@@ -1012,8 +1849,58 @@ x+	&读/写。创建新文件。如果文件已存在，则返回 FALSE 和一�
 \end{lstlisting}
 
 
+为了使用fopen()访问远程文件，需要指定正确的URL参数，PHP可以依据相应的协议和地址进行处理。
 
-\section{fclose()}
+PHP的fopen()函数支持HTTP、HTTPS、FTP和FTPS等协议。
+
+\begin{compactitem}
+\item 对于HTTP和HTTPS，fopen()只能以只读方式打开URL；
+\item 对于FTP和FTPS，fopen()支持以“只写”或“只读”方式打开URL；
+\item 对于FTP和FTPS，fopen()不能使用“可读可写”方式打开URL。
+\end{compactitem}
+
+在下面的示例中，fopen()获取远程文件内容后进行分析，并且配合正则表达式进行匹配，从而将结果重新格式化后在页面输出。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	set_time_limit(0);		//为了避免连接超时，这里设定
+						//对程序运行时间未做限制
+	$remote_url = "http://www.taodoor.com";
+
+	//打开远程文件
+	$handdle = fopen($remote_url . "/news.html", "r");
+
+	if($handdle)
+	{
+		$data = '';
+
+		//读取文件
+		while(!feof($handdle))
+		{
+			$data .= fgets($handdle, 1024);
+		}
+
+		//使用正则表达式分析页面的链接地址
+		preg_match_all('/<a\s+href="?([^>"]+)"?\s*[^>]*>([^>]+)<\/a>/i',$data,$arr);
+
+		//循环输出
+		for($i=0; $i<count($arr[1]); $i++)
+		{
+			echo '<li><a href="'.$remote_url.$arr[1][$i].'">'.$arr[2][$i].'</a>';
+		}
+	}else{
+		echo "无法连接到远程服务器。";
+	}
+?>
+\end{lstlisting}
+
+在访问远程主机并执行文件操作时，难免发生超时错误，因此可以使用set\_time\_limit()函数来对程序的运行时间进行限制。
+
+
+
+
+\subsection{fclose()}
 
 fclose() 函数用于关闭打开的文件。
 
@@ -1028,7 +1915,10 @@ fclose($file);
 \end{lstlisting}
 
 
-\section{feof()}
+\subsection{fsize()}
+
+
+\subsection{feof()}
 
 
 feof() 函数检测是否已达到文件的末端 (EOF)。在循环遍历未知长度的数据时，feof() 函数很有用，但是在 w 、a 以及 x 模式下无法读取打开的文件。
@@ -1039,8 +1929,64 @@ if (feof($file)) echo "End of file";
 \end{lstlisting}
 
 
+\subsection{fread()}
 
-\section{fgets()}
+
+
+下面的示例代码说明了如何正确地将文件内容读取到\$content字符串中，并且对于二进制文件同样也是安全的。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	$filename = "/usr/local/readme.txt";
+	
+	//一次性读取整个文件
+	$handle = fopen ($filename, "r");			//打开一个只读文件
+	$length = filesize ($filename);				//计算文件的大小
+	$content = fread ($handle, $length);			//读取文件的内容
+	fclose ($handle);						//关闭文件
+	
+	//传统读取文件的方法
+	$handle = fopen ($filename, "r+");
+	$content = "";
+
+	//使用feof()判断文件的结束
+	while(!feof($handle))
+	{
+		$content .= fread($handle, 1024);
+	}
+	fclose ($handle);
+
+	//更便捷的方法
+	$handle = fopen ($filename, "r");
+	$content = "";
+	do{
+		$data = fread($handle, 1024);
+		if(strlen($data)===0)					//当没有数据时，跳出循环
+			break;
+		$content .= $data;
+	}while(1);
+	fclose ($handle);
+
+	//使用fgets()的方法
+	$handle = fopen ($filename, "rt");			//使用“t”将“\n”替换为“\r\n”
+	while (!feof ($handle)) 
+	{
+		$content .= fgets($handle, 4096);
+	}
+	fclose ($handle);
+
+	//使用fgetc()逐字节读取文件内容
+	$handle = fopen ($filename, "r");
+	while (($c = fgetc($handle))!==FALSE) 
+	{
+		$content .= $c;
+	}
+	fclose ($handle);
+?>
+\end{lstlisting}
+
+\subsection{fgets()}
 
 
 fgets() 函数用于从文件中逐行读取文件。在调用该函数之后，文件指针会移动到下一行。
@@ -1060,7 +2006,7 @@ fclose($file);
 \end{lstlisting}
 
 
-\section{fgetc()}
+\subsection{fgetc()}
 
 
 fgetc() 函数用于从文件逐字符地读取文件。在调用该函数之后，文件指针会移动到下一个字符。
@@ -1078,18 +2024,344 @@ fclose($file);
 ?>
 \end{lstlisting}
 
+\subsection{fwrite()}
 
-\section{f\/ile upload}
+下面的示例代码说明如何写入文件。
 
-通过 PHP，允许用户从表单上传文件到服务器。不过，允许用户上传文件是一个巨大的安全风险，因此应该仅仅允许可信的用户执行文件上传操作。
+\begin{lstlisting}[language=PHP]
+<?php
+	$filename = 'test.txt';
+	$somecontent = "添加这些文字到文件\n";
+
+	//首先要确定文件存在并且可写
+	if (is_writable($filename))
+	{
+    		//使用添加模式打开$filename，文件指针将会在文件的开头
+	     if (!$handle = fopen($filename, 'a')) 
+		{
+			echo "不能打开文件 $filename";
+			exit;									//无法打开文件则退出程序
+    		}
+
+    		//将$somecontent写入到我们打开的文件中。
+		if (!fwrite($handle, $somecontent)) 
+		{
+			echo "不能写入到文件 $filename";
+			exit;									//无法写入文件则退出程序
+		}
+
+		echo "文件“$filename”写入成功";
+
+		//关闭文件
+		fclose($handle);
+	} else {
+		echo "文件“$filename”不可写";
+	}
+?>
+\end{lstlisting}
+
+
+在写入文件之前需要使用is\_writable()函数判断文件是否可写，然后在可写的情况下按照打开、写入、关闭文件的顺序依次进行操作。
+
+不同的操作系统使用不同的行结束符，因此在写入一个文本文件并需要插入一个新行时需要使用符合相应操作系统的行结束符。
+
+\begin{compactitem}
+\item UNIX/Linux等系统使用“\textbackslash n”作为行结束符；
+\item Windows系统使用“\textbackslash r\textbackslash n”作为行结束符。
+\item Mac OS X操作系统使用“\textbackslash r”作为行结束符。
+\end{compactitem}
+
+
+
+
+\subsection{fputs()}
+
+
+\subsection{unlink()}
+
+
+在删除文件时可能会发生删除失败的情况，其原因可能包括文件不存在、文件权限错误、文件被锁定以及删除目录而非文件等。
+
+为了屏蔽删除文件失败时发生的错误，通常可以使用“@”来禁止显示删除文件时发生的E\_WARNING错误报告。
+
+
+\subsection{ftruncate()}
+
+
+
+\subsection{file\_get\_contents()}
+
+fopen()、fread()、fgets()、fseek()等只能对文件进行最基本的处理，并返回文件指针。
+
+file\_get\_contents()和file()函数可以使用更加简洁的方式来获得文件的全部或部分内容，并返回字符串或数组。
+
+file\_get\_contents()函数可以将整个文件读入到一个字符串中，并且避免文件的打开、锁定和关闭等操作。
+
+在操作系统提供支持的情况下，file\_get\_contents()函数还可以使用内存映射技术来增强性能。
+
+和fopen()等函数打开本地或远程文件连接类似，file\_get\_contents()函数除了可以读取本地文件之外，还可以读取远程主机上的文件。
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//读取一个本地文件
+	echo file_get_contents("/home/tom/public_html/index.html");
+
+	//读取一个远程文件
+	echo file_get_contents("http://www.taodoor.com/index.php");
+
+	//如果使用低版本的PHP程序，应该使用代替方案，
+	//这样可以增强程序的移植性
+	if(!file_exists("file_get_contents"))
+	{
+		//自定义的代替方法
+		function file_get_contents ($filename)
+		{
+			//打开文件
+			$fp = @fopen ($filename, "r");
+
+			//锁定文件
+			@flock($fp, LOCK_SH);
+
+			//读取文件内容
+			$data = @fread($fp, filesize($filename));
+
+			//关闭文件
+			@fclock($fp);
+
+			if($data)
+			{
+				return $data;
+			}else{
+				return "";
+			}
+		}
+	}
+?>
+\end{lstlisting}
+
+
+
+\subsection{file()}
+
+
+
+file()函数可以将整个文件读入到一个数组中，这样就可以使用数组的相关函数来对文件内容进行处理。
+
+从实质上来讲，file()函数通过把整个文件进行分割后读入数组，这样数组中的每个元素就是文件中相应的行（并且包括换行符在内）。
+
+在分析日志文件时，可以通过file()函数实现对日志文件内容倒序处理，这样就可以从日志文件中获得最新的记录，它们原来的位置是日志文件的尾部。
+
+\begin{lstlisting}[language=PHP]
+<?php
+	$logs = file("server.log");			//读取一个日志文件
+	$contents = array_reverse($logs);
+	foreach($contents as $line){
+		echo $line;
+	}
+?>
+\end{lstlisting}
+
+
+
+
+\section{Pointer}
+
+
+
+在PHP中对文件指针进行操作时，必须首先提供一个使用fopen()函数打开的、合法的文件指针。
+
+
+文件指针的位置是以文件头开始的字节数度量的。
+
+\subsection{ftell()}
+
+
+
+\subsection{fseek()}
+
+
+\subsection{rewind()}
+
+
+\section{Tempfile}
+
+
+PHP支持创建一个临时文件来存储数据，使用tmpfile()和tempnam()可以建立一个具有唯一文件名的临时文件。
+
+通常情况下，PHP文件函数创建的临时文件位于系统临时目录/tmp下。
+
+
+\subsection{tmpfile()}
+
+
+tmpfile()函数不需要任何参数就可以以写模式建立一个具有唯一文件名的临时文件，并返回一个和fopen()相似的文件指针。
+
+tmpfile()创建的临时文件在fclose()关闭文件或脚本执行结束后会被自动删除。
+
+\subsection{tempnam()}
+
+
+\begin{compactitem}
+\item tmpfile()无法指定临时文件的目录，也无法获知创建的文件名。
+\item tempnam()可以对临时文件提供更多的控制。
+\end{compactitem}
+
+tempnam()函数可以在指定的目录下创建一个具有唯一文件名的文件，而且tempnam()创建的临时文件不会被自动删除，除非使用unlink()进行手动删除。
+
+\section{Lock}
+
+
+\subsection{flock()}
+
+
+在网络环境下，不同用户进程可能在同一时刻对同一文件进行操作，不合理的并发模型可能会对文件造成破坏。
+
+最典型的网络文件访问破坏是多个进程同时对文件进行写入操作，用户可以使用flock()来对文件使用锁机制来避免文件访问破坏。
+
+
+flock() 允许执行一个简单的可以在任何平台中使用的读取/写入模型（包括大部分的 Unix 派生版和 Windows）。
+
+\begin{lstlisting}[language=PHP]
+bool flock ( resource $handle , int $operation [, int &$wouldblock ] )
+\end{lstlisting}
+
+
+
+flock()函数获取文件的指针\$handle，并将该文件设定为某一访问权限\$operation。
+
+\$operation 可以是以下值之一：
+
+\begin{compactitem}
+\item LOCK\_SH：共享锁定，读取文件时使用；
+\item LOCK\_EX：独占锁定，写入文件时使用；
+\item LOCK\_UN：释放锁定，释放已经存在的共享或独占锁；
+\item LOCK\_NB：附加锁定，如果不希望flock()在锁定时堵塞，就应该在上述锁定后加上该锁。
+\end{compactitem}
+
+PHP 支持以咨询方式对全部文件执行轻便的锁定，也就是说所有访问程序必须使用同一方式锁定, 否则它不会工作。
+
+
+
+flock()函数可以辨别同时运行的独立进程，判断它们能否在共享或独占模式下访问文件。
+
+
+
+默认情况下，flock()函数会阻塞到获取锁，可以通过LOCK\_NB选项来控制（在非 Windows 平台上）。
+
+如果其他进程不服从或不识别flock()函数加在用户文件上的锁，那么这个进程会忽略已存在的文件锁，因此只有所有访问程序使用相同的方式锁定文件时才能让flock()发挥作用，这样就要求其他访问程序都必须服从于flock()函数。
+
+一个文件可以同时存在很多共享锁定LOCK\_SH，这样多个进程可以在同一时刻拥有对该文件的读取访问权限；
+
+
+一个独占锁定LOCK\_EX只允许一个用户拥有一次，通常被用于文件的写入操作。
+
+如果其他进程需要访问具有独占锁定的文件，那么必须等到独占锁定被释放以后才能进行。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	$fname = "/home/tom/public_html/test.txt";
+	
+	//以读写方式打开文件
+	if( $fp = @fopen($fname, "w+") )
+	{
+		die("无法打开文件 $fname");
+	}
+	
+	//写入文件时，总将文件锁定为LOCK_EX
+	if( !flock($fp, LOCK_EX) )
+	{
+		die("无法将文件锁定为 LOCK_EX\n");
+	}
+	//写入文件
+	fwrite($fp, "第一行文字\n");
+	fwrite($fp, "另一行文字\n");
+
+	flock($fp, LOCK_UN);						//释放独占锁定
+
+	//读取文件时，总将文件锁定为LOCK_SH
+	if( !flock($fp, LOCK_SH) )
+	{
+		die("无法将文件锁定为 LOCK_SH\n");
+	}
+
+	//读取文件
+	rewind($fp);								//将文件指针倒回文件的开头
+	while(!feof($fp))
+	{
+		echo fread($fp, 1024);
+	}
+
+	flock($fp, LOCK_UN);						//释放共享锁定
+
+	fclose($fp);								//关闭文件
+?>
+\end{lstlisting}
+
+
+
+在Windows以外的操作系统中，对于已经被flock()函数锁定的文件，如果再次执行锁定就会使flock()函数被挂起（锁定堵塞），直到以前的所有其他锁定被释放。
+
+如果不希望上述锁定堵塞的情况发生，可以在\$operation参数中附加LOCK\_NB。
+
+下面的示例说明了如何防止锁定堵塞发生。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	$fp = fopen($fname, "w+");
+	flock($fp, LOCK_EX + LOCK_NB);
+	fwrite($fp, "Some thing wrote\n");
+	flock($fp, LOCK_UN + LOCK_NB);
+	fclose();
+?>
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{Upload}
+
+
+
+
+
+PHP允许用户从表单上传文件到服务器，也不限制浏览器上传的文件类型，而且PHP还允许用户对服务iq文件的下载进行控制。
+
+不过，从安全方面来考虑时会发现允许用户上传文件是一个巨大的安全风险，因此应该仅仅允许可信任的用户执行文件上传操作。
+
+
+最基本的文件上传方式是使用HTML表单的POST方法来提交文件。
+
+
+
 
 \begin{lstlisting}[language=HTML]
 <!DOCTYPE html>
 <html>
 <body>
 
-<form action="upload_file.php" method="post"
-enctype="multipart/form-data">
+<form action="upload_file.php" method="post" enctype="multipart/form-data">
+<input type="hidden" name="MAX_FILE_SIZE" value="40000">
 <label for="file">Filename:</label>
 <input type="file" name="file" id="file" /> 
 <br />
@@ -1099,6 +2371,10 @@ enctype="multipart/form-data">
 </body>
 </html>
 \end{lstlisting}
+
+在隐藏域的MAX\_FILE\_SIZE中可以设置允许接收文件的最大尺寸（单位为字节），但是MAX\_FILE\_SIZE的值只是对浏览器的一个建议，可以被简单的绕过。
+
+在实际应用中，php.ini中设置的文件上传的最大值upload\_max\_filesize是不会失效的，不过最好还是在表单中通过MAX\_FILE\_SIZE来进行限制。
 
 <form> 标签的 enctype 属性规定了在提交表单时要使用哪种内容类型。在表单需要二进制数据时，比如文件内容，使用``multipart/form-data"。
 
@@ -1134,7 +2410,20 @@ else
 \item \texttt{\$\_FILES["file"]["error"]} - 由文件上传导致的错误代码
 \end{compactitem}
 
-注意，这是一种非常简单文件上传方式。基于安全方面的考虑，开发者应当增加有关什么用户有权上传文件的限制。在下面的这个脚本中，我们增加了对文件上传的限制，用户只能上传 .gif 或 .jpeg 文件\footnote{对于 IE，识别 jpg 文件的类型必须是 pjpeg，对于 FireFox，必须是 jpeg。}，文件大小必须小于 20 kb：
+在上述的简单文件上传实现中，服务器接收到的用户文件首先被存储在临时目录中，PHP将获得一个存储了上传文件的全部信息的\$\_FILES全局变量。
+
+
+在处理文件上传的PHP脚本中，需要实现对文件进行检测并判断的逻辑，然后才能确定接下来是否允许文件开始上传。
+
+\begin{compactitem}
+\item \texttt{\$\_FILES["file"]["size"]}限制被上传文件的大小；
+\item \texttt{\$\_FILES["file"]["type"]}限制被上传文件的类型；
+\item \texttt{\$\_FILES["file"]["error"]}判断文件上传导致的错误代码。
+\end{compactitem}
+
+如果上传后的文件大小、类型都符合限制，那么接下来PHP可以将其从临时目录拷贝到指定的位置，从而完成文件上传。
+
+基于安全方面的考虑，开发者应当增加有关什么用户有权上传文件的限制，因此需要增加对文件上传的限制，例如只允许用户上传 .gif 或 .jpeg 文件\footnote{对于 IE，识别 jpg 文件的类型必须是 pjpeg，对于 FireFox，必须是 jpeg。}，文件大小必须小于 20 kb。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -1164,7 +2453,13 @@ else
 ?>
 \end{lstlisting}
 
-上面的例子在服务器的 PHP 临时文件夹创建了一个被上传文件的临时副本，但是这个临时的复制文件会在脚本结束时消失。要保存被上传的文件，我们需要把它拷贝到另外的位置：
+上面的例子在服务器的 PHP 临时文件夹创建了一个被上传文件的临时副本，但是这个临时的复制文件会在脚本结束时消失。
+
+
+\subsection{move\_uploaded\_file()}
+
+
+要保存被上传的文件，我们需要把它拷贝到另外的位置，PHP提供了专门用于上传文件拷贝的函数move\_uploaded\_file()，这样就有了copy()函数之外的另一种选择。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -1204,6 +2499,853 @@ else
 \end{lstlisting}
 
 这个例子把用户上传的文件保存到名为``upload" 的新文件夹，上面的脚本会检测是否已存在此文件，如果不存在，则把文件拷贝到指定的文件夹。
+
+
+
+从思路上来看，处理多个文件的上传和单个文件的上传的情况是一样的，因此表单可以支持更多数量的文件上传，区别只是\$\_FILES数组的结构形式。
+
+首先，在上传单个文件时，需要在<input>标签中指定文件的名字，并且在处理文件上传的脚本中对其进行处理。
+
+
+\begin{lstlisting}[language=PHP]
+<form enctype="multipart/form-data" method="POST" action="upload.php">
+	<input type="hidden" name="MAX_FILE_SIZE" value="40000">
+	文件：<input name="upfile" type="file">
+	<input type="submit" value="上传文件">
+</form>
+
+<?php
+	//上传文件的存储目录
+	$uploaddir = "/home/tom/public_html/uploads/";
+
+	//文件上传后全路径名称
+	$uploadfile = $uploaddir. $_FILES["upfile"]["name"];
+	
+	if (move_uploaded_file($_FILES["upfile"]["tmp_name"], $uploadfile)) 
+	{
+	    print "文件上传成功！\n";
+	    print_r($_FILES);
+	} else {
+	    print "文件上传失败！\n";
+	    print_r($_FILES);
+	}
+?>
+\end{lstlisting}
+
+其次，在上传多个文件时，需要在<input>标签中指定不同的name属性值。
+
+\begin{lstlisting}[language=PHP]
+<form enctype="multipart/form-data" method="POST" action="multiy_upload.php">
+	文件1：<input name="upfile1" type="file">
+	文件2：<input name="upfile2" type="file">
+	文件3：<input name="upfile3" type="file">
+	<input type="submit" value="上传文件">
+</form>
+
+<!--
+<form enctype="multipart/form-data" method="POST" action="multiy_upload.php">
+	<input type="hidden" name="MAX_FILE_SIZE" value="40000">
+	文件1：<input name="upfile[]" type="file"><br>
+	文件2：<input name="upfile[]" type="file"><br>
+	文件3：<input name="upfile[]" type="file"><br>
+	<input type="submit" value="上传文件">
+</form>
+-->
+
+<?php
+	//文件上传目录
+	$uploaddir = "/home/tom/public_html/uploads/";
+
+	//循环遍历$_FILE数组进行判断
+	for($i=0; $i<count($_FILES['upfile']['name']); $i++)
+	{
+		//错误数组
+		$error = array();
+
+		//判断文件大小
+		if($_FILES['upfile']['size'][$i] >= 40000)
+		{
+			$error[] = "文件的尺寸太大！";
+		}
+
+		//判断文件类型
+		if($_FILES['upfile']['type'][$i] != "text/plain")
+		{
+			$error[] = "文件的类型必须为文本文件！";
+		}
+
+		//其他错误类型
+		if($_FILES['upfile']['error'][$i] != UPLOAD_ERR_OK)
+		{
+			$error[] = "文件上传失败！";
+		}
+	
+		echo "文件{$i}：".$_FILES['upfile']['name'][$i]."<br>\n";
+	
+		if(count($error))
+		{
+			//发现错误
+			echo join("<br>", $error);
+		}else{
+			move_uploaded_file($_FILES['upfile']['tmp_name'][$i],
+							$uploaddir . $_FILES['upfile']['name'][$i]);
+		}
+		echo "<hr>";
+	}
+?>
+\end{lstlisting}
+
+
+
+\section{Download}
+
+
+要实现文件下载，必须首先向浏览器发送必要的头信息来通知浏览器准备对将要下载的文件的处理。
+
+Web服务器向浏览器发送的信息主要包括以下内容：
+
+\begin{compactitem}
+\item 下载文件的类型使用MIME类型表示；
+\item 下载文件的描述给出文件名等信息；
+\item 下载文件的长度以字节为单位进行说明。
+\end{compactitem}
+
+Web服务器向浏览器发送的最常见的的MIME类型就是“Content-type: text/html”。如果Web服务器向浏览器发送的是PNG图像，那么HTTP头信息可能如下：
+
+\begin{lstlisting}[language=PHP]
+Content-type: image/png
+Content-Transfer-Encoding: BINARY
+\end{lstlisting}
+
+
+在不同的系统中，MIME类型的表示根据Web服务器的配置并不一致，例如可以在Apache httpd服务器的conf目录下查看magic文件来检查MIME类型。
+
+\subsection{header()}
+
+header()函数可以向浏览器发送头信息来指导下载，而且头信息必须在其他页面内容输出之前被发送，否则发生错误。
+
+在header()函数发送完头信息后，可以使用echo()、print()等发送具体的HTML信息等输出到浏览器。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//文件源是：original.html
+	$name = 'original.html';
+
+	//发送头信息：指定文件类型
+	header('Content-type: text/html');
+
+	//发送头信息：指定文件的表述
+	header('Content-Disposition: attachment; filename="downloaded.html"');
+
+	//发送头信息：指定文件的小
+	header("Content-Length: ".filesize($name));
+
+	//输出文件内容
+	$fp = fopen($name, "r");
+	while(false==feof($fp)){
+		echo fread($fp, 1024);
+	}
+?>
+\end{lstlisting}
+
+
+\subsection{readfile()}
+
+
+
+
+在输出文件内容时可以使用readfile()函数来将文件的内容直接输出到浏览器。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//一个图片文件
+	$name = "img.png";
+
+	//发送头信息
+	header("Content-Type: image/png");
+	header("Content-Disposition: attachment; filename=\"$name\"");
+	header("Content-Length: ".filesize($name));
+
+	//输出文件
+	readfile($fp);
+?>
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+
+\section{Permission}
+
+
+UNIX系统在安全性方面被设计为一个分级的权限控制系统，任何系统资源都属于特定的用户或用户组，其他用户或用户组在访问时则受到相应的限制。
+
+超级用户root拥有对所有资源的绝对的控制权。
+
+\begin{compactitem}
+\item 只有root用户可以任意修改文件的所有者和用户组；
+\item 其他用户只能将文件的组改为该用户自己所在的组，不能修改文件所有者。
+\end{compactitem}
+
+需要注意的是，访问权限是UNIX/Linux系统的一种内部机制，相关的函数在Windows操作系统下无效。
+
+
+\subsection{fileowner()}
+
+通常情况下，系统资源（即文件或目录）属于其创建者，fileowner()和filegroup()可以返回文件所有者ID和所属的用户组ID。
+
+
+
+
+\subsection{filegroup()}
+
+
+
+\subsection{posix\_getpwuid()}
+
+posix\_getpwuid()和posix\_getgrgid()可以将用户ID和用户组ID解析为字符串形式。
+
+
+\subsection{posix\_getgrgid()}
+
+
+
+\subsection{chown()}
+
+
+
+
+
+\subsection{chgrp()}
+
+
+
+实际上，PHP运行在非root用户状态下，因此chgrp()函数在修改文件所属的组时受到一定的限制，而且使用chown()函数改变文件的所有者时不会生效。
+
+
+\subsection{chmod()}
+
+
+文件的访问权限可以用来指定特定的用户能否对文件进行读、写或执行等操作。
+
+chmod()函数可以改变文件的访问权限，需要指定一个文件和相对应的权限值。
+
+默认情况下，权限值需要使用以0开头的八进制数字表示。
+
+
+
+
+\section{Path}
+
+
+为了描述一个文件的位置，需要给出文件的路径和文件名。
+
+
+PHP支持两种不同的路径分隔符，其中：
+
+\begin{compactitem}
+ \item UNIX/Linux系统必须使用“/”；
+ \item Windows默认使用“\textbackslash ”，也接受“/”的写法。
+\end{compactitem}
+
+在考虑可移植情况时，建议使用“/”作为文件的路径分隔符，或者使用PHP内置的DIRECTORY\_SEPARATOR，其值为当前系统的默认路径分隔符。
+
+
+
+
+\subsection{basename()}
+
+
+
+\subsection{dirname()}
+
+
+
+\subsection{pathinfo()}
+
+pathinfo() 返回一个关联数组包含有 path 的信息。返回关联数组还是字符串取决于 options。
+
+
+
+pathinfo()返回的数组包含了路径的信息，其中的dirname、basename和extension等分别表示目录名、文件名和文件扩展名。
+
+
+
+
+
+
+\section{Directory}
+
+PHP提供了与目录操作相关的函数，也可以使用目录类实现对文件系统中的目录的操作。
+
+如果用户需要取得一个目录下的文件和子目录，可以使用遍历目录和检索目录两种方式来实现。
+
+
+读取目录内容时可以使用opendir()、readdir()和closedir()等函数，类似于读取文件的操作，因此也称为遍历目录。
+
+\begin{compactitem}
+\item 遍历目录结构时可以使用文件系统函数，也可以使用Directory类；
+\item 检索目录可以返回包含目录结构信息的数组。
+\end{compactitem}
+
+\begin{compactitem}
+\item opendir()打开一个目录句柄，可用于之后的 closedir()，readdir() 和 rewinddir() 调用中。
+
+\item readdir()返回目录中下一个文件的文件名。文件名以在文件系统中的排序返回。
+
+\item closedir()关闭由 dir_handle 指定的目录流。流必须之前被 opendir() 所打开。
+
+\end{compactitem}
+
+下面的示例说明如何使用opendir()、readdir(）和closedir()等实现遍历目录结构。
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//打开一个目录
+	$handle = @opendir("/path/to/files");
+	
+	if ($handle)
+     {
+		echo "目录文件：\n";
+
+		readdir($handle);		//获取“.”，当前目录的表示
+		readdir($handle);		//获取“..”，上级目录的表示
+
+		//正确地遍历目录方法，使用“!==”符号
+		while (false !== ($file = readdir($handle))) {
+			echo "$file\n";
+		}
+
+		//将目录的指针倒回开头
+		rewinddir($handle);
+
+		//关闭目录
+		closedir($handle);
+	}
+?>
+\end{lstlisting}
+
+
+PHP提供的内置的Directory类可以使用面向对象的方式来实现目录遍历。
+
+
+\begin{lstlisting}[language=PHP]
+Directory {
+	/* 属性 */
+	public string $path ;
+	public resource $handle ;
+	/* 方法 */
+	public void close ([ resource $dir_handle ] )
+	public string read ([ resource $dir_handle ] )
+	public void rewind ([ resource $dir_handle ] )
+}
+\end{lstlisting}
+
+
+
+Directory类是PHP的内建类，没有提供相应的构造函数，因此Directory 实例是通过调用 dir() 函数创建的，而不是 new 操作符。
+
+下面的示例说明如何使用Directory类来实现目录遍历。
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//打开目录
+	$d = dir("/path/to/files");
+
+	echo "Handle: ".$d->handle."<br>\n";
+	echo "Path: ".$d->path."<br>\n";
+	
+	//循环输出
+	while (false !== ($file = $d->read()))
+	{
+	    echo $file."<br>\n";
+	}
+	
+	//关闭目录
+	$d->close();
+?>
+\end{lstlisting}
+
+
+具体来说，dir()函数可以返回一个实例化了的Directory对象，其中：
+
+\begin{compactitem}
+\item \$handle是一个打开了的目录句柄；
+\item \$path是当前目录的路径。
+\end{compactitem}
+
+Directory类的read()、rewind()和close()方法分别对应readdir()、rewinddir()和closedir()函数。
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\subsection{opendir()}
+
+opendir()函数接受一个目录路径字符串，并返回一个目录句柄。如果目录不存在或者无访问权限，则返回FALSE，同时产生一个E\_WARNING级别的错误信息。
+
+在opendir()前面加上“@”符号可以抑制错误信息的输出。
+
+
+
+
+\subsection{readdir()}
+
+readdir()函数接受一个目录句柄，并返回当前目录指针位置的一个文件名，然后将目录指针向后移动一位，直到目录指针位于目录的末尾时才会返回FALSE以表示再没有文件了。
+
+如果要重置目录指针到开始处，可以使用rewinddir()函数，该函数可以接受一个目录句柄，并将其倒回目录的开头。
+
+
+
+
+\subsection{closedir()}
+
+closedir()函数关闭一个打开的目录，也可以接受一个目录句柄作为参数来关闭指定的目录。
+
+
+
+
+\subsection{glob()}
+
+如果用户使用glob()函数检索指定的目录来实现遍历目录，也可以实现和其他目录函数类似的效果。
+
+glob() 函数依照 libc glob() 函数使用的规则寻找所有与 pattern 匹配的文件路径，类似于一般 shells 所用的规则一样，不进行缩写扩展或参数替代。
+
+glob()函数的返回值是一个包含目录检索结果的数组，其原型如下：
+
+\begin{lstlisting}[language=PHP
+array glob ( string $pattern [, int $flags = 0 ] )
+\end{lstlisting}
+
+
+\begin{compactitem}
+\item \$pattern指定要检索的目录信息，可以使用“*”或“?”等通配符；
+\item \$flags指定与检索模式相关的参数。
+\end{compactitem}
+
+下面的示例说明如何使用glob()函数实现检索目录文件。
+
+\begin{lstlisting}[language=PHP
+<?php
+	//检索当前目录中的所有“*.txt”文件
+	$files = glob("*.txt");
+	foreach ($files as $filename)
+	{
+	    echo "$filename size " . filesize($filename) . "\n";
+	}
+
+	//检索当前目录中的所有以“c”开头的子目录
+	$files = glob("c*", GLOB_ONLYDIR);
+	foreach ($files as $filename) 
+	{
+	    echo "$filename size " . filesize($filename) . "\n";
+	}
+
+	//检索“/path/”中的所有以“a”、“b”或“c”开头的PHP文件
+	$files = glob("/path/{a,b,c}*.php", GLOB_BRACE);
+	foreach ($files as $filename)
+	{
+	    echo "$filename size " . filesize($filename) . "\n";
+	}
+?>
+\end{lstlisting}
+
+
+
+
+\subsection{mkdir()}
+
+
+
+
+\subsection{rmdir()}
+
+
+通常情况下，如果目录是非空的，那么就不能进行快速的删除，必须首先删除其中的文件，然后才能从最深处的目录开始层层向外删除目录。
+
+
+递归思想的引入使得可以一次删除整个目录及其子目录和其中的文件。
+
+
+首先，考虑要删除的目录中没有包含其他子目录的情况，只要遍历该目录并删除其他的所有文件后，就可以实现目录删除。
+
+其次，如果目录中还包含子目录，那么就使用递归方式来删除所有目录。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	/**
+	* 函数名：deleteDir
+	* 功  能：递归地删除指定的目录
+	* 参  数：$dir目录
+	* 返回值：无
+     */
+	function deleteDir ($dir)
+	{
+		$handle = @opendir ($dir);	//打开目录
+
+		readdir ($handle);			//排除当前目录“.”
+		readdir ($handle);			//排除父级目录“..”
+		while (false !== ($file = readdir($handle))) 
+		{
+			//构造文件或目录的路径
+			$file = $dir .DIRECTORY_SEPARATOR. $file;
+
+			if (is_dir ($file)){			//如果是子目录，就进行递归操作
+				delete ($file);
+			} else {				//如果是文件，则使用unlik()删除
+				if (@unlink ($file)) {
+					echo "文件<b>$file</b>删除成功了。<br>\n";
+				} else {
+					echo "文件<b>$file</b>删除失败！<br>\n";
+				}
+			}
+		}
+		
+		//现在，删除当前目录
+		if (@rmdir ($dir)) {
+			echo "目录<b>$dir</b>删除成功了。<br>\n";
+		} else {
+			echo "目录<b>$dir</b>删除失败！<br>\n";
+		}
+	}
+
+	//测试程序
+	$dir = "/home/tom/public_html/delete_dir";
+	deleteDir ($dir);
+?>
+\end{lstlisting}
+
+
+在实际应用中，还需要考虑给定的目录是否已被删除，因此需要通过返回的状态值进行判断，或者在无法删除时终止并返回等。
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{copy()}
+
+PHP没有提供直接复制目录的函数，需要通过文件拷贝、删除、重命名等方法间接实现。
+
+\subsection{rename()}
+
+重命名文件函数rename()对目录操作也是有效的。
+
+从表面上看，移动一个文件是将文件从一个目录复制到另一个目录，然后再删除原来目录中的文件。
+
+从实现原理上看，移动一个文件也是一个重命名的过程，也就是将文件名中的路径名修改为移动文件后的新路径名，从而可以使用重命名思想来简化文件移动。
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	/**
+	* 函数名：move
+	* 功  能：移动指定的文件和目录
+	* 参  数：$source  要操作的文件
+	*		 $dest    要移动到的文件目录
+	* 返回值：bool
+     */
+	function move ($source, $dest)
+	{
+		$file = basename($source);			//取得目录名
+		$desct = $desct .DIRECTORY_SEPARATOR. $file;
+	
+		return rename($source, $desct);
+	}
+	
+	//将文件或目录从path1移动到path2目录下
+	move("/path1/name.gif", "/path2");
+	move("/path1/dir", "/path2");
+?>
+\end{lstlisting}
+
+
+复制一个包含多级子目录的目录与删除一个非空目录时的情况类似，都需要涉及到文件复制、目录创建等操作，因此也是一个目录遍历和递归处理的综合。
+
+首先，对源目录进行遍历。
+
+\begin{compactitem}
+\item 如果遇到的是文件，可以直接使用copy()函数进行复制；
+\item 如果遇到的是目录，则必须先建立该目录，然后对其下的文件或子目录进行复制操作。
+\end{compactitem}
+
+其次，使用递归思想处理整个目录中的所有文件和子目录。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	/**
+	* 函数名：copyDir
+	* 功  能：递归地复制整个目录
+	* 参  数：$dirFrom   源目录名
+	*		$dirTo	  目标目录名
+	* 返回值：无
+     */
+	function copyDir($dirFrom, $dirTo)
+	{
+		//如果遇到一个同名的文件，无法复制
+		//目录则直接退出
+		if(is_file($dirTo))
+		{
+			die("无法建立目录 $dirTo");
+		}
+		
+		//如果目录已经存在就不必建立
+		if(!file_exists($dirTo))
+		{
+			mkdir($dirTo);
+		}
+
+		$handle = opendir($dirFrom);		//打开当前目录
+
+		readdir ($handle);				//排除当前目录“.”
+		readdir ($handle);				//排除父级目录“..”
+
+		//循环读取文件
+		while (false !== ($file = readdir($handle))) 
+		{
+			//生成源文件名
+			$fileFrom = $dirFrom .DIRECTORY_SEPARATOR. $file;
+			//生成目标文件名
+			$fileTo = $dirTo .DIRECTORY_SEPARATOR. $file;
+			
+			if(is_dir($fileFrom)){			//如果是子目录，就进行递归操作
+				copyDir($fileFrom, $fileTo);
+			}else{					//如果是文件，直接使用copy()函数
+				@copy($fileFrom, $fileTo);
+			}
+		}
+	}
+	
+	//测试代码
+	copyDir("C:\\windows\\temp", "D:\\temp");
+?>
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
 
 
 
@@ -2132,12 +4274,736 @@ You are <?php echo $_REQUEST["age"]; ?> years old!
 \end{lstlisting}
 
 
+\chapter{PHP Image}
+
+除了处理字符串等文本数据之外，PHP也可以使用GD库等来处理图像（例如文字按钮、计数器数字、股票走势图形、数据拼图等静态或动态图形）。
+
+基本的图像文件操作包括对点、线和基本几何图形的实现，以及书写动态文字、使用调色板、填充图形区域等。
+
+
+
+PHP在使用图形库来创建图像时，首先在内存中建立图像，然后输出并下载到用户的浏览器中。
+
+\begin{compactenum}
+\item 创建画布来开始绘图设计，画布实际上就是在内存中开辟的一块用于存储图像信息的临时区域；
+\item 设置图像颜色来开始使用图像处理函数进行具体绘图；
+\item 图像绘制完成后转交给Web服务器，并发送（或下载）到浏览器来进行显示；
+\item 图像发送完成后就会被及时清理内存中的虚拟“画布”。
+\end{compactenum}
+
+
+\section{Pixel}
+
+
+像素（pixel）是构成数字图像的最小单位，若干个像素点以矩阵的方式排列后就形成了图像。
+
+\section{Palette}
+
+调色板（palette）是一个包含颜色值的数组，像素的颜色由它们在调色板中的位置确定。
+
+调色板中的每一项都是由3个独立的颜色值（红、绿、蓝）混合而成，它们的范围都可以从0～255.
+
+0代表不显示颜色，255代表颜色的浓度最深，因此每个像素最多可以有16777216（即256x256x256）种可能的颜色。
+
+图像以像素和调色板作为数据，并按照一定的算法存储为文件，因此不同的图像文件格式有不同的存储算法。
+
+通常情况下，GIF、JPEG和PNG等图像文件格式都是压缩的，可以减小文件的体积。
+
+\section{Bit}
+
+颜色也可以理解为由数字（位，Bit）表示的，并且颜色数=$2^n$，其中n就是所占的位数。
+
+\begin{compactitem}
+\item 高彩色指16位显示模式，支持65536（64K）种颜色；
+\[2^{16}=65536\]
+\item 真彩色指24位显示模式，支持1677万（16M）种颜色。
+\[2^{24}=16777216\]
+\end{compactitem}
+
+\section{Index}
+
+
+图像指数可以评价图像整体的感观和效果，并通过对比度、亮度、色调和饱和度等参数进行量化表达。
+
+\begin{compactitem}
+\item 对比度是画面最亮的部分和最暗的部分的比值，其值越大则明暗对比越强；
+\item 亮度是画面总体的明亮程度，其值越大则画面越明亮；
+\item 色调是色偏，可以分为冷色调和暖色调等；
+\item 饱和度是色调的光度或暗度以及色调的纯度。
+\end{compactitem}
+
+饱和度表示图像的彩色深浅度或鲜艳度，取决于彩色种的白色光含量。白色光含量越高，则彩色光含量越低，色彩饱和度就越低。
+
+
+\section{Transparency}
+
+透明度控制背景是否可以透过图像，以及以多大的恶透明度透过图像。
+
+PNG等支持Alpha通道，这样每一个ie像素都有一个额外的值来表示其透明度，其他图像只是简单地指定调色板中的选项值来指定透明度。
+
+
+
+
+
+
+
+\section{GD}
+
+
+GD库本身是一个PHP动态链接扩展库，可以使PHP处理GIF、JPEG、PNG、WBMP、XBM等格式的图像文件操作，并且支持额外的字体库（例如FreeType和Type 1字体等）。
+
+
+
+在Windows自动捆绑了GD库，但是默认不开启，因此需要在php.ini中通过“extension=php\_gd2.dll”选项来手动打开对GD扩展库的支持。
+
+在UNIX/Linux中需要在编译PHP时使用“\texttt{--with-gd}”选项打开，而且需要安装相关的图片格式和字体。
+
+
+默认情况下，GD库的功能有限，需要配合其他的函数库进行使用。
+
+
+\subsection{gd\_info()}
+
+
+gd\_info()取得当前安装的 GD 库的信息，并返回一个关联数组描述了安装的 GD 库的版本和性能。
+
+
+
+\section{Canvas}
+
+
+\subsection{imageCreate)}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{imageCreateTrueColor()}
+
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{Color}
+
+
+\subsection{imageColorAllocate()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{Image}
+
+
+
+
+PHP可以直接生成GIF、JPEG、PNG和WBMP四种图像格式的文件，也可以从不同的源（例如本地或网络图像文件）新建图像。
+
+
+在直接输出图像到浏览器之前，需要使用header()发送标头信息来设置正确的MIME文件类型。
+
+\begin{compactitem}
+\item Content-type: image/gif
+\item Content-type: image/jpeg
+\item Content-type: image/png
+\item Content-type: image/vnd.wap.wbmp
+\end{compactitem}
+
+在保存图像到服务器上时，不需要使用header()发送标头信息。
+
+
+
+
+
+\subsection{imageGIF()}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{imageJPEG()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{imagePNG()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{imageWBMP()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\subsection{imageCreateFromGIF()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{imageCreateFromJPEG()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{imageCreateFromPNG()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\subsection{imageCreateFromWBMP()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{imageCreateFromString()}
+
+
+
+\subsection{imageDestroy()}
+
+
+\section{Graph}
+
+
+
+在使用图形库进行点、线和面的绘制时，图形在画布中的位置通过坐标进行确定。
+
+
+\begin{compactitem}
+\item 坐标原点在画布左上角的起始位置，以像素大小为单位。
+\item X轴正方向向右延伸；
+\item Y轴正方向向下延伸。
+\end{compactitem}
+
+\subsection{imageSetPixel()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{imageLine()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\subsection{imageDashedLine()}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//创建图像
+	$img = imageCreate (300, 200);
+	$background = ImageColorAllocate($img, 255, 255, 255);			//背景设为白色
+	$black = ImageColorAllocate ($img, 0, 0, 0);		  			//设定黑色
+	$white = $background;									//设定白色
+
+	//发送标头信息
+	header("Content-type: image/png");
+
+	//绘制矩形
+	imageRectangle($img, 30, 30, 180, 120, $black);
+	imageRectangle($img, 60, 60, 210, 150, $black);
+
+	//填充颜色
+	imageFill ($img, 100, 100,$black);
+
+	//输出文字
+	imageString ($img, 5, 75, 81, "Hello, PHP", $white);
+
+	//输出PNG图像
+	imagePNG($img);
+
+	//销毁图像
+	imageDestroy($img);
+?>
+\end{lstlisting}
+
+
+
+
+
+
+
+\subsection{imageRectangle()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\subsection{imagePolygon()}
+
+
+
+\subsection{imageArc()}
+
+
+
+
+\subsection{imageSetThickness()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//定义PNG图片的高和宽
+	$widht =501;
+	$height=201;
+
+	//创建图片
+	$image=imageCreate($widht, $height);
+
+	//定义颜色
+	$colorWhite=imageColorAllocate($image, 255, 255, 255);
+	$colorGrey=imageColorAllocate($image, 192, 192, 192);
+	$colorBlue=imageColorAllocate($image, 0, 0, 255);
+	$colorRed =imageColorAllocate($image, 255, 0, 0);
+	
+	//创建包围在图片周围的线
+	for ($i=0; $i<=30; $i++)
+	{
+		imageline($image, 0, $i*20, 500, $i*20, $colorGrey);
+		imageline($image, $i*20, 0, $i*20, 200, $colorGrey);
+	}
+
+	//绘制多边形
+	$graphValues=array(1,142,45,190,80,181,120,105,23,13,150,55);
+	imagePolygon($image, $graphValues, 6, $colorBlue);
+
+	//绘制弧形
+	imageArc($image, 250, 100, 200, 150, 40, 320, $colorRed);
+
+	//绘制圆形
+	imageEllipse($image, 400, 100, 179, 179, $colorBlue);
+
+	//设定图形的线宽，并绘制矩形
+	imageSetThickness($image, 3);
+	imageRectangle($image, 250, 52, 400, 146, $colorRed);
+
+	//输出PNG图形
+	header("Content-type: image/png");
+	imagePNG($image);
+
+	//销毁资源
+	imageDestroy($image);
+?>
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\subsection{getImageSize()}
+
+
+在对图像文件进行操作之前，可以使用getImageSize()函数获得图片的尺寸等相关信息。
+
+
+
+
+\subsection{imageCopy()}
+
+
+
+
+
+\subsection{imageCopyMerge()}
+
+
+
+\subsection{imageCopyMergeGray()}
+
+
+
+\subsection{imageCopyResampled()}
+
+
+
+
+\subsection{imageCopyResized()}
+
+
+\subsection{imageRotate()}
+
+
+
+
+
+
+
+\section{Fill}
+
+
+
+\subsection{imageFill()}
+
+
+
+
+\subsection{imageFillToBorder()}
+
+
+
+\subsection{imageFilledRectangle()}
+
+
+
+
+
+\subsection{imageFilledPolygon()}
+
+
+
+
+\subsection{imageFilledArc()}
+
+
+
+\subsection{imageFilledEllipse()}
+
+
+
+\section{String}
+
+
+
+
+
+\subsection{imageString()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{imageStringUp()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{imageChar()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{imageCharUp()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{imageLoadFont()}
+
+
+除了使用内置的字体之外，PHP还可以使用imageLoadFont()函数加载用户自定义字体文件，并返回对应字体的标识符。
+
+字体文件的格式是二进制的，并且和平台有关，因此不同类型的CPU的机器生成的字体是不同的。
+
+\subsection{imageTtfText()}
+
+
+TrueType是一种可以缩放的，与设备无关的字体，并且可以按轮廓存储TrueType字体，因此它们可以任意调整高度，打印TrueType字体时可以与屏幕上显示的完全相同。
+
+
+\subsection{imageTtfbBox()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\section{Filter}
+
+
+PHP提供的图像过滤器函数可以对图形进行修饰，这些内置的过滤器类似于Photoshop中的“滤镜”功能。
+
+
+\subsection{imageFilter()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+下面的说明如何对图像进行灰度处理。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//打开图像
+	$im = imageCreateFromPNG('dave.png');
+
+	if ($im && imageFilter($im, IMG_FILTER_GRAYSCALE)) 
+	{
+    		echo '灰度处理成功！';
+	    imagePNG($im, 'dave.png');
+	} else {
+    		echo '灰度处理失败！';
+	}
+
+	//消除内存图像
+	imageDestroy($im);
+?>
+\end{lstlisting}
+
+
+下面的说明如何对图像进行模糊处理。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//打开图像
+	$im = imageCreateFromPNG('sean.png');
+
+	if ($im && imageFilter($im, IMG_FILTER_GAUSSIAN_BLUR)) 
+	{
+	    echo '亮度改变成功！';
+	    imagePNG($im, 'sean.png');
+	}else{
+	    echo '亮度改变失败！';
+	}
+
+	//消除内存图像
+	imageDestroy($im);
+?>
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
 
 
 
 \chapter{PHP Mail}
 
 
+
+
+
+绝大多数邮件服务器都支持SMTP、POP3和IMAP协议，PHP可以基于邮件协议来实现邮件的收取、发送等服务。
 
 
 

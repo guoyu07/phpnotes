@@ -1,34 +1,14 @@
 \part{Foundation}
 
-{\CTEXnoindent\textbf{版权信息}}
-
-
-Copyright © 1997 - 2013，PHP 文档组版权所有。发行本资料必须服从 Creative Commons Attribution 3.0 或更新版许可中阐明的条款及条件。\href{http://www.php.net/manual/zh/cc.license.php}{Creative Commons Attribution 3.0 license} 的副本已随本手册发行。其最新版本位于 »~\url{http://creativecommons.org/licenses/by/3.0/}。
-
-如有兴趣再发行或再版此文档的全部或部分内容，不论修改过与否，或有任何问题，请联系版权所有者 » \href{doc-license@lists.php.net}{doc-license@lists.php.net}。注意，本地址映射到一个公开归档的邮件列表。
-
-{\CTEXnoindent\textbf{作者与贡献者}}
-
-在手册的首页上仅突出了目前最活跃的人员，但还有更多的贡献者正在帮助我们工作或在过去给项目提供过巨大的帮助。有许多不知名的人帮助在手册中写下用户评论，并不断地包含在参考中，也很感谢他们的努力。下面所提供的列表均以字母顺序排序。
-
-{\CTEXnoindent\textbf{作者与编辑}}
-
-下列人员曾经或者目前正在为本手册添砖加瓦： Bill Abt, Jouni Ahto, Alexander Aulbach, Daniel Beckham, Stig Bakken, Nilgün Belma Bugüner, Jesus M. Castagnetto, Ron Chmara, Sean Coates, John Coggeshall, Simone Cortesi, Peter Cowburn, Daniel Egeberg, Markus Fischer, Wez Furlong, Sara Golemon, Rui Hirokawa, Brad House, Pierre-Alain Joye, Etienne Kneuss, Moriyoshi Koizumi, Rasmus Lerdorf, Andrew Lindeman, Stanislav Malyshev, Justin Martin, Rafael Martinez, Rick McGuire, Moacir de Oliveira Miranda Júnior, Kalle Sommer Nielsen, Yasuo Ohgaki, Richard Quadling, Derick Rethans, Rob Richards, Sander Roobol, Egon Schmid, Thomas Schoefbeck, Sascha Schumann, Dan Scott, Masahiro Takagi, Yannick Torres, Michael Wallner, Lars Torben Wilson, Jim Winstead, Jeroen van Wolffelaar 和 Andrei Zmievski.
-
-下列人员对本手册做了相当数量的编辑工作： Stig Bakken, Gabor Hojtsy, Hartmut Holzgraefe 和 Egon Schmid.
-
-
-{\CTEXnoindent\textbf{用户评论维护者}}
-
-目前最活跃的维护者是： Daniel Brown, Nuno Lopes, Felipe Pena, Thiago Pojda 和 Maciek Sokolewicz.
-
-下列人员为维护用户评论作出了巨大的努力: Mehdi Achour, Daniel Beckham, Friedhelm Betz, Victor Boivie, Jesus M. Castagnetto, Nicolas Chaillan, Ron Chmara, Sean Coates, James Cox, Vincent Gevers, Sara Golemon, Zak Greant, Szabolcs Heilig, Oliver Hinckel, Hartmut Holzgraefe, Etienne Kneuss, Rasmus Lerdorf, Matthew Li, Andrew Lindeman, Aidan Lister, Hannes Magnusson, Maxim Maletsky, Bobby Matthis, James Moore, Philip Olson, Sebastian Picklum, Derick Rethans, Sander Roobol, Damien Seguy, Jason Sheets, Tom Sommer, Jani Taskinen, Yasuo Ohgaki, Jakub Vrana, Lars Torben Wilson, Jim Winstead, Jared Wyles 和 Jeroen van Wolffelaar.
-
-{\CTEXnoindent\textbf{中文翻译外部支持团队}}
-
-PHP手册中文翻译工作是一项长期而又艰巨的工作，为了让这个工作得以持久进行下去，我们组织了 » \href{http://code.google.com/p/phpdoc-zh/}{PHP 手册中文翻译补完计划}。下列人员目前正在参与该计划：codingall.com（赵磊）、cuimuxi（崔玉松）、cztviztor、gaojian1226、HaoHappy（陈浩）、HonestQiao（乔楚）、kendotom、lgg860911、loosen.copen、miusun01（李鼎峰）、ping3608、r.anerg（罗翀）、suppersoft（paris.wang）、fising（王祥中）、wind.golden（陈金）。
 
 \chapter{PHP Syntax}
+
+
+PHP标识符用于赋予变量、常量、函数、类或方法的名称，只能由字母（所有英文字符以及ASCII码值在127～255的所有字符）、数字或下划线组成。
+
+标识符只能以字母或下划线开头，并且PHP自身定义的关键字不能作为常量、函数名或类名，但是可以将它们作为变量使用。
+
+
 
 \section{PHP tags}
 
@@ -804,6 +784,10 @@ echo 'Variables do not $expand $either';
 \end{table}
 
 
+具体来说，转义字符是“\textbackslash”和其他字符合起来表示的一个特殊字符，通常是一些非打印字符。
+
+
+
 Heredoc 结构就象是没有使用双引号的双引号字符串，这就是说在 heredoc 结构中单引号不用被转义，但是上文中列出的转义序列还可以使用。变量将被替换，但在 heredoc 结构中含有复杂的变量时要格外小心。
 
 要注意的是结束标识符这行除了可能有一个分号（;）外，绝对不能包含其它字符。这意味着标识符不能缩进，分号的前后也不能有任何空白或制表符。更重要的是结束标识符的前面必须是个被本地操作系统认可的换行，比如在 UNIX 和 Mac OS X 系统中是 \textbackslash n，而结束定界符（可能其后有个分号）之后也必须紧跟一个换行。
@@ -1127,14 +1111,26 @@ PHP 中的 string 的实现方式是一个由字节组成的数组再加上一�
 
 \end{compactitem}
 
-最后，要书写能够正确使用 Unicode 的程序依赖于很小心地避免那些可能会损坏数据的函数。要使用来自于 intl 和 mbstring 扩展的函数。不过使用能处理 Unicode 编码的函数只是个开始。不管用何种语言提供的函数，最基本的还是了解 Unicode 规格。例如一个程序如果假定只有大写和小写，那可是大错特错。
+在编写能够正确使用 Unicode 的程序时，必须小心地避免那些可能会损坏数据的函数。例如要使用来自于 intl 和 mbstring 扩展的函数。
+
+不过，使用能处理 Unicode 编码的函数只是个开始，不管用何种语言提供的函数，最基本的还是了解 Unicode 规格。例如一个程序如果假定只有大写和小写，那可是大错特错。
+
+
 
 
 \section{Array}
 
-PHP 中的数组实际上是一个有序映射。映射是一种把 values 关联到 keys 的类型。此类型在很多方面做了优化，因此可以把它当成真正的数组，或列表（向量），散列表（是映射的一种实现），字典，集合，栈，队列以及更多可能性。由于数组元素的值也可以是另一个数组，树形结构和多维数组也是允许的。
+数组是PHP的基本数据类型，而且PHP提供了丰富的数组处理函数和方法，例如排序函数、替换函数、回调函数等。
 
-可以用 array() 语言结构来新建一个数组。它接受任意数量用逗号分隔的 \colorbox{lightgray}{\texttt{键（key） => 值（value）}}对。
+另外，PHP数组函数还可以实现堆栈和队列等数据结构。
+
+实际上，PHP 中的数组是一个有序映射，映射本身是一种把 values 关联到 keys 的类型。
+
+PHP数组类型在很多方面做了优化，可以将其当作真正的数组，或列表（向量），散列表（是映射的一种实现），字典，集合，栈，队列等来使用。
+
+数组元素的值也可以是另一个数组，因此树形结构和多维数组也是允许的。
+
+数组中任何都有固定的键名（索引）和值，用户可以用 array() 语言结构来新建一个数组。它接受任意数量用逗号分隔的 \colorbox{lightgray}{\texttt{键（key） => 值（value）}}对。
 
 \begin{verbatim}
 array(  key =>  value
@@ -1199,7 +1195,15 @@ array(1) {
 
 上例中所有的键名都被强制转换为 1，则每一个新单元都会覆盖前一个的值，最后剩下的只有一个 \colorbox{lightgray}{\texttt{"d"}}。
 
-PHP 数组可以同时含有 integer 和 string 类型的键名，因为 PHP 实际并不区分索引数组和关联数组。
+PHP数组内部使用类似C语言中“指针”的机制，可以便于对数组的管理和操作，因此索引、值和内部的指针是数组的重要组成部分。
+
+PHP数组不仅可以使用数字索引，也可以使用字符串键名的方式，因此PHP可以直接获取数组所有的键名和值，也可以方便地交换数组中的键名和值。
+
+
+
+PHP 实际并不区分索引数组和关联数组，这样PHP数组才可以同时含有 integer 和 string 类型的键名。
+
+
 
 如果对给出的值没有指定键名，则取当前最大的整数索引值，而新的键名将是该值加一。如果指定的键名已经有了值，则该值会被覆盖。
 
@@ -1379,6 +1383,7 @@ unset($arr);    // This deletes the whole array
 \end{lstlisting}
 
 如上所述，如果给出方括号但没有指定键名，则取当前最大整数索引值，新的键名将是该值加上 1（但是最小为 0）。如果当前还没有整数索引，则键名将为 0。
+
 注意这里所使用的最大整数键名不一定当前就在数组中。它只要在上次数组重新生成索引后曾经存在过就行了。以下面的例子来说明：
 
 \begin{lstlisting}[language=PHP]
@@ -1432,7 +1437,7 @@ Array
 
 \subsection{Array Function}
 
-有很多操作数组的函数，unset() 函数允许删除数组中的某个键。但要注意数组将不会重建索引。如果需要删除后重建索引，可以用 array\_values() 函数。
+unset() 函数允许删除数组中的某个键。但要注意数组将不会重建索引。如果需要删除后重建索引，可以用 array\_values() 函数。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -1449,7 +1454,7 @@ $b = array_values($a);
 ?>
 \end{lstlisting}
 
-foreach 控制结构是专门用于数组的。它提供了一个简单的方法来遍历数组。
+foreach 控制结构是专门用于数组的，而且它提供了一个简单的方法来遍历数组。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -2116,7 +2121,16 @@ echo $a;       // bar
 
 \section{PHP Type Casting}
 
-PHP 中的类型强制转换和 C 中的非常相似，在要转换的变量之前加上用括号括起来的目标类型。
+在实际应用中，经常使用不同类型的变量来满足不同应用程序接口的需求，因此需要对变量进行类型识别或转换。
+
+\begin{compactitem}
+\item gettype()可以查看一个变量的数据类型。
+\item var\_dump()可以查看一个变量的数据类型和值。
+\item print\_r()可以查看一个变量的值，并且输出更直观的数据结果。
+\item var\_export()可以返回一个变量的字符串表示。
+\end{compactitem}
+
+PHP 中的类型强制转换和 C 中的非常相似，在要转换的变量之前加上用括号括起来的目标类型。或者，使用settype()函数来将目标数据类型作为参数，并输出转换后的变量。
 
 
 \begin{lstlisting}[language=PHP]
@@ -2127,7 +2141,7 @@ $bar = (boolean) $foo;   // $bar is a boolean
 \end{lstlisting}
 
 
-允许的强制转换有：
+PHP允许的强制转换包括：
 
 \begin{compactitem}
 \item (int), (integer) - 转换为整形 integer
@@ -2136,10 +2150,21 @@ $bar = (boolean) $foo;   // $bar is a boolean
 \item (string) - 转换为字符串 string
 \item (array) - 转换为数组 array
 \item (object) - 转换为对象 object
-\item (unset) - 转换为 NULL (PHP 5)
+\item (unset) - 转换为 NULL
 \end{compactitem}
 
+
+
 (binary) 转换和 b 前缀转换支持为 PHP 5.2.1 新增。
+
+虽然浮点数和整型数可以相互转换，但是可能有精度损失。
+
+\begin{compactitem}
+\item 整型转换为浮点型时没有精度损失；
+\item 浮点型转换为整型时自动舍弃小数部分。
+\end{compactitem}
+
+如果一个浮点数超过整型数的有效范围，那么溢出的部分将会丢失，因此结果将是不确定的。
 
 注意在括号内允许有空格和制表符，所以下面两个例子功能相同：
 
@@ -2180,6 +2205,37 @@ if ($fst === $str) {
 
 有时在类型之间强制转换时确切地会发生什么可能不是很明显。
 
+除此之外，PHP还提供了更为具体的转换函数：intval()、floatval()和strval()，分别用来转换整型、浮点型和字符串类型。
+
+为了获得一个指定精度的浮点数，可以参考C语言使用sprintf()，并返回一个格式化了的字符串。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$foo = sprintf("%0.2f",3.1415926);
+$foo = (float)sprintf("%0.2f",3.1415926);
+?>
+\end{lstlisting}
+
+字符串在转换为数字时得到的数字是从字符串开始部分的数值型字符串，而且数值型字符串包括使用科学记数法表示的数字，因此PHP中的数值型字符串可以和数字变量进行混合运算。
+
+
+数组和对象转换为字符串时的结果分别是“Array”和“Object”，因此试图以echo或print输出一个数组或字符串并不能得到预期的结果，应该使用print\_r()或var\_dump()进行输出。
+
+如果将资源型数据转换为字符串，那么将得到类似于“Resource id\#1”格式的字符串，其中1是PHP中资源的唯一标识符，可以使用get\_resource\_type()获得资源的类型。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$fp = fopen("foo", "w");
+echo get_resource_type($fp);
+?>
+\end{lstlisting}
+
+在将布尔值、数字或字符串转换为数组时，将得到一个以上述类型数据为元素的数组。
+
+\begin{compactitem}
+\item 将一个NULL转换为数组将得到一个空数组；
+\item 将一个对象转换为数组时将使数组元素变为对象的属性，其键名为成员变量名。
+\end{compactitem}
 
 
 
@@ -2308,11 +2364,18 @@ var_dump($unset_obj);
 ?>
 \end{lstlisting}
 
-依赖未初始化变量的默认值在某些情况下会有问题，例如把一个文件包含到另一个之中时碰上相同的变量名。另外把 register\_globals 打开是一个主要的安全隐患。使用未初始化的变量会发出 E\_NOTICE 错误，但是在向一个未初始化的数组附加单元时不会。 isset() 语言结构可以用来检测一个变量是否已被初始化。
+依赖未初始化变量的默认值在某些情况下会有问题，例如把一个文件包含到另一个之中时碰上相同的变量名。另外把 register\_globals 打开是一个主要的安全隐患。使用未初始化的变量会发出 E\_NOTICE 错误，但是在向一个未初始化的数组附加单元时不会。
+
+isset() 语言结构可以用来检测一个变量是否已被初始化。
 
 
 
 \chapter{Superglobals}
+
+
+PHP实现了自己的外部变量机制，因此可以以简单的方式来处理表单数据，获取环境变量等，并将外部数据或变量保存到全局数组变量中。
+
+
 
 
 对于全部脚本而言，PHP 提供了大量的预定义变量，而且这些预定义变量依赖于运行的服务器的版本和设置以及其它因素。
@@ -2328,11 +2391,16 @@ var_dump($unset_obj);
 
 从 PHP 4.1.0 开始，PHP 提供了一套附加的预定数组，这些数组变量包含了来自Web服务器、运行环境和用户输入的数据。这些数组非常特别，它们在全局范围内自动生效，因此通常被称为自动全局变量（autoglobals）或者超全局变量（superglobals）。
 
+
+
 PHP超全局变量是在全部作用域中始终可用的内置变量，包括\$GLOBALS、\$\_SERVER、\$\_GET、\$\_POST、\$\_FILES、\$\_COOKIE、\$\_SESSION、\$\_REQUEST、\$\_ENV等。
 
 
 
 PHP 中的许多预定义变量都是“超全局的”，这意味着它们在一个脚本的全部作用域中都可用。在函数或方法中无需执行 global \$variable; 就可以访问它们。
+
+
+
 
 PHP 4.2.0 以及后续版本中，PHP 指令 register\_globals 的默认值为 off。这是 PHP 的一个主要变化，让 register\_globals 的值为 off 将影响到预定义变量集在全局范围内的有效性。
 
@@ -2342,9 +2410,15 @@ PHP 4.2.0 以及后续版本中，PHP 指令 register\_globals 的默认值为 o
 
 PHP 中没有用户自定义超全局变量的机制，超全局变量罗列于下文中，但是超级全局变量不能被用作函数或类方法中的可变变量。
 
+
+
 “Superglobal”也称为自动化的全局变量，这就表示其在脚本的所有作用域中都是可用的，不需要在函数或方法中用 global \$variable; 来访问它。
 
+
+
 与所有其他超全局变量不同，\$GLOBALS在PHP中总是可用的。
+
+
 
 
 
@@ -2353,6 +2427,44 @@ PHP 中没有用户自定义超全局变量的机制，超全局变量罗列于�
 另外，尽管超全局变量和 HTTP\_*\_VARS 同时存在，但是它们并不是同一个变量，所以改变其中一个的值并不会对另一个产生影响。
 
 如果某些 variables\_order 中的变量没有设定，它们的对应的 PHP 预定义数组也是空的。
+
+对于使用GET或POST方法传递的表单数据，，PHP脚本可以通过\$\_GET或\$\_POST超全局数组变量进行保存和操作。
+
+\begin{lstlisting}[language=PHP]
+<form action="<?php echo htmlspecialchars($_SERVER['PHP_SELF'])?>" method="get">
+Name: <input type="text" name="username"><br />
+Email: <input type="text" name="email''></ br>
+<input type="submit" name="submit" value="注册">
+</form>
+
+<pre>
+您的用户名是：<?php echo $_GET['username']; ?>
+Email地址是：<?php echo $_GET['email']; ?>
+</pre>
+\end{lstlisting}
+
+PHP中的超全局变量\$\_GET和\$\_POST可以自动获取表单的HTML数据，并且可以以数组的方式来进行操作。
+
+\$\_REQUEST不仅包含\$\_GET和\$\_POST的值，还包括\$\_COOKIE的值。
+
+另外，\$\_REQUEST对\$\_GET、\$\_POST和\$\_COOKIE的包含是有顺序的，由php.ini中的variable\_order选项决定。例如，如果variable\_order的值为EGPCS，那么在\$\_REQUEST中的GET方法将覆盖POST方法的同名变量。
+
+Cookie和Session为PHP提供了两种不同的会话机制，可以允许Web应用程序在同一个会话中自由地存取持久性会话数据。
+
+\begin{compactitem}
+\item \$\_COOKIE是客户端用来获取或存储Cookie的变量。
+\item \$\_SESSION是服务器端用来获取或存储Session的变量。
+\end{compactitem}
+
+
+
+
+不同的机器的环境变量是不同的，PHP可以通过\$\_ENV和\$\_SERVER获取系统的环境变量，这些环境变量包含了Web服务器的相关配置信息，以及浏览器的相关状态信息，这样就可以根据不同的环境来设置不同的输出效果。
+
+例如，从\$\_SERVER可以返回发出请求的客户机IP地址和服务器域名等，phpinfo()函数返回的环境信息中就包含了\$\_ENV和\$\_SERVER的内容。
+
+
+另外，在基于权限或身份认证的系统中，可以获取客户端的IP地址来屏蔽非法的用户请求等。
 
 
 
@@ -2399,88 +2511,94 @@ $foo in current scope: local variable
 
 如果以命令行方式运行 PHP，下面列出的元素几乎没有有效的(或是没有任何实际意义的)。
 
-%%%%\begin{compactitem}
-%%%%\item 'PHP\_SELF'
-%%%%当前执行脚本的文件名，与 document root 有关。例如，在地址为 http://example.com/test.php/foo.bar 的脚本中使用 \$\_SERVER['PHP\_SELF'] 将得到 /test.php/foo.bar。\_\_FILE\_\_ 常量包含当前(例如包含)文件的完整路径和文件名。 从 PHP 4.3.0 版本开始，如果 PHP 以命令行模式运行，这个变量将包含脚本名。之前的版本该变量不可用。
-%%%%\item 'argv'
-%%%%传递给该脚本的参数的数组。当脚本以命令行方式运行时，argv 变量传递给程序 C 语言样式的命令行参数。当通过 GET 方式调用时，该变量包含query string。
-%%%%\item 'argc'
-%%%%包含命令行模式下传递给该脚本的参数的数目(如果运行在命令行模式下)。
-%%%%\item 'GATEWAY\_INTERFACE'
-%%%%服务器使用的 CGI 规范的版本；例如，“CGI/1.1”。
-%%%%\item 'SERVER\_ADDR'
-%%%%当前运行脚本所在的服务器的 IP 地址。
-%%%%\item 'SERVER\_NAME'
-%%%%当前运行脚本所在的服务器的主机名。如果脚本运行于虚拟主机中，该名称是由那个虚拟主机所设置的值决定。
-%%%%\item 'SERVER\_SOFTWARE'
-%%%%服务器标识字符串，在响应请求时的头信息中给出。
-%%%%\item 'SERVER\_PROTOCOL'
-%%%%请求页面时通信协议的名称和版本。例如，“HTTP/1.0”。
-%%%%\item 'REQUEST\_METHOD'
-%%%%访问页面使用的请求方法；例如，“GET”, “HEAD”，“POST”，“PUT”。
-%%%%\item 'REQUEST\_TIME'
-%%%%请求开始时的时间戳。从 PHP 5.1.0 起可用。
-%%%%\item 'REQUEST\_TIME\_FLOAT'
-%%%%请求开始时的时间戳，微秒级别的精准度。 自 PHP 5.4.0 开始生效。
-%%%%\item 'QUERY\_STRING'
-%%%%query string（查询字符串），如果有的话，通过它进行页面访问。
-%%%%\item 'DOCUMENT\_ROOT'
-%%%%当前运行脚本所在的文档根目录。在服务器配置文件中定义。
-%%%%\item 'HTTP\_ACCEPT'
-%%%%当前请求头中 Accept: 项的内容，如果存在的话。
-%%%%\item 'HTTP\_ACCEPT\_CHARSET'
-%%%%当前请求头中 Accept-Charset: 项的内容，如果存在的话。例如：“iso-8859-1,*,utf-8”。
-%%%%\item 'HTTP\_ACCEPT\_ENCODING'
-%%%%当前请求头中 Accept-Encoding: 项的内容，如果存在的话。例如：“gzip”。
-%%%%\item 'HTTP\_ACCEPT\_LANGUAGE'
-%%%%当前请求头中 Accept-Language: 项的内容，如果存在的话。例如：“en”。
-%%%%\item 'HTTP\_CONNECTION'
-%%%%当前请求头中 Connection: 项的内容，如果存在的话。例如：“Keep-Alive”。
-%%%%\item 'HTTP\_HOST'
-%%%%当前请求头中 Host: 项的内容，如果存在的话。
-%%%%\item 'HTTP\_REFERER'
-%%%%引导用户代理到当前页的前一页的地址（如果存在）。由 user agent 设置决定。并不是所有的用户代理都会设置该项，有的还提供了修改 HTTP\_REFERER 的功能。简言之，该值并不可信。
-%%%%\item 'HTTP\_USER\_AGENT'
-%%%%当前请求头中 User-Agent: 项的内容，如果存在的话。该字符串表明了访问该页面的用户代理的信息。一个典型的例子是：Mozilla/4.5 [en] (X11; U; Linux 2.2.9 i586)。除此之外，你可以通过 get\_browser() 来使用该值，从而定制页面输出以便适应用户代理的性能。
-%%%%\item 'HTTPS'
-%%%%如果脚本是通过 HTTPS 协议被访问，则被设为一个非空的值。
-%%%%\item 'REMOTE\_ADDR'
-%%%%浏览当前页面的用户的 IP 地址。
-%%%%\item 'REMOTE\_HOST'
-%%%%浏览当前页面的用户的主机名。DNS 反向解析不依赖于用户的 REMOTE\_ADDR。
-%%%%\item 'REMOTE\_PORT'
-%%%%用户机器上连接到 Web 服务器所使用的端口号。
-%%%%\item 'REMOTE\_USER'
-%%%%经验证的用户
-%%%%\item 'REDIRECT\_REMOTE\_USER'
-%%%%验证的用户，如果请求已在内部重定向。
-%%%%\item 'SCRIPT\_FILENAME'
-%%%%当前执行脚本的绝对路径。
-%%%%\item 'SERVER\_ADMIN'
-%%%%该值指明了 Apache 服务器配置文件中的 SERVER\_ADMIN 参数。如果脚本运行在一个虚拟主机上，则该值是那个虚拟主机的值。
-%%%%\item 'SERVER\_PORT'
-%%%%Web 服务器使用的端口。默认值为 “80”。如果使用 SSL 安全连接，则这个值为用户设置的 HTTP 端口。
-%%%%\item 'SERVER\_SIGNATURE'
-%%%%包含了服务器版本和虚拟主机名的字符串。
-%%%%\item 'PATH\_TRANSLATED'
-%%%%当前脚本所在文件系统（非文档根目录）的基本路径。这是在服务器进行虚拟到真实路径的映像后的结果。
-%%%%\item 'SCRIPT\_NAME'
-%%%%包含当前脚本的路径。这在页面需要指向自己时非常有用。\_\_FILE\_\_ 常量包含当前脚本(例如包含文件)的完整路径和文件名。
-%%%%\item 'REQUEST\_URI'
-%%%%URI 用来指定要访问的页面。例如 “/index.html”。
-%%%%\item 'PHP\_AUTH\_DIGEST'
-%%%%当作为 Apache 模块运行时，进行 HTTP Digest 认证的过程中，此变量被设置成客户端发送的“Authorization” HTTP 头内容（以便作进一步的认证操作）。
-%%%%\item 'PHP\_AUTH\_USER'
-%%%%当 PHP 运行在 Apache 或 IIS（PHP 5 是 ISAPI）模块方式下，并且正在使用 HTTP 认证功能，这个变量便是用户输入的用户名。
-%%%%\item 'PHP\_AUTH\_PW'
-%%%%当 PHP 运行在 Apache 或 IIS（PHP 5 是 ISAPI）模块方式下，并且正在使用 HTTP 认证功能，这个变量便是用户输入的密码。
-%%%%\item 'AUTH\_TYPE'
-%%%%当 PHP 运行在 Apache 模块方式下，并且正在使用 HTTP 认证功能，这个变量便是认证的类型。
-%%%%\item 'PATH\_INFO'
-%%%%包含由客户端提供的、跟在真实脚本名称之后并且在查询语句（query string）之前的路径信息，如果存在的话。例如，如果当前脚本是通过 URL http://www.example.com/php/path\_info.php/some/stuff?foo=bar 被访问，那么 \$\_SERVER['PATH\_INFO'] 将包含 /some/stuff。
-%%%%\item 'ORIG\_PATH\_INFO'
-%%%%在被 PHP 处理之前，“PATH\_INFO” 的原始版本。
-%%%%\end{compactitem}
+\begin{compactitem}
+\item 'PHP\_SELF'
+当前执行脚本的文件名，与 document root 有关。例如，在地址为 http://example.com/test.php/foo.bar 的脚本中使用 \$\_SERVER['PHP\_SELF'] 将得到 /test.php/foo.bar。\_\_FILE\_\_ 常量包含当前(例如包含)文件的完整路径和文件名。 
+
+从 PHP 4.3.0 版本开始，如果 PHP 以命令行模式运行，这个变量将包含脚本名。之前的版本该变量不可用。
+\item 'argv'
+传递给该脚本的参数的数组。当脚本以命令行方式运行时，argv 变量传递给程序 C 语言样式的命令行参数。当通过 GET 方式调用时，该变量包含query string。
+\item 'argc'
+包含命令行模式下传递给该脚本的参数的数目(如果运行在命令行模式下)。
+\item 'GATEWAY\_INTERFACE'
+服务器使用的 CGI 规范的版本，例如“CGI/1.1”。
+\item 'SERVER\_ADDR'
+当前运行脚本所在的服务器的 IP 地址。
+\item 'SERVER\_NAME'
+当前运行脚本所在的服务器的主机名。如果脚本运行于虚拟主机中，该名称是由那个虚拟主机所设置的值决定。
+\item 'SERVER\_SOFTWARE'
+服务器标识字符串，在响应请求时的头信息中给出。
+\item 'SERVER\_PROTOCOL'
+请求页面时通信协议的名称和版本，例如“HTTP/1.0”。
+\item 'REQUEST\_METHOD'
+向服务器页面传送数据的方法，或者说访问页面使用的请求方法，HTTP支持的请求方法包括“GET”、“HEAD”、“POST”和“PUT”等。
+\item 'REQUEST\_TIME'
+请求开始时的时间戳。从 PHP 5.1.0 起可用。
+\item 'REQUEST\_TIME\_FLOAT'
+请求开始时的时间戳，微秒级别的精准度。 自 PHP 5.4.0 开始生效。
+\item 'QUERY\_STRING'
+客户端发送到服务器的query string（查询字符串），可以用于进行页面访问。
+\item 'DOCUMENT\_ROOT'
+当前运行脚本所在的文档根目录，例如在Apache服务器配置文件中定义的虚拟目录。
+\item 'HTTP\_ACCEPT'
+当前请求头中 Accept: 项的内容，如果存在的话。
+\item 'HTTP\_ACCEPT\_CHARSET'
+当前请求头中 Accept-Charset: 项的内容，如果存在的话。例如：“iso-8859-1,*,utf-8”。
+\item 'HTTP\_ACCEPT\_ENCODING'
+当前请求头中 Accept-Encoding: 项的内容，如果存在的话。例如：“gzip”。
+\item 'HTTP\_ACCEPT\_LANGUAGE'
+当前请求头中 Accept-Language: 项的内容，如果存在的话。例如：“en”。
+\item 'HTTP\_CONNECTION'
+当前请求头中 Connection: 项的内容，例如“Keep-Alive”。
+\item 'HTTP\_COOKIE'
+当前请求头中Cookie:项的内容。
+\item 'HTTP\_HOST'
+当前请求头中 Host: 项的内容。
+\item 'HTTP\_REFERER'
+引导用户代理到当前页的前一页的地址（如果存在），由 user agent 设置决定。并不是所有的用户代理都会设置该项，有的还提供了修改 HTTP\_REFERER 的功能，因此该值并不可信。
+\item 'HTTP\_USER\_AGENT'
+当前请求头中 User-Agent: 项的字符串内容，可以表明访问该页面的用户代理的信息，例如客户端浏览器名称、版本和其他信息等。除此之外，还可以通过 get\_browser() 来使用该值，从而定制页面输出以便适应用户代理的性能。
+\item 'HTTPS'
+如果脚本是通过 HTTPS 协议被访问，则被设为一个非空的值。
+\item 'REMOTE\_ADDR'
+浏览当前页面的用户的 IP 地址。
+\item 'REMOTE\_HOST'
+浏览当前页面的用户的主机名。DNS 反向解析不依赖于用户的 REMOTE\_ADDR。
+\item 'REMOTE\_PORT'
+用户机器上连接到 Web 服务器时所使用的端口号。
+\item 'REMOTE\_USER'
+经验证的用户
+\item 'REDIRECT\_REMOTE\_USER'
+验证的用户，如果请求已在内部重定向。
+\item 'SCRIPT\_FILENAME'
+当前执行脚本的绝对路径。
+\item 'SERVER\_ADMIN'
+Apache 服务器配置文件中的 SERVER\_ADMIN 参数。如果脚本运行在一个虚拟主机上，则该值是那个虚拟主机的值。
+\item 'SERVER\_PORT'
+Web 服务器等待请求的端口，默认值为 “80”。如果使用 SSL 安全连接，则这个值为用户设置的 HTTP 端口。
+\item 'SERVER\_SIGNATURE'
+包含了服务器版本和虚拟主机名的字符串。
+\item 'PATH\_TRANSLATED'
+当前脚本所在文件系统（非文档根目录）的基本路径。这是在服务器进行虚拟到真实路径的映像后的结果。
+\item 'SCRIPT\_NAME'
+URL中包含当前脚本的路径。这在页面需要指向自己时非常有用。\_\_FILE\_\_ 常量包含当前脚本(例如包含文件)的完整路径和文件名。
+\item 'REQUEST\_URI'
+要访问的页面。例如 “/index.html”。
+\item 'PHP\_AUTH\_DIGEST'
+当作为 Apache 模块运行时，进行 HTTP Digest 认证的过程中，此变量被设置成客户端发送的“Authorization” HTTP 头内容（以便作进一步的认证操作）。
+\item 'PHP\_AUTH\_USER'
+当 PHP 运行在 Apache 或 IIS（PHP 5 是 ISAPI）模块方式下，并且正在使用 HTTP 认证功能，这个变量便是用户输入的用户名。
+\item 'PHP\_AUTH\_PW'
+当 PHP 运行在 Apache 或 IIS（PHP 5 是 ISAPI）模块方式下，并且正在使用 HTTP 认证功能，这个变量便是用户输入的密码。
+\item 'AUTH\_TYPE'
+当 PHP 运行在 Apache 模块方式下，并且正在使用 HTTP 认证功能，这个变量便是认证的类型。
+\item 'PATH\_INFO'
+包含由客户端提供的、跟在真实脚本名称之后并且在查询语句（query string）之前的路径信息，如果存在的话。
+
+例如，如果当前脚本是通过 URL http://www.example.com/php/path\_info.php/some/stuff?foo=bar 被访问，那么 \$\_SERVER['PATH\_INFO'] 将包含 /some/stuff。
+\item 'ORIG\_PATH\_INFO'
+在被 PHP 处理之前，“PATH\_INFO” 的原始版本。
+\end{compactitem}
 
 \begin{example}
 \$\_SERVER 范例
@@ -2505,6 +2623,8 @@ www.example.com
 
 
 \$\_GET -- \$HTTP\_GET\_VARS$^{\text{[已弃用]}}$\footnote{自PHP4.1.0起，引入 \$\_GET，弃用 \$HTTP\_GET\_VARS。} — HTTP GET 变量。
+
+GET适用于HTTP查询字符串（query string），也就是URL中“？”之后的信息。
 
 \$\_GET是通过 URL 参数传递给当前脚本的变量的数组，\$\_GET 是通过 urldecode() 传递的。\$HTTP\_GET\_VARS 包含相同的信息， 但它不是一个超全局变量。 (注意 \$HTTP\_GET\_VARS 和 \$\_GET 是不同的变量，PHP 处理它们的方式不同)
 
@@ -2846,7 +2966,9 @@ array(4) {
 \section{Variable scope}
 
 
-变量的范围即它定义的上下文背景（也就是它的生效范围）。大部分的 PHP 变量只有一个单独的范围。这个单独的范围跨度同样包含了 include 和 require 引入的文件。例如：
+变量的范围即它定义的上下文背景（也就是它的生效范围），因此变量的范围也称为变量的作用域。
+
+大部分的 PHP 变量只有一个单独的范围，而且这个单独的范围跨度同样包含了 include 和 require 引入的文件。
 
 
 \begin{lstlisting}[language=PHP]
@@ -2856,7 +2978,7 @@ include 'b.inc';
 ?>
 \end{lstlisting}
 
-这里变量 \$a 将会在包含文件 b.inc 中生效。但是，在用户自定义函数中，一个局部函数范围将被引入。任何用于函数内部的变量按缺省情况将被限制在局部函数范围内。例如：
+这里变量 \$a 将会在包含文件 b.inc 中生效。但是，在用户自定义函数中，一个局部函数范围将被引入。任何用于函数内部的变量按缺省情况将被限制在局部函数范围内。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -2871,11 +2993,22 @@ Test();
 ?>
 \end{lstlisting}
 
-这个脚本不会有任何输出，因为 echo 语句引用了一个局部版本的变量 \$a，而且在这个范围内，它并没有被赋值。你可能注意到 PHP 的全局变量和 C 语言有一点点不同，在 C 语言中，全局变量在函数中自动生效，除非被局部变量覆盖。这可能引起一些问题，有些人可能不小心就改变了一个全局变量。PHP 中全局变量在函数中使用时必须声明为 global。
+这个脚本不会有任何输出，因为 echo 语句引用了一个局部版本的变量 \$a，而且在这个范围内，它并没有被赋值。
+
+\begin{compactitem}
+\item 在函数内部定义的局部变量（或参数，引用除外），不能访问函数的外部；
+\item 在函数外部定义的全局变量，不能访问函数的内部。
+\end{compactitem}
+
+
+
+
 
 
 \subsection{Global Variable}
 
+
+C语言的全局变量在函数中自动生效，除非被局部变量覆盖，因此在PHP中使用全局变量可能引起某些问题，而且在PHP函数中使用全局变量时必须声明为 global。
 
 首先，一个使用 global 的例子：
 
@@ -2899,7 +3032,13 @@ echo $b;
 
 以上脚本的输出将是“3”。在函数中声明了全局变量 \$a 和 \$b 之后，对任一变量的所有引用都会指向其全局版本。对于一个函数能够声明的全局变量的最大个数，PHP 没有限制。
 
-在全局范围内访问变量的第二个办法，是用特殊的 PHP 自定义 \$GLOBALS 数组。前面的例子可以写成：
+PHP无法在函数内部自动地使用全局变量，必须在函数内部使用global关键字将变量声明为全局的，才能在函数内部使用全局变量。
+
+
+
+在全局范围内访问变量的第二个办法是使用PHP自定义的特殊的\$GLOBALS 数组。
+
+\$GLOBALS数组是一个在PHP程序运行时自动创建的特殊变量，而且\$GLOBALS数组中的元素和外部变量是一一对应的。
 
 
 
@@ -2938,7 +3077,12 @@ function test_global()
 
 \subsection{Static Variable}
 
-变量范围的另一个重要特性是静态变量（static variable）。静态变量仅在局部函数域中存在，但当程序执行离开此作用域时，其值并不丢失。看看下面的例子：
+
+默认情况下，函数执行结束后，其内部的局部变量自动从内存空间消失，可以使用静态变量将函数的内部变量持久地保留在内存中。
+
+静态变量（static variable）仅在局部函数域中存在，当程序执行离开此作用域时，其值并不丢失。
+
+在程序再次执行时，静态变量将接续上一次的结果继续运算，因此在某些应用场景（例如递归运算）中使用静态变量是很有用的。
 
 
 
@@ -3090,7 +3234,9 @@ int(1)
 \section{Variable variables}
 
 
-有时候使用可变变量名是很方便的。就是说，一个变量的变量名可以动态的设置和使用。一个普通的变量通过声明来设置，例如：
+可变变量名就是指一个变量的变量名可以动态的设置和使用。
+
+一个普通的变量通过声明来设置，例如：
 
 
 \begin{lstlisting}[language=PHP]
@@ -3180,13 +3326,23 @@ I am B.
 
 \chapter{PHP Constants}
 
-常量是一个简单值的标识符（名字）。如同其名称所暗示的，在脚本执行期间该值不能改变（除了所谓的魔术常量，它们其实不是常量）。常量默认为大小写敏感。传统上常量标识符总是大写的。
+常量是一个简单值的标识符（名字），在程序执行期间其值不能改变（除了所谓的魔术常量，它们其实不是常量）。
 
-常量名和其它任何 PHP 标签遵循同样的命名规则。合法的常量名以字母或下划线开始，后面跟着任何字母，数字或下划线。用正则表达式是这样表达的：\colorbox{lightgray}{\texttt{[a-zA-Z\_\textbackslash x7f-\textbackslash xff][a-zA-Z0-9\_\textbackslash x7f-\textbackslash xff]*}}\footnote{在这里，字母指的是 a-z，A-Z，以及从 127 到 255（0x7f-0xff）的 ASCII 字符。}。
+常量默认为大小写敏感，而且传统上常量标识符总是大写的。
 
-常量只能包含标量数据（boolean，integer，float 和 string）。可以定义 resource 常量，但应尽量避免，因为会造成不可预料的结果。
 
-可以用 define() 函数来定义常量，在 PHP 5.3.0 以后，可以使用 const 关键字在类定义之外定义常量。一个常量一旦被定义，就不能再改变或者取消定义。
+
+常量名和其它任何 PHP 标签遵循同样的命名规则，只是不带“\$”符号，通常合法的常量名以字母或下划线开始，后面跟着任何字母，数字或下划线。
+
+在正则表达式可以这样描述常量名：\colorbox{lightgray}{\texttt{[a-zA-Z\_\textbackslash x7f-\textbackslash xff][a-zA-Z0-9\_\textbackslash x7f-\textbackslash xff]*}}\footnote{在这里，字母指的是 a-z，A-Z，以及从 127 到 255（0x7f-0xff）的 ASCII 字符。}。
+
+常量只能包含标量数据（boolean，integer，float 和 string），虽然可以定义 resource 常量，但是应该尽量避免，否则可能造成不可预料的结果。
+
+
+
+用户可以用 define() 函数来定义常量，也可以使用 const 关键字在类定义之外定义常量。
+
+常量不能是数组、对象或资源，用户不能再改变常量的值或者取消定义。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -3240,7 +3396,28 @@ echo CONSTANT;
 
 可以简单的通过指定其名字来取得常量的值，与变量不同，不应该在常量前面加上 \$ 符号。如果常量名是动态的，也可以用函数 constant() 来获取常量的值。用 get\_defined\_constants() 可以获得所有已定义的常量列表。
 
-如果使用了一个未定义的常量，PHP 假定想要的是该常量本身的名字，如同用字符串调用它一样（CONSTANT 对应 "CONSTANT"）。此时将发出一个 E\_NOTICE 级的错误。除非事先用 define() 将 bar 定义为一个常量，否则\texttt{\$foo[bar]} 是错误的。如果只想检查是否定义了某常量，用 defined() 函数。
+如果未经定义就使用一个常量，那么PHP将会自动为其赋值，并且PHP假定想要的是该常量本身的名字，如同用字符串调用它一样（CONSTANT 对应 "CONSTANT"），同时将发出一个 E\_NOTICE 级的错误。
+
+除非事先用 define() 将 bar 定义为一个常量，否则\texttt{\$foo[bar]} 是错误的。
+
+\begin{compactitem}
+\item 如果只想检查是否定义了某常量，用 defined() 函数。
+\item 如果只想检查是否定义了某变量，用isset()函数。
+\end{compactitem}
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 检查常量
+if(defined("M_EULER"){
+	define("M_EULER",0.5772156649015);
+}
+
+// 检查变量
+if(isset($_GET['page'])){
+	$_GET['page'] = 1;
+}
+?>
+\end{lstlisting}
 
 
 
@@ -3297,15 +3474,57 @@ PHP 向它运行的任何脚本提供了大量的预定义常量。不过很多�
 \hline
 \_\_DIR\_\_	 	&文件所在的目录。如果用在被包括文件中，则返回被包括的文件所在的目录。它等价于 dirname(\_\_FILE\_\_)。除非是根目录，否则目录中名不包括末尾的斜杠。（PHP 5.3.0中新增） =\\
 \hline
-\_\_FUNCTION\_\_	 &函数名称（PHP 4.3.0 新加）。自 PHP 5 起本常量返回该函数被定义时的名字（区分大小写）。在 PHP 4 中该值总是小写字母的。\\
+\_\_FUNCTION\_\_	 &函数名称。自 PHP 5 起本常量返回该函数被定义时的名字（区分大小写）。在 PHP 4 中该值总是小写字母的。\\
 \hline
-\_\_CLASS\_\_	 &类的名称（PHP 4.3.0 新加）。自 PHP 5 起本常量返回该类被定义时的名字（区分大小写）。在 PHP 4 中该值总是小写字母的。类名包括其被声明的作用区域（例如 Foo\textbackslash Bar）。注意自 PHP 5.4 起 \_\_CLASS\_\_ 对 trait 也起作用。当用在 trait 方法中时，\_\_CLASS\_\_ 是调用 trait 方法的类的名字。\\
+\_\_CLASS\_\_	 &类的名称。自 PHP 5 起本常量返回该类被定义时的名字（区分大小写）。在 PHP 4 中该值总是小写字母的。类名包括其被声明的作用区域（例如 Foo\textbackslash Bar）。注意自 PHP 5.4 起 \_\_CLASS\_\_ 对 trait 也起作用。当用在 trait 方法中时，\_\_CLASS\_\_ 是调用 trait 方法的类的名字。\\
 \hline
 \_\_TRAIT\_\_	 &Trait 的名字（PHP 5.4.0 新加）。自 PHP 5.4 起此常量返回 trait 被定义时的名字（区分大小写）。Trait 名包括其被声明的作用区域（例如 Foo\textbackslash Bar）。\\
 \hline
-\_\_METHOD\_\_ &类的方法名（PHP 5.0.0 新加）。返回该方法被定义时的名字（区分大小写）。\\
+\_\_METHOD\_\_ &类的方法名。返回该方法被定义时的名字（区分大小写）。\\
 \hline
-\_\_NAMESPACE\_\_ &当前命名空间的名称（区分大小写）。此常量是在编译时定义的（PHP 5.3.0 新增）。\\
+\_\_NAMESPACE\_\_ &当前命名空间的名称（区分大小写）。此常量是在编译时定义的。\\
+\hline
+TURE & 布尔值，真\\
+\hline
+FALSE & 布尔值，假\\
+\hline
+NULL & NULL值\\
+\hline
+PHP\_OS & 操作系统类型，例如“WINNT”\\
+\hline
+PHP\_VERSION & PHP版本号\\
+\hline
+DIRECTORY\_SEPARATOR&目录分隔符，UNIX/Linux支持/，Windows支持\textbackslash \\
+\hline
+PHP\_SHLIB\_SUFFIX & UNIX/Linux使用“so”，Windows使用“dll”\\
+\hline
+PATH\_SEPARATOR & 环境变量PATH中使用的目录列表分隔符，UNIX/Linux使用“:”，Windows使用“;”\\
+\hline
+E\_ERROR & 1，表示错误\\
+\hline
+E\_WARNING& 2，表示警告\\
+\hline
+E\_PARSE & 4，表示解析错误，由程序解析器报告\\
+\hline
+E\_NOTICE & 8，表示非关键错误\\
+\hline
+M\_PI & 圆周率，3.1415926535898\\
+\hline
+M\_E & 自然常数，2.7182818284590\\
+\hline
+M\_LOG2E & $\log_2^e$=1.4426950408890，以2为底的e的对数\\
+\hline
+M\_LOG10E & $\log_{10}^e$=0.4342944819033，以10为底的e的对数\\
+\hline
+M\_LN2&$\ln2$=0.6931471805599，以e为底的2的对数\\
+\hline
+M\_LN10& $\ln10$=2.3025850929940，以e为底的10的对数\\
+\hline
+M\_1\_PI&$1/\pi$=0.3183098861838\\
+\hline
+M\_LNPI&$\ln\pi$=1.1447298858494\\
+\hline
+M\_EULER&欧拉常数，0.5772156649015\\
 \hline
 \end{longtable}
 
@@ -3318,7 +3537,11 @@ PHP 向它运行的任何脚本提供了大量的预定义常量。不过很多�
 \chapter{PHP String}
 
 
-PHP中的字符串变量用于包含字符串的值，存储并处理文本片段。同时，PHP提供了很多的字符串函数供用户对字符串进行操作，从而更加灵活的处理字符串，而且PHP字符串函数是 PHP 核心的组成部分，无需安装即可使用这些函数。
+
+
+PHP中的字符串变量用于包含字符串的值，存储并处理文本片段，而且PHP内置相应的字符串函数来对字符串进行灵活的操作。
+
+PHP字符串函数是 PHP 核心的组成部分，无需安装即可使用这些函数。
 
 
 在创建字符串之后就可以对它进行操作了，可以直接在函数中使用字符串，或者把它存储在变量中，比如在下面的例子中，PHP 脚本把字符串 "Hello World" 赋值给名为 \texttt{\$txt} 的字符串变量：
@@ -3333,6 +3556,19 @@ echo $txt;
 
 
 以上代码的输出：\verb|Hello World|
+
+C语言的字符串是字符数组，PHP将字符串作为基本数据类型进行处理，因此PHP的抽象级别比C语言更高。
+
+对字符串的基本操作包括访问字符串中的字符等，PHP支持在字符串变量后面使用“\{\}”操作符，并且通过字符的偏移量对其进行直接操作。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$txt="Hello World";
+echo $txt{0}; // H
+?>
+\end{lstlisting}
 
 
 \section{Concatenation Operator}
@@ -3358,39 +3594,10 @@ echo $txt;
 在上面的例子中使用了两次并置运算符，这是由于我们需要插入第三个字符串。为了分隔这两个变量，我们在 \$txt1 与 \$txt2 之间插入了一个空格。
 
 
-\section{strlen()}
-
-
-strlen() 函数用于计算字符串的长度，下面的示例中使用strlen()来计算出字符串 "Hello world!" 的长度：
-
-\begin{lstlisting}[language=PHP]
-<?php
-  echo strlen("Hello world!");
-?>
-\end{lstlisting}
-
-
-以上代码的输出：\verb|12|
-
-字符串的长度信息常常用在循环或其他函数中，因为那时确定字符串何时结束是很重要的（例如，在循环中，我们需要在字符串中的最后一个字符之后结束循环）。
-
-\section{strpos()}
-
-strpos() 函数用于在字符串内检索一段字符串或一个字符。如果在字符串中找到匹配，该函数会返回第一个匹配的位置。如果未找到匹配，则返回 FALSE。
-
-下面的示例演示如何在字符串中找到子字符串 "world"：
 
 
 
-\begin{lstlisting}[language=PHP]
-<?php
-  echo strpos("Hello world!", "world");
-?>
-\end{lstlisting}
 
-以上代码的输出是：\verb|6|
-
-在字符串"Hello world!"中，字符串 "world" 的位置是 6，至于返回 6 而不是 7，是由于字符串中的首个位置是 0，而不是 1。
 
 
 \section{PHP String Functions}
@@ -3613,6 +3820,599 @@ wordwrap()					&按照指定长度对字符串进行折行处理。&	4\\
 \end{longtable}
 
 
+\section{Analyze}
+
+
+
+\subsection{strlen()}
+
+
+strlen() 函数用于计算字符串的长度，下面的示例中使用strlen()来计算出字符串 "Hello world!" 的长度：
+
+\begin{lstlisting}[language=PHP]
+<?php
+  echo strlen("Hello world!");
+?>
+\end{lstlisting}
+
+
+以上代码的输出：\verb|12|
+
+字符串的长度信息常用在循环或其他函数中，因此确定字符串何时结束是很重要的（例如，在循环中，我们需要在字符串中的最后一个字符之后结束循环）。
+
+和C语言不同，PHP不会在字符串末尾添加一个“\textbackslash 0”作为结束标志。
+
+\subsection{strpos()}
+
+strpos() 函数用于在字符串内检索一段字符串或一个字符。如果在字符串中找到匹配，该函数会返回第一个匹配的位置。如果未找到匹配，则返回 FALSE。
+
+\begin{lstlisting}[language=PHP]
+mixed strpos ( string $haystack , mixed $needle [, int $offset = 0 ] )
+\end{lstlisting}
+
+下面的示例演示如何在字符串中找到子字符串 "world"：
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+  echo strpos("Hello world!", "world");
+?>
+\end{lstlisting}
+
+以上代码的输出是：\verb|6|
+
+在字符串"Hello world!"中，字符串 "world" 的位置是 6，至于返回 6 而不是 7，是由于字符串中的首个位置是 0，而不是 1。
+
+\subsection{strrpos()}
+
+\begin{lstlisting}[language=PHP]
+int strrpos ( string $haystack , string $needle [, int $offset = 0 ] )
+\end{lstlisting}
+
+在使用strpos()和strrpos()函数时需要注意，如果没有查询到特定字符串出现的位置，函数将返回FALSE，因此在判断一个字符串中是否包含另一个子串的正确方法是使用恒等符“===”。
+
+\begin{lstlisting}[language=PHP]
+if(strpos($string,"w") == false){
+	// ...
+}
+\end{lstlisting}
+
+
+\subsection{substr()}
+
+substr()函数用于从某一个字符串中取出子字符串。
+
+\begin{lstlisting}[language=PHP]
+string substr ( string $string , int $start [, int $length ] )
+\end{lstlisting}
+
+
+
+
+\subsection{explode()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+array explode ( string $delimiter , string $string [, int $limit ] )
+\end{lstlisting}
+
+\subsection{implode()}
+
+
+\begin{lstlisting}[language=PHP]
+string implode ( string $glue , array $pieces )
+\end{lstlisting}
+
+\section{Blank}
+
+
+\subsection{trim()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string trim ( string $str [, string $charlist = " \t\n\r\0\x0B" ] )
+\end{lstlisting}
+
+
+在实践中容易出现空白的地方是服务器接受的表单数据，例如用户无意中输入的空格等。
+
+\begin{lstlisting}[language=PHP]
+<?php
+if(isset($_POST[''submit'])){
+	if(!trim($_POST['title'])){
+		echo "<p><font color=red>标题没有填写</font></p>";
+	}elseif(!trim($_POST['content'])){
+		echo "<p><font color=red>正文没有填写</font></p>";
+	}else{
+		echo $_POST['title'];
+		echo "<hr>";
+		echo $_POST['content'];
+	}
+}
+<form method="post" action="#">
+标题：<input type="text" name="title" value=""><br />
+内容：<textarea name="content"></textarea><br />
+<input type="submit" name="submit" value="提交">
+</form>
+?>
+\end{lstlisting}
+
+trim()、ltrim()和rtrim()等函数只能删除单字节的空白字符，无法删除“全角空格”等字符。
+
+另外，为了删除某些非打印字符产生的空白字符，可以在删除列表中指定要删除的空白字符。
+
+\subsection{str\_pad()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string str_pad ( string $input , int $pad_length [, string $pad_string = " " [, int $pad_type = STR_PAD_RIGHT ]] )
+\end{lstlisting}
+
+str\_pad()等字符填充函数可以用于实现对敏感信息的保护，例如金额的打印操作等，其原理类似于C语言中的printf()函数。
+
+\section{Reverse}
+
+
+\subsection{strrev()}
+
+
+
+strrev()函数的功能类似于对字符串中的字符的反序排列，它们都是按照字节进行的。
+
+\begin{lstlisting}[language=PHP]
+string strrev ( string $string )
+\end{lstlisting}
+
+\section{Transform}
+
+
+\subsection{strtoupper()}
+
+
+
+\begin{lstlisting}[language=PHP]
+string strtoupper ( string $string )
+\end{lstlisting}
+
+\subsection{strtolower()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string strtolower ( string $string )
+\end{lstlisting}
+
+\subsection{ucfirst()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string ucfirst ( string $str )
+\end{lstlisting}
+
+
+\subsection{ucwords()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string ucwords ( string $str )
+\end{lstlisting}
+
+
+
+\section{Comparison}
+
+PHP支持使用多种方法对字符串进行比较，并且除了可以直接使用条件运算符进行比较之外，还可以按照字节、自然排序以及模糊比较等。
+
+在使用条件运算符来比较字符串和数字时，字符串首先被转换为数字，然后再进行比较。
+
+\subsection{strcmp()}
+
+strcmp()按字节进行字符串的比较。
+
+
+\begin{lstlisting}[language=PHP]
+int strcmp ( string $str1 , string $str2 )
+\end{lstlisting}
+
+\subsection{strcasecmp()}
+
+strcasecmp()函数可以忽略大小写来对字符串进行比较。
+
+
+\begin{lstlisting}[language=PHP]
+int strcasecmp ( string $str1 , string $str2 )
+\end{lstlisting}
+
+\subsection{strnatcmp()}
+
+除了按照字节位进行比较之外，PHP也可以按照“自然排序”法来比较字符串。
+
+具体来说，自然排序法将比照字符串中的数字部分，将字符串按照数字大小进行排序，从而可以直接模拟人类的思维习惯。
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+int strnatcmp ( string $str1 , string $str2 )
+\end{lstlisting}
+
+\subsection{strnatcasecmp()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+int strnatcasecmp ( string $str1 , string $str2 )
+\end{lstlisting}
+
+
+
+\subsection{soundex()}
+
+在模糊查询中，计算字符串（主要是英文单词）的相似读音可以对某一单词计算出一个关键值，这样就可以进一步找出和输入的单词有相同发音关键值的所有单词。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string soundex ( string $str )
+\end{lstlisting}
+
+\subsection{similar\_text()}
+
+
+
+similar\_text()可以计算两个单词的相似程度，并且返回它们中相匹配的字符的数目，这样就可以实现相似度的输出。
+
+\begin{lstlisting}[language=PHP]
+int similar_text ( string $first , string $second [, float &$percent ] )
+\end{lstlisting}
+
+\section{Replace}
+
+
+\subsection{str\_replace()}
+
+str\_replace()函数和strtr()函数都可以实现字符替换功能，而且都可以将给定字符串的指定部分替换为其他字符串。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+mixed str_replace ( mixed $search , mixed $replace , mixed $subject [, int &$count ] )
+\end{lstlisting}
+
+\subsection{strtr()}
+
+strtr()函数也称为字符串翻译函数，可以用来转换指定字符，并且返回相应的副本。
+
+
+\begin{lstlisting}[language=PHP]
+string strtr ( string $str , string $from , string $to )
+string strtr ( string $str , array $replace_pairs )
+\end{lstlisting}
+
+
+\section{Format}
+
+
+PHP提供了和C语言同名的printf()函数和sprintf()函数来对数字或字符串进行格式化输出。
+
+
+\begin{compactitem}
+\item printf()函数直接输出格式化后的字符串。
+\item sprintf()函数返回格式化后的字符串。
+\end{compactitem}
+
+
+
+\subsection{printf()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+int printf ( string $format [, mixed $args [, mixed $... ]] )
+\end{lstlisting}
+
+
+\subsection{sprintf()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string sprintf ( string $format [, mixed $args [, mixed $... ]] )
+\end{lstlisting}
+
+\subsection{number\_format()}
+
+
+\begin{lstlisting}[language=PHP]
+string number_format ( float $number [, int $decimals = 0 ] )
+string number_format ( float $number , int $decimals = 0 , string $dec_point = "." , string $thousands_sep = "," )
+\end{lstlisting}
+
+
+\section{HTML}
+
+
+通常情况下，在实际Web应用程序中接收到表单数据后需要进行立即显示或其他操作，这样可以让用户自行决定下一步是继续还是返回。
+
+为了对HTML中的实体进行转义操作，可以使用htmlentities()函数来将所有的非ASCII代码转换为对应的实体代码。
+
+\subsection{htmlentities()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string htmlentities ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] )
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{htmlspecialchars()}
+
+htmlspecialchars()函数具有和htmlentities()函数相同的参数列表，其对引号的转换规则也相同。
+
+
+
+\begin{lstlisting}[language=PHP]
+string htmlspecialchars ( string $string [, int $flags = ENT_COMPAT | ENT_HTML401 [, string $encoding = ini_get("default_charset") [, bool $double_encode = true ]]] )
+\end{lstlisting}
+
+\subsection{get\_magic\_quotes\_gpc()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+bool get_magic_quotes_gpc ( void )
+\end{lstlisting}
+
+PHP对反斜线的处理依赖于magic\_quotes\_gpc选项的设置，因此在表单中处理数据时需要智能判定。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+define("MAGIC_QUOTES_GPC", get_magic_quotes_gpc());
+
+function html2text($html){
+	if(MAGIC_QUOTES_GPC){
+		$str = stripslashes($html);
+	}
+	return htmlspecialchars($str);
+}
+?>
+\end{lstlisting}
+
+
+
+
+\subsection{stripslashes()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string stripslashes ( string $str )
+\end{lstlisting}
+
+\subsection{addslashes()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string addslashes ( string $str )
+\end{lstlisting}
+
+\subsection{strip\_tags()}
+
+在某些场合（例如论坛）中，需要直接删除用户输入的HTML标签，并且使用BBcode等进行代替。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string strip_tags ( string $str [, string $allowable_tags ] )
+\end{lstlisting}
+
+
+\section{URL}
+
+PHP对URL的处理包括对URL字符串的解析、编码和构造查询字符串等。
+
+
+
+\subsection{parse\_str()}
+
+
+
+parse\_str()函数可以使用两种不同的方式来解析浏览器使用GET方法发出的QUERY\_STRING字符串，而且解析后的变量的作用域都和parse\_str()函数相同。
+
+\begin{compactitem}
+\item 将QUERY\_STRING查询字符串中的变量直接转换为同名的PHP变量；
+\item 将解析后的变量放入指定的数组中。
+\end{compactitem}
+
+\begin{lstlisting}[language=PHP]
+mixed parse_url ( string $url [, int $component = -1 ] )
+\end{lstlisting}
+
+在下面的示例中，假设浏览器向服务器发出的URL是http://localhost/test.php?action=test&foo[]=hello&foo[]=world，因此\$\_SERVER["QUERY_STRING"]为action=test&foo[]=hello&foo[]=world。
+
+
+如果以第一种方式来解析URL，作用域在函数内部。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function test(){
+	parse_str($_SERVER["QUERY_STRING"]);
+	echo $action . "<br />";
+	echo $foo[1] . "<br />";
+	echo $foo[2];
+}
+?>
+\end{lstlisting}
+
+如果以第二种方式来解析URL，将会把变量解析到给定的数组中。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function test(){
+	parse_str($_SERVER["QUERY_STRING"], $arr);
+	echo $arr['action'] . "<br />";
+	echo $arr['foo'][0] . "<br />";
+	echo $arr['foo'][1];
+}
+?>
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{parse\_url()}
+
+parse\_url()函数可以用来对URL进行全面解析，并且返回一个数组，其中包含以下部分或者全部内容。
+
+\begin{compactitem}
+\item schema：协议，例如http或https；
+\item host：域名；
+\item port：端口，例如80；
+\item user：认证用户名；
+\item pass：认证密码；
+\item path：访问路径；
+\item query：查询字符串，即URL中“？”后面的内容，或者说\$\_SERVER["QUERY\_STRING"]；
+\item fragment：锚，URL中“#”后面的内容，也就是页面的定位标记。
+\end{compactitem}
+
+parse\_url()返回的信息不能确定URL中的字符串是合法的，任何类似URL的字符串都可以被parse\_url()函数解析。
+
+\subsection{rawurlencode()}
+
+为了生成符合编码规范的URL，在为URL中的普通字符（非间隔符）编码时需要满足下面的规定：
+
+\begin{quote}
+除“-”、“\_”、“.”以及英文字母和数字外，其他的任何字符均将转换为由“\%”和两个十六进制数字表示的转义实体。
+\end{quote}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string rawurlencode ( string $str )
+\end{lstlisting}
+
+\subsection{urlencode()}
+
+
+在早期的URL编码规范中，空格被转换为“+”，可以使用urlencode()函数来进行兼容旧有的编码规范。
+
+
+\begin{lstlisting}[language=PHP]
+string urlencode ( string $str )
+\end{lstlisting}
+
+\subsection{rawurldecode()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\subsection{urldecode()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{http\_build\_query()}
+
+PHP5提供的http\_build\_query()函数可以用来构造QUERY\_STRING查询字符串。
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+string http_build_query ( mixed $query_data [, string $numeric_prefix [, string $arg_separator [, int $enc_type = PHP_QUERY_RFC1738 ]]] )
+\end{lstlisting}
+
+在下面的示例中，自定义的build\_query()函数通过递归算法来模拟了http\_build\_query()函数的行为，这里没有考虑\$numeric\_prefix参数的问题。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function build_query($formdata, $key=null){
+	$res = array();
+	foreach((array)$formdata as $k=>$v){
+		$tmp_key = urlencode($k);
+		if($key) $tmp_key = $key . '[' . $tmp_key . ']';
+		if(is_array($v)){
+			$res[] = build_query($v,$tmp_key);
+		}else{
+			$rtes[] = $tmp_key . "=" . urlencode($v);
+		}
+	}
+	return implode("v",$res);
+}
+?>
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
 \section{PHP String Constants}
 
 
@@ -3696,6 +4496,10 @@ STR\_PAD\_BOTH	 	&&\\
 运算符是可以通过给出的一或多个值（用编程行话来说，表达式）来产生另一个值（因而整个结构成为一个表达式）的东西。PHP的运算符包括\verb|+ - * / > < >= <=|等，与C++十分类似。
 
 PHP运算符可按照其能接受几个值来分组。一元运算符只能接受一个值，例如 !（逻辑取反运算符）或 +\/+（递增运算符）。二元运算符可接受两个值，例如熟悉的算术运算符 +（加）和 -（减），大多数 PHP 运算符都是这种。最后是唯一的三元运算符 ? :，可接受三个值；通常就简单称之为“三元运算符”（尽管称之为条件运算符可能更合适）。
+
+PHP运算符可以按照功能划分为算术运算符、字符串运算符、赋值运算符、位运算符、条件运算符和逻辑运算符等，而且PHP运算符还支持相应的优先级。
+
+
 
 
 PHP运算符优先级和结合方向控制着在表达式包含有若干个不同运算符时究竟怎样对其求值，其中运算符优先级指定了两个表达式绑定得有多“紧密”。例如，表达式 1 + 5 * 3 的结果是 16 而不是 18 是因为乘号（“*”）的优先级比加号（“+”）高。必要时可以用括号来强制改变优先级。例如：(1 + 5) * 3 的值为 18。如果运算符优先级相同，其结合方向决定着应该从右向左求值，还是从左向右求值。
@@ -3826,13 +4630,13 @@ echo ++$a + $a++; // may print 4 or 5
 \hline
 \%	&Modulus (division remainder)	&\$a \% \$b &\$a 除以 \$b 的余数。\\
 \hline
-
-
 \end{longtable}
 
-除法运算符总是返回浮点数。只有在下列情况例外：两个操作数都是整数（或字符串转换成的整数）并且正好能整除，这时它返回一个整数。
 
-取模运算符的操作数在运算之前都会转换成整数（除去小数部分）。
+
+除法运算符总是返回浮点数，只有在两个操作数都是整数（或字符串转换成的整数）并且正好能整除时才返回一个整数。
+
+除法和取模运算符的除数部分不能为0，而且取模运算符的操作数在运算之前都会转换成整数（除去小数部分）。
 
 取模运算符 \% 的结果和被除数的符号（正负号）相同。即 \$a \% \$b 的结果和 \$a 的符号相同。例如：
 
@@ -3845,13 +4649,22 @@ echo (-5 % -3)."\n";         // prints -2
 ?>
 \end{lstlisting}
 
+取模运算符可以扩展来进行时间、日期等不同基数的数字问题进行计算机，因此可以在直接使用PHP的日期时间函数之外，为解决类似“某年某月某日后第多少天”之类的问题提供了新的解决方案。
 
+\begin{lstlisting}[language=PHP]
+<?php
+// 早上9点
+$morning =9; 
+/* 计算8小时后的时间 */
+$afternoon = ($morning + 8) % 12; // 下午5点
+?>
+\end{lstlisting}
 
 \section{Assignment Operators}
 
-基本的赋值运算符是“=”。一开始可能会以为它是“等于”，其实不是的。它实际上意味着把右边表达式的值赋给左边的运算数。
+PHP基本的赋值运算符是“=”，但是它并不是“等于”，其意味着把右边表达式的值赋给（或者拷贝给）左边的运算数，这样就不会影响右边表达式原来的值。
 
-赋值运算表达式的值也就是所赋的值。也就是说，“\$a = 3”的值是 3。
+赋值运算表达式的值也就是所赋的值，也就是说“\$a = 3”的值就是 3。
 
 
 
@@ -3952,8 +4765,7 @@ $o = &new C;
 
 \section{Bitwise Operators}
 
-
-位运算符允许对整型数中指定的位进行求值和操作。
+二进制计算机中的所有数字、字母或符号都是以二进制形式存储的，通过PHP的位运算符允许对整型数中指定的位进行求值和操作。
 
 \begin{longtable}{|m{35pt}|m{80pt}|m{270pt}|}
 %head
@@ -3993,8 +4805,12 @@ $o = &new C;
 \hline
 \end{longtable}
 
+位运算是基于系统底层的运算，而且移位本身是数学运算，向任何方向移出去的位都被丢弃。
 
-位移在 PHP 中是数学运算。向任何方向移出去的位都被丢弃。左移时右侧以零填充，符号位被移走意味着正负号不被保留。右移时左侧以符号位填充，意味着正负号被保留。
+\begin{compactitem}
+\item 左移时右侧以零填充，符号位被移走意味着正负号不被保留。
+\item 右移时左侧以符号位填充，意味着正负号被保留。
+\end{compactitem}
 
 要用括号确保想要的优先级。例如 \$a \& \$b == true 先进行比较再进行按位与；而 (\$a \& \$b) == true 则先进行按位与再进行比较。
 
@@ -4515,12 +5331,34 @@ Expression: 0 = -4 << 62
 \end{lstlisting}
 
 
-不要在 32 位系统下向右移超过 32 位。不要在结果可能超过 32 的情况下左移。使用 gmp 扩展对超出 PHP\_INT\_MAX 的数值来进行位操作。
+在32位系统下向右移位时，不要超过 32 位，而且不要在结果可能超过 32 的情况下左移，可以使用 gmp 扩展对超出 PHP\_INT\_MAX 的数值来进行位操作。
 
+在实践中的很多问题都可以简单地归结为0和1的问题，这样可以从新的角度来解决问题，例如可以使用位运算来对CMS权限模型中的管理员、作者和访客等用户的不同权限进行分析。
 
+具体来说，通过对二进制位的判断来实现对权限的分析
 
+\begin{lstlisting}[language=PHP]
+<?php
+define('PUBLIC_ARTICLE',1); // 发布文章 0000 0001
+define('CREATE_ARTICLE',2); // 创建文章 0000 0010
+define('MODIFY_ARTICLE',4); // 修改文章 0000 0100
+define('DELETE_ARTICLE',8); // 删除文章 0000 1000
+define('SEARCH_ARTICLE',16); // 搜索文章 0001 0000
+define('CREATE_COMMENT',32); // 添加评论 0010 0000
+define('DELETE_COMMENT',64); // 删除评论0100 0000
 
+// 所有权限
+$final_allow = PUBLIC_ARTICLE | CREATE_ARTICLE | MODIFY_ARTICLE | DELETE_ARTICLE | SEARCH_ARTICLE | CREATE_COMMENT | DELETE_COMMENT;
+echo "管理者拥有的全部权限： " . decbin($final_allow) . "<br />";
 
+$no_search_allow = $final_allow ^ SEARCH_ARTICLE;
+echo "仅无法搜索文章的权限： " . decbin($no_search_allow) . "<br />";
+
+$editor_allow = PUBLIC_ARTICLE | MODIFY_ARTICLE | DELETE_ARTICLE;
+echo "编辑人员的权限： " . decbin($editor_allow) . "<br />";
+echo "非编辑人员的权限： " . decbin($final_allow & ~$editor_allow) . "<br />";
+?>
+\end{lstlisting}
 
 
 
@@ -4576,7 +5414,16 @@ Expression: 0 = -4 << 62
 
 \zihao{5}
 
-如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换为数值并且比较按照数值来进行。此规则也适用于 switch 语句。当用 === 或 !== 进行比较时则不进行类型转换，因为此时类型和数值都要比对。
+如果比较一个数字和字符串或者比较涉及到数字内容的字符串，则字符串会被转换为数值并且比较按照数值来进行，而且该规则也适用于 switch 语句。
+
+当用 === 或 !== 进行比较时则不进行类型转换，因为此时类型和数值都要比对，它们仅用于严格的比较场合。
+
+\begin{compactitem}
+\item ===表示恒等，要求运算符两侧的表达式具有相同的类型和值；
+\item !==表示非恒等，要求运算符两侧的表达式的类型和值都不同；
+\end{compactitem}
+
+相比而言，==和!=只关心运算符两侧的表达式的值是否相等，并且在进行比较之前进行虑数据类型转换。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -4759,6 +5606,12 @@ echo "<pre>$output</pre>";
 
 \section{Incrementing/Decrementing Operators}
 
+根据书写的方法不同，自增和自减运算符表达的意义也不同。
+
+\begin{compactitem}
+\item 将表达式置于自增（或自减）运算符的前面，那么先返回表达式的值，然后再进行自增操作。
+\item 将表达式置于自增（或自减）运算符的前面，那么先进行自增（或自减）操作，然后再返回运算后的值。
+\end{compactitem}
 
 \begin{longtable}{|m{35pt}|m{130pt}|m{50pt}|m{150pt}|}
 %head
@@ -4938,10 +5791,47 @@ bool(false)
 bool(true)
 \end{verbatim}
 
+PHP的逻辑运算和C语言一样都支持“短路”计算，可以认为是对逻辑运算的优化，不过也可能导致短路部分的运算被忽略。例如，如果短路部分存在赋值运算，那么就会忽略它，因此将赋值语句放到逻辑判断中实际上是不合适的。
+
+
+
+\begin{compactitem}
+\item 对于逻辑与运算，当从左边开始第一个表达式的值为假时就立即返回假，同时忽略后面的表达式求值。
+\item 对于逻辑或运算，当从左边开始第一个表达式的值为真时就立即返回真，同时忽略后面的表达式求值。
+\end{compactitem}
+
+另外，“!”具有比“=”更高的优先级，因此PHP仍然支持传统的求反（或者说非）操作，不过这可能会产生误解。
+
+\begin{lstlisting}[language=PHP]
+<?php
+if( !$a = rand(0,1) )
+{
+	echo $a;
+}
+?>
+\end{lstlisting}
+
+为了避免误解，上述的逻辑可以使用括号“()”来强调运算符的计算次序。
+
+\begin{lstlisting}[language=PHP]
+<?php
+if( ($a=rand(0,1) == false )
+{
+	echo $a;
+}
+?>
+\end{lstlisting}
+
+
 \section{String Operators}
 
 
-有两个字符串（string）运算符。第一个是连接运算符（“.”），它返回其左右参数连接后的字符串。第二个是连接赋值运算符（“.=”），它将右边参数附加到左边的参数之后。
+PHP有两个字符串（string）运算符（.和.=），而且它们都将非字符串表达式自动转换为字符串类型。
+
+\begin{compactitem}
+\item 连接运算符（“.”）返回其左右参数连接后的字符串。
+\item 连接赋值运算符（“.=”）将右边参数附加到左边的参数之后。
+\end{compactitem}
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -5226,7 +6116,11 @@ instanceof 运算符是 PHP 5 引进的，在此之前用 is\_a()，但是后来
 \chapter{PHP Expression}
 
 
-表达式是 PHP 最重要的基石。在 PHP 中，几乎所写的任何东西都是一个表达式。简单但却最精确的定义一个表达式的方式就是“任何有值的东西”。
+表达式是 PHP 最重要的基石，通常的表达式是变量、常量和运算符的组合。
+
+PHP中几乎所写的任何东西都是一个表达式，简单但却最精确的定义一个表达式的方式就是“任何有值的东西”。
+
+
 
 最基本的表达式形式是常量和变量。当键入“\$a = 5”，即将值“5”分配给变量 \$a。“5”，很明显，其值为 5，换句话说“5”是一个值为 5 的表达式（在这里，“5”是一个整型常量）。
 
@@ -5245,7 +6139,9 @@ function foo ()
 
 函数也是表达式，表达式的值即为它们的返回值。既然 foo() 返回 5，表达式“foo()”的值也是 5。通常函数不会仅仅返回一个静态值，而可能会计算一些东西。
 
-当然，PHP 中的值常常并非是整型的。PHP 支持四种标量值（标量值不能拆分为更小的单元，例如和数组不同）类型：整型值（integer），浮点数值（float），字符串值（string）和布尔值（boolean）。PHP 也支持两种复合类型：数组和对象。这两种类型具可以赋值给变量或者从函数返回。
+实际上，PHP 中的值常常并非是整型的，值可以是数字、字符串、数组、函数、对象以及其他表达式。
+
+例如，PHP 支持四种标量值（标量值不能拆分为更小的单元，例如和数组不同）类型：整型值（integer），浮点数值（float），字符串值（string）和布尔值（boolean）。PHP 也支持两种复合类型：数组和对象。这两种类型具可以赋值给变量或者从函数返回。
 
 PHP 和其它语言一样在表达式的道路上发展，但推进得更深远。PHP 是一种面向表达式的语言，从这一方面来讲几乎一切都是表达式。考虑刚才已经研究过的例子，“\$a = 5”。很显然这里涉及到两个值，整型常量“5”的值以及变量 \$a 的值，它也被更新为 5。但是事实是这里还涉及到一个额外的值，即赋值语句本身的值。
 
@@ -5303,6 +6199,8 @@ $h = $g += 10;      /* first, $g is incremented by 10 and ends with the
 最后一件值得提起的事情就是表达式的真值。在许多事件中，大体上主要是在条件执行和循环中，并不关心表达式中具体的值，而是只关心表达式的值是否是 TRUE 或者 FALSE。常量 TRUE 和 FALSE（大小写无关）是两种可能的布尔值。在必要时，一个表达式将自动转换为布尔值。
 
 上面的例子应该提供了一个很好的关于什么是表达式和怎样构建一个有用的表达式的概念。在其余的示例程序部分，将始终使用 \textsl{expr} 来表示一个有效的 PHP 表达式。
+
+除了使用符号表达式之外，PHP还支持正则表达式等字符串处理工具。
 
 
 \chapter{PHP Statements}
@@ -5490,6 +6388,10 @@ endif;
 ?>
 \end{lstlisting}
 
+在else if嵌套结构的最后加上一个else块，可以保证各个块中的判断条件是互斥的，从而避免出现非预期的结果。
+
+
+
 
 \section{Select statements}
 
@@ -5544,7 +6446,9 @@ switch ($i) {
 ?>
 \end{lstlisting}
 
-为避免错误，理解 switch 是怎样执行的非常重要。switch 语句一行接一行地执行（实际上是语句接语句）。开始时没有代码被执行。仅当一个 case 语句中的值和 switch 表达式的值匹配时 PHP 才开始执行语句，直到 switch 的程序段结束或者遇到第一个 break 语句为止。如果不在 case 的语句段最后写上 break 的话，PHP 将继续执行下一个 case 中的语句段。
+为避免错误，理解 switch 是怎样执行的非常重要。switch 语句一行接一行地执行（实际上是语句接语句）。开始时没有代码被执行。仅当一个 case 语句中的值和 switch 表达式的值匹配时 PHP 才开始执行语句，直到 switch 的程序段结束或者遇到第一个 break 语句为止。
+
+如果不在 case 的语句段最后写上 break 的话，PHP 将继续执行下一个 case 中的语句段，因此合理地使用break可以控制退出switch语句的时机。
 
 
 switch语句的工作原理如下：
@@ -5594,7 +6498,7 @@ switch ($i) {
 \end{lstlisting}
 
 
-一个 case 的特例是 default。它匹配了任何和其它 case 都不匹配的情况。例如：
+case的特例是 default，它匹配了任何和其它 case 都不匹配的情况，并且应该放在最后。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -5614,8 +6518,7 @@ switch ($i) {
 ?>
 \end{lstlisting}
 
-
-case 表达式可以是任何求值为简单类型的表达式，即整型或浮点数以及字符串。不能用数组或对象，除非它们被解除引用成为简单类型。
+case表达式的个数是没有限制的，而且case表达式可以是任何求值为简单类型的表达式，即整型、浮点数、字符串、布尔值或NULL，但是不能用数组或对象，除非它们被解除引用成为简单类型。
 
 switch 支持替代语法的流程控制。
 
@@ -5677,14 +6580,14 @@ PHP 中的循环语句用于执行相同的代码块指定的次数，循环语�
 
 \subsection{while statements}
 
-while 循环是 PHP 中最简单的循环类型。它和 C 语言中的 while 表现地一样。while 语句的基本格式是：
+while 循环是 PHP 中最简单的循环类型，而且和C语言中的 while 表现一致。
 
 \begin{verbatim}
 while (expr)
     statement
 \end{verbatim}
 
-while 语句的含意很简单，它告诉 PHP只要指定的条件（while 表达式）成立，while 语句将重复执行代码块。
+while 语句告诉 PHP只要指定的条件（while 表达式）成立，while 语句将重复执行代码块。
 
 
 \begin{lstlisting}[language=PHP]
@@ -5705,7 +6608,9 @@ while($i<=5)
 ?>
 \end{lstlisting}
 
-表达式的值在每次开始循环时检查，所以即使这个值在循环语句中改变了，语句也不会停止执行，直到本次循环结束。有时候如果 while 表达式的值一开始就是 FALSE，则循环语句一次都不会执行。
+表达式的值在每次开始循环时检查，所以即使这个值在循环语句中改变了，语句也不会停止执行，直到本次循环结束。
+
+如果 while 表达式的值一开始就是 FALSE，则循环语句一次都不会执行。
 
 和 if 语句一样，可以在 while 循环中用花括号括起一个语句组，或者用替代语法：
 
@@ -5739,6 +6644,22 @@ endwhile;
 ?>
 \end{lstlisting}
 
+while的主要应用是对数组的遍历，可以使用each()函数读取当前的数组元素，并将数组指针后移一步。
+
+
+在遍历数组的循环开始前应该首先重置数组指针的位置，例如在“list(\$index,$fruit)=each(\$attr)”表达式中，可以使用list()函数将数组\$arr当前元素的键名和值赋给变量\$index和\$fruit。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array('apple','orange','pear');
+
+reset($arr);
+
+while(list($index,$fruit)=each($arr)){
+	echo "第'' . $index . "种水果是：" . $fruit . "\n";
+}
+?>
+\end{lstlisting}
 
 
 \subsection{do...while statements}
@@ -5946,9 +6867,9 @@ for($i = 0, $size = sizeof($people); $i < $size; ++$i)
 
 \subsection{foreach statements}
 
-foreach 语法结构提供了遍历数组的简单方式，而且foreach 语句仅能够应用于用于循环遍历数组和对象，如果尝试应用于其他数据类型的变量，或者未初始化的变量将发出错误信息。
 
-每进行一次循环，当前数组元素的值就会被赋值给 value 变量（数组指针会逐一地移动） - 以此类推。
+
+foreach 语法结构提供了遍历数组的简单方式，每进行一次循环，当前数组元素的值就会被赋值给 value 变量（数组指针会逐一地移动） - 以此类推。
 
 
 \begin{lstlisting}[language=PHP]
@@ -5967,10 +6888,9 @@ foreach (array_expression as $key => $value)
     statement
 \end{verbatim}
 
-第一种格式遍历给定的 array\_expression 数组。每次循环中，当前单元的值被赋给 \$value 并且数组内部的指针向前移一步（因此下一次循环中将会得到下一个单元）。
+第一种格式遍历给定的 array\_expression 数组，并且将每次循环中的当前单元的值赋给 \$value，并且数组内部的指针向前移一步（因此下一次循环中将会得到下一个单元）。
 
 第二种格式做同样的事，只除了当前单元的键名也会在每次循环中被赋给变量 \$key。
-
 
 
 
@@ -5987,8 +6907,45 @@ foreach ($arr as $value)
 ?>
 \end{lstlisting}
 
+foreach 语句仅能够应用于用于循环遍历数组和对象，如果尝试应用于其他数据类型的变量，或者未初始化的变量将发出错误信息，因此需要提前判断变量的类型来避免避免foreach错误。
 
-当 foreach 开始执行时，数组内部的指针会自动指向第一个单元，这意味着不需要在 foreach 循环之前调用 reset()。由于 foreach 依赖内部数组指针，在循环中修改其值将可能导致意外的行为，而且foreach 不支持用“@”来抑制错误信息的能力。
+\begin{lstlisting}[language=PHP]
+<?php
+$arr=array("one", "two", "three");
+
+if(is_array($arr)){
+	foreach ($arr as $value)
+	{
+		echo "Value: " . $value . "<br />";
+	}
+}
+?>
+\end{lstlisting}
+
+
+另外，和while遍历数组的原理不同，foreach将自动重置数组的指针位置。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array('apple','orange','pear');
+$i = 0;
+
+// 
+foreach($arr as $fruit){
+	echo "第" . $i . "种水果：" . $fruit . "\n";
+}
+
+// 或者
+foreach($arr as $index => $fruit){
+	echo "第'' . $index . "种水果是：" . $fruit . "\n";
+}
+?>
+\end{lstlisting}
+
+
+当 foreach 开始执行时，数组内部的指针会自动指向第一个单元，这意味着不需要在 foreach 循环之前调用 reset()。
+
+foreach 依赖内部数组指针，在循环中修改其值将可能导致意外的行为，而且foreach 不支持用“@”来抑制错误信息的能力。
 
 
 可以很容易地通过在 \$value 之前加上 \& 来修改数组的元素，此方法将以引用赋值而不是拷贝一个值。
@@ -6021,7 +6978,7 @@ foreach (array(1, 2, 3, 4) as &$value) {
 ?>
 \end{lstlisting}
 
-这里，数组最后一个元素的 \$value 引用在 foreach 循环之后仍会保留。建议使用 unset() 来将其销毁。
+这里，数组最后一个元素的 \$value 引用在 foreach 循环之后仍会保留，因此建议使用 unset() 来将其销毁。
 
 用户可能注意到了以下的代码功能完全相同：
 
@@ -6191,9 +7148,34 @@ A: 3; B: 4; C:
 
 \section{Break statements}
 
-break 结束当前 for，foreach，while，do-while 或者 switch 结构的执行。
+break和continue可以在循环体种控制程序跳转。
 
-break 可以接受一个可选的数字参数\footnote{在PHP 5.4.0以后，\texttt{break 0;} 不再合法，这在之前的版本被解析为 \texttt{break 1;}。另外，取消变量作为参数传递（例如 \texttt{\$num = 2; break \$num;}）。}来决定跳出几重循环。
+break具有“终止”、“中断”的含义，可以从while、do-while、for、foreach和switch语句中跳出，或者说break 结束当前 for，foreach，while，do-while 或者 switch 结构的执行。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$i = 1;
+do{
+	echo "$i\n";
+	if($i++ >= 50) break;
+}while(1);
+
+// 或者
+for($i = 0; ; ){
+	if($i++ >= 50) break;
+	echo "$i\n";
+}
+?>
+\end{lstlisting}
+
+
+
+
+
+
+break 可以接受一个可选的数字参数\footnote{在PHP 5.4.0以后，\texttt{break 0;} 不再合法，这在之前的版本被解析为 \texttt{break 1;}来决定跳出多少层循环。
+
+另外，取消变量也可以作为参数传递（例如 \texttt{\$num = 2; break \$num;}）。}来决定跳出几重循环。
 
 
 \begin{lstlisting}[language=PHP]
@@ -6227,7 +7209,13 @@ while (++$i) {
 
 
 
+
+
 \section{Continue stataments}
+
+
+continue用于在循环体中跳过本次循环中剩余的代码，并开始执行下一次循环。
+
 
 
 continue 在循环结构用用来跳过本次循环中剩余的代码并在条件求值为真时开始执行下一次循环。在 PHP 中 switch 语句被认为是可以使用 continue 的一种循环结构。
@@ -6723,7 +7711,9 @@ script on line 2
 \section{Alternative syntax}
 
 
-PHP 提供了一些流程控制的替代语法，包括 if，while，for，foreach 和 switch。替代语法的基本形式是把左花括号（\{）换成冒号（:），把右花括号（\}）分别换成 endif;，endwhile;，endfor;，endforeach; 以及 endswitch;。
+PHP 提供了if，while，for，foreach 和 switch等流程控制的替代语法，其最佳适用场合是嵌入到HTML的脚本中，否则在复杂的HTML页面中寻找花括号的匹配是很麻烦的。
+
+替代语法的基本形式是把左花括号（\{）换成冒号（:），把右花括号（\}）分别换成 endif;，endwhile;，endfor;，endforeach; 以及 endswitch;。
 
 \begin{lstlisting}[language=PHP]
 <?php if ($a == 5): ?>
