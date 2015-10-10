@@ -1454,16 +1454,292 @@ array range ( mixed $start , mixed $limit [, number $step = 1 ] )
 
 \chapter{PHP Date/Time}
 
+\section{Timestamp}
+
+时间戳（timestamp）是指在一连串的信息中加入辨识文字（例如时间或日期），用以保障本地端（local）信息更新顺序与远端（remote）一致。
+
+时间戳的范例如下：
+
+\begin{lstlisting}[language=PHP]
+2005-10-30 T 10:45 UTC
+2007-11-09 T 11:20 UTC 
+Sat Jul 23 02:16:57 2005
+\end{lstlisting}
+
+UNIX时间\footnote{UNIX时间以5000日为纪念日，第一个5000日是1983年9月10日，第10000日是1997年5月19日，第15000日是2011年1月26日，第20000日是2024年10月4日。}（或称UNIX时间戳，POSIX时间）是一种在UNIX或类UNIX系统中使用的时间表示方式，其纪元时间从UTC（协调世界时）1970年1月1日0时0分0秒开始，因此UNIX时间戳就是从UNIX TIME纪元时间起至现在的总秒数（不考虑闰秒）。
+
+
+UNIX时间戳是一个有符号整数，所以1970年前一百年可以用其负数部分表示，但是事实上很少这样使用。因为UNIX时间戳主要用来表示当前时间或者和计算机有关的日志时间（如文件创建时间和log发生时间等）。
+
+考虑到所有计算机文件不可能在1970年前创建，所以用UNIX时间戳很少用来表示1970前的时间。如果需要表示以前的时间，一般就是自己定义数据结构，例如可以用几个数分别表示年月日，或者类似Excel中用1900年1月1日后的天数表示时间。
+
+后来的计算机时间、UNIX时间、Linux时间、Java时间都是以1970年1月1日0时0分0秒为原点开始计算。例如，Integer在Java内用32位表示，因此32位能表示的最大值是2147483647。
+
+\begin{lstlisting}[language=PHP]
+System.out.println(Integer.MAX_VALUE);
+2147483647
+\end{lstlisting}
+
+
+\begin{longtable}{|m{80pt}|m{250pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+语言&操作
+\endhead
+%endhead
+
+%firsthead
+\caption{在不同编程语言中获取现在的UNIX时间戳}\\
+\hline
+语言&操作
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Java	&\texttt{time}\\
+\hline
+JavaScript&\texttt{Math.round(new Date().getTime()/1000)}，getTime()返回数值的单位是毫秒\\
+\hline
+Microsoft .NET / C\#&\texttt{epoch = (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000}\\
+\hline
+MySQL	&\texttt{SELECT unix_timestamp(now())}\\
+\hline
+Perl	&\texttt{time}\\
+\hline
+PHP	&\texttt{time()}\\
+\hline
+PostgreSQL&\texttt{SELECT extract(epoch FROM now())}\\
+\hline
+Python	&先\texttt{import time}然后\texttt{time.time()}\\
+\hline
+\multirow{2}{60pt}{Ruby}		&获取Unix时间戳：\texttt{Time.now}或\texttt{Time.new}\\ \cline{1-2}
+							&显示Unix时间戳：\texttt{Time.now.to\_i}\\
+\hline
+SQL Server&\texttt{SELECT DATEDIFF(s, '1970-01-01 00:00:00', GETUTCDATE())}\\
+\hline
+Unix / Linux&\texttt{date +\%s}\\
+\hline
+VBScript / ASP&\texttt{DateDiff("s", "01/01/1970 00:00:00", Now())}\\
+\hline
+Perl命令行状态&\texttt{perl -e "print time"}\\
+\hline
+\end{longtable}
+
+另外，1年365天的总秒数是31536000，2147483647/31536000 = 68.1，也就是说32位能表示的最长时间是68年，而实际上到2038年01月19日03时14分07秒，便会到达最大时间，过了这个时间点，所有32位操作系统时间便会变为10000000 00000000 00000000 00000000。
+
+32位UNIX系统以32位二进制数字表示时间。但是它们最多只能表示至协调世界时间2038\footnote{UNIX系统使用32比特的空间存储一个从1970年开始数的秒数，这一秒数是UNIX内部时钟的基准，但是到2038年某一时刻这个空间就不够用了（类似2000年的千禧虫电脑问题，被称为2038年问题）。}年1月19日3时14分07秒（二进制01111111 11111111 11111111 11111111，即0x7FFF:FFFF），在下一秒二进制数字则会变为10000000 00000000 00000000 00000000，（即0x8000:0000）。
+
+0x8000:0000是一个负数，因此各系统会把时间误解作1901年12月13日20时45分52秒（亦有说回归到1970年，即32位系统的UNIX时间将会被重置），从而出现时间回归的现象，可能导致软件问题和系统瘫痪。
+
+目前的解决方案是把系统由32位转为64位系统，在64位系统下的UTC时间最多可以表示到292,277,026,596年12月4日15时30分08秒。
+
+
+\begin{longtable}{|m{80pt}|m{250pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+语言&操作
+\endhead
+%endhead
+
+%firsthead
+\caption{在不同编程语言中实现Unix时间戳到普通时间的转换}\\
+\hline
+语言&操作
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Java	&\texttt{String date = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new java.util.Date(Unix timestamp * 1000))}\\
+\hline
+\multirow{2}{80pt}{JavaScript} &\texttt{var unixTimestamp = new Date(Unix timestamp * 1000) } \\ \cline{1-2}
+			&\texttt{commonTime = unixTimestamp.toLocaleString()}\\
+\hline
+Linux	&\texttt{date -d @Unix timestamp}\\
+\hline
+MySQL	&\texttt{from\_unixtime(Unix timestamp)}\\
+\hline
+\multirow{2}{80pt}{Perl}	&\texttt{my $time = Unix timestamp}\\ \cline{1-2}
+		&\texttt{my ($sec, $min, $hour, $day, $month, $year) = (localtime($time))[0,1,2,3,4,5,6]}\\
+\hline
+PHP		&\texttt{date('r', Unix timestamp)}\\
+\hline
+PostgreSQL&\texttt{SELECT TIMESTAMP WITH TIME ZONE 'epoch' + Unix timestamp) * INTERVAL '1 second';}\\
+\hline
+\multirow{2}{80pt}{Python}	&\texttt{import time}\\ \cline{1-2}
+		&\texttt{time.gmtime(Unix timestamp)}\\
+\hline
+Ruby	&Time.at(Unix timestamp)}\\
+\hline
+SQL Server&\texttt{DATEADD(s, Unix timestamp, '1970-01-01 00:00:00')}\\
+\hline
+VBScript / ASP&DateAdd("s", Unix timestamp, "01/01/1970 00:00:00")}\\
+\hline
+Perl命令行状态&\texttt{perl -e "print scalar(localtime(Unix timestamp))"}\\
+\hline
+\end{longtable}
+
+
+
+
+
+\begin{longtable}{|m{80pt}|m{250pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+语言&操作
+\endhead
+%endhead
+
+%firsthead
+\caption{在不同编程语言中实现普通时间到Unix时间戳的转换}\\
+\hline
+语言&操作
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+Java	&\texttt{long epoch = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse("01/01/1970 01:00:00");}\\
+\hline
+JavaScript&\texttt{var commonTime = new Date(Date.UTC(year, month - 1, day, hour, minute, second))}\\
+\hline
+MySQL	&\texttt{SELECT unix\_timestamp(time)}，时间格式: YYYY-MM-DD HH:MM:SS 或 YYMMDD 或 YYYYMMDD\\
+\hline
+Perl	&\texttt{use Time::Local}\\ \cline{1-2}
+	&\texttt{my $time = timelocal(\$sec, \$min, \$hour, \$day, \$month, \$year);}\\
+\hline
+PHP	&\texttt{mktime(hour, minute, second, month, day, year)}\\
+\hline
+PostgreSQL &\texttt{SELECT extract(epoch FROM date('YYYY-MM-DD HH:MM:SS'));}\\
+\hline
+\multirow{80pt}{Python}&\texttt{import time}\\ \cline{1-2}
+		&\texttt{int(time.mktime(time.strptime('YYYY-MM-DD HH:MM:SS', '\%Y-\%m-\%d \%H:\%M:\%S')))}\\
+\hline
+Ruby	&\texttt{Time.local(year, month, day, hour, minute, second)}\\
+\hline
+SQL Server&\texttt{SELECT DATEDIFF(s, '1970-01-01 00:00:00', time)}\\
+\hline
+Unix / Linux&\texttt{date +\%s -d"Jan 1, 1970 00:00:01"}\\
+\hline
+VBScript / ASP&\texttt{DateDiff("s", "01/01/1970 00:00:00", time)}\\
+\hline
+\end{longtable}
+
+
+
+\section{Leapsecond}
+
+
+The Unix time number is zero at the Unix epoch, and increases by exactly 86400 per day since the epoch.
+
+UNIX处理闰秒的策略如下：
+
+\begin{compactitem}
+\item 正闰秒时，闰秒的unix time就跟后一秒相同；
+\item 负闰秒时，unix time就会跳过闰秒的那个数字。
+\end{compactitem}
+
+按照Single Unix specification的定义，应该是这样的：
+
+
+
+\begin{lstlisting}[language=PHP]
+UTC=2008-12-31T23:59:59.0 → seconds_since_epoch=1230940799[.0]
+UTC=2008-12-31T23:59:59.5 → seconds_since_epoch=1230940799[.5]
+UTC=2008-12-31T23:59:60.0 → seconds_since_epoch=1230940800[.0]
+UTC=2008-12-31T23:59:60.5 → seconds_since_epoch=1230940800[.5]
+UTC=2009-01-01T00:00:00.0 → seconds_since_epoch=1230940800[.0]
+UTC=2009-01-01T00:00:00.5 → seconds_since_epoch=1230940800[.5]
+\end{lstlisting}
+
+实际之中有些地方要保证数值的单调增长，会做一些小修改，比如NTP协议中采用：
+
+\begin{lstlisting}[language=PHP]
+UTC=2008-12-31T23:59:59.0 → gettimeofday() returns 1230940799.0
+UTC=2008-12-31T23:59:59.5 → gettimeofday() returns 1230940799.5
+UTC=2008-12-31T23:59:60.0 → gettimeofday() returns 1230940800.0
+UTC=2008-12-31T23:59:60.5 → gettimeofday() returns 1230940800.000001
+UTC=2009-01-01T00:00:00.0 → gettimeofday() returns 1230940800.000002
+UTC=2009-01-01T00:00:00.5 → gettimeofday() returns 1230940800.5
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
 
 \section{date()}
 
 
 
-PHP 的 date() 函数用于格式化时间戳\footnote{时间戳是自 1970 年 1 月 1 日（00:00:00 GMT）以来的秒数，它也被称为 Unix 时间戳（Unix Timestamp）。}或日期，从而产生可读性更好的日期和时间。
+PHP 的 date() 函数用于格式化一个本地时间/日期的时间戳\footnote{时间戳是自 1970 年 1 月 1 日（00:00:00 GMT）以来的秒数，它也被称为 Unix 时间戳（Unix Timestamp）。}，从而产生可读性更好的日期和时间。
 
 \begin{lstlisting}[language=PHP]
-     date(format,timestamp)
+string date( string $format, [, int timestamp] )
 \end{lstlisting}
+
+返回将整数 timestamp 按照给定的格式字串而产生的字符串。如果没有给出时间戳则使用本地当前时间。换句话说，timestamp 是可选的，默认值为 time()。
+
+
 
 其中：
 
@@ -1496,14 +1772,136 @@ echo date("Y-m-d");
 
 date() 函数的第二个参数规定了一个时间戳，此参数是可选的。如果没有提供时间戳，将使用当前的时间。
 
+\subsection{timezone}
+
+
+在每次调用日期/时间函数时，如果时区无效则会引发 E\_NOTICE 错误，如果使用系统设定值或 TZ 环境变量，则会引发 E\_STRICT 或 E\_WARNING 消息。
+
+
+\subsection{format}
+
+
+自 PHP 5.1.1 起引入了下面的常量作为标准的日期/时间格式来指定 format 参数。
+
+\begin{verbatim}
+DateTime::ATOM
+DATE_ATOM
+Atom (example: 2005-08-15T15:52:01+00:00)
+DateTime::COOKIE
+DATE_COOKIE
+HTTP Cookies (example: Monday, 15-Aug-2005 15:52:01 UTC)
+DateTime::ISO8601
+DATE_ISO8601
+ISO-8601 (example: 2005-08-15T15:52:01+0000)
+DateTime::RFC822
+DATE_RFC822
+RFC 822 (example: Mon, 15 Aug 05 15:52:01 +0000)
+DateTime::RFC850
+DATE_RFC850
+RFC 850 (example: Monday, 15-Aug-05 15:52:01 UTC)
+DateTime::RFC1036
+DATE_RFC1036
+RFC 1036 (example: Mon, 15 Aug 05 15:52:01 +0000)
+DateTime::RFC1123
+DATE_RFC1123
+RFC 1123 (example: Mon, 15 Aug 2005 15:52:01 +0000)
+DateTime::RFC2822
+DATE_RFC2822
+RFC 2822 (example: Mon, 15 Aug 2005 15:52:01 +0000)
+DateTime::RFC3339
+DATE_RFC3339
+Same as DATE_ATOM (since PHP 5.1.3)
+DateTime::RSS
+DATE_RSS
+RSS (example: Mon, 15 Aug 2005 15:52:01 +0000)
+DateTime::W3C
+DATE_W3C
+World Wide Web Consortium (example: 2005-08-15T15:52:01+00:00)
+\end{verbatim}
+
+从PHP5.1.2起引入了下面的常量来作为日出时间的返回值格式：
+
+\begin{verbatim}
+SUNFUNCS_RET_TIMESTAMP (integer)
+Timestamp
+SUNFUNCS_RET_STRING (integer)
+Hours:minutes (example: 08:02)
+SUNFUNCS_RET_DOUBLE (integer)
+Hours as floating point number (example 8.75)
+\end{verbatim}
+
+\subsection{request}
+
+从PHP5.1开始，在\texttt{\$\_SERVER['REQUEST\_TIME']}中保存发起该请求时刻的UNIX时间戳，从而可以统计勤请求的开始时间。
+
+
+\subsection{range}
+
+有效的时间戳典型范围是格林威治时间 1901 年 12 月 13 日 20:45:54 到 2038 年 1 月 19 日 03:14:07，该范围符合 32 位有符号整数的最小值和最大值。
+
+不过，在 PHP 5.1.0 之前，该范围在某些系统（如 Windows）中限制为从 1970 年 1 月 1 日到 2038 年 1 月 19 日。
+
+\section{strtotime}
+
+
+要将字符串表达的时间转换成时间戳，应该使用 strtotime()。
+
+\begin{compactitem}
+\item 成功则返回时间戳。
+\item 不成功则返回 FALSE（在 PHP 5.1.0 之前本函数在失败时返回 -1）。
+\end{compactitem}
+
+此外，一些数据库有一些函数将其时间格式转换成时间戳（例如 MySQL 的UNIX\_TIMESTAMP 函数）。
+
+strtotime()可以将任何英文文本的日期时间描述解析为 UNIX 时间戳，该函数预期接受一个包含美国英语日期格式的字符串并尝试将其解析为 Unix 时间戳（自 January 1 1970 00:00:00 GMT 起的秒数），其值相对于 now 参数给出的时间，如果没有提供此参数则用系统当前时间。
+
+
+
+\begin{lstlisting}[language=PHP]
+int strtotime ( string $time [, int $now = time() ] )
+\end{lstlisting}
+
+\begin{compactitem}
+\item time~~日期/时间字符串。
+\item now~~用来计算返回值的时间戳。
+\end{compactitem}
+
+strtotime()使用 TZ 环境变量（如果有的话）来计算时间戳，并且自 PHP 5.1.0 起有更容易的方法来定义时区用于所有的日期/时间函数。
+
+\begin{compactitem}
+\item 在每次调用日期/时间函数时，如果时区无效则会引发 E\_NOTICE 错误。
+\item 如果使用系统设定值或 TZ 环境变量，则会引发 E\_STRICT 或 E\_WARNING 消息。
+\end{compactitem}
+
+有效的时间戳通常从 Fri, 13 Dec 1901 20:45:54 GMT 到 Tue, 19 Jan 2038 03:14:07 GMT（对应于 32 位有符号整数的最小值和最大值），而且不是所有的平台都支持负的时间戳，因此日期范围被限制为不能早于 UNIX纪元。这意味着在 1970 年 1 月 1 日之前的日期将不能用在 Windows和某些Linux版本等，不过 PHP 5.1.0 及更新的版本克服了此限制。
+
+\begin{compactitem}
+\item 如果给定的年份是两位数字的格式，则其值 0-69 表示 2000-2069，70-100 表示 1970-2000。
+\item 如果给定的日期格式是m/d/y，则认为是美国格式。
+\item 如果给定的日期格式是d-m-y或d.m.y，则认为是欧洲格式。
+\end{compactitem}
+
+为了避免日期格式中可能的混淆，最好使用ISO 8601(YYYY-MM-DD)格式的日期或者DataTime::createFromFormat()。
+
+使用strtotime()来进行数学计算是不明智的，最好使用DataTime::add()、DataTime::sub()或DateTime::modify()函数来进行日期的加减等操作。
+
+\section{strftime}
+
+要格式化其它语种的日期，应该用 setlocale() 和 strftime() 函数来代替 date()。
+
+
 \section{mktime()}
 
 
-mktime() 函数可为指定的日期返回 Unix 时间戳。
+mktime() 函数可为指定的日期返回 Unix 时间戳，因此可以把 date() 和 mktime() 函数结合使用来得到未来或过去的日期。
+
 
 \begin{lstlisting}[language=PHP]
 mktime(hour,minute,second,month,day,year,is_dst)
 \end{lstlisting}
+
+夏令时自身的问题也让这种方法比简单地在时间戳上加减一天或者一个月的秒数更可靠。
+
 
 下面的示例将使用 mktime() 函数为明天创建一个时间戳。
 
