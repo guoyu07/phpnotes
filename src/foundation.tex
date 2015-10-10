@@ -6391,7 +6391,42 @@ endif;
 在else if嵌套结构的最后加上一个else块，可以保证各个块中的判断条件是互斥的，从而避免出现非预期的结果。
 
 
+\subsection{table drive}
 
+表驱动（table drive）可以出于特定的目的来使用表，从而不必使用很多的逻辑语句（if或case）就可以从表中找出信息。
+
+事实上，任何信息都可以通过表来挑选，只是逻辑语句在简单的情况下往往更简单而且更直接，但是随着逻辑链的复杂，表就变得越来越富有吸引力了。
+
+假设需要一个可以返回每个月中天数的函数（为简单起见不考虑闰年），可以使用下面的函数来实现：
+
+
+\begin{lstlisting}[language=PHP]
+funtion getMonthDays($month){
+	if ( 1==$month){days=31;}
+	elseif(2==$month){$days=28;}
+	elseif(3==$month){$days=31;}
+	elseif(4==$month){$days=30;}
+	elseif(5==$month){$days=31;}
+	elseif(6==$month){$days=30;}
+	elseif(7==$month){$days=31;}
+	elseif(8==$month){$days=31;}
+	elseif(9==$month){$days=30;}
+	elseif(10==$month){$days=31;}
+	elseif(11==$month){$days=30;}
+	elseif(12==$month){$days=31;}
+	return $days;
+}
+\end{lstlisting}
+
+如果使用表驱动法来解决elseif冗余的问题，可以将上述代码改写为：
+
+
+\begin{lstlisting}[language=PHP]
+$monthDays=array(31,28,31,30,31,30,31,31,30,31,30,31);
+for($i=0; $i<12; $i++){
+	return $monthDays[$i];
+}
+\end{lstlisting}
 
 \section{Select statements}
 
