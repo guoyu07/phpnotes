@@ -1,0 +1,2127 @@
+\part{Composer}
+
+
+
+\chapter{Overview}
+
+Composer 是一个跨平台的PHP依赖管理工具，允许用户声明项目所依赖的代码库，并且可以在项目中安装它们。
+
+Composer 不是一个包管理器。虽然涉及 ``packages" 和 ``libraries"，但是composer在每个项目的基础上进行管理，在指定项目的某个目录中（例如 vendor）进行安装。
+
+具体来说，Composer在本地安装一些资源包。一个包本质上就是一个包含东西的目录。通常情况下它存储 PHP 代码，但在理论上它可以是任何东西。并且它包含一个描述，其中有一个名称和一个版本号，这个名称和版本号用于识别该包。
+
+默认情况下，Composer不会在全局安装任何东西，因此它仅仅是一个依赖管理。
+
+Composer 受到了 node npm 和 ruby's bundler 的强烈启发，可以这样为用户解决问题：
+
+\begin{compactenum}
+\item 你有一个项目依赖于若干个库。
+
+\item 其中一些库依赖于其他库。
+
+\item 声明所依赖的东西。
+
+\item Composer 会找出哪个版本的包需要安装，并安装它们（将它们下载到你的项目中）。
+\end{compactenum}
+
+比方说，正在创建的一个项目需要一个库来做日志记录，当前决定使用 monolog。为了将它添加到项目中，用户所需要做的就是创建一个 composer.json 文件，其中描述了项目的依赖关系。
+
+composer.json的内容指出当前的项目需要一些 monolog/monolog 的包，从 1.2 开始的任何版本。
+
+\begin{lstlisting}[language=Java]
+{
+    "require": {
+        "monolog/monolog": "1.2.*"
+    }
+}
+\end{lstlisting}
+
+运行 Composer 需要 PHP 5.3.2+ 以上版本。一些敏感的 PHP 设置和编译标志也是必须的，但是对于任何不兼容项安装程序都会抛出警告。
+
+目前支持Composer的框架包括Symfony、Laravel、CodeIgniter、CakePHP、FuelPHP、Drupal和SilverStripe等。
+
+\section{Installation}
+
+\subsection{Project}
+
+在局部安装Composer时，首先要真正获取 Composer，同时这意味着需要把Composer下载到项目中。
+
+\begin{lstlisting}[language=bash]
+$ curl -sS https://getcomposer.org/installer | php
+\end{lstlisting}
+
+如果上述方法由于某些原因失败了，还可以通过 php下载安装器：
+
+\begin{lstlisting}[language=bash]
+$ php -r "readfile('https://getcomposer.org/installer');" | php
+\end{lstlisting}
+
+接下来将检查一些 PHP 的设置，然后下载 composer.phar 到工作目录中。这是 Composer 的二进制文件，也是一个 PHAR 包（PHP 的归档），composer.phar可以帮助用户在命令行中执行一些操作。
+
+可以通过\texttt{-\/-install-dir}选项指定 Composer 的安装目录（它可以是一个绝对或相对路径）：
+
+\begin{lstlisting}[language=bash]
+$ curl -sS https://getcomposer.org/installer | php -- --install-dir=bin
+\end{lstlisting}
+
+\subsection{Global}
+
+可以将composer.phar放在任何地方。如果把它放在系统的 PATH 目录中，就能在全局访问它。 在类Unix系统中可以在使用时不加 php 前缀。
+
+可以执行如下命令让 composer 在你的系统中进行全局调用：
+
+\begin{lstlisting}[language=bash]
+$ curl -sS https://getcomposer.org/installer | php
+$ sudo mv composer.phar /usr/local/bin/composer
+\end{lstlisting}
+
+现在只需要执行\texttt{composer}命令就可以使用 Composer 而不需要输入\texttt{php composer.phar}。
+
+Composer 是 homebrew-php 项目的一部分。
+
+\begin{lstlisting}[language=bash]
+$ brew update
+$ brew tap josegonzalez/homebrew-php
+$ brew tap homebrew/versions
+$ brew install php55-intl
+$ brew install josegonzalez/php/composer
+\end{lstlisting}
+
+如果下载并且运行 Composer-Setup.exe，它将安装最新版本的 Composer到Windows系统中 ，并设置好系统的环境变量，于是就可以在任何目录下直接使用 composer 命令。
+
+如果需要手动安装Composer，需要手动设置系统的环境变量 PATH 并运行安装命令下载 composer.phar 文件：
+
+\begin{lstlisting}[language=bash]
+C:\Users\username>cd C:\bin
+C:\bin>php -r "readfile('https://getcomposer.org/installer');" | php
+\end{lstlisting}
+
+如果收到 readfile 错误提示，需要使用 http 链接或者在 php.ini 中开启 php\_openssl.dll 。
+
+在 composer.phar 同级目录下新建文件 composer.bat ：
+
+\begin{lstlisting}[language=bash]
+C:\bin>echo @php "%~dp0composer.phar" %*>composer.bat
+\end{lstlisting}
+
+关闭当前的命令行窗口，打开新的命令行窗口进行测试：
+
+\begin{lstlisting}[language=bash]
+C:\Users\username>composer -V
+Composer version 27d8904
+\end{lstlisting}
+
+要检查 Composer 是否正常工作，只需要通过 php 来执行 PHAR，正常情况下这将返回一个可执行的命令列表。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar
+\end{lstlisting}
+
+Composer的进程退出代码意义如下：
+
+\begin{compactitem}
+\item 0: 正常
+\item 1: 通用/未知错误
+\item 2: 依赖关系处理错误
+\end{compactitem}
+
+另外，也可以仅执行 \texttt{-\/-check}选项而无需下载 Composer。 
+
+\begin{lstlisting}[language=bash]
+$ curl -sS https://getcomposer.org/installer | php -- --help
+\end{lstlisting}
+
+\section{Dependence}
+
+使用 Composer 来安装项目的依赖时，如果在当前目录下没有一个 composer.json 文件，需要手动创建。
+
+要解决和下载依赖，执行\texttt{install}命令：
+
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar install
+\end{lstlisting}
+
+
+如果你进行了全局安装，并且没有 phar 文件在当前目录，可以使用下面的命令代替：
+
+\begin{lstlisting}[language=bash]
+$ composer install
+\end{lstlisting}
+
+上述命令将下载指定的依赖（例如monolog）到 vendor目录（例如vendor/monolog/monolog） 目录。
+
+
+
+
+\section{Repository}
+
+packagist 是 Composer 的主要资源库，在没有指定package的来源时默认来源就是从packagist。
+
+Packagist 是 Composer 主要的一个包信息存储库，它默认是启用的。任何在 packagist 上发布的包都可以直接被 Composer 使用。例如，monolog被发布在 packagist 上，用户就可以直接使用它，而不必指定任何额外的来源信息。
+
+一个 Composer 的库基本上是一个包的源：记录了可以得到包的地方。Packagist 的目标是成为大家使用库资源的中央存储平台。这意味着用户可以 require 那里的任何包。
+
+当访问 packagist.org时可以浏览和搜索资源包，而且可以通过向packagist.org提交自己的package的来源地址来让packagist抓取自己的包。一旦完成，自己的包将可以提供给任何人使用。
+
+任何支持 Composer 的开源项目应该发布自己的包在 packagist 上，虽然并不一定要发布在 packagist 上来使用 Composer。
+
+除了把资源包放在 packagist.org 上，也可以自行托管资源库。
+
+\begin{compactitem}
+\item Private company packages
+
+如果你是一个公司的职员，对公司内部的资源包使用 composer，你可能会想让这些包保持私有的状态。
+
+\item Separate ecosystem
+
+如果你的项目有自己的生态系统，并且自己的资源包不需要被其它项目所复用，你可能会想将它们从 packagist.org 上分离出来。其中一个例子就是 wordpress 的插件。
+\end{compactitem}
+
+
+对于自行托管的软件包，建议使用 composer 类型资源库设置，它将提供最佳的性能。
+
+这里有一些工具，可以帮助你创建 composer 类型的资源库。
+
+\subsection{Packagist}
+
+packagist 的底层是开源的。这意味着你可以只安装你自己拷贝的 packagist，改造并使用它。这真的是很直接简单的事情。然而，由于其规模和复杂性，对于大多数中小型企业还是建议使用 Satis。
+
+Packagist 是一个 Symfony2 应用程序，并且托管在 GitHub 上 github.com/composer/packagist。它内部使用了 composer 并作为 VCS 资源库与 composer 用户之间的代理。它拥有所有 VCS 资源包的列表，定期重新抓取它们，并将其作为一个 composer 资源库。
+
+要设置你的副本，只需要按照 github.com/composer/packagist 的说明进行操作。
+
+可以在 composer.json 中禁用默认的 Packagist 资源库。
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "packagist": false
+        }
+    ]
+}
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+\subsection{Satis}
+
+Satis（\url{https://github.com/composer/satis}）是一个静态的 composer 资源库生成器。它像是一个超轻量级的、基于静态文件的 packagist 版本。
+
+你给它一个包含 composer.json 的存储库，定义好 VCS 和 资源库。它会获取所有你列出的包，并打印 packages.json 文件，作为 composer 类型的资源库。
+
+
+
+\subsection{Artifact}
+
+在某些情况下，或许没有能力拥有之前提到的任何一种线上资源库，而且大部分的时间它们都是私有的。
+
+为了简化维护，可以简单的使用 artifact 资源库类型，来引用一个包含那些私有包的 ZIP 存档的文件夹：
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "type": "artifact",
+            "url": "path/to/directory/with/zips/"
+        }
+    ],
+    "require": {
+        "private-vendor-one/core": "15.6.2",
+        "private-vendor-two/connectivity": "*",
+        "acme-corp/parser": "10.3.5"
+    }
+}
+\end{lstlisting}
+
+每个 zip artifact 都只是一个 ZIP 存档，放置在 composer.json 所在的根目录：
+
+
+\begin{lstlisting}[language=bash]
+$ unzip -l acme-corp-parser-10.3.5.zip
+
+composer.json
+...
+\end{lstlisting}
+
+如果有两个不同版本的资源包，它们都会被导入。当有一个新版本的存档被添加到 artifact 文件夹，并且你运行了 update 命令，该版本就会被导入，并且 Composer 将更新到最新版本。
+
+
+
+
+
+
+\section{Library}
+
+
+\subsection{Package}
+
+
+每一个项目都是一个包（package），项目和库之间唯一的区别仅仅在于项目是一个没有名字的包。
+
+
+
+只要有一个 composer.json 文件在目录中，那么整个目录就是一个包。
+
+当添加一个 require 到项目中，就是在创建一个依赖于其它库的包。
+
+
+为了使它成为一个可安装的包，需要给它一个名称。可以通过 composer.json 中的 name 来定义：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+  "name": "acme/hello-world",
+  "require": {
+     "monolog/monolog": "1.0.*"
+  }
+}
+\end{lstlisting}
+
+
+在上述情况下，项目的名称为 acme/hello-world，其中 acme 是供应商的名称，供应商的名称是必须填写的。
+
+
+如果不知道拿什么作为供应商的名称， 那么使用 github 上的用户名通常是不错的选择。 虽然包名不区分大小写，但惯例是使用小写字母，并用连字符作为单词的分隔。
+
+事实上，在 composer 内部将每一个版本都视为一个单独的包。尽管在你使用 composer 时这种区别无关紧要，但当你想改变它时，这就显得至关重要。
+
+除了名称和版本号，还存放了有用的元数据。与安装关系最密切的是 source 信息，它申明了在哪里可以获得资源包的内容。包数据指向包内容，并有两种指向方式：dist 和 source。
+
+\begin{compactitem}
+\item Dist
+
+dist 指向一个存档，该存档是对一个资源包的某个版本的数据进行的打包。通常是已经发行的稳定版本。
+
+\item Source
+
+source 指向一个开发中的源。这通常是一个源代码仓库，例如 git。当你想要对下载下来的资源包进行修改时，可以这样获取。
+\end{compactitem}
+
+你可以使用其中任意一个，或者同时使用。这取决于其它的一些因素，比如“user-supplied 选项”和“包的稳定性”，前者将会被优先考虑。
+
+\subsection{Repository}
+
+一个资源库是一个包的来源。它是一个 packages/versions 的列表。Composer 将查看所有你定义的 repositories 以找到你项目需要的资源包。
+
+默认情况下已经将 Packagist.org 注册到 Composer。你可以在 composer.json 中申明更多的资源库，把它们加入你的项目中。
+
+资源库的定义仅可用于“root 包”，而在你依赖的包中定义的资源库将不会被加载。
+
+\begin{compactitem}
+\item composer
+
+主资源库的类型为 composer。它使用一个单一的 packages.json 文件，包含了所有的资源包元数据。
+
+\item vcs
+
+VCS 表示版本控制系统。这包括像 git、svn 或 hg 这样的版本管理系统。Composer 有一个资源类型可以从这些系统安装软件包。
+
+\item pear
+
+pear 类型资源库，使得从任何 PEAR 渠道安装资源包成为可能。Composer 将为所有此类型的包增加前缀（类似于 pear-\{渠道名称\}/）以避免冲突。而在之后使用别名时也增加前缀（如 pear-\{渠道别名\}/）。
+
+\item package
+
+如果需要使用一个项目，它无法通过上述任何一种方式支持 composer，你仍然可以使用 package 类型定义资源库。
+
+\end{compactitem}
+
+composer也是 packagist.org 所使用的资源类型。要引用一个 composer 资源库，只需要提供一个存放 packages.json 文件的 目录路径。比如要引用 packagist.org 下的 /packages.json，它的 URL 就应该是 packagist.org。而 example.org/packages.json 的 URL 应该是 example.org。
+
+唯一必须的字段是 packages。它的 JSON 结构如下：
+
+
+\begin{lstlisting}[language=bash]
+{
+    "packages": {
+        "vendor/package-name": {
+            "dev-master": { @composer.json },
+            "1.0.x-dev": { @composer.json },
+            "0.0.1": { @composer.json },
+            "1.0.0": { @composer.json }
+        }
+    }
+}
+\end{lstlisting}
+
+@composer.json 标记将会从此包的指定版本中读取 composer.json 的内容，其内至少应包含以下信息：
+
+\begin{compactitem}
+\item name
+\item version
+\item dist or source
+\end{compactitem}
+
+这是一个最简单的包定义：
+
+\begin{lstlisting}[language=bash]
+{
+    "name": "smarty/smarty",
+    "version": "3.1.7",
+    "dist": {
+        "url": "http://www.smarty.net/files/Smarty-3.1.7.zip",
+        "type": "zip"
+    }
+}
+\end{lstlisting}
+
+packages的JSON body还可以包含任何在 composer.json 架构 中介绍的字段。
+
+notify-batch 字段允许你指定一个 URL，它将会在用户安装每一个包时被调用。该 URL 可以是（与其资源库相同域名的）绝对路径或者一个完整的 URL 地址。
+
+\begin{lstlisting}[language=bash]
+{
+    "notify-batch": "/downloads/"
+}
+\end{lstlisting}
+
+对于 example.org/packages.json 包含的 monolog/monolog 包，它将会发送一个 POST 请求到 example.org/downloads/，使用下面的 JSON request body：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "downloads": [
+        {"name": "monolog/monolog", "version": "1.2.1.0"},
+    ]
+}
+\end{lstlisting}
+
+version 字段将包含标准化的版本号。
+
+notify-batch 字段是可选的。
+
+
+对于较大的资源库，可以拆分 packages.json 为多个文件，然后使用includes字段允许引用这些额外的文件。
+
+
+\begin{lstlisting}[language=bash]
+{
+    "includes": {
+        "packages-2011.json": {
+            "sha1": "525a85fb37edd1ad71040d429928c2c0edec9d17"
+        },
+        "packages-2012-01.json": {
+            "sha1": "897cde726f8a3918faf27c803b336da223d400dd"
+        },
+        "packages-2012-02.json": {
+            "sha1": "26f911ad717da26bbcac3f8f435280d13917efa5"
+        }
+    }
+}
+\end{lstlisting}
+
+文件的 SHA-1 码允许它被缓存，仅在 hash 值改变时重新请求。
+
+includes字段是可选的。你也许并不需要它来自定义存储库。
+
+
+
+对于非常大的资源库，像 packagist.org 使用 so-called provider 文件是首选方法。
+
+provider-includes 字段允许你设置一个列表，来申明这个资源库提供的包名称。在这种情况下文件的哈希算法必须使用 sha256。
+
+providers-url 描述了如何在服务器上找到这些 provider 文件。它是以资源库的根目录为起点的绝对路径。
+
+\begin{lstlisting}[language=bash]
+{
+    "provider-includes": {
+        "providers-a.json": {
+            "sha256": "f5b4bc0b354108ef08614e569c1ed01a2782e67641744864a74e788982886f4c"
+        },
+        "providers-b.json": {
+            "sha256": "b38372163fac0573053536f5b8ef11b86f804ea8b016d239e706191203f6efac"
+        }
+    },
+    "providers-url": "/p/%package%$%hash%.json"
+}
+\end{lstlisting}
+
+这些文件包含资源包的名称以及哈希值，以验证文件的完整性，例如：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "providers": {
+        "acme/foo": {
+            "sha256": "38968de1305c2e17f4de33aea164515bc787c42c7e2d6e25948539a14268bb82"
+        },
+        "acme/bar": {
+            "sha256": "4dd24c930bd6e1103251306d6336ac813b563a220d9ca14f4743c032fb047233"
+        }
+    }
+}
+\end{lstlisting}
+
+上述文件申明了 acme/foo 和 acme/bar 可以在这个资源库找到，通过加载由 providers-url 引用的文件，替换 \%package\% 为包名并且替换 \%hash\% 为 sha256 的值。这些文件本身只包含上文提到的 packages 的定义。
+
+这些字段是可选的。你也许并不需要它们来自定义存储库。
+
+
+packages.json 文件是用一个 PHP 流加载的。你可以使用 options 参数来设定额外的流信息。你可以设置任何有效的PHP 流上下文选项。
+
+从 VCS 资源库加载一个包时，最常见的是维护自己 fork 的第三方库。如果你在项目中使用某些库，并且你决定改变这些库内的某些东西，你会希望你项目中使用的是你自己的修正版本。如果这个库是在 GitHub 上（这种情况经常出现），你可以简单的 fork 它并 push 你的变更到这个 fork 里。在这之后你更新项目的 composer.json 文件，添加你的 fork 作为一个资源库，变更版本约束来指向你的自定义分支。
+
+
+例如，假设你 fork 了 monolog，在 bugfix 分支修复了一个 bug：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/igorw/monolog"
+        }
+    ],
+    "require": {
+        "monolog/monolog": "dev-bugfix"
+    }
+}
+\end{lstlisting}
+
+当你运行 php composer.phar update 时，你应该得到你修改的版本，而不是 packagist.org 上的 monolog/monolog。
+
+注意，你不应该对包进行重命名，除非你真的打算摆脱原来的包，并长期的使用你自己的 fork。这样 Composer 就会正确获取你的包了。如果你确定要重命名这个包，你应该在默认分支（通常是 master 分支）上操作，而不是特性分支，因为包的名字取自默认分支。
+
+如果其它包依赖你 fork 的这个分支，可能要对它做版本号的行内别名设置，才能够准确的识别版本约束。
+
+使用私有资源库和使用第三方资源库是完全相同的解决方案，也可以让你使用你 GitHub 和 BitBucket 上的私人代码库进行工作：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "require": {
+        "vendor/my-private-repo": "dev-master"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url":  "git@bitbucket.org:vendor/my-private-repo.git"
+        }
+    ]
+}
+\end{lstlisting}
+
+唯一的要求是为一个 git 客户端安装 SSH 秘钥。
+
+Git 并不是 VCS 资源库唯一支持的版本管理系统，还包括Subversion和Mercurial等。
+
+为了从这些系统获取资源包，你必须安装对应的客户端，这可能是不方便的。基于这个原因，这里提供了 GitHub 和 BitBucket 的 API 的特殊支持，以便在无需安装版本控制系统的情况下获取资源包。在 VCS 资源库提供的 dist 中获取 zip 存档。
+
+VCS 驱动将基于 URL 自动检测版本库类型。但如果可能，你需要明确的指定一个 git、svn 或 hg 作为资源库类型，而不是 vcs。
+
+If you set the no-api key to true on a github repository it will clone the repository as it would with any other git repository instead of using the GitHub API. But unlike using the git driver directly, composer will still attempt to use github's zip files.
+
+由于 Subversion 没有原生的分支和标签的概念，Composer 假设在默认情况下该代码位于 \$url/trunk、\$url/branches 和 \$url/tags 内。如果你的存储库使用了不同的布局，你可以更改这些值。例如，如果你使用大写的名称，你可以像这样配置资源库：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "http://svn.example.org/projectA/",
+            "trunk-path": "Trunk",
+            "branches-path": "Branches",
+            "tags-path": "Tags"
+        }
+    ]
+}
+\end{lstlisting}
+
+如果你的存储库目录中没有任何分支或标签文件夹，你可以将 branches-path 或 tags-path 设置为 false。
+
+
+如果是一个位于子目录的包，例如， /trunk/foo/bar/composer.json 和 /tags/1.0/foo/bar/composer.json，那么你可以让 composer 通过 "package-path" 选项设置的子目录进行访问，在这个例子中可以将其设置为 "package-path": "foo/bar/"。
+
+pear 类型资源库，使得从任何 PEAR 渠道安装资源包成为可能。Composer 将为所有此类型的包增加前缀（类似于 pear-\{渠道名称\}/）以避免冲突。而在之后使用别名时也增加前缀（如 pear-\{渠道别名\}/）。
+
+例如，使用 pear2.php.net：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "type": "pear",
+            "url": "http://pear2.php.net"
+        }
+    ],
+    "require": {
+        "pear-pear2.php.net/PEAR2_Text_Markdown": "*",
+        "pear-pear2/PEAR2_HTTP_Request": "*"
+    }
+}
+\end{lstlisting}
+
+在这种情况下渠道的简称（别名）是 pear2，因此 PEAR2\_HTTP\_Request 包的名称应该写作 pear-pear2/PEAR2\_HTTP\_Request。
+
+pear 类型的资源库对每个 requires 都要做完整的请求，因此可能大大降低安装速度。
+
+通过自定义供应商名称，对 PEAR 渠道包进行别名是允许的。例如，假设你有一个私人 PEAR 库，并希望使用 Composer 从 VCS 集成依赖。你的 PEAR 库包含以下资源包：
+
+\begin{compactitem}
+\item BasePackage。
+\item IntermediatePackage 依赖于 BasePackage。
+\item TopLevelPackage1 和 TopLevelPackage2 都依赖于 IntermediatePackage。
+\end{compactitem}
+
+如果没有一个供应商别名，Composer 将使用 PEAR 渠道名称作为包名的一部分：
+
+\begin{compactitem}
+\item pear-pear.foobar.repo/BasePackage
+\item pear-pear.foobar.repo/IntermediatePackage
+\item pear-pear.foobar.repo/TopLevelPackage1
+\item pear-pear.foobar.repo/TopLevelPackage2
+\end{compactitem}
+
+假设之后的某个时间，你希望将你的 PEAR 包迁移，使用 Composer 资源库和命名方案，并且采用 foobar 作为供应商名称。这样之前使用 PEAR 包的项目将不会看到更新的资源包，因为它们有不同的供应商名称（foobar/IntermediatePackage 与 pear-pear.foobar.repo/IntermediatePackage）。
+
+你可以通过从一开始就为 PEAR 资源库指定 vendor-alias 来避免这种情况的发生，以得到一个不会过时的包名。
+
+为了说明这一点，下面的例子会从你的 PEAR 资源库中得到 BasePackage、TopLevelPackage1 和 TopLevelPackage2 资源包，并从 Github 资源库中获取 IntermediatePackage 资源包：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/foobar/intermediate.git"
+        },
+        {
+            "type": "pear",
+            "url": "http://pear.foobar.repo",
+            "vendor-alias": "foobar"
+        }
+    ],
+    "require": {
+        "foobar/TopLevelPackage1": "*",
+        "foobar/TopLevelPackage2": "*"
+    }
+}
+\end{lstlisting}
+
+如果你想使用一个项目，它无法通过上述任何一种方式支持 composer，你仍然可以使用 package 类型定义资源库。
+
+基本上，你可以定义与 packages.json 中 composer 类型资源库相同的信息，但需要为每个这样的资源包分别定义。同样，至少应该包含以下信息：name、version、（dist 或 source）。
+
+这是一个 smarty 模板引擎的例子：
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "type": "package",
+            "package": {
+                "name": "smarty/smarty",
+                "version": "3.1.7",
+                "dist": {
+                    "url": "http://www.smarty.net/files/Smarty-3.1.7.zip",
+                    "type": "zip"
+                },
+                "source": {
+                    "url": "http://smarty-php.googlecode.com/svn/",
+                    "type": "svn",
+                    "reference": "tags/Smarty_3_1_7/distribution/"
+                },
+                "autoload": {
+                    "classmap": ["libs/"]
+                }
+            }
+        }
+    ],
+    "require": {
+        "smarty/smarty": "3.1.*"
+    }
+}
+\end{lstlisting}
+
+
+通常你不需要去定义 source，因为你并不是真的需要它。
+
+注意，package资源库类型存在以下限制，因此应尽可能避免使用：
+
+\begin{compactitem}
+\item Composer 将不会更新资源包，除非你修改了 version 字段。
+\item Composer 将不会更新 commit references，因此如果你使用 master reference，将不得不删除该程序包以强制更新，并且将不得不面对一个不稳定的 lock 文件。
+\end{compactitem}
+
+
+
+
+\subsection{Platform}
+
+Composer 将那些已经安装在系统上，但并不是由 Composer 安装的包视为一个虚拟的平台软件包（包括PHP本身，PHP扩展和一些系统库等）。
+
+\begin{compactitem}
+\item php
+
+php表示用户的 PHP 版本要求，可以对其做出限制（例如 >=5.4.0）。如果需要64位版本的 PHP，可以使用 php-64bit 进行限制。
+
+\item hhvm
+
+hhvm代表的是 HHVM（也就是 HipHop Virtual Machine） 运行环境的版本，并且允许设置一个版本限制，例如\texttt{'>=2.3.3'}。
+
+\item ext-<name>
+
+ext-<name>可以帮助指定需要的 PHP 扩展（包括核心扩展）。通常 PHP 拓展的版本可以是不一致的，将它们的版本约束为 * 是一个不错的主意。一个 PHP 扩展包的例子就是包名可以写成 ext-gd。
+
+\item lib-<name>
+
+lib-<name>允许对 PHP 库的版本进行限制，可供使用的名称包括curl、iconv、icu、libxml、openssl、pcre、uuid、xsl。
+\end{compactitem}
+
+可以使用\texttt{composer show -\/-platform}命令来获取可用的平台软件包的列表。
+
+
+\begin{lstlisting}[language=bash]
+$ composer show --platform
+composer-plugin-api 1.1.0     The Composer Plugin API
+ext-calendar        7.0.13    The calendar PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-ctype           7.0.13    The ctype PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-curl            7.0.13    The curl PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-date            7.0.13    The date PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-dom             20031129  The dom PHP extension
+ext-exif            0         The exif PHP extension (actual version: 1.4 $Id: 8bdc0c8f27c2c9dd1f7551f1f9fe3ab57a06a4b1 $)
+ext-fileinfo        1.0.5     The fileinfo PHP extension
+ext-filter          7.0.13    The filter PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-ftp             7.0.13    The ftp PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-gd              7.0.13    The gd PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-gettext         7.0.13    The gettext PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-hash            1.0       The hash PHP extension
+ext-iconv           7.0.13    The iconv PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-igbinary        1.2.2-dev The igbinary PHP extension
+ext-json            1.4.0     The json PHP extension
+ext-libxml          7.0.13    The libxml PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-mbstring        7.0.13    The mbstring PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-memcache        3.0.9-dev The memcache PHP extension
+ext-memcached       3.0.0b1   The memcached PHP extension
+ext-msgpack         2.0.1     The msgpack PHP extension
+ext-mysqli          7.0.13    The mysqli PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-mysqlnd         0         The mysqlnd PHP extension (actual version: mysqlnd 5.0.12-dev - 20150407 - $Id: 241ae00989d1995ffcbbf63d579943635faf9972 $)
+ext-openssl         7.0.13    The openssl PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-pcntl           7.0.13    The pcntl PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-pcre            7.0.13    The pcre PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-PDO             7.0.13    The PDO PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-pdo_mysql       7.0.13    The pdo_mysql PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-phalcon         3.0.2     The phalcon PHP extension
+ext-Phar            2.0.2     The Phar PHP extension
+ext-posix           7.0.13    The posix PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-readline        7.0.13    The readline PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-redis           2.2.8     The redis PHP extension (actual version: 2.2.8-devphp7)
+ext-Reflection      7.0.13    The Reflection PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-session         7.0.13    The session PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-shmop           7.0.13    The shmop PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-SimpleXML       7.0.13    The SimpleXML PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-sockets         7.0.13    The sockets PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-SPL             7.0.13    The SPL PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-sysvmsg         7.0.13    The sysvmsg PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-sysvsem         7.0.13    The sysvsem PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-sysvshm         7.0.13    The sysvshm PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-tokenizer       7.0.13    The tokenizer PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-wddx            7.0.13    The wddx PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-xml             7.0.13    The xml PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-xmlreader       7.0.13    The xmlreader PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-xmlwriter       7.0.13    The xmlwriter PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-xsl             7.0.13    The xsl PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-yaf             3.0.4     The yaf PHP extension
+ext-Zend-OPcache    7.0.13    The Zend OPcache PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+ext-zip             1.13.5    The zip PHP extension
+ext-zlib            7.0.13    The zlib PHP extension (actual version: 7.0.13-1+deb.sury.org~trusty+1)
+lib-curl            7.35.0    The curl PHP library
+lib-iconv           2.19      The iconv PHP library
+lib-libxml          2.9.1     The libxml PHP library
+lib-openssl         1.0.2.10  OpenSSL 1.0.2j  26 Sep 2016
+lib-pcre            8.39      The pcre PHP library
+lib-xsl             1.1.28    The xsl PHP library
+php                 7.0.13    The PHP interpreter
+php-64bit           7.0.13    The PHP interpreter, 64bit
+php-ipv6            7.0.13    The PHP interpreter with IPv6 support
+\end{lstlisting}
+
+
+\subsection{Version}
+
+
+在开发自己的Package时，需要一些方法来指明自己开发的包的版本。
+
+在 Packagist 上发布自己的包时，Packagist能够从 VCS (git, svn, hg) 的信息推断出包的版本，因此不必自己手动指明版本号，并且也不建议这样做。
+
+如果想要手动创建并且真的要明确指定它，只需要添加一个 version 字段：
+
+\begin{lstlisting}[language=bash]
+{
+    "version": "1.0.0"
+}
+\end{lstlisting}
+
+实际上，应该尽量避免手动设置版本号，因为标签的值必须与标签名相匹配。
+
+
+\subsection{Tagging}
+
+
+对于每一个看起来像版本号的标签，都会相应的创建一个包的版本。它应该符合\texttt{'X.Y.Z'}或者\texttt{'vX.Y.Z'}的形式，\texttt{-patch}、\texttt{-alpha}、\texttt{-beta}或\texttt{-RC}这些后缀是可选的。在后缀之后也可以再跟上一个数字。
+
+\begin{compactitem}
+\item 1.0.0
+\item v1.0.0
+\item 1.10.5-RC1
+\item v4.4.4beta2
+\item v2.0.0-alpha
+\item v2.0.4-p1
+\end{compactitem}
+
+即使标签带有前缀 v， 由于在需要 require 一个版本的约束时是不允许这种前缀的， 因此 v 将被省略（例如标签 V1.0.0 将创建 1.0.0 版本）。
+
+\subsection{Branch}
+
+
+对于每一个分支，都会相应的创建一个包的开发版本。如果分支名看起来像一个版本号，那么将创建一个如同\{分支名\}-dev 的包版本号。例如，一个分支 2.0 将产生一个 2.0.x-dev 包版本（加入了 .x 是出于技术的原因，以确保它被识别为一个分支，而 2.0.x 的分支名称也是允许的，它同样会被转换为 2.0.x-dev）。
+
+如果分支名看起来不像一个版本号，它将会创建 dev-\{分支名\} 形式的版本号。例如，master 将产生一个 dev-master 的版本号。
+
+\begin{compactitem}
+\item 1.x
+\item 1.0 (equals 1.0.x)
+\item 1.1.x
+\end{compactitem}
+
+当安装一个新的版本时，将会自动从它的source 中拉取。
+
+
+\subsection{Aliases}
+
+
+
+别名表示一个包版本的别名。例如，可以为 dev-master 设置别名 1.0.x-dev，这样就可以通过 \texttt{require 1.0.x-dev} 来得到 dev-master 版本的包。
+
+\chapter{Configuration}
+
+\section{composer.json}
+
+要开始在项目中使用 Composer，只需要一个 composer.json 文件，该文件包含了项目的依赖和其它的一些元数据，而且允许定义嵌套结构。
+
+只要有一个包含 composer.json 文件的库存储在线上版本控制系统（例如Git）中，用户自己的库就可以被 Composer 所安装。例如，可以将 acme/hello-world 库发布到github.com/username/hello-world 中。
+
+现在测试这个 acme/hello-world 包，我们在本地创建一个新的项目并命名为 acme/blog，这个博客依赖 acme/hello-world，而后者又依赖 monolog/monolog。我们可以在某处创建一个新的 blog 文件夹来完成它，并且需要包含 composer.json 文件：
+
+\begin{lstlisting}[language=bash]
+{
+    "name": "acme/blog",
+    "require": {
+        "acme/hello-world": "dev-master"
+    }
+}
+\end{lstlisting}
+
+在这个例子中 name 不是必须的，因为我们并不想将它发布为一个库。在这里为 composer.json 文件添加描述。
+
+现在我们需要告诉我们的应用，在哪里可以找到 hello-world 的依赖，为此我们需要在 composer.json 中添加 repositories 来源申明：
+
+\begin{lstlisting}[language=bash]
+{
+    "name": "acme/blog",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/username/hello-world"
+        }
+    ],
+    "require": {
+        "acme/hello-world": "dev-master"
+    }
+}
+\end{lstlisting}
+
+
+接下来，现在就可以使用 Composer 的 install 命令来安装你的依赖包。
+
+实际上，任何含有 composer.json 的 GIT、SVN、HG 存储库，都可以通过 require 字段指定“包来源”和“声明依赖”来添加到实际应用项目中。
+
+Composer有一个 JSON schema 格式化文档被用来验证用户的 composer.json 文件。事实上，它已经被 validate 命令所使用。
+
+\subsection{root}
+
+“root 包”是指由 composer.json 定义的在你项目根目录的包。这是 composer.json 定义你项目所需的主要条件。（简单的说，你自己的项目就是一个 root 包）
+
+某些字段仅适用于“root 包”上下文。 config 字段就是其中一个例子。只有“root 包”可以定义。在依赖包中定义的 config 字段将被忽略，这使得 config 字段只有“root 包”可用（root-only）。
+
+如果你克隆了其中的一个依赖包，直接在其上开始工作，那么它就变成了“root 包”。与作为他人的依赖包时使用相同的 composer.json 文件，但上下文发生了变化。
+
+一个资源包是不是“root 包”，取决于它的上下文。 例如，如果你的项目依赖 monolog 库，那么你的项目就是“root 包”。 但是，如果你从 GitHub 上克隆了 monolog 为它修复 bug， 那么此时 monolog 就是“root 包”。
+
+
+\subsection{name}
+
+name是包的名称，它包括供应商名称和项目名称，使用/分隔。例如，monolog/monolog或igorw/event-source。
+
+
+通常容易产生相同的项目名称，而供应商名称的存在则很好的解决了命名冲突的问题。例如，它允许两个不同的人创建同样名为 json 的库，而之后它们将被命名为 igorw/json 和 seldaek/json。
+
+这里，我们需要引入 monolog/monolog，供应商名称与项目的名称相同，对于一个具有唯一名称的项目，我们推荐这么做。它还允许以后在同一个命名空间添加更多的相关项目。如果你维护着一个库，这将使你可以很容易的把它分离成更小的部分。
+
+
+对于需要发布的包（库），这是必须填写的。
+
+
+
+\subsection{description}
+
+一个包的简短描述。通常这个最长只有一行。
+
+对于需要发布的包（库），这是必须填写的。
+
+
+\subsection{version}
+
+version 不是必须的，并且建议忽略（见下文）。
+
+它应该符合 \texttt{'X.Y.Z'}或者 \texttt{'vX.Y.Z'}的形式， \texttt{-dev}、\texttt{-patch}、\texttt{-alpha}、\texttt{-beta} 或 \texttt{-RC} 这些后缀是可选的。在后缀之后也可以再跟上一个数字。
+
+在前面的例子中引入的 monolog 版本指定为 1.0.*。这表示任何从 1.0 开始的开发分支，它将会匹配 1.0.0、1.0.2 或者 1.0.20。
+
+版本约束可以用几个不同的方法来指定。
+
+通常，我们能够从 VCS (git, svn, hg) 的信息推断出包的版本号，在这种情况下，我们建议忽略 version。
+
+Packagist 使用 VCS 仓库， 因此 version 定义的版本号必须是真实准确的。 自己手动指定的 version，最终有可能在某个时候因为人为错误造成问题。
+
+\subsection{type}
+
+包的安装类型，默认为 library。
+
+包的安装类型，用来定义安装逻辑。如果你有一个包需要一个特殊的逻辑，你可以设定一个自定义的类型。这可以是一个 symfony-bundle，一个 wordpress-plugin 或者一个 typo3-module。这些类型都将是具体到某一个项目，而对应的项目将要提供一种能够安装该类型包的安装程序。
+
+composer 原生支持以下4种类型：
+
+\begin{compactitem}
+\item library: 这是默认类型，它会简单的将文件复制到 vendor 目录。
+\item project: 这表示当前包是一个项目，而不是一个库。例如：框架应用程序 Symfony standard edition，内容管理系统 SilverStripe installer 或者完全成熟的分布式应用程序。使用 IDE 创建一个新的工作区时，这可以为其提供项目列表的初始化。
+\item metapackage: 当一个空的包，包含依赖并且需要触发依赖的安装，这将不会对系统写入额外的文件。因此这种安装类型并不需要一个 dist 或 source。
+\item composer-plugin: 一个安装类型为 composer-plugin 的包，它有一个自定义安装类型，可以为其它包提供一个 installler。
+\end{compactitem}
+
+仅在你需要一个自定义的安装逻辑时才使用它。建议忽略这个属性，采用默认的 library。
+
+\subsection{keywords}
+
+该包相关的关键词的数组（可选），这些可用于搜索和过滤，例如logging、events、database、redis或templating等。
+
+
+\subsection{homepage}
+
+该项目网站的 URL 地址（可选）。
+
+\subsection{time}
+
+版本发布时间（可选），必须符合 YYYY-MM-DD 或 YYYY-MM-DD HH:MM:SS 格式。
+
+\subsection{license}
+
+包的许可协议（可选），它可以是一个字符串或者字符串数组，强烈建议提供此内容。
+
+最常见的许可协议的推荐写法（按字母排序）：
+
+\begin{compactitem}
+\item Apache-2.0
+\item BSD-2-Clause
+\item BSD-3-Clause
+\item BSD-4-Clause
+\item GPL-2.0
+\item GPL-2.0+
+\item GPL-3.0
+\item GPL-3.0+
+\item LGPL-2.1
+\item LGPL-2.1+
+\item LGPL-3.0
+\item LGPL-3.0+
+\item MIT
+\end{compactitem}
+
+对于闭源软件，你必须使用 "proprietary" 协议标识符。
+
+对于一个包，当允许在多个许可协议间进行选择时（"disjunctive license"），这些协议标识符可以被指定为数组。
+
+\begin{lstlisting}[language=bash]
+{
+    "license": [
+       "LGPL-2.1",
+       "GPL-3.0+"
+    ]
+}
+\end{lstlisting}
+
+另外它们也可以由 "or" 分隔，并写在括号中：
+
+\begin{lstlisting}[language=bash]
+{
+    "license": "(LGPL-2.1 or GPL-3.0+)"
+}
+\end{lstlisting}
+
+同样，当有多个许可协议需要结合使用时（"conjunctive license"），它们应该被 "and" 分隔，并写在括号中。
+
+\subsection{authors}
+
+包的作者（可选）。这是一个对象数组，强烈建议提供此内容。
+
+这个对象必须包含以下属性：
+
+\begin{compactitem}
+\item name: 作者的姓名，通常使用真名。
+\item email: 作者的 email 地址。
+\item homepage: 作者主页的 URL 地址。
+\item role: 该作者在此项目中担任的角色（例如开发人员或翻译）。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=bash]
+{
+    "authors": [
+        {
+            "name": "Nils Adermann",
+            "email": "naderman@naderman.de",
+            "homepage": "http://www.naderman.de",
+            "role": "Developer"
+        },
+        {
+            "name": "Jordi Boggiano",
+            "email": "j.boggiano@seld.be",
+            "homepage": "http://seld.be",
+            "role": "Developer"
+        }
+    ]
+}
+\end{lstlisting}
+
+\subsection{support}
+
+获取项目支持的向相关信息对象（可选）。
+
+这个对象必须包含以下属性：
+
+\begin{compactitem}
+\item email: 项目支持 email 地址。
+\item issues: 跟踪问题的 URL 地址。
+\item forum: 论坛地址。
+\item wiki: Wiki 地址。
+\item irc: IRC 聊天频道地址，类似于 irc://server/channel。
+\item source: 网址浏览或下载源。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=bash]
+{
+    "support": {
+        "email": "support@example.org",
+        "irc": "irc://irc.freenode.org/composer"
+    }
+}
+\end{lstlisting}
+
+
+
+\subsection{require}
+
+第一件事情（并且往往只需要做这一件事）就是需要在 composer.json 文件中指定 require 的值，也就是简单的告诉 Composer项目中需要依赖哪些包。
+
+\begin{lstlisting}[language=bash]
+{
+  "require": {
+      "monolog/monolog": "1.0.*"
+  }
+}
+\end{lstlisting}
+
+require表示必须的软件包列表，除非这些依赖被满足，否则不会完成安装。
+
+require 需要一个 包名称 （例如 monolog/monolog） 映射到 包版本 （例如 1.0.*） 的对象。
+
+
+
+
+require 和 require-dev 还支持稳定性标签（@，仅针对“root 包”）。这允许你在 minimum-stability 设定的范围外做进一步的限制或扩展。例：如果你想允许依赖一个不稳定的包，你可以在一个包的版本约束后使用它，或者是一个空的版本约束内使用它。
+
+
+\begin{lstlisting}[language=bash]
+{
+    "require": {
+        "monolog/monolog": "1.0.*@beta",
+        "acme/foo": "@dev"
+    }
+}
+\end{lstlisting}
+
+
+如果你的依赖之一，有对另一个不稳定包的依赖，你最好在 require 中显示的定义它，并带上足够详细的稳定性标识。
+
+\begin{lstlisting}[language=bash]
+{
+    "require": {
+        "doctrine/doctrine-fixtures-bundle": "dev-master",
+        "doctrine/data-fixtures": "@dev"
+    }
+}
+\end{lstlisting}
+
+
+require 和 require-dev 还支持对 dev（开发）版本的明确引用（即版本控制系统中的提交编号 commit），以确保它们被锁定到一个给定的状态，即使你运行了更新命令。你只需要明确一个开发版本号，并带上诸如 \#<ref> 的标识。
+
+\begin{lstlisting}[language=bash]
+{
+    "require": {
+        "monolog/monolog": "dev-master#2eb0c0978d290a1c45346a1955188929cb4e5db7",
+        "acme/foo": "1.0.x-dev#abc123"
+    }
+}
+\end{lstlisting}
+
+虽然这有时很方便，但不应该长期在你的包中使用，因为它有一个技术上的限制。 composer.json 将仍然在哈希值之前指定的分支名称读取元数据， 正因为如此，在某些情况下，它不会是一个实用的解决方法， 如果可能，你应该总是尝试切换到拥有标签的版本。
+
+require也可以应用于行内别名，这样它将匹配一个约束，否则不会。
+
+\subsection{require-dev}
+
+require-dev列表是为开发或测试等目的，额外列出的依赖。“root 包”的 require-dev 默认是会被安装的。然而 install 或 update 支持使用\texttt{--no-dev}参数来跳过 require-dev 字段中列出的包。
+
+\subsection{conflict}
+
+此列表中的包与当前包的这个版本冲突。它们将不允许同时被安装。
+
+注意，在 conflict 中指定类似于 <1.0, >= 1.1 的版本范围时，这表示它与小于1.0 并且 同时大等于1.1的版本冲突，这很可能不是你想要的。在这种情况下你可能想要表达的是 <1.0 | >= 1.1 。
+
+\subsection{replace}
+
+这个列表中的包将被当前包取代。这使你可以 fork 一个包，以不同的名称和版本号发布，同时要求依赖于原包的其它包，在这之后依赖于你 fork 的这个包，因为它取代了原来的包。
+
+这对于创建一个内部包含子包的主包也非常的有用。例如 symfony/symfony 这个主包，包含了所有 Symfony 的组件，而这些组件又可以作为单独的包进行发布。如果你 require 了主包，那么它就会自动完成其下各个组件的任务，因为主包取代了子包。
+
+注意，在使用上述方法取代子包时，通常你应该只对子包使用 self.version 这一个版本约束，以确保主包仅替换掉子包的准确版本，而不是任何其他版本。
+
+\subsection{provide}
+
+List of other packages that are provided by this package. This is mostly useful for common interfaces. A package could depend on some virtual logger package, any library that implements this logger interface would simply list it in provide.
+
+\subsection{suggest}
+
+建议安装的包，它们增强或能够与当前包良好的工作。这些只是信息，并显示在依赖包安装完成之后，给你的用户一个建议，他们可以添加更多的包。
+
+格式如下，版本约束变成了描述信息。
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "suggest": {
+        "monolog/monolog": "Allows more advanced logging of the application flow"
+    }
+}
+\end{lstlisting}
+
+\subsection{autoload}
+
+PHP autoloader 的自动加载映射。
+
+Currently PSR-0 autoloading, PSR-4 autoloading, classmap generation and files includes are supported. PSR-4 is the recommended way though since it offers greater ease of use (no need to regenerate the autoloader when you add classes).
+
+\subsection{psr-4}
+
+Under the psr-4 key you define a mapping from namespaces to paths, relative to the package root. When autoloading a class like Foo\textbackslash \textbackslash Bar\textbackslash \textbackslash Baz a namespace prefix Foo\textbackslash \textbackslash  pointing to a directory src/ means that the autoloader will look for a file named src/Bar/Baz.php and include it if present. Note that as opposed to the older PSR-0 style, the prefix (Foo\textbackslash \textbackslash ) is not present in the file path.
+
+Namespace prefixes must end in \textbackslash \textbackslash  to avoid conflicts between similar prefixes. For example Foo would match classes in the FooBar namespace so the trailing backslashes solve the problem: Foo\textbackslash \textbackslash  and FooBar\textbackslash \textbackslash  are distinct.
+
+The PSR-4 references are all combined, during install/update, into a single key => value array which may be found in the generated file vendor/composer/autoload\_psr4.php.
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-4": {
+            "Monolog\\": "src/",
+            "Vendor\\Namespace\\": ""
+        }
+    }
+}
+\end{lstlisting}
+
+If you need to search for a same prefix in multiple directories, you can specify them as an array as such:
+
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-4": { "Monolog\\": ["src/", "lib/"] }
+    }
+}
+\end{lstlisting}
+
+If you want to have a fallback directory where any namespace will be looked for, you can use an empty prefix like:
+
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-4": { "": "src/" }
+    }
+}
+\end{lstlisting}
+
+
+\subsection{psr-0}
+
+在 psr-0下你定义了一个命名空间到实际路径的映射（相对于包的根目录）。注意，这里同样支持 PEAR-style 方式的约定（与命名空间不同，PEAR 类库在类名上采用了下划线分隔）。
+
+请注意，命名空间的申明应该以\textbackslash \textbackslash  结束，以确保 autoloader 能够准确响应。例如，Foo 将会与 FooBar 匹配，然而以反斜杠结束就可以解决这样的问题， Foo\textbackslash \textbackslash 和 FooBar\textbackslash \textbackslash 将会被区分开来。
+
+在 install/update 过程中，PSR-0 引用都将被结合为一个单一的键值对数组，存储至 vendor/composer/autoload\_namespaces.php 文件中。
+
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-0": {
+            "Monolog\\": "src/",
+            "Vendor\\Namespace\\": "src/",
+            "Vendor_Namespace_": "src/"
+        }
+    }
+}
+\end{lstlisting}
+
+
+如果你需要搜索多个目录中一个相同的前缀，你可以将它们指定为一个数组。
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-0": { "Monolog\\": ["src/", "lib/"] }
+    }
+}
+\end{lstlisting}
+
+PSR-0 方式并不仅限于申明命名空间，也可以是精确到类级别的指定。这对于只有一个类在全局命名空间的类库是非常有用的（如果 php 源文件也位于包的根目录）。例如，可以这样申明：
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-0": { "UniqueGlobalClass": "" }
+    }
+}
+\end{lstlisting}
+
+如果你想设置一个目录作为任何命名空间的备用目录，你可以使用空的前缀，例如：
+
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-0": { "": "src/" }
+    }
+}
+\end{lstlisting}
+
+\subsection{classmap}
+
+classmap 引用的所有组合，都会在 install/update 过程中生成，并存储到 vendor/composer/autoload\_classmap.php 文件中。这个 map 是经过扫描指定目录（同样支持直接精确到文件）中所有的 .php 和 .inc 文件里内置的类而得到的。
+
+你可以用 classmap 生成支持支持自定义加载的不遵循 PSR-0/4 规范的类库。要配置它指向需要的目录，以便能够准确搜索到类文件。
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "classmap": ["src/", "lib/", "Something.php"]
+    }
+}
+\end{lstlisting}
+
+
+\subsection{files}
+
+
+如果你想要明确的指定，在每次请求时都要载入某些文件，那么你可以使用 'files' autoloading。通常作为函数库的载入方式（而非类库）。
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "files": ["src/MyLibrary/functions.php"]
+    }
+}
+\end{lstlisting}
+
+\subsection{autoload-dev}
+
+This section allows to define autoload rules for development purposes.
+
+Classes needed to run the test suite should not be included in the main autoload rules to avoid polluting the autoloader in production and when other people use your package as a dependency.
+
+Therefore, it is a good idea to rely on a dedicated path for your unit tests and to add it within the autoload-dev section.
+
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-4": { "MyLibrary\\": "src/" }
+    },
+    "autoload-dev": {
+        "psr-4": { "MyLibrary\\Tests\\": "tests/" }
+    }
+}
+\end{lstlisting}
+
+
+\subsection{include-path}
+
+这是目前唯一支持传统项目的做法，所有新的代码都建议使用自动加载。 这是一个过时的做法，但 Composer 将仍然保留这个功能。
+
+include-path表示一个追加到 PHP include\_path 中的列表（可选）。
+
+
+\begin{lstlisting}[language=bash]
+{
+    "include-path": ["lib/"]
+}
+\end{lstlisting}
+
+\subsection{target-dir}
+
+This is only present to support legacy PSR-0 style autoloading, and all new code should preferably use PSR-4 without target-dir and projects using PSR-0 with PHP namespaces are encouraged to migrate to PSR-4 instead.
+
+定义当前包安装的目标文件夹（可选）。
+
+若某个包的根目录，在它申明的命名空间之下，将不能正确的使用自动加载。而 target-dir 解决了这个问题。
+
+Symfony 就是一个例子。它有一些独立的包作为组件。Yaml 组件就放在 Symfony\textbackslash Component\textbackslash Yaml 目录下，然而这个包的根目录实际上是 Yaml。为了使自动加载成为可能，我们需要确保它不会被安装到 vendor/symfony/yaml，而是安装到 vendor/symfony/yaml/Symfony/Component/Yaml，从而使 Symfony 定义的 autoloader 可以从 vendor/symfony/yaml 加载它。
+
+要做到这一点 autoload 和 target-dir 应该定义如下：
+
+\begin{lstlisting}[language=bash]
+{
+    "autoload": {
+        "psr-0": { "Symfony\\Component\\Yaml\\": "" }
+    },
+    "target-dir": "Symfony/Component/Yaml"
+}
+\end{lstlisting}
+
+\subsection{minimum-stability}
+
+
+这定义了通过稳定性过滤包的默认行为。默认为 stable（稳定）。因此如果你依赖于一个 dev（开发）包，你应该明确的进行定义。
+
+对每个包的所有版本都会进行稳定性检查，而低于 minimum-stability 所设定的最低稳定性的版本，将在解决依赖关系时被忽略。对于个别包的特殊稳定性要求，可以在 require 或 require-dev 中设定。
+
+可用的稳定性标识（按字母排序）：dev、alpha、beta、RC、stable。
+
+\subsection{prefer-stable}
+
+当此选项被激活时，Composer 将优先使用更稳定的包版本，可以使用\texttt{"prefer-stable": true}来激活它。
+
+\subsection{repositories}
+
+使用自定义的包资源库。
+
+默认情况下 composer 只使用 packagist 作为包的资源库。通过指定资源库，你可以从其他地方获取资源包。
+
+Repositories 并不是递归调用的，只能在“Root包”的 composer.json 中定义。附属包中的 composer.json 将被忽略。
+
+支持以下类型的包资源库：
+
+\begin{compactitem}
+\item composer: 一个 composer 类型的资源库，是一个简单的网络服务器（HTTP、FTP、SSH）上的 packages.json 文件，它包含一个 composer.json 对象的列表，有额外的 dist 和/或 source 信息。
+
+这个 packages.json 文件是用一个 PHP 流加载的。你可以使用 options 参数来设定额外的流信息。
+\item vcs: 从 git、svn 和 hg 取得资源。
+\item pear: 从 pear 获取资源。
+\item package: 如果你依赖于一个项目，它不提供任何对 composer 的支持，你就可以使用这种类型。你基本上就只需要内联一个 composer.json 对象。
+\end{compactitem}
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "http://packages.example.com"
+        },
+        {
+            "type": "composer",
+            "url": "https://packages.example.com",
+            "options": {
+                "ssl": {
+                    "verify_peer": "true"
+                }
+            }
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/Seldaek/monolog"
+        },
+        {
+            "type": "pear",
+            "url": "http://pear2.php.net"
+        },
+        {
+            "type": "package",
+            "package": {
+                "name": "smarty/smarty",
+                "version": "3.1.7",
+                "dist": {
+                    "url": "http://www.smarty.net/files/Smarty-3.1.7.zip",
+                    "type": "zip"
+                },
+                "source": {
+                    "url": "http://smarty-php.googlecode.com/svn/",
+                    "type": "svn",
+                    "reference": "tags/Smarty_3_1_7/distribution/"
+                }
+            }
+        }
+    ]
+}
+\end{lstlisting}
+
+顺序是非常重要的，当 Composer 查找资源包时，它会按照顺序进行。
+
+默认情况下 Packagist 是最后加入的，因此自定义设置将可以覆盖 Packagist 上的包。
+
+\subsection{config}
+
+
+下面的这一组选项，仅用于项目。
+
+\begin{compactitem}
+\item \texttt{process-timeout}: 默认为 300。处理进程结束时间（例如git 克隆的时间）。
+
+Composer 将放弃超时的任务。如果你的网络缓慢或者正在使用一个巨大的包，你可能要将这个值设置的更高一些。
+\item \texttt{use-include-path}: 默认为 false。如果为 true，Composer autoloader 还将在 PHP include path 中继续查找类文件。
+\item \texttt{preferred-install}: 默认为 auto。它的值可以是 source、dist 或 auto。这个选项允许你设置 Composer 的默认安装方法。
+\item \texttt{github-protocols}: 默认为\texttt{["git", "https", "ssh"]}。从 github.com 克隆时使用的协议优先级清单，因此默认情况下将优先使用 git 协议进行克隆。
+
+可以重新排列它们的次序，例如如果你的网络有代理服务器或 git 协议的效率很低，你就可以提升 https 协议的优先级。
+\item \texttt{github-oauth}: 一个域名和 oauth keys 的列表。 例如，使用\texttt{\{"github.com": "oauthtoken"\}} 作为此选项的值， 将使用 oauthtoken 来访问 github 上的私人仓库，并绕过 low IP-based rate 的 API 限制。
+
+\item \texttt{vendor-dir}: 默认为 vendor。通过设置你可以安装依赖到不同的目录。
+\item \texttt{bin-dir}: 默认为 vendor/bin。如果一个项目包含二进制文件，它们将被连接到这个目录。
+\item \texttt{cache-dir}: unix 下默认为 \$home/cache，Windows 下默认为 C:\textbackslash Users\textbackslash <user>\textbackslash AppData\textbackslash Local\textbackslash Composer。用于存储 composer 所有的缓存文件。
+
+\item \texttt{cache-files-dir}: 默认为 \$cache-dir/files。存储包 zip 存档的目录。
+\item \texttt{cache-repo-dir}: 默认为 \$cache-dir/repo。存储 composer 类型的 VCS（svn、github、bitbucket） repos 目录。
+\item \texttt{cache-vcs-dir}: 默认为 \$cache-dir/vcs。此目录用于存储 VCS 克隆的 git/hg 类型的元数据，并加快安装速度。
+\item \texttt{cache-files-ttl}: 默认为 15552000（6个月）。默认情况下 Composer 缓存的所有数据都将在闲置6个月后被删除，这个选项允许你来调整这个时间，你可以将其设置为0以禁用缓存。
+\item \texttt{cache-files-maxsize}: 默认为 300MiB。Composer 缓存的最大容量，超出后将优先清除旧的缓存数据，直到缓存量低于这个数值。
+\item \texttt{prepend-autoloader}: 默认为 true。如果设置为 false，composer autoloader 将不会附加到现有的自动加载机制中。这有时候用来解决与其它自动加载机制产生的冲突。
+\item \texttt{autoloader-suffix}: 默认为 null。Composer autoloader 的后缀，当设置为空时将会产生一个随机的字符串。
+optimize-autoloader Defaults to false. Always optimize when dumping the autoloader.
+\item \texttt{github-domains}: 默认为\texttt{["github.com"]}。一个 github mode 下的域名列表。这是用于GitHub的企业设置。
+\item \texttt{notify-on-install}: 默认为 true。Composer 允许资源仓库定义一个用于通知的 URL，以便有人从其上安装资源包时能够得到一个反馈通知。此选项允许你禁用该行为。
+\item \texttt{discard-changes}: 默认为 false，它的值可以是 true、false 或 stash。这个选项允许你设置在非交互模式下，当处理失败的更新时采用的处理方式。
+
+另外，true 表示永远放弃更改，"stash" 表示继续尝试。Use this for CI servers or deploy scripts if you tend to have modified vendors.
+
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=bash]
+{
+    "config": {
+        "bin-dir": "bin"
+    }
+}
+\end{lstlisting}
+
+\subsection{scripts}
+
+Composer 允许你在安装过程中的各个阶段挂接脚本。
+
+\subsection{extra}
+
+任意的供 scripts 使用的额外数据（可选），这可以是几乎任何东西。若要从脚本事件访问处理程序，你可以这样做：
+
+
+
+
+
+\begin{lstlisting}[language=bash]
+$extra = $event->getComposer()->getPackage()->getExtra();
+\end{lstlisting}
+
+
+\subsection{bin}
+
+该属性用于标注一组应被视为二进制脚本的文件（可选），它们会被软链接到（config 对象中的）bin-dir 属性所标注的目录，以供其他依赖包调用。
+
+\subsection{archive}
+
+这些选项在创建包存档时使用（可选）。
+
+
+
+\begin{compactitem}
+\item exclude: 允许设置一个需要被排除的路径的列表。使用与 .gitignore 文件相同的语法。一个前导的（!）将会使其变成白名单而无视之前相同目录的排除设定。前导斜杠只会在项目的相对路径的开头匹配。星号为通配符。
+\end{compactitem}
+
+\begin{lstlisting}[language=bash]
+{
+    "archive": {
+        "exclude": ["/foo/bar", "baz", "/*.test", "!/foo/bar/baz"]
+    }
+}
+\end{lstlisting}
+
+
+在这个例子中我们 include /dir/foo/bar/file、/foo/bar/baz、/file.php、/foo/my.test 但排除了 /foo/bar/any、/foo/baz、/my.test。
+
+
+
+\section{composer.lock}
+
+在安装依赖后，Composer 将把安装时确切的版本号列表写入 composer.lock 文件。这将锁定改项目的特定版本，因此需要提交应用程序的 composer.lock （包括 composer.json）到版本库中
+
+这是非常重要的，因为 install 命令将会检查锁文件是否存在，如果存在，它将下载指定的版本（忽略 composer.json 文件中的定义）。
+
+这意味着，任何人建立项目都将下载与指定版本完全相同的依赖。你的持续集成服务器、生产环境、你团队中的其他开发人员、每件事、每个人都使用相同的依赖，从而减轻潜在的错误对部署的影响。即使你独自开发项目，在六个月内重新安装项目时，你也可以放心的继续工作，即使从那时起你的依赖已经发布了许多新的版本。
+
+如果不存在 composer.lock 文件，Composer 将读取 composer.json 并创建锁文件。
+
+这意味着如果你的依赖更新了新的版本，你将不会获得任何更新。此时要更新你的依赖版本请使用 update 命令。这将获取最新匹配的版本（根据你的 composer.json 文件）并将新版本更新进锁文件。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar update
+\end{lstlisting}
+
+如果只想安装或更新一个依赖，你可以白名单它们：
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar update monolog/monolog [...]
+\end{lstlisting}
+
+对于库，并不一定建议提交锁文件。如果愿意，可以在自己的项目中提交 composer.lock 文件。
+
+锁文件将帮助团队始终针对同一个依赖版本进行测试，而且这个锁文件任何时候都只对于自己的项目产生影响。
+
+如果不想提交锁文件，并且正在使用 Git，那么需要将它添加到 .gitignore 文件中。
+
+
+
+\section{Environment}
+
+
+可以设置一些环境变量来覆盖默认的配置。建议尽可能的在 composer.json 的 config 字段中设置这些值，而不是通过命令行设置环境变量。
+
+值得注意的是，环境变量中的值将始终优先于 composer.json 中所指定的值。
+
+\subsection{COMPOSER}
+
+环境变量 COMPOSER 可以为 composer.json 文件指定其它的文件名。
+
+\begin{lstlisting}[language=bash]
+COMPOSER=composer-other.json php composer.phar install
+\end{lstlisting}
+
+\subsection{COMPOSER\_ROOT\_VERSION}
+
+通过设置这个环境变量，你可以指定 root 包的版本，如果程序不能从 VCS 上猜测出版本号，并且未在 composer.json 文件中申明。
+
+\subsection{COMPOSER\_VENDOR\_DIR}
+
+通过设置这个环境变量，你可以指定 composer 将依赖安装在 vendor 以外的其它目录中。
+
+
+\subsection{COMPOSER\_BIN\_DIR}
+
+通过设置这个环境变量，你可以指定 bin（Vendor Binaries）目录到 vendor/bin 以外的其它目录。
+
+
+\subsection{HTTP\_PROXY}
+
+如果你是通过 HTTP 代理来使用 Composer，你可以使用 http\_proxy 或 HTTP\_PROXY 环境变量。只要简单的将它设置为代理服务器的 URL。许多操作系统已经为你的服务设置了此变量。
+
+\subsection{http\_proxy}
+
+
+建议使用 http\_proxy（小写）或者两者都进行定义。因为某些工具，像 git 或 curl 将使用 http\_proxy 小写的版本。另外，你还可以使用 \texttt{git config --global http.proxy <proxy url>} 来单独设置 git 的代理。
+
+
+\subsection{no\_proxy}
+
+如果你是使用代理服务器，并且想要对某些域名禁用代理，就可以使用 no\_proxy 环境变量。只需要输入一个逗号相隔的域名 排除 列表。
+
+此环境变量接受域名、IP 以及 CIDR地址块。你可以将它限制到一个端口（例如:80）。你还可以把它设置为 * 来忽略所有的 HTTP 代理请求。
+
+
+\subsection{HTTP\_PROXY\_REQUEST\_FULLURI}
+
+如果你使用了 HTTP 代理，但它不支持 request\_fulluri 标签，那么你应该设置这个环境变量为 false 或 0 ，来防止 composer 从 request\_fulluri 读取配置。
+
+\subsection{HTTPS\_PROXY\_REQUEST\_FULLURI}
+
+如果你使用了 HTTPS 代理，但它不支持 request\_fulluri 标签，那么你应该设置这个环境变量为 false 或 0 ，来防止 composer 从 request\_fulluri 读取配置。
+
+
+\subsection{COMPOSER\_HOME}
+
+COMPOSER\_HOME 环境变量允许你改变 Composer 的主目录。这是一个隐藏的、所有项目共享的全局目录（对本机的所有用户都可用）。
+
+它在各个系统上的默认值分别为：
+
+\begin{compactitem}
+\item *nix
+
+/home/<user>/.composer
+\item OSX
+
+/Users/<user>/.composer
+\item Windows
+
+C:\textbackslash Users\textbackslash <user>\textbackslash AppData\textbackslash Roaming\textbackslash Composer
+\end{compactitem}
+
+\subsection{COMPOSER\_HOME/config.json}
+
+你可以在 COMPOSER\_HOME 目录中放置一个 config.json 文件。在你执行 install 和 update 命令时，Composer 会将它与你项目中的 composer.json 文件进行合并。
+
+该文件允许你为用户的项目设置 配置信息 和 资源库。
+
+若 全局 和 项目 存在相同配置项，那么项目中的 composer.json 文件拥有更高的优先级。
+
+\subsection{COMPOSER\_CACHE\_DIR}
+
+COMPOSER\_CACHE\_DIR 环境变量允许你设置 Composer 的缓存目录，这也可以通过 cache-dir 进行配置。
+
+它在各个系统上的默认值分别为：
+
+\begin{compactitem}
+\item *nix
+
+\$COMPOSER\_HOME/cache
+\item OSX
+
+\$COMPOSER\_HOME/cache
+\item Windows
+
+C:\textbackslash Users\textbackslash <user>\textbackslash AppData\textbackslash Local\textbackslash Composer 或 \%LOCALAPPDATA\%/Composer
+\end{compactitem}
+
+\subsection{COMPOSER\_PROCESS\_TIMEOUT}
+
+这个环境变量控制着 Composer 执行命令的等待时间（例如git 命令）。默认值为300秒（5分钟）。
+
+\subsection{COMPOSER\_DISCARD\_CHANGES}
+
+这个环境变量控制着 discard-changes。
+
+\subsection{COMPOSER\_NO\_INTERACTION}
+
+如果设置为1，这个环境变量将使 Composer 在执行每一个命令时都放弃交互，相当于对所有命令都使用了\texttt{--no-interaction}。可以在搭建 虚拟机/持续集成服务器 时这样设置。
+
+
+
+\chapter{Commandline}
+
+为了从命令行获得帮助信息，可以运行 composer 或者 composer list 命令，然后结合 \texttt{-\/-help}命令来获得更多的帮助信息。
+
+下列参数可与每一个命令结合使用：
+
+\begin{compactenum}
+\item \texttt{--verbose (-v)}: 增加反馈信息的详细度。
+
+\begin{compactitem}
+\item \texttt{-v}表示正常输出。
+\item \texttt{-vv}表示更详细的输出。
+\item \texttt{-vvv}则是为了 debug。
+\end{compactitem}
+
+\item \texttt{-\/-help (-h)}：显示帮助信息。
+\item \texttt{-\/-quiet (-q)}：禁止输出任何信息。
+\item \texttt{-\/-no-interaction (-n)}：不要询问任何交互问题。
+\item \texttt{-\/-working-dir (-d)}：如果指定的话，使用给定的目录作为工作目录。
+\item \texttt{-\/-profile}：显示时间和内存使用信息。
+\item \texttt{-\/-ansi}：强制 ANSI 输出。
+\item \texttt{-\/-no-ansi}：关闭 ANSI 输出。
+\item \texttt{-\/-version (-V)}：显示当前应用程序的版本信息。
+\end{compactenum}
+
+
+
+
+
+
+\section{init}
+
+除了手动创建 composer.json 文件之外，实际上还有一个 init 命令可以更容易的做到这一点。
+
+当运行\texttt{composer init}命令时，它会以交互方式要求您填写一些信息，同时聪明的使用一些默认值。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar init
+\end{lstlisting}
+
+\begin{compactitem}
+\item \texttt{-\/-name}：包的名称。
+\item \texttt{-\/-description}：包的描述。
+\item \texttt{-\/-author}：包的作者。
+\item \texttt{-\/-homepage}：包的主页。
+\item \texttt{-\/-require}：需要依赖的其它包，必须要有一个版本约束，并且应该遵循\texttt{foo/bar:1.0.0}这样的格式。
+\item \texttt{-\/-require-dev}：开发版的依赖包，内容格式与\texttt{-\/-require}相同。
+\item \texttt{-\/-stability (-s)}：minimum-stability 字段的值。
+\end{compactitem}
+
+
+\section{install}
+
+install 命令从当前目录读取 composer.json 文件，处理好依赖关系，并把依赖安装到 vendor 目录下。
+
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar install
+\end{lstlisting}
+
+如果当前目录下存在 composer.lock 文件，它会从此文件读取依赖版本，而不是根据 composer.json 文件去获取依赖，从而确保了该库的每个使用者都能得到相同的依赖版本。
+
+如果没有 composer.lock 文件，composer 将在处理完依赖关系后创建它。
+
+\begin{compactitem}
+\item \texttt{--prefer-source}: 下载包的方式有两种： source 和 dist。
+
+对于稳定版本 composer 将默认使用 dist 方式。而 source 表示版本控制源 。如果 \texttt{--prefer-source}是被启用的，composer 将从 source 安装（如果有的话）。如果想要使用一个 bugfix 到你的项目，这是非常有用的。并且可以直接从本地的版本库直接获取依赖关系。
+\item \texttt{--prefer-dist}: 与 \texttt{--prefer-source}相反，composer 将尽可能的从 dist 获取，这将大幅度的加快在 build servers 上的安装。这也是一个回避 git 问题的途径，如果你不清楚如何正确的设置。
+\item \texttt{--dry-run}: 如果你只是想演示而并非实际安装一个包，你可以运行 \texttt{--dry-run}命令，它将模拟安装并显示将会发生什么。
+\item \texttt{--dev}: 安装 require-dev 字段中列出的包（这是一个默认值）。
+\item \texttt{--no-dev}: 跳过 require-dev 字段中列出的包。
+\item \texttt{--no-scripts}: 跳过 composer.json 文件中定义的脚本。
+\item \texttt{--no-plugins}: 关闭 plugins。
+\item \texttt{--no-progress}: 移除进度信息，这可以避免一些不处理换行的终端或脚本出现混乱的显示。
+\item \texttt{--optimize-autoloader (-o)}: 转换 PSR-0/4 autoloading 到 classmap 可以获得更快的加载支持。特别是在生产环境下建议这么做，但由于运行需要一些时间，因此并没有作为默认值。
+\end{compactitem}
+
+
+
+\section{update}
+
+为了获取依赖的最新版本，并且升级 composer.lock 文件，可以使用 update 命令。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar update
+\end{lstlisting}
+
+这将解决项目的所有依赖，并将确切的版本号写入 composer.lock。
+
+如果你只是想更新几个包，可以分别列出它们：
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar update vendor/package vendor/package2
+\end{lstlisting}
+
+还可以使用通配符进行批量更新：
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar update vendor/*
+\end{lstlisting}
+
+\begin{compactitem}
+\item \texttt{--prefer-source}: 当有可用的包时，从 source 安装。
+\item \texttt{--prefer-dist}: 当有可用的包时，从 dist 安装。
+\item \texttt{--dry-run}: 模拟命令，并没有做实际的操作。
+\item \texttt{--dev}: 安装 require-dev 字段中列出的包（这是一个默认值）。
+\item \texttt{--no-dev}: 跳过 require-dev 字段中列出的包。
+\item \texttt{--no-scripts}: 跳过 composer.json 文件中定义的脚本。
+\item \texttt{--no-plugins}: 关闭 plugins。
+\item \texttt{--no-progress}: 移除进度信息，这可以避免一些不处理换行的终端或脚本出现混乱的显示。
+\item \texttt{--optimize-autoloader (-o)}: 转换 PSR-0/4 autoloading 到 classmap 可以获得更快的加载支持。特别是在生产环境下建议这么做，但由于运行需要一些时间，因此并没有作为默认值。
+\item \texttt{--lock}: 仅更新 lock 文件的 hash，取消有关 lock 文件过时的警告。
+\item \texttt{--with-dependencies}：同时更新白名单内包的依赖关系，这将进行递归更新。
+\end{compactitem}
+
+
+\section{require}
+
+require 命令增加新的依赖包到当前目录的 composer.json 文件中。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar require
+\end{lstlisting}
+
+在添加或改变依赖时， 修改后的依赖关系将被安装或者更新。
+
+如果不希望通过交互来指定依赖包，可以在这条指令中直接指明依赖包。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar require vendor/package:2.* vendor/package2:dev-master
+\end{lstlisting}
+
+\begin{compactitem}
+\item \texttt{--prefer-source}: 当有可用的包时，从 source 安装。
+\item \texttt{--prefer-dist}: 当有可用的包时，从 dist 安装。
+\item \texttt{--dev}: 安装 require-dev 字段中列出的包。
+\item \texttt{--no-update}: 禁用依赖关系的自动更新。
+\item \texttt{--no-progress}: 移除进度信息，这可以避免一些不处理换行的终端或脚本出现混乱的显示。
+\item \texttt{--update-with-dependencies}：一并更新新装包的依赖。
+\end{compactitem}
+
+\section{global}
+
+global 命令允许用户在 COMPOSER\_HOME 目录下执行其它命令（例如install、require 或 update等），并且如果将 \$COMPOSER\_HOME/vendor/bin 加入到了 \$PATH 环境变量中，那么就可以在命令行中安装全局应用。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar global require fabpot/php-cs-fixer:dev-master
+\end{lstlisting}
+
+在 php-cs-fixer 就可以在全局范围使用了（假设已经设置好了PATH）。如果稍后想更新它，只需要运行\texttt{global update}：
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar global update
+\end{lstlisting}
+
+\section{search}
+
+search 命令允许为当前项目搜索依赖包，通常它只搜索 packagist.org 上的包，可以简单的输入搜索条件。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar search monolog
+\end{lstlisting}
+
+也可以通过传递多个参数来进行多条件搜索。
+
+\begin{compactitem}
+\item \texttt{--only-name (-N)}: 仅针对指定的名称搜索（完全匹配）。
+\end{compactitem}
+
+
+
+\section{show}
+
+可以使用 show 命令列出所有可用的软件包。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar show
+\end{lstlisting}
+
+如果想看到一个包的详细信息，可以输入一个包名称。
+
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar monolog/monolog
+name     : monolog/monolog
+versions : master-dev, 1.0.2, 1.0.1, 1.0.0, 1.0.0-RC1
+type     : library
+names    : monolog/monolog
+source   : [git] http://github.com/Seldaek/monolog.git 3d4e60d0cbc4b888fe5ad223d77964428b1978da
+dist     : [zip] http://github.com/Seldaek/monolog/zipball/3d4e60d0cbc4b888fe5ad223d77964428b1978da 3d4e60d0cbc4b888fe5ad223d77964428b1978da
+license  : MIT
+
+autoload
+psr-0
+Monolog : src/
+
+requires
+php >=5.3.0
+\end{lstlisting}
+
+可以输入一个软件包的版本号，来显示该版本的详细信息。
+
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar show monolog 1.0.2
+\end{lstlisting}
+
+
+\begin{compactitem}
+\item \texttt{--installed (-i)}: 列出已安装的依赖包。
+\item \texttt{--platform (-p)}: 仅列出平台软件包（PHP 与它的扩展）。
+\item \texttt{--self (-s)}: 仅列出当前项目信息。
+\end{compactitem}
+
+\section{depends}
+
+depends 命令可以查出已安装在你项目中的某个包，是否正在被其它的包所依赖，并列出它们。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar depends --link-type=require monolog/monolog
+
+nrk/monolog-fluent
+poc/poc
+propel/propel
+symfony/monolog-bridge
+symfony/symfony
+\end{lstlisting}
+
+\begin{compactitem}
+\item \texttt{--link-type}: 检测的类型，默认为 require 也可以是 require-dev。
+\end{compactitem}
+
+
+
+\section{validate}
+
+在提交 composer.json 文件，和创建 tag 前，应该始终运行 validate 命令。它将检测你的 composer.json 文件是否是有效的。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar validate
+\end{lstlisting}
+
+\begin{compactitem}
+\item \texttt{--no-check-all}: Composer 是否进行完整的校验。
+\end{compactitem}
+
+\section{status}
+
+如果经常修改依赖包里的代码，并且它们是从 source（自定义源）进行安装的，那么 status 命令允许你进行检查，如果有任何本地的更改它将会给予提示。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar status
+\end{lstlisting}
+
+可以使用\texttt{-\/-verbose}系列参数（\texttt{-v|vv|vvv}）来获取更详细的详细：
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar status -v
+
+You have changes in the following dependencies:
+vendor/seld/jsonlint:
+    M README.mdown
+\end{lstlisting}
+
+\section{self-update}
+
+将 Composer 自身升级到最新版本，只需要运行 self-update 命令。它将替换你的 composer.phar 文件到最新版本。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar self-update
+\end{lstlisting}
+
+
+如果想要升级到一个特定的版本，可以这样简单的指定它：
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar self-update 1.0.0-alpha7
+\end{lstlisting}
+
+如果已经为整个系统安装 Composer，可能需要在 root 权限下运行它：
+
+\begin{lstlisting}[language=bash]
+$ sudo composer self-update
+\end{lstlisting}
+
+\begin{compactitem}
+\item \texttt{--rollback (-r)}: 回滚到你已经安装的最后一个版本。
+\item \texttt{--clean-backups}: 在更新过程中删除旧的备份，这使得更新过后的当前版本是唯一可用的备份。
+\end{compactitem}
+
+\section{config}
+
+config 命令允许编辑 Composer 的一些基本设置，无论是本地的 composer.json 或者全局的 config.json 文件。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar config --list
+config [options] [setting-key] [setting-value1] ... [setting-valueN]
+\end{lstlisting}
+
+setting-key 是一个配置选项的名称，setting-value1 是一个配置的值。可以使用数组作为配置的值（像 github-protocols），多个 setting-value 是允许的。
+
+\begin{compactitem}
+\item \texttt{--global (-g)}: 操作位于 \$COMPOSER\_HOME/config.json 的全局配置文件。如果不指定该参数，此命令将影响当前项目的 composer.json 文件，或 \texttt{--file} 参数所指向的文件。
+\item \texttt{--editor (-e)}: 使用文本编辑器打开 composer.json 文件。默认情况下始终是打开当前项目的文件。当存在 \texttt{--global} 参数时，将会打开全局 composer.json 文件。
+\item \texttt{--unset}: 移除由 setting-key 指定名称的配置选项。
+\item \texttt{--list (-l)}: 显示当前配置选项的列表。当存在 \texttt{--global} 参数时，将会显示全局配置选项的列表。
+\item \texttt{--file="..." (-f)}: 在一个指定的文件上操作，而不是 composer.json。注意，不能与 \texttt{--global} 参数一起使用。
+\end{compactitem}
+
+除了修改配置选项， config 命令还支持通过以下方法修改来源信息：
+
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar config repositories.foo vcs http://github.com/foo/bar
+\end{lstlisting}
+
+\section{create-project}
+
+可以使用 Composer 从现有的包中创建一个新的项目。这相当于执行了一个 git clone 或 svn checkout 命令后将这个包的依赖安装到它自己的 vendor 目录。
+
+
+create-project命令的常见的用途如下：
+
+\begin{compactitem}
+\item 可以快速的部署你的应用。
+\item 可以检出任何资源包，并开发它的补丁。
+\item 多人开发项目，可以用它来加快应用的初始化。
+\end{compactitem}
+
+要创建基于 Composer 的新项目，可以使用\texttt{create-project}命令，通过传递一个包名，Composer会创建项目的目录。
+
+也可以在第三个参数中指定版本号，否则将获取最新的版本。
+
+
+如果该目录目前不存在，则会在安装过程中自动创建。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar create-project doctrine/orm path 2.2.*
+\end{lstlisting}
+
+此外，也可以无需使用这个命令，而是通过现有的 composer.json 文件来启动这个项目。
+
+默认情况下，这个命令会在 packagist.org 上查找指定的包。
+
+\begin{compactitem}
+\item \texttt{--repository-url}: 提供一个自定义的储存库来搜索包，这将被用来代替 packagist.org。
+
+可以是一个指向 composer 资源库的 HTTP URL，或者是指向某个 packages.json 文件的本地路径。
+\item \texttt{--stability (-s)}: 资源包的最低稳定版本，默认为 stable。
+\item \texttt{--prefer-source}: 当有可用的包时，从 source 安装。
+\item \texttt{--prefer-dist}: 当有可用的包时，从 dist 安装。
+\item \texttt{--dev}: 安装 require-dev 字段中列出的包。
+\item \texttt{--no-install}: 禁止安装包的依赖。
+\item \texttt{--no-plugins}: 禁用 plugins。
+\item \texttt{--no-scripts}: 禁止在根资源包中定义的脚本执行。
+\item \texttt{--no-progress}: 移除进度信息，这可以避免一些不处理换行的终端或脚本出现混乱的显示。
+\item \texttt{--keep-vcs}: 创建时跳过缺失的 VCS 。如果在非交互模式下运行创建命令，这将是非常有用的。
+\end{compactitem}
+
+\section{dump-autoload}
+
+某些情况下需要更新 autoloader（例如在包中加入了一个新的类），可以使用 dump-autoload 来打印自动加载索引，而不必执行 install 或 update 命令。
+
+此外，dump-autoload可以打印一个优化过的，符合 PSR-0/4 规范的类的索引，这也是出于对性能的可考虑。
+
+在大型的应用中会有许多类文件，而 autoloader 会占用每个请求的很大一部分时间，使用 classmaps 或许在开发时不太方便，但是它在保证性能的前提下，仍然可以获得 PSR-0/4 规范带来的便利。
+
+\begin{compactitem}
+\item \texttt{--optimize (-o)}: 转换 PSR-0/4 autoloading 到 classmap 获得更快的载入速度。这特别适用于生产环境，但可能需要一些时间来运行，因此它目前不是默认设置。
+\item \texttt{--no-dev}: 禁用 autoload-dev 规则。
+\end{compactitem}
+
+
+
+
+\section{license}
+
+列出已安装的每个包的名称、版本、许可协议。可以使用 \texttt{--format=json}参数来获取 JSON 格式的输出。
+
+\section{run-script}
+
+可以运行此命令来手动执行 脚本，只需要指定脚本的名称，可选的 \texttt{--no-dev}参数允许禁用开发者模式。
+
+\section{diagnose}
+
+如果发现了一个 bug 或是程序行为变得怪异，可能需要运行 diagnose 命令来帮助检测一些常见的问题。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar diagnose
+\end{lstlisting}
+
+\section{archive}
+
+archive命令用来对指定包的指定版本进行 zip/tar 归档，也可以用来归档整个项目（不包括 excluded/ignored（排除/忽略）的文件）。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar archive vendor/package 2.0.21 --format=zip
+\end{lstlisting}
+
+\begin{compactitem}
+\item \texttt{--format (-f)}: 指定归档格式：tar 或 zip（默认为 tar）。
+\item \texttt{--dir}: 指定归档存放的目录（默认为当前目录）。
+\end{compactitem}
+
+
+
+\section{help}
+
+使用 help 可以获取指定命令的帮助信息。
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar help install
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Autoloading}
+
+除了库的下载，Composer 还生成了一个自动加载文件（vendor/autoload.php），它可以加载 Composer 下载的库中所有的类文件。
+
+只需要将下面这行代码添加到项目的引导文件中就可以实现自动加载，例如：
+
+\begin{lstlisting}[language=PHP]
+require 'vendor/autoload.php';
+\end{lstlisting}
+
+
+自动加载使得用户可以很容易的使用第三方代码。例如，如果项目依赖 monolog，那么就可以像这样开始使用这个类库，并且他们将被自动加载。
+
+\begin{lstlisting}[language=PHP]
+$log = new Monolog\Logger('name');
+$log->pushHander(new Monolog\Handler\StreamHandler('app.log',Monolog\Logger::WARNING));
+
+$log->addWarning('Foo');
+\end{lstlisting}
+
+可以在 composer.json 的 autoload 字段中增加自己的 autoloader。例如，下面的说明将指示Composer注册一个 PSR-4 autoloader 到 Acme 命名空间。
+
+\begin{lstlisting}[language=bash]
+{
+  "autoload": {
+     "psr-4": {"Acme\\": "src/"}
+  }
+}
+\end{lstlisting}
+
+
+可以定义一个从命名空间到目录的映射。此时 src 会在项目的根目录，与 vendor 文件夹同级。例如 src/Foo.php 文件应该包含 Acme\textbackslash Foo 类。
+
+
+添加 autoload 字段后，应该再次运行 install 命令来生成 vendor/autoload.php 文件。
+
+引用这个文件也将返回 autoloader 的实例，可以将包含调用的返回值存储在变量中，并添加更多的命名空间。这个事实对于在一个测试套件中自动加载类文件是非常有用的，例如：
+
+\begin{lstlisting}[language=PHP]
+$loader = require 'vendor/autoload.php';
+$loader->add('Acme\\Test\\',__DIR__);
+\end{lstlisting}
+
+
+除了 PSR-4 自动加载，classmap 也是支持的，这样就允许类被自动加载（即使不符合 PSR-0 规范）。
+
+Composer 提供了自己的 autoloader。如果不想使用它，可以仅仅引入 vendor/composer/autoload\_*.php 文件，它返回一个关联数组，可以通过这个关联数组配置自己的 autoloader。
+
+
+
+

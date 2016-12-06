@@ -1,146 +1,100 @@
 \part{Introduction}
 
+\chapter{Overview}
+
+PHP\footnote{PHP：Hypertext Preprocessor（超文本预处理器）就是一种递归命名。}是一种开源的通用计算机脚本语言，尤其适用于网络开发并可嵌入HTML中使用。
 
 
-PHP\footnote{PHP：Hypertext Preprocessor，递归命名。}（Hypertext Preprocessor，超文本预处理器）是一种开源的通用计算机脚本语言，尤其适用于网络开发并可嵌入HTML中使用，现在大多数的Web主机都提供 PHP 的支持，而且使用PHP完全是免费的。
+PHP针对大多数HTTP服务器都提供了相应的模块，而且PHP 支持 CGI 标准，因此PHP可以作为 CGI 处理器来使用。
 
-
-PHP针对大多数HTTP服务器都提供了相应的模块，而且PHP 支持 CGI 标准，因而使得 PHP 能够作为 CGI 处理器来工作。
-
-作为一种免费的，并且使用广泛的创建动态交互性站点的强有力的服务器端脚本语言，而且PHP开始注重程序运行性能和自身代码的模块性，因此对于ASP、ASP.NET等竞争者来说，PHP 无疑是另一种高效率的选项。
-
-
-
-
-PHP最初由Rasmus Lerdorf在1995年开始开发，现在PHP的标准由PHP Group和开放源代码社区维护。PHP以PHP License作为许可协议，不过因为这个协议限制了PHP名称的使用，所以和开放源代码许可协议GPL不兼容。
-
-PHP 文件的文件后缀是``.php"、``.php3" 或 ``.phtml"，其中``.php"是 PHP 的默认扩展名，所有以 .php 结尾的文件都将由 PHP 来处理。在支持PHP的服务器上，只需要建立 .php 文件，并把它们放置到Web目录中，服务器将自动解析这些文件，不用编译任何东西，也不用安装任何其它的工具，仅仅只需把这些使用了 PHP 的文件想象成简单的 HTML 文件，其中只不过多了一种新的标识符，在这里可以做各种各样的事情。
-
-PHP的主要目标是允许网络开发人员快速编写动态页面，其语法借鉴了C、Java和Perl等流行计算机语言的特点，易于一般程序员学习。使用 PHP 的一大好处是它对于初学者来说极其简单，同时也给专业的程序员提供了各种高级的特性，而且尽管 PHP 的开发是以服务端脚本为目的，但事实上其功能远不局限与此，PHP也被用于其他很多领域。
-
-
-\zihao{6}
+PHP开始注重程序运行性能和自身代码的模块性之后，PHP无疑成为了另一种高效率的选择。例如，PHP内置的标准库（SPL）提供了一组类和接口来支持常用的数据结构类（例如堆栈、队列和堆等）以及遍历这些数据结构的迭代器，或者用户可以自己实现 SPL 接口。
 
 
 
-\begin{longtable}{|m{16pt}|m{20pt}|m{35pt}|m{300pt}|}
 
-%head
-\multicolumn{4}{r}{}
-\tabularnewline\hline
-主要\newline 版本	&次要\newline 版本	&发布日期	&说明
-\endhead
-%endhead
+PHP现在由PHP Group和开放源代码社区维护PHP标准，并以PHP License作为许可协议，限制了PHP名称的使用，和GPL（开放源代码许可协议）不兼容。
 
-%firsthead
-\caption{PHP版本历程}\\
-\hline
-主要\newline 版本	&次要\newline 版本	&发布日期	&说明
-\endfirsthead
-%endfirsthead
+``.php"是 PHP 的默认扩展名，所有以 .php 结尾的文件都将由 PHP 来处理，只需要把.php文件部署到支持PHP的服务器上的Web目录中，服务器将自动解析这些文件，无需编译也不用安装任何其它的工具，仅仅只需把这些使用了 PHP 的文件想象成简单的 HTML 文件，其中只不过多了一种新的标识符，在这里可以做各种各样的事情。
 
-%foot
-\multicolumn{4}{r}{}
-\endfoot
-%
+PHP的语法借鉴了C、Java和Perl等语言，主要目标是允许网络开发人员快速编写动态页面。
 
-%lastfoot
-\endlastfoot
-%endlastfoot
+PHP针对不同层次的用户提供了相关的特性（包括高级特性），因此尽管 PHP 的开发是以服务端脚本为主，也可以被用于其他很多领域。
 
-\hline
-1.0		&1.0.0	&1995-06-08	&正式名称为``Personal Home Page Tools (PHP Tools)"，第一次使用了``PHP"的名字。\\
-\hline
-2.0		&2.0.0	&1996-04-16	&针对PHP 1.0的改进版，速度更快、体积更小，更容易产生动态网页。\\
-\hline
-3.0		&3.0.0	&1998-06-06	&开发方式改成多人共同参与。Zeev Suraski和Andi Gutmans为了这个版本重写了剖析引擎。\\
-\hline
-\multirow{7}{40pt}{4.0}		&4.0.0	&2000-05-22	&改成以Zend引擎作为语法分析器，具有两阶段剖析/标签剖析系统等先进功能。\\ \cline{2-4}
-
-		&4.1.0	&2001-12-10	&加入``超全局变量"（superglobals）功能，包含了\$\_GET、\$\_POST、\$\_SESSION等。\\  \cline{2-4}
-
-		&4.2.0	&2002-04-22	&默认取消register\_globals功能。从网络接收的数据将不会设置成全局变量，增加程序安全性。\\ \cline{2-4}
-
-		&4.3.0	&2002-12-27	&加入命令行可执行文件，称为CLI。\\ \cline{2-4}
-
-		&4.4.0	&2005-07-11	&Added man pages for phpize and php-config scripts.\\ \cline{2-4}
-
-		&4.4.8	&2008-01-03	&一些安全性的增强。曾可能为PHP 4的最后版本。若有必要，提供安全性更新到2008-08-08。\\ \cline{2-4}
-
-		&4.4.9	&2008-08-07	&更多安全性增强和问题修补。PHP 4.4系列的最后版本。\\ \cline{2-4}
-\hline
-\multirow{18}{40pt}{5.0}		&5.0.0	&2004-07-13	&Zend Engine II with a new object model.\\ \cline{2-4}
-
-		&5.1.0	&2005-11-24	&Performance improvements with introduction of compiler variables in re-engineered PHP Engine.\\ \cline{2-4}
-
-		&5.2.0	&2006-11-02	&默认打开``过滤"的扩展。\\ \cline{2-4}
-
-		&5.2.8	&2008-12-08	&emergent bug fix。\\ \cline{2-4}
-
-		&5.2.9	&2009-02-26	&解决了5.2.*的超过了50多个错误和多个安全问题，增加了稳定性。\\ \cline{2-4}
-
-		&5.2.10&2009-06-18	&这个版本修正了大量的bug和安全漏洞，并升级了时区数据库。\\ \cline{2-4}
-
-		&5.2.17&2011-01-06	&修正了一个浮点数转化的Bug。\\ \cline{2-4}
-
-		&5.3.0	&2009-06-30	&支持命名空间;\newline 使用XMLReader和XMLWriter增强XML支持;\newline 支持SOAP,延迟静态绑定，跳转标签（有限的goto）, 闭包，Native PHP archives。\\ \cline{2-4}
-
-		&5.3.3	&2010-07-22	&使用命名空间的类中，与类同名的成员函数不再作为构造函数。\\ \cline{2-4}
-
-		&5.3.6	&2011-03-17	&修正一系列Bug。\\ \cline{2-4}
-
-		&5.3.10&2012-02-02	&修正了Stefan Esser报告的任意远程代码执行漏洞，CVE-2012-0830。\\ \cline{2-4}
-
-		&5.4.0	&2012-03-01	&支持Trait、简短数组表达式。\newline 移除了register\_globals, safe\_mode, allow\_call\_time\_pass\_reference, session\_register(), session\_unregister(), magic\_quotes以及session\_is\_registered()。\newline 加入了内建的Web服务器。\newline 增强了性能，减小内存使用量。\\ \cline{2-4}
-\hline
-6.0		&6.0.0	&	&支持Unicode;移除ereg扩展；\newline 内置Alternative PHP Cache；\newline 移除mime\_magic和重写fileinfo()以更好地支持MIME。\newline 部分PHP 6特性已加入至PHP 5.3.0（命名空间，延迟静态绑定，lambda函数，闭包，goto）和5.4.0（traits，闭包重绑定）中。\\ 
-\hline
-\end{longtable}
-
-
-
-\zihao{5}
-
-
-
-相比ASP，PHP可以在多数的服务器和操作系统上运行，而且PHP支持大多数的Web服务器，现在云计算平台（Google App Engine、Amazon EC2和Microsoft Azure等）都提供了对PHP的支持。
+PHP的跨平台特性使其可以在多数的服务器和操作系统上运行，而且的到了大多数Web服务器的支持，现在的云计算平台（Google App Engine、Amazon EC2和Microsoft Azure等）都提供了对PHP的支持。
 
 另外，PHP的扩展性使其除了可以向最终用户提供数据库、协议和API的基础结构之外，还允许开发者自己加入并提交新的模块。
 
 
 
-PHP的应用范围相当广泛，尤其是在网页程序的开发上，PHP 文件可包含文本、HTML 标签以及脚本，但是PHP的用途并不局限于输出 HTML。PHP 还能被用来动态输出图像、PDF 文件甚至 Flash 动画（使用 libswf 和 Ming）。PHP还能够非常简便的输出文本，例如 XHTML 以及任何其它形式的 XML 文件，PHP 能够自动生成这些文件，然后通过在服务端开辟出一块动态内容的缓存从而直接把它们打印出来，或者将它们存储到文件系统中。
+PHP的应用范围相当广泛，尤其是在网页程序的开发上。
+
+\begin{compactenum}
+\item 服务器端程序
+
+\begin{compactitem}
+\item PHP解析器（CGI或服务器模块）
+\item Web服务器（Nginx和Apache等）
+\item Web浏览器
+\end{compactitem}
+
+\item 命令行脚本
+
+\begin{compactitem}
+\item PHP命令行模式
+\item 定时任务（Cron或Tast Scheduler）
+\end{compactitem}
+
+\end{compactenum}
+
+PHP丰富的功能并不局限于输出 HTML，还能被用来动态输出图像、PDF 文件、Flash 动画（使用 libswf 和 Ming），用户一般使用PHP来收集表单数据、生成动态网页或者发送/接收Cookies等。
+
+PHP在处理HTML表单时，表单的任何元素都在 PHP 脚本中自动生效。
+
+\begin{lstlisting}[language=PHP]
+<form action="action.php" method="post">
+ <p>姓名: <input type="text" name="name" /></p>
+ <p>年龄: <input type="text" name="age" /></p>
+ <p><input type="submit" /></p>
+</form>
+\end{lstlisting}
+
+当用户填写了该表单并点击了提交按钮后，页面 action.php 将被调用。
+
+
+\begin{lstlisting}[language=PHP]
+你好，<?php echo htmlspecialchars($_POST['name']); ?>。
+你 <?php echo (int)$_POST['age']; ?> 岁了。
+\end{lstlisting}
+
+htmlspecialchars() 使得 HTML 之中的特殊字符被正确的编码，从而不会被使用者在页面注入 HTML 标签或者 Javascript 代码（例如 age 字段），也可以使用 PHP 的 filter 扩展来自动完成该工作，PHP会自动设置 \texttt{\$\_POST['name']}和\texttt{\$\_POST['age']}变量。
+
+用户也可以在 PHP 中处理 XForms 的输入，尽管用户可能更喜欢使用长久以来支持良好的 HTML 表单。
+
+PHP可以非常简便的输出文本（例如 XHTML 以及任何其它形式的 XML 文件），PHP还可以通过在服务端开辟出一块动态内容的缓存从而直接把它们打印出来，或者将它们存储到文件系统中。
+
+
+
+PHP支持使用Perl 兼容正则表达式（PCRE）以及其他扩展和工具来解析和访问 XML 文档，同时PHP还将所有的 XML功能标准化在libxml2库中，并且还增加了 SimpleXML，XMLReader 以及 XMLWriter来支持并扩充功能。
+
+
+PHP可以在开发时选择使用过程和面向对象，或者两者混合的方式来开发。例如，从PHP 5开始引入了完全的对象模型，弥补了 PHP 4对OOP支持的不足。
+
+PHP对数据库的支持很全面，用户可以使用任何针对某数据库的扩展（例如 mysql）编写数据库支持的网页，也可以使用抽象层（例如PDO）或者通过 ODBC 扩展连接到任何支持 ODBC 标准的数据库。其它一些数据库也可能会用 cURL 或者 sockets（例如 CouchDB）。
+
+
+
+PHP 还支持利用LDAP、IMAP、SNMP、NNTP、POP3、HTTP、COM（Windows 环境）等协议的服务，还可以通过开放原始网络端口来使得任何其它的协议能够协同工作。
+
+PHP 支持和所有Web开发语言之间的 WDDX 复杂数据交换，而且PHP支持Java 对象的即时连接，可以透明地将其用作 PHP 对象。
+
+
+PHP框架可以使项目得到更快更简单的部署和更加敏捷的开发效率，因此在实际生产中框架的使用已非常普遍，例如PHP官方的框架为Zend framework。
 
 
 
 
 
-
-
-PHP 具有极其有效的文本处理特性，包括 Perl 兼容正则表达式（PCRE）以及许多扩展和工具可用于解析和访问 XML 文档。PHP 将所有的 XML 功能标准化于坚实的 libxml2 扩展，并且还增加了 SimpleXML，XMLReader 以及 XMLWriter 支持以扩充其功能。另外，PHP还有很多其它有趣的扩展库，以及一些附加的 PECL 扩展。
-
-
-
-
-
-
-使用 PHP，除了可以自由地选择操作系统和Web服务器之外，还可以在开发时选择使用过程和面向对象，或者两者混合的方式来开发。尽管 PHP 4 不支持 OOP 所有的标准，但很多代码仓库和大型的应用程序（包括 PEAR 库）仅使用 OOP 代码来开发。后来PHP 5 弥补了 PHP 4 的这一弱点，引入了完全的对象模型。
-
-PHP支持很大范围的数据库，使用任何针对某数据库的扩展（例如 mysql）编写数据库支持的网页非常简单，或者使用抽象层如 PDO，或者通过 ODBC 扩展连接到任何支持 ODBC 标准的数据库。其它一些数据库也可能会用 cURL 或者 sockets，例如 CouchDB。
-
-
-
-PHP 还支持利用诸如 LDAP、IMAP、SNMP、NNTP、POP3、HTTP、COM（Windows 环境）等不计其数的协议的服务，还可以开放原始网络端口，使得任何其它的协议能够协同工作。PHP 支持和所有Web开发语言之间的 WDDX 复杂数据交换。关于相互连接，PHP 已经支持了对 Java 对象的即时连接，并且可以透明地将其用作 PHP 对象。
-
-
-
-
-
-
-
-
-
-\chapter{History}
+\section{History}
 
 
 
@@ -163,11 +117,8 @@ Zeev Suraski和Andi Gutmans在PHP 3发布后开始改写PHP的核心，这个在
 
 从2008年开始，PHP 5成为了PHP唯一维护中的稳定版本，PHP 4已经不会继续更新，以鼓励用户迁移到PHP 5。
 
-PHP 6的开发也正在进行中，主要的改进有移除\texttt{register\_globals}、magic quotes和Safe mode的功能。
+PHP 7的开发正在进行中，主要的改进有PHPNG、JIT引擎、抽象语法树编译、异步编程。
 
-与此同时，PHP 7的开发也正在进行中，主要的改进有PHPNG、JIT引擎、抽象语法树编译、异步编程。
-
-现在PHP的标准由PHP Group和开放源代码社区维护，并且以PHP License作为许可协议，限制PHP名称的使用，因此和开放源代码许可协议GPL并不兼容。
 
 
 
@@ -183,12 +134,14 @@ PHP 6的开发也正在进行中，主要的改进有移除\texttt{register\_glo
 或者在命令行中输入如下的命令：
 
 \begin{lstlisting}[language=bash]
-php -i
+$ php -i
 //or
-php -r 'phpinfo();'
+$ php -r 'phpinfo();'
 \end{lstlisting}
 
-调用函数 \texttt{phpinfo()}可以得到很多有关当前系统的有用信息，例如预定义变量、已经加载的 PHP 模块和配置信息。为了移除敏感信息，比如AUTH\_USER和AUTH\_PASSWORD，可以修改代码如下：
+\texttt{phpinfo()}函数可以得到很多有关当前系统的有用信息，例如预定义变量、已经加载的 PHP 模块和配置信息。
+
+为了移除敏感信息，比如AUTH\_USER和AUTH\_PASSWORD，可以修改代码如下：
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -224,51 +177,47 @@ php -r 'phpinfo();'
 </html>
 \end{lstlisting}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\chapter{Compatibility}
-
-
 在兼容性方面，PHP有可能影响到老版本的代码的最重要的两点改动分别是：
 
 \begin{compactitem}
-\item 取消了旧的 \texttt{\$HTTP\_*\_VARS}数组（在函数或者方法中原本是全局变量）。
+\item 取消了旧的 \textcolor{red}{\texttt{\$HTTP\_*\_VARS}}数组（在函数或者方法中原本是全局变量）。
 
 \end{compactitem}
 
 PHP 4.1.0 版本引入了如下超全局数组变量：
 
 \begin{compactitem}
-\item \texttt{\$\_GET}
-\item \texttt{\$\_POST}
-\item \texttt{\$\_COOKIE}
-\item \texttt{\$\_SERVER}
-\item \texttt{\$\_FILES}
-\item \texttt{\$\_ENV}
-\item \texttt{\$\_REQUEST}
-\item \texttt{\$\_SESSION}
+\item \textcolor{blue}{\texttt{\$\_GET}}
+
+PHP保留的超全局变量变量\texttt{\$\_GET}包含所有的GET数据。
+\item \textcolor{blue}{\texttt{\$\_POST}}
+
+PHP保留的超全局变量\texttt{\$\_POST}包含所有的POST数据。
+\item \textcolor{blue}{\texttt{\$\_COOKIE}}
+
+PHP保留的超全局变量\texttt{\$\_COOKIE}包含所有的COOKIE数据。
+\item \textcolor{blue}{\texttt{\$\_SERVER}}
+
+PHP保留的超全局变量\texttt{\$\_SERVER}包含Web服务器提供的所有信息。
+
+\item \textcolor{blue}{\texttt{\$\_FILES}}
+
+PHP保留的超全局变量\texttt{\$\_FILES}包含所有的FILES数据。
+\item \textcolor{blue}{\texttt{\$\_ENV}}
+
+PHP保留的超全局变量\texttt{\$\_ENV}包含所有的ENV数据。
+\item \textcolor{blue}{\texttt{\$\_REQUEST}}
+
+PHP保留的超全局变量\texttt{\$\_REQUEST}包含所有的GET、POST和COOKIE的数据。
+\item \textcolor{blue}{\texttt{\$\_SESSION}}
+
+PHP保留的超全局变量\texttt{\$\_SESSION}包含所有的SESSION数据。
 \end{compactitem}
 
-老的 \texttt{\$HTTP\_*\_VARS}数组，诸如 \texttt{\$HTTP\_POST\_VARS}等，从 PHP 3 就已经开始使用，它们仍然存在。
+有些 \textcolor{red}{\texttt{\$HTTP\_*\_VARS}}数组（诸如 \texttt{\$HTTP\_POST\_VARS}等）从PHP 3就已经开始使用，从 PHP 5.4.0 开始将不再有效。
 
 
-自 PHP 5.0.0 起, 用 \texttt{register\_long\_arrays}设置选项可禁用 长类型的 PHP 预定义变量数组。
+自PHP 5.0.0起, 用 \texttt{register\_long\_arrays}设置选项可禁用长类型的PHP预定义变量数组。
 
 
 \begin{compactitem}
@@ -276,14 +225,310 @@ PHP 4.1.0 版本引入了如下超全局数组变量：
 
 \end{compactitem}
 
-建议用以上提到的超全局数组变量来访问这些值。但可能老的脚本、书籍以及教程都可能建立在该设置为\texttt{on} 的基础上。
+建议用以上提到的超全局数组变量来访问这些值，但是可能老的脚本、书籍以及教程都可能建立在该设置为\texttt{on} 的基础上。
 
-如果该选项被设置为\texttt{on}，则可以在 \url{http://www.example.com/foo.php?id=42}中直接使用变量 \texttt{\$id}。但不管被设置为 \texttt{on}还是\texttt{off}，\texttt{\$\_GET['id']}一直有效。
-
-
+如果该选项被设置为\texttt{on}，则可以在 \url{http://www.example.com/foo.php?id=42}中直接使用变量 \texttt{\$id}。不过，不管被设置为 \texttt{on}还是\texttt{off}，\texttt{\$\_GET['id']}一直有效。
 
 
 
+
+
+
+\section{Server}
+
+PHP的命令行（CLI）脚本接口可以帮助用户完成自动化的任务（例如测试、部署和应用管理），而且可以直接调用程序代码而无需创建 Web 图形界面。
+
+用户执行\texttt{php -a}选项就可以进入和 Ruby 的 IRB 或 python 的交互式 shell 相似的交互式shell。例如，一个简单的 “Hello, \$name” CLI 程序：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($argc != 2) {
+    echo "Usage: php hello.php [name].\n";
+    exit(1);
+}
+$name = $argv[1];
+echo "Hello, $name\n";
+\end{lstlisting}
+
+PHP 会在脚本运行时根据参数设置两个特殊的变量，\$argc 是一个表示参数个数的整数，\$argv 是一个数组变量，包含每个参数的值， 它的第一个元素一直是 PHP 脚本的名称（例如这里就是hello.php）。
+
+\begin{lstlisting}[language=PHP]
+$ php -a
+Interactive mode enabled
+
+> php hello.php
+Usage: php hello.php [name]
+> php hello.php world
+Hello, world
+\end{lstlisting}
+
+命令运行失败时，可以通过 exit() 表达式返回一个非 0 整数来通知 shell，
+
+PHP CLI SAPI还提供了一个内置的Web服务器，从命令行终端进入项目的 Web 根目录并执行下面的命令就可以启动内置的 Web 服务器来进行本地开发调试。
+
+\begin{lstlisting}[language=bash]
+$ cd ~/public_html
+$ php -S localhost:8000
+PHP Development Server started at Tue Dec  6 10:03:32 2016
+Listening on http://localhost:8000
+Document root is /home/me/public_html
+Press Ctrl-C to quit.
+\end{lstlisting}
+
+URI请求会被发送到PHP所在的的工作目录（Working Directory）进行处理，除非使用了\texttt{-t}参数来自定义不同的目录。
+
+\begin{lstlisting}[language=bash]
+$ cd ~/public_html
+$ php -S localhost:8000 -t foo/
+PHP Development Server started at Tue Dec  6 10:03:32 2016
+Listening on http://localhost:8000
+Document root is /home/me/public_html/foo
+Press Ctrl-C to quit.
+\end{lstlisting}
+
+如果请求未指定执行哪个PHP文件，则默认执行目录内的index.php 或者 index.html。如果这两个文件都不存在，服务器会返回404错误。
+
+在命令行启动PHP内置的Web Server时，如果指定了一个PHP文件，则这个文件会作为一个“路由”脚本，意味着每次请求都会先执行这个脚本。如果这个脚本返回 FALSE ，那么直接返回请求的文件（例如请求静态文件不作任何处理），否则会把输出返回到浏览器。
+
+如果访问http://localhost:8000/和http://localhost:8000/myscript.html，窗口会显示：
+
+\begin{lstlisting}[language=bash]
+$ cd ~/public_html
+$ php -S localhost:8000
+PHP Development Server started at Tue Dec  6 10:03:32 2016
+Listening on http://localhost:8000
+Document root is /home/me/public_html
+Press Ctrl-C to quit.
+::1:39144 GET /favicon.ico - Request read
+::1:39146 GET / - Request read
+::1:39147 GET /favicon.ico - Request read
+::1:39148 GET /myscript.html - Request read
+::1:39149 GET /favicon.ico - Request read
+\end{lstlisting}
+
+修改php.ini中的cli\_server.color项可以控制内置Web Server的终端输出有无颜色。
+
+
+\begin{longtable}{|m{60pt}|m{30pt}|m{100pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+名字&默认&可修改范围
+\endhead
+%endhead
+
+%firsthead
+\caption{CLI SAPI cli\_server.color配置选项}\\
+\hline
+名字&默认&可修改范围
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+cli\_server.color&\texttt{"0"}&PHP\_INI\_ALL\\
+\hline
+\end{longtable}
+
+\subsection{Router}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// router.php
+if (preg_match('/\.(?:png|jpg|jpeg|gif)$/', $_SERVER["REQUEST_URI"]))
+    return false;    // 直接返回请求的文件
+else { 
+    echo "<p>Welcome to PHP</p>";
+}
+?>
+\end{lstlisting}
+
+
+如果指定了路由脚本，那么可以设置请求图片直接显示图片，请求HTML则显示“Welcome to PHP”。例如，执行之后终端显示：
+
+
+\begin{lstlisting}[language=bash]
+$ cd ~/public_html
+$ php -S localhost:8000 router.php
+PHP Development Server started at Tue Dec  6 10:03:32 2016
+Listening on http://localhost:8000
+Document root is /home/me/public_html
+Press Ctrl-C to quit.
+::1:55801 GET /mylogo.jpg - Request read
+::1:55803 GET /abc.html - Request read
+::1:55804 GET /favicon.ico - Request read
+\end{lstlisting}
+
+
+\section{Closure}
+
+PHP从5.3（2009年）之后开始引入对闭包以及匿名函数的支持，并在接下来的PHP 5.4中增加了将闭包绑定到对象作用域中的特性，并改善其可调用性，从此在大部分情况下可以使用匿名函数取代一般的函数。
+
+\section{Reflection}
+
+PHP 通过反射 API 和魔术方法可以实现多种方式的元编程。开发者通过魔术方法（例如\_\_get()、\_\_set()、 \_\_clone()、\_\_toString()、\_\_invoke()等）可以改变类的行为。
+
+PHP通过\_\_call()和\_\_callStatic()可以实现和Ruby的method\_missing方法完成相同的功能。
+
+\section{Functional}
+
+
+函数式编程是一种不同于对象式编程的思想，PHP并不是天生就属于函数式编程的语言。
+
+PHP本身的语法、语义不能完全很好地支持函数式编程，不过可以通过封装类库来完成PHP对函数式编程的过滤、映射和归约的支持。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+/**
+ * 函数式编程
+ *
+ * @author dogstar 20161113
+ */
+
+
+class Functional_Lite {
+
+    protected $data;
+
+    public function __construct($data) {
+        $this->data = $data;
+    }
+
+
+    /** ------------ middle operation ------------ **/
+
+    public function filter($callback) {
+        $newData = array();
+
+        if (!is_callable($callback)) {
+            $callback = create_function('$it', 'return ' . $callback . ';');
+        }
+
+        foreach ($this->data as $item) {
+            if (call_user_func($callback, $item)) {
+                $newData[] = $item;
+            }
+        }
+
+        $this->data = $newData;
+
+        return $this;
+    }
+
+    public function map($callback) {
+        if (!is_callable($callback)) {
+            $callback = create_function('$it', 'return ' . $callback . ';');
+        }
+
+        foreach ($this->data as &$itemRef) {
+            $itemRef = call_user_func($callback, $itemRef);
+        }
+
+        return $this;
+    }
+
+    /** ------------ end operation ------------ **/
+
+    public function reduce($callback, $accumulator) {
+        $rs = $accumulator;
+
+        if (!is_callable($callback)) {
+            $callback = create_function('$it_1, $it_2', 'return ' . $callback . ';');
+        }
+
+        foreach ($this->data as $item) {
+            $rs = call_user_func_array($callback, array($rs, $item));
+        }
+
+        return $rs;
+    }
+
+
+    public function foldLeft($callback, $accumulator = NULL) {
+        // default
+        if ($accumulator === NULL) {
+            $accumulator = array_shift($this->data);
+        }
+
+        return $this->reduce($callback, $accumulator);
+    }
+
+    public function foldRight($callback, $accumulator = NULL) {
+        $this->data = array_reverse($this->data);
+        return $this->foldLeft($callback, $accumulator);
+    }
+
+    /** ------------ extra operation ------------ **/
+
+}
+\end{lstlisting}
+
+假设我们需要计算1到5之间的偶数之和的两倍，那么：
+
+\begin{lstlisting}[language=PHP]
+$fun = new Functional_Lite(range(1, 5));
+
+
+$rs = $fun->filter(function ($x) { return $x % 2 == 0;})
+            ->map(function ($x) {return $x * 2;})
+            ->reduce(function ($x, $y) { return $x + $y;}, 0);
+
+var_dump($rs); // 2 * 2 + 4 * 2 = 12
+\end{lstlisting}
+
+使用字符串表达式进一步缩短代码，可以这样：
+
+\begin{lstlisting}[language=PHP]
+$fun = new Functional_Lite(range(1, 5));
+
+
+$rs = $fun->filter('$it % 2 == 0')
+            ->map('$it * 2')
+            ->reduce('$it_1 + $it_2', 0);
+
+var_dump($rs); // 2 * 2 + 4 * 2 = 12
+\end{lstlisting}
+
+这里使用了 \$it 来表示每次迭代的元素。例如，对于reduce操作，使用了\$it\_1、\$it\_2分别表示第一个元素、第二个元素。
+
+除了对数值进行操作，也可以对字符串或其他类型的集合进行操作。假设需要过滤一个字符的单词，然后把剩下的单词转大写，再用空格拼接起来。
+
+\begin{lstlisting}[language=PHP]
+$fun = new Functional_Lite(array('dogstar', 'x', 'love', 'y', 'yoyo', '!!'));
+
+$rs = $fun->filter(function ($x) { return strlen($x) > 1;})
+            ->map(function ($x) { return strtoupper($x);})
+            ->reduce(function ($x, $y) { return $x . ' ' . $y;}, 'RS:');
+
+var_dump($rs); // RS: DOGSTAR LOVE YOYO !!
+\end{lstlisting}
+
+对于最后的结果，我们在累加量初始了“RS:”，所以最后的结果里有“RS:”的前缀。
+
+同样地，使用字符串表达式可以简化上面的处理以达到同样的效果：
+
+\begin{lstlisting}[language=PHP]
+$rs = $fun->filter('strlen($it) > 1')
+            ->map('strtoupper($it)')
+            ->reduce('$it_1 . " " . $it_2', 'RS:');
+\end{lstlisting}
+
+PHP实际上距离函数式编程的道路还很遥远，比如柯里化、部分施用、偏函数、Either类、Opeion类、值不可变，而且有很多在PHP中是明显很难实现的（例如上下文的处理）。
 
 
 \chapter{Syntax}
@@ -292,10 +537,11 @@ PHP 4.1.0 版本引入了如下超全局数组变量：
 \section{Constructs}
 
 
-The PHP syntax and semantics are the format (syntax) and the related meanings (semantics) of the text and symbols in the PHP programming language. They form a set of rules that define how a PHP program can be written and interpreted. PHP is a procedural and object-oriented language for coding webpage markup text to be transformed into HTML format.
+PHP的语法和语义说明了PHP代码中的文本和符号的意义，它们定义了PHP程序如何编写和解析，以及PHP代码如何嵌入到HTML文档中。
 
+=用于变量赋值操作，每条PHP语句以逗号结束，可以使用echo语句来输出PHP变量（以\$开头）的内容，同时PHP命名是大小写敏感的。
 
-Each PHP statement is terminated by semicolon ("\texttt{;}"). The PHP markup can display text by using "\texttt{echo}" with variables named by dollar-prefix "\texttt{\$}" on case-sensitive names (\texttt{\$}xx, \texttt{\$}xX, \texttt{\$}NewX, etc.). The assignment operator is "\texttt{=}". The markup can be modularized into functions (or methods) defined with keyword "\textcolor{Blue}{\texttt{function}}" within optional classes named by "\texttt{class} xx". The control structures include: \texttt{if}, \texttt{while}, \texttt{for}, \texttt{foreach}, \texttt{switch}. Grouping of text can be specified by curly braces ("\texttt{\{...\}}"), but some control structures can use colon syntax with end keywords, such as in statement below:
+用户可以使用function和class来进行代码模块化，而且PHP支持if、while、for、foreach、switch等控制结构，而且PHP也支持类似end*的控制代码结构。
 
 \begin{lstlisting}[language=PHP]
 if ($x==0) : 
@@ -304,7 +550,7 @@ endif;
 \end{lstlisting}
 
 
-The following Hello world program is written in PHP code embedded in an HTML document:
+PHP原生的模板引擎功能支持把PHP代码直接嵌入到HTML中，例如：
 
 \begin{lstlisting}[language=PHP]
 <!DOCTYPE html>
@@ -322,35 +568,31 @@ The following Hello world program is written in PHP code embedded in an HTML doc
 \end{lstlisting}
 
 
-
-
-However as PHP does not need to be embedded in HTML, or used with a web server, the simplest version of a Hello World program can be written like this:
-
-\begin{lstlisting}[language=PHP]
-<?='Hello world.'; ?>
-\end{lstlisting}
-
 \section{Delimiters}
 
 
+PHP引擎根据\texttt{<?php}和\texttt{?>} 分隔符来解析PHP代码。
 
-The PHP interpreter only executes PHP code within its delimiters(the trigger symbols). Anything outside its delimiters is not processed by PHP (although non-PHP text is still subject to control structures described in PHP code) . The most common delimiters are \texttt{<?php} to open and \texttt{?>} to close PHP sections.  Other delimiters, \texttt{<script language="php">} and \texttt{</script>} delimiters are also available, as are the shortened forms \texttt{<?} or \texttt{<?=} (which is used to echo back a string or variable) and \texttt{?>} as well as ASP-style short forms \texttt{<\%} or \texttt{<\%=} and \texttt{\%>}, so these two forms are the most portable. While short delimiters are used, they make script files less portable as support for them can be disabled in the PHP configuration, and so they are discouraged. The purpose of all these delimiters is to separate PHP code from non-PHP code, including HTML.
-
-
-
-The first form of delimiters, \texttt{<?php} and \texttt{?>}, in XHTML and other XML documents, creates correctly formed XML "processing instructions". This means that the resulting mixture of PHP code and other markup in the server-side file is itself well-formed XML.
-
-Therefore, in either of these two cases, the resulting mixture of PHP and other markup is well-formed, and so probably valid, as XML and XHTML on the server before PHP processing. This may be helpful if the source code documents ever need to be processed in other ways during the life of the software.
-
-The purpose of these delimiters is to separate PHP code from non-PHP code (notably HTML). Everything outside the delimiters is ignored by the PHP parser and is passed through as output.
-
-
+PHP 会在输出时自动删除其结束符\texttt{?>}后的一个换行，主要是针对在一个页面中嵌入多段 PHP 代码或者包含了无实质性输出的 PHP 文件而设计。如果确实需要在PHP结束符\texttt{?>}之后输出换行，可以在其后加一个空格，或者在最后的一个\texttt{echo/print}语句中加入一个换行。
 
 \section{Variables}
 
-变量和常量可以理解为程序中的基本数据存储单元，可以存储不同类型的数据，而且PHP的变量和常量的数据类型由程序的上下文决定。
 
-变量是程序运行时用于保存信息或数据的临时“仓库”，可以改变或删除变量。
+PHP中，变量以“\$”后接变量名称来表示，而且变量名称区分大小写。
+
+\begin{compactitem}
+\item 变量是程序运行时用于保存信息或数据的临时“仓库”，可以改变或删除变量。
+\item 变量和常量可以理解为程序中的基本数据存储单元，可以用来存储不同类型的数据。
+\item PHP的变量和常量的数据类型由程序的上下文决定。
+\end{compactitem}
+
+
+
+
+有效的变量名称应以字母或下划线开头，后可以接任意数目的字母、数字或下划线，PHP也支持使用多字节文字作为变量名。
+
+PHP解释器在解析变量时，将会尽可能多地取得“\$”后面的字符来组成一个合法的变量名，可以使用花括号把变量名括起来以明确表示一个变量。
+
 
 
 
@@ -358,11 +600,7 @@ The purpose of these delimiters is to separate PHP code from non-PHP code (notab
 \section{Structures}
 
 
-
-
-In terms of keywords and language syntax, PHP is similar to most high level languages that follow the C style syntax. PHP offers an alternative syntax using colons rather than the standard curly-brace syntax (of "\texttt{\{...\}}"). This syntax affects the following control structures: \texttt{\textcolor{Blue}{if}} conditions, \texttt{\textcolor{Blue}{for}} and \texttt{\textcolor{Blue}{while}} loops, and function returns are similar in syntax to languages such as \texttt{C}, \texttt{C++}, \texttt{C\#}, \texttt{Java} and \texttt{Perl}.
-
-The syntax varies only slightly from the curly-brace syntax. In each case the opening brace (\texttt{\{}) is replaced with a colon (\texttt{:}) and the close brace is replaced with \texttt{endif;}, \texttt{endwhile;}, \texttt{endfor;}, \texttt{endforeach;}, or \texttt{endswitch;}, respectively. Mixing syntax styles within the same control block is not supported. An example of the syntax for an \texttt{if/elseif} statement is as follows:
+PHP使用\texttt{\{...\}}来放置控制结构中的代码，或者也可以使用类似如下的结构来进行逻辑控制。
 
 \begin{lstlisting}[language=PHP]
 if (condition) :
@@ -379,7 +617,7 @@ endif;
 
 
 
-PHP的语法参考了Perl、C语言，而且可以集成在HTML之中，以下是一个简单的Hello World代码：
+PHP的语法参考了Perl、C语言，而且可以内嵌在HTML之中。
 
 \begin{lstlisting}[language=PHP]
 <!DOCTYPE html>
@@ -396,7 +634,7 @@ PHP的语法参考了Perl、C语言，而且可以集成在HTML之中，以下�
 </html>
 \end{lstlisting}
 
-PHP解析引擎只解析<?php到?>之间的代码，不包含在<?php到?>之间的内容会直接提交，所以可以用以下的方式来将PHP代码嵌入在HTML之中：
+PHP解析引擎只解析\texttt{<?php}到\texttt{?>}之间的代码，不包含在\texttt{<?php}到\texttt{?>}之间的内容会直接输出。或者说，\texttt{<?php}和\texttt{?>}可以让源代码不断地进出PHP模式，并最终生成解析结果。
 
 \begin{lstlisting}[language=PHP]
  <?php
@@ -408,9 +646,11 @@ PHP解析引擎只解析<?php到?>之间的代码，不包含在<?php到?>之间
  ?>
 \end{lstlisting}
 
+
+
 在HTML中嵌入PHP时，比如需要单独输出某个变量，除了正常采用echo语句外，可以直接采用\verb|<?=$title ?>|
 
-在判断语句中的HTML代码并不会被直接提交：
+在判断语句中的HTML代码并不会被直接输出，而且根据PHP代码的执行来决定，例如：
 
 
 \begin{lstlisting}[language=PHP]
@@ -472,7 +712,7 @@ function print_star($num){
 
 \chapter{Data types}
 
-PHP主要有四种标量类型，标量可以认为是数据结构中最基本的单元，只能存储一个数据。
+PHP主要有四种标量类型，标量可以认为是数据结构中最基本的单元，只能存储一个固定的数据。
 
 \begin{compactitem}
 \item 整型（integer）
@@ -490,7 +730,7 @@ PHP主要有四种标量类型，标量可以认为是数据结构中最基本�
 
 单引号在定义简单的字符串时是更加高效的处理方式，双引号则需要花费额外的开销来处理字符串的转义和变量的解析，因此在没有特别需求时可以使用单引号。
 
-另外，PHP还引入了定界符<\/<\/<来定义字符串，不过字符串必须包含在一组定界标识符中，而且定界结束符必须顶格书写。
+另外，PHP还支持使用定界符<\/<\/<来定义字符串，使用上字符串必须包含在一组定界标识符中，而且定界结束符必须顶格书写。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -511,10 +751,11 @@ EOT;
 
 PHP支持的两种复合类型分别是数组（array）和对象（object），相对于标量只能存放一个数据，数组可以存放任何类型的多个数据，可以是标量数据、数组、对象、资源以及其他语法结构等。
 
-数组中的每一个数据称为一个元素，每个元素包括索引（键名）和值两部分。
+
 
 \begin{compactitem}
-\item 元素的索引只能由数字或字符串组成，使用整型数字表示索引时类似于C语言的数组“下标”。
+\item 数组中的每一个数据称为一个元素，每个元素包括索引（键名）和值两部分。
+\item 元素的索引只能由数字或字符串组成，使用整型数字表示索引时类似于C语言的数组“下标(index)”。
 \item 元素的值可以是多种类型。
 \end{compactitem}
 
@@ -539,6 +780,7 @@ $my_stuff = array(
 
 数组允许分别对元素赋值，如果有同名元素，那么只保留最后一次的定义，而且所有整数字符的键都被看作是整数。
 
+\section{Object}
 
 
 对象是一种高级的数据类型，任何事物都可以看作是对象，每一个对象都是由一组属性值和一组方法（或称操作）构成，其中属性表明对象的一种状态，方法通常用来获取或改变对象的属性。
@@ -554,28 +796,14 @@ NULL和False可以表达相同的概念，但是二者有着本质的区别。�
 \item 布尔型变量可以转换为整数：True转化为1，False转换为0。
 
 \item 布尔型变量可以转换为字符串：True转化为字符“1”，False转换为字符“0”。
-
 \end{compactitem}
 
 NULL转换为整型后的值为0，转换为字符串后的值为空字符“”。
 
 
 
-资源是由专门的函数建立和使用的，资源本身是一种特殊的数据类型，可以被用户创建、使用和释放。
-
-PHP实现了自动垃圾回收机制来释放不再需要的资源，一般发生在PHP脚本运行结束之后。
-
-按照封装的层次，用户无法获知某个资源的细节，通常包含打开文件、数据库连接、图形画布区域等特殊句柄等。
 
 
-
-
-
-PHP中，变量以“\$”后接变量名称来表示，而且变量名称区分大小写。
-
-有效的变量名称应以字母或下划线开头，后可以接任意数目的字母、数字或下划线，PHP也支持使用多字节文字作为变量名。
-
-PHP解释器在解析变量时，将会尽可能多地取得“\$”后面的字符来组成一个合法的变量名，可以使用花括号把变量名括起来以明确表示一个变量。
 
 
 
@@ -588,16 +816,13 @@ PHP提供了针对字符串和数组的完善的支持，并且PHP还提供了�
 
 PHP利用curl库可以对URL地址进行解码或编码，不需要自己手动实现。
 
-
-\subsection{pspell}
-
-PHP利用aspell库（\url{http://aspell.net}）可以支持pspell扩展，从而实现单词拼写检查和建议。
-
 \subsection{pcre}
 
 PHP实用PCRE来实现对正则表达式的支持。
 
+\subsection{pspell}
 
+PHP利用aspell库（\url{http://aspell.net}）可以支持pspell扩展，从而实现单词拼写检查和建议。
 
 
 \section{Array}
@@ -611,6 +836,14 @@ PHP通过serialize()和unserialize()等函数，可以将数组、对象等数�
 
 PHP利用WDDX（Web分布式数据格式）可以进行数据串行化，从而在应用环境中交换更为复杂的数据结构。
 
+\section{Resource}
+
+
+资源是由专门的函数建立和使用的，资源本身是一种特殊的数据类型，可以被用户创建、使用和释放。
+
+PHP实现了自动垃圾回收机制来释放不再需要的资源，一般发生在PHP脚本运行结束之后。
+
+按照封装的层次，用户无法获知某个资源的细节，通常包含打开文件、数据库连接、图形画布区域等特殊句柄等。
 
 
 
@@ -626,18 +859,13 @@ function myFunction() { // declares a function, this is named myFunction
  return 'John Doe'; // returns the value 'John Doe'
 }
  
-echo 'My name is ' . myFunction() . '!'; //outputs the text concatenated with the return value of myFunction.
+echo 'My name is ' . myFunction() . '!'; 
+// outputs the text concatenated with the return value of myFunction.
 // myFunction is called as a result of this syntax.
 // The result of the output will be 'My name is John Doe!'
 \end{lstlisting}
 
 在Zend引擎的支持和优化下，现在PHP可以通过不同的扩展模块来支持各种各样的Web应用（例如网络爬虫等）。
-
-In PHP 5.2 and earlier, functions are not first-class functions and can only be referenced by their name, directly or dynamically by a variable containing the name of the function. User-defined functions can be created at any time without being prototyped. 
-
-Functions can be defined inside code blocks, permitting a run-time decision as to whether or not a function should be defined. Function calls must use parentheses, with the exception of zero argument class constructor functions called with the PHP \textcolor{Blue}{\texttt{new}} operator, where parentheses are optional. 
-
-An example function definition is the following:
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -821,8 +1049,8 @@ PHP提供的文件和目录函数等可以对本地文件系统进行直接操�
 除了可以针对HTML和文本文件进行处理之外，PHP还可以对符合特定格式的文件进行快速处理。
 
 \begin{compactitem}
-\item CVS：逗号分隔的文件；
-\item INI：配置文件；
+\item CVS
+\item INI
 \item XML
 \end{compactitem}
 
@@ -855,6 +1083,16 @@ PHP支持和所有Web开发语言之间的WDDX复杂数据交换，而且PHP支�
 
 
 \chapter{Development}
+
+\section{Interface}
+
+PHP对Apache和IIS等服务器提供了直接的模块接口（SAPI），如果PHP不能作为模块支持Web服务器，还可以作为 CGI 或 FastCGI 处理器来使用，因此可以使用PHP的CGI可执行程序来处理所有服务器上的 PHP 文件请求。
+
+\begin{compactitem}
+\item SAPI
+\item CGI
+\end{compactitem}
+
 
 \section{Kernel}
 
@@ -904,46 +1142,34 @@ Event			&Logging			&Science		&XML\\
 
 
 
-除了内置的函数之外，PHP也提供了很多扩展库（extension），例如数据库连接函数、数据压缩函数、图形处理等，从PECL（PHP Extension Community Library）可以获取更多的函数库。
+除了内置的函数之外，PHP也可以通过扩展库（extension）来提供数据库连接函数、数据压缩函数或图形处理等。
 
 
+从PHP5开始引入了对全新的PECL（PHP Extension Community Library）模块的支持，PECL是PEAR打包系统的升级。
+
+用户必须经过编译、安装和加载才能使用PECL扩展。例如，可以通过在 php.ini中的\texttt{extension}指令加载扩展，或者用\texttt{dl()}函数。
+
+\subsection{pecl}
 
 
-从PHP5开始引入了对全新的PECL模块的支持，而且PHP5支持面向对象的全部机制，并且保留了向下的兼容性。
-
-
-
-
-PHP 扩展库通常称为“php\_*.dll”（其中星号代表具体某扩展的名字），PHP 发行包中包括了大多数开发者最常用到的扩展库，这些被称为“核心”扩展库。不过呢，如果用户所需要的功能并没有被任何核心扩展提供，那还是有可能在 PECL 中找到。PHP Extension Community Library（PECL，PHP 扩展社区库）是个 PHP 扩展的储存室，提供了对于所有已知扩展的下载及开发途径的指南。
-
-PECL是通过PEAR 打包系统来的 PHP 扩展库仓库，要使用共享扩展库，必须经过编译，安装，然后加载。注意，当编译 PHP 模块时，拥有各种工具（autoconf，automake，libtool 等）很重要。
-
-如果用户开发了一个自己使用的扩展，可以考虑将其发布到 PECL 中以便于其他有相同需求的用户使用。一个很好的副作用是可以得到其他用户的反馈，感谢，错误报告甚至修正/更新。不过在向 PECL 发布扩展之前先了解\url{http://pecl.php.net/package-new.php}。
-
-
-
-以下指南中假定 /your/phpsrcdir/ 是 PHP 源程序的路径，extname 是 PECL 扩展库的名字。自己根据实际情况调整。此外还假定用户熟悉pear 命令，PEAR 手册里 pear 命令的信息同样适用于 pecl。
-
-以下说明的方法提供了怎样编译和安装扩展库的各种指导，但并不会自动加载它们。可以通过将其包括在 php.ini 中用 \texttt{extension PHP}指令加载，或者用\texttt{dl()}函数。
-
-下载 PECL 扩展库有几种方法，如：
+PECL 网站中列出的 PECL 扩展库的发行版本可以用 pear 命令来下载和安装，也可以指明具体的版本号。
 
 \begin{compactitem}
 \item \texttt{pecl download extname}
 
-PECL 网站中列出的 PECL 扩展库的发行版本可以用 pear 命令来下载和安装，也可以指明具体的修正版。
-
-
+\begin{lstlisting}[language=bash]
+$ pecl download extname
+\end{lstlisting}
 
 \item \texttt{pecl install extname}
-
-PECL 使建立共享 PHP 扩展库更容易。用pecl命令会自动下载扩展代码， 所以在这种情况下不需要再次下载。
 
 \begin{lstlisting}[language=bash]
 $ pecl install extname
 \end{lstlisting}
 
-这将下载 extname 的源代码，编译之，并将 \texttt{extname.so}安装到 extension\_dir 中。然后 \texttt{extname.so}就可以通过 php.ini 加载\footnote{在 php.ini 中激活扩展之后，需要重新启动 web 服务以使更改生效。}。
+\end{compactitem}
+
+pecl可以下载 extname 的源代码并进行编译，然后将 \texttt{extname.so}安装到 extension\_dir 中，这样就可以通过 php.ini 加载 \texttt{extname.so}\footnote{在 php.ini 中激活扩展之后，需要重新启动 web 服务以使更改生效。}。
 
 默认情况下，pecl 命令不会安装标记为 alpha 或 beta 状态的包。如果没有 stable 包可用，也可以用以下命令安装一个 beta 包：
 
@@ -957,9 +1183,12 @@ $ pecl install extname-beta
 $ pecl install extname-0.1
 \end{lstlisting}
 
-有时候不能用 pecl 安装命令。这可能是因为在防火墙后面，或者是因为想要安装的扩展库还没有 PECL 兼容的包，例如 SVN 中尚未发布的扩展库。如果要编译这种扩展库，可以用更底层的编译工具来手工进行编译。
+\subsection{phpize}
 
-phpize 命令是用来准备 PHP 扩展库的编译环境的。下面例子中，扩展库的源程序位于 extname 目录中：
+
+在手工编译PECL扩展时，phpize 命令用于准备 PHP 扩展库的编译环境。
+
+在下面的例子中，扩展库的源程序位于 extname 目录中：
 
 \begin{lstlisting}[language=bash]
 $ cd extname
@@ -969,11 +1198,12 @@ $ make
 # make install
 \end{lstlisting}
 
-成功的安装将创建\texttt{extname.so}并放置于 PHP 的扩展库目录中。需要调整 php.ini，加入\texttt{extension=extname.so}这一行之后才能使用此扩展库。
+如果系统中没有 phpize 命令并且使用了预编译的包（例如 RPM），那要安装 PHP 包相应的开发版本，此版本通常包含了 phpize 命令以及相应的用于编译 PHP 及其扩展库的头文件，通过\texttt{phpize -\/-help}命令可以显示此命令用法。
 
-如果系统中没有 phpize 命令并且使用了预编译的包（例如 RPM），那要安装 PHP 包相应的开发版本，此版本通常包含了 phpize 命令以及相应的用于编译 PHP 及其扩展库的头文件，通过\texttt{phpize --help}命令可以显示此命令用法。
+\subsection{php-config}
 
-php-config 是一个简单的命令行脚本用于获取所安装的 PHP 配置的信息。在编译扩展时，如果安装有多个 PHP 版本，可以在配置时用 \texttt{--with-php-config}选项来指定使用哪一个版本编译，该选项指定了相对应的 php-config 脚本的路径。
+
+php-config 是一个简单的命令行脚本用于获取所安装的 PHP 配置的信息。在编译扩展时，如果安装有多个 PHP 版本，可以在配置时用 \texttt{-\/-with-php-config}选项来指定使用哪一个版本编译，该选项指定了相对应的 php-config 脚本的路径。
 
 php-config 脚本在命令行所能使用的选项可以通过 \texttt{-h} 选项来显示：
 
@@ -1001,56 +1231,24 @@ Options:
 \begin{tabular}{ll}
 \hline
 选项					&说明\\
-\texttt{--prefix}			&PHP 所安装的路径前缀，例如 \texttt{/usr/local}\\
-\texttt{--includes}		&列出用 \texttt{-I} 选项包含的所有文件\\
-\texttt{--ldflags}		&PHP 编译时所使用的 \texttt{LD} 标志\\
-\texttt{--libs}			&PHP 编译时所附加的库\\
-\texttt{--extension-dir}	&扩展库的默认路径\\
-\texttt{--include-dir}	&头文件的默认路径前缀\\
-\texttt{--php-binary}	&PHP CLI 或者 CGI 可执行文件的完整路径\\
-\texttt{--php-sapis}		&列出所有可用的 SAPI 模块\\
-\texttt{--configure-options}	&重现当前 PHP 在编译时的配置选项\\
-\texttt{--version}		&PHP 版本号\\
-\texttt{--vernum}		&PHP 版本号，以整数表示\\
+\texttt{-\/-prefix}			&PHP 所安装的路径前缀，例如 \texttt{/usr/local}\\
+\texttt{-\/-includes}		&列出用 \texttt{-I} 选项包含的所有文件\\
+\texttt{-\/-ldflags}		&PHP 编译时所使用的 \texttt{LD} 标志\\
+\texttt{-\/-libs}			&PHP 编译时所附加的库\\
+\texttt{-\/-extension-dir}	&扩展库的默认路径\\
+\texttt{-\/-include-dir}	&头文件的默认路径前缀\\
+\texttt{-\/-php-binary}	&PHP CLI 或者 CGI 可执行文件的完整路径\\
+\texttt{-\/-php-sapis}		&列出所有可用的 SAPI 模块\\
+\texttt{-\/-configure-options}	&重现当前 PHP 在编译时的配置选项\\
+\texttt{-\/-version}		&PHP 版本号\\
+\texttt{-\/-vernum}		&PHP 版本号，以整数表示\\
 \end{tabular}
 \end{table}
 
-\item PECL
 
-\href{http://pecl.php.net/}{PECL}网站包括有 PHP 开发组提供的不同扩展库的信息，包括：新记录，版本说明，需求，以及其它信息。
+用户的扩展设定应该与所使用的 PHP 可执行文件的设定都保持一致，有些Web服务器就会搞混，因为其并不一定使用和 PHP 可执行文件处于同一目录下的 php.ini 文件。
 
-
-
-\item SVN
-
-大多数 PECL 扩展库也在 SVN 中，见\url{http://svn.php.net/viewvc/pecl/}。要直接从 SVN 中下载，用以下命令：
-
-\begin{lstlisting}[language=bash]
-$ svn checkout http://svn.php.net/repository/pecl/extname/trunk extname
-\end{lstlisting}
-
-\item Windows 下载
-
-在Windows系统下，PECL 扩展库位于“PHP{\textbackslash}ext”目录中（在 PHP 4 中位于“PHP{\textbackslash}extensions”目录中）。目前 PHP 项目没有为 Windows 下 PECL 扩展编译二进制文件，所有扩展都由 PHP 小组定期自动编译。如果在 PHP 发行包和 PCEL 中都没有某 DLL 文件，那可能需要自己编译之后才能使用该扩展。
-
-在 Windows 上有两种加载 PHP 扩展的方式：把扩展编译进 PHP，或者加载 DLL，其中加载预编译的扩展是更简单更被推荐的方式。最常见的方式是在 php.ini 配置文件里包含一个 PHP 扩展，其实很多扩展已经在 php.ini 里了，仅需要移除分号来激活它们。
-
-\begin{lstlisting}[language=bash]
-;extension=php_extname.dll
-extension=php_extname.dll
-\end{lstlisting}
-
-要加载某扩展时，需要在系统中有其相对应的“.dll”文件，但是用户常常会发现每个 DLL 都有好几个版本：
-
-\begin{compactitem}
-\item 不同的版本号（至少前两个数字要一致）
-\item 不同的线程安全性设定
-\item 不同的处理器体系（x86，x64，...)
-\item 不同的排错设定
-\item 其它
-\end{compactitem}
-
-用户的扩展设定应该与所使用的 PHP 可执行文件的设定都保持一致，有些Web服务器就会搞混，因为其并不一定使用和 PHP 可执行文件处于同一目录下的 php.ini 文件。要搞清楚具体使用了哪一个 php.ini 文件，在 phpinfo() 的输出中查看：
+要搞清楚具体使用了哪一个 php.ini 文件，在 phpinfo() 的输出中查看：
 
 
 \begin{lstlisting}[language=bash]
@@ -1077,12 +1275,7 @@ drive:\\path\to\php\executable\php.exe -i
 
 阅读所使用的Web服务器之文档以确定日志文件的位置，这与 PHP 本身并无关系。此外， phpinfo() 可以起到很大帮助。
 
-
-
-\end{compactitem}
-
-
-有时可能需要将扩展库静态编译到 PHP 中。这需要将扩展库源程序放入 \texttt{php-src/ext/} 目录中去并告诉 PHP 编译系统来生成其配置脚本。
+有时可能需要将扩展库静态编译到 PHP 中，此时就需要将扩展库源程序放入 \texttt{php-src/ext/} 目录中去并告诉 PHP 编译系统来生成其配置脚本。
 
 
 \begin{lstlisting}[language=bash]
@@ -1111,46 +1304,61 @@ $ make install
 \end{lstlisting}
 
 
-是否用 \texttt{--enable-extname}或 \texttt{--with-extname}取决于扩展库。通常不需要外部库文件的扩展库使用\texttt{--enable}。要确认的话，在 \texttt{buildconf} 之后运行：
+是否用 \texttt{-\/-enable-extname}或 \texttt{-\/-with-extname}取决于扩展库，不需要外部库文件的扩展库使用\texttt{-\/-enable}。如果要确认的话，在 \texttt{buildconf} 之后运行：
 
 \begin{lstlisting}[language=bash]
-$ ./configure --help | grep extname
+$ ./configure -\/-help | grep extname
 \end{lstlisting}
+
+\section{CGI}
+
+多线程Web 服务器接收的所有请求都运行在相同的进程空间（Web 服务器自己的空间）中，该空间仅有一套环境变量。如果想获得 CGI 变量，例如 PATH\_INFO、HTTP\_HOST 等，使用原有的 PHP 3.x 的方式（getenv()），或使用类似的方式（注册全局变量到\$\_ENV环境变量）都是不可行的，只能获得运行中的Web 服务器的环境变量，而不能获得任何有效的 CGI 变量。
+
+Web服务器的启动脚本事实上是一个 CGI 脚本，因此启动脚本在启动Web 服务器进程的同时就会包含一些CGI变量，但是如果从命令行手动启动Web服务器就不会产生这些CGI 形式的变量。
+
+PHP默认情况下被编译为CLI 和 CGI 程序，可以建立一个命令行解释器来处理CGI以及非Web相关的操作。如果需要为Web服务器提供PHP支持，那么通常为性能考虑应该使用模块方式。
+
+CGI可以使 Apache 用户用不同的用户 ID 运行不同的 PHP 页面，不过使用 CGI 方式进行服务器部署可能存在缺陷。
+
+某些服务器提供的环境变量可能没有定义在当前的CGI/1.1 标准中，只有下列变量定义在其中，其它的变量均作为“供应商扩展（vendor extensions）”来对待。
+
+\begin{compactitem}
+\item AUTH\_TYPE
+\item CONTENT\_LENGTH
+\item CONTENT\_TYPE
+\item GATEWAY\_INTERFACE
+\item PATH\_INFO
+\item PATH\_TRANSLATED
+\item QUERY\_STRING
+\item REMOTE\_ADDR
+\item REMOTE\_HOST
+\item REMOTE\_IDENT
+\item REMOTE\_USER
+\item REQUEST\_METHOD
+\item SCRIPT\_NAME
+\item SERVER\_NAME
+\item SERVER\_PORT
+\item SERVER\_PROTOCOL
+\item SERVER\_SOFTWARE
+\end{compactitem}
+
 
 \chapter{Installation}
 
-There are two primary ways for adding support for PHP to a web server. For many web servers PHP has a direct module interface called Server Application Programming Interface (SAPI). These web servers include Apache HTTP Server, Microsoft IIS, Netscape (now defunct) and iPlanet. Some other web servers support the Internet Server Application Programming Interface (ISAPI), Microsoft's web server module interface (OmniHTTPd for example). If PHP has no module support for a web server, it can always be used as a Common Gateway Interface (CGI) or FastCGI processor. That way, web server is configured to use the CGI executable of PHP to process all requests to PHP files.
-
-
-PHP-FPM (FastCGI Process Manager) is an alternative FastCGI implementation for PHP, bundled with the official PHP distribution since version 5.3.3. When compared to the older FastCGI implementation, it contains some additional features, mostly useful for heavily loaded web servers.
-
-When using PHP for command-line scripting, a PHP command-line interface (CLI) executable is needed. PHP supports a CLI SAPI as of PHP 4.3.0. The main focus of this SAPI is developing shell applications using PHP. There are quite a few differences between the CLI SAPI and other SAPIs, although they do share many of the same behaviors.
-
-PHP can also be used for writing desktop graphical user interface (GUI) applications, by using the PHP-GTK extension. PHP-GTK is not included in the official PHP distribution, and as an extension it can be used only with PHP versions 5.1.0 and newer. The most common way of installing PHP-GTK is compiling it from the source code.
-
-
-When PHP is installed and used in cloud environments, software development kits (SDKs) are provided for using cloud-specific features. For example:
-
+在配置PHP应用服务器时，一般有两个方法可以将 PHP 连接到服务器上。
 
 \begin{compactitem}
-\item Amazon Web Services provides the AWS SDK for PHP
-\item Windows Azure can be used with the Windows Azure SDK for PHP.
+\item SAPI
+\item CGI
 \end{compactitem}
-
-Numerous configuration options are supported, affecting both core PHP features and extensions. Configuration file php.ini is searched for in different locations, depending on the way PHP is used. Configuration file is split into various sections, while some of the configuration options can be also set within the web server configuration.
-
-
-在安装PHP之前，首先需要知道想用 PHP 来做什么，如果需要自己配置服务器和 PHP，一般有两个方法可以将 PHP 连接到服务器上。
 
 PHP向Apache和IIS等Web服务器提供了一个直接的模块接口SAPI，其中IIS服务器支持微软的ISAPI，可以极大地提高IIS的性能。
 
 ISAPI是驻留在Web服务器中的代码，而且和Apache模块的原理类似，ISAPI在首次调用时就会被载入内存，这样在以后的使用中就不会启动新的进程。
 
+如果 PHP无法作为Web服务器模块，总是可以将其作为 CGI 或 FastCGI 处理器来使用，这样就可以使用 PHP 的 CGI 可执行程序来处理所有服务器上的 PHP 文件请求。
 
-
-如果 PHP 不能作为模块支持 Web 服务器，总是可以将其作为 CGI 或 FastCGI 处理器来使用。这意味着可以使用 PHP 的 CGI 可执行程序来处理所有服务器上的 PHP 文件请求。
-
-如果需要通过PHP 命令行脚本完成诸如在离线状态下，根据传递给脚本的参数，自动生成一些图片，或处理一些文本文件等的工作，那一定需要命令行可执行程序（CLI）。如果是这种情况，不需要服务器和浏览器。
+PHP命令行脚本可以执行能够在离线状态下根据传递给脚本的参数，自动生成一些图片，或处理一些文本文件等工作。
 
 
 \section{UNIX}
@@ -1327,32 +1535,52 @@ password=p@ss
 
 为了在操作系统启动时自动启动MySQL服务，可以将“support/mysql.server”文件复制到系统的启动目录中。
 
-\begin{lstlisting}[language=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[language=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[language=bash]
-
-\end{lstlisting}
-
-
-
 
 \section{Mac OSX}
 
 Mac OS X有内建支持的 PHP，编译安装类似于 Unix 系统下的安装，也可以使用预编译和打包的 PHP 版本来安装标准配置的 PHP。
 
 如果需要不同的功能集（比如安全服务器或不同的数据库驱动程序），可能需要自己编译 PHP 和/或Web服务器。
+
+\subsection{Homebrew}
+
+Homebrew 是一个强大的 OS X 专用包管理器， 它可以帮助你轻松的安装 PHP 和各种扩展。 Homebrew PHP 是一个包含与 PHP 相关的 Formulae，能让你通过 homebrew 安装 PHP 的仓库。
+
+也就是说, 你可以通过 brew install 命令安装 php53, php54, php55 或者 php56 ，并且通过修改 PATH 变量来切换各个版本。或者你也可以使用 brew-php-switcher 来自动切换。
+
+\subsection{MacPorts}
+
+MacPorts 是一个开源的，社区发起的项目，它的目的在于设计一个易于使用的系统，方便编译，安装以及升级 OS X 系统上的 command-line, X11 或者基于 Aqua 的开源软件。
+
+MacPorts 支持预编译的二进制文件，因此你不必每次都重新从源码压缩包编译，如果你的系统没有安装这些包，它会节省你很多时间。
+
+此时，你可以通过 port install 命名来安装 php53，php54，php55 或者 php56，比如：
+
+\begin{lstlisting}[language=bash]
+$ sudo port install php54
+$ sudo port install php55
+\end{lstlisting}
+
+也可以执行 select 命令来切换当前的 php 版本：
+
+
+\begin{lstlisting}[language=bash]
+$ sudo port select --set php php55
+\end{lstlisting}
+
+\subsection{PHPBrew}
+
+phpbrew 是一个安装与管理多个 PHP 版本的工具，在应用程序或者项目需要不同版本的 PHP 时非常有用，可以不再需要使用虚拟机来处理这些情况。
+
+另外，php-osx.liip.ch 是另一种流行的选择，它提供了从5.3到5.6版本的单行安装功能。 它并不会覆盖Apple集成的PHP文件，而是将其安装在了一个独立的目录中(/usr/local/php5)。
+
+
+最后一个可以用来控制安装 PHP 版本的选择就是 自行编译。 如果使用这种方法， 必须先确认是否已经通过Apple’s Mac Developer Center下载、安装了Xcode 或者 “Command Line Tools for XCode”。
+
+上述列出的解决方案主要是针对 PHP 本身， 并不包含Apache、Nginx 或者 SQL 服务器，使用MAMP或XAMPP 等集成包可以安装这些软件并且将他们绑在一起，只是易于安装的背后也牺牲了一定的弹性。
+
+
+
 
 在默认的Web服务器中启用 PHP时，只需将 Apache 配置文件 \texttt{httpd.conf}中的若干配置指令前面的注释符号去掉，这样CGI或CLI 默认都可以使用（可以很容易的被终端程序使用）。
 
@@ -1419,8 +1647,6 @@ phpinfo() 将会显示PHP的相关系统信息。例如，可以在 DocumentRoot
 要重启Apache，可以在 shell 中执行 \texttt{sudo apachectl graceful}，也可以停止/启动 OS X 系统首选项中的“Personal Web Server”选项。
 
 默认情况下，从浏览器访问本地文件的 URL 一般类似于\texttt{http://localhost/info.php}，或者使用\verb|http://localhost/~yourusername/info.php|来访问用户自己 DocumentRoot 中的文件。
-
-
 \end{compactenum}
 
 CLI（或者旧版本中的 CGI）一般文件名为 php ，其路径可能是 /usr/bin/php。
@@ -1431,9 +1657,7 @@ CLI（或者旧版本中的 CGI）一般文件名为 php ，其路径可能是 /
 
 \section{Windows}
 
-
-
-在安装PHP之前需要确保系统中已经安装好HTTP（Web）服务器，并确认其正常工作，而且不同的PHP版本的目录结构可能是不同的。
+用户可以下载PHP的Windows二进制包，如果为PHP所在的根目录（php.exe 所在的文件夹）设置好环境变量（例如PATH）就可以从命令行中直接执行 PHP。不过，在安装PHP之前需要确保系统中已经安装好HTTP（Web）服务器，并确认其正常工作，而且不同的PHP版本的目录结构可能是不同的。
 
 
 \begin{table}[htbp]
@@ -1463,7 +1687,9 @@ php-cgi.exe & php.exe & CGI可执行文件\\
 \end{tabular}
 \end{table}
 
+如果需要将生产环境部署在 Windows 上，那么 IIS7可以提供最稳定和最佳的性能，用户可以使用IIS7 的图形化插件phpmanager来设置并管理 PHP。
 
+IIS7有内置的 FastCGI ，只需要将 PHP 配置为它的处理器就可以使用。
 
 
 \subsection{Compile}
@@ -1858,6 +2084,7 @@ Windows Registry Editor Version 5.0
 
 在对IIS进行设置后，需要重启IIS服务器来使修改生效。
 
+\section{Docker}
 
 
 
@@ -2087,17 +2314,13 @@ FastCGI 致力于减少网页服务器与 CGI 程序之间交互的开销，从�
 
 CGI 程序运行在独立的进程中，并对每个 Web 请求建立一个进程，虽然这种方法非常容易实现，但效率很差且难以扩展，在处理大量请求时，进程的大量建立和消亡使操作系统性能大大下降，另外地址空间无法共享也限制了资源重用。
 
-与 CGI 为每个请求创建一个新的进程不同，FastCGI 使用持续的进程来处理一连串的请求，而且这些进程由 FastCGI 服务器管理（而不是 Web 服务器）。例如，Apache HTTP Server 通过 mod_fcgid 模块实现了 FastCGI。
+与 CGI 为每个请求创建一个新的进程不同，FastCGI 使用持续的进程来处理一连串的请求，而且这些进程由 FastCGI 服务器管理（而不是 Web 服务器）。例如，Apache HTTP Server 通过 mod\_fcgid 模块实现了 FastCGI。
 
 当接收到一个请求时，Web 服务器把环境变量和页面请求通过一个 socket（比如FastCGI 进程与 Web 服务器都位于本地）或者一个 TCP connection（FastCGI 进程在远端的 Server Farm）传递给 FastCGI 进程。
 
 \section{PHP-FPM}
 
-FPM (FastCGI 进程管理器) 是一个可选的 PHP FastCGI 实现，并且附加了一些（主要是）对高负载网站很有用的特性。
-
-PHP-FPM（FastCGI进程管理器）用于替换 PHP FastCGI 的大部分附加功能，对于高负载网站是非常有用的。
-
-具体说来，FPM的功能包括：
+FPM (FastCGI 进程管理器) 是一个可选的 PHP FastCGI 实现，并且附加了一些（主要是）对高负载网站很有用的特性，可以用于替换 PHP FastCGI 的大部分附加功能来提高网站负载。
 
 \begin{compactitem}
 \item 支持平滑停止/启动的高级进程管理功能；
@@ -2112,7 +2335,7 @@ PHP-FPM（FastCGI进程管理器）用于替换 PHP FastCGI 的大部分附加�
 
 \item ``慢日志" - 记录脚本（不仅记录文件名，还记录 PHP backtrace 信息，可以使用 ptrace或者类似工具读取和分析远程进程的运行数据）运行所导致的异常缓慢;
 
-\item \texttt{fastcgi\_finish\_request()} - 特殊功能：用于在请求完成和刷新数据后，继续在后台执行耗时的工作（录入视频转换、统计处理等）；
+\item \texttt{fastcgi\_finish\_request()} - 在请求完成和刷新数据后继续在后台执行耗时的工作（录入视频转换、统计处理等）；
 
 \item 动态/静态子进程产生；
 
@@ -2122,22 +2345,22 @@ PHP-FPM（FastCGI进程管理器）用于替换 PHP FastCGI 的大部分附加�
 
 \end{compactitem}
 
-编译 PHP 时需要 \texttt{--enable-fpm} 配置选项来激活 FPM 支持。以下为 FPM 编译的具体配置参数（全部为可选参数）：
+编译 PHP 时需要 \texttt{-\/-enable-fpm} 配置选项来激活 FPM 支持，以下为 FPM 编译的具体配置参数（全部为可选参数）：
 
 \begin{compactitem}
-\item \texttt{--with-fpm-user} - 设置 FPM 运行的用户身份（默认 - nobody）
+\item \texttt{-\/-with-fpm-user} 设置 FPM 运行的用户身份（默认 - nobody）
 
-\item \texttt{--with-fpm-group} - 设置 FPM 运行时的用户组（默认 - nobody）
+\item \texttt{-\/-with-fpm-group} 设置 FPM 运行时的用户组（默认 - nobody）
 
-\item \texttt{--with-fpm-systemd} - 启用 systemd 集成 (默认 - no)
+\item \texttt{-\/-with-fpm-systemd} 启用 systemd 集成 (默认 - no)
 
-\item \texttt{--with-fpm-acl}- 使用POSIX 访问控制列表 (默认 - no) 5.6.5版本起有效
+\item \texttt{-\/-with-fpm-acl} 使用POSIX 访问控制列表 (默认 - no)
 \end{compactitem}
 
 FPM 配置文件为 php-fpm.conf，其语法类似 php.ini 。
 
 
-\begin{compactitem}
+\begin{compactenum}
 \item php-fpm.conf 全局配置段
 
 \begin{compactitem}
@@ -2286,7 +2509,7 @@ FPM 监控页面的 ping 网址。如果没有设置，则无法访问 ping 页�
 
 \end{compactitem}
 
-\end{compactitem}
+\end{compactenum}
 
 还可以在为一个运行池传递附加的环境变量，或者更新 PHP 的配置值。可以在 php-fpm.conf 中如下面的配置参数来做到：
 
@@ -2308,7 +2531,7 @@ PHP配置值通过 \texttt{php\_value}或者\texttt{php\_flag}设置，并且会
 
 使用 \texttt{php\_admin\_value}或者\texttt{php\_admin\_flag}定义的值，不能被 PHP 代码中的 \texttt{ini\_set()}覆盖。
 
-自PHP 5.3.3 起，也可以通过Web服务器设置 PHP 的设定。在 nginx.conf 中设定 PHP的示例如下：
+自PHP 5.3.3 起，也可以通过Web服务器设置 PHP 的设定。例如，在 nginx.conf 中设定 PHP的示例如下：
 
 \begin{lstlisting}[language=bash]
 set $php_value "pcre.backtrack_limit=424242";
@@ -2318,7 +2541,7 @@ fastcgi_param  PHP_VALUE $php_value;
 fastcgi_param  PHP_ADMIN_VALUE "open_basedir=/var/www/htdocs";
 \end{lstlisting}
 
-由于这些设定是以 FastCGI 标头传递给 php-fpm，php-fpm 不应绑定到外部网可以访问的地址上，否则任何人都能修改 PHP 的配置选项了。
+上述这些设定是以 FastCGI 标头传递给 php-fpm，因此php-fpm不应被绑定到外部网可以访问的地址上，否则任何人就能可以修改 PHP 的配置选项。
 
 
 
@@ -2328,7 +2551,7 @@ WSGI（Python Web Server Gateway Interface）是为 Python 语言定义的 Web �
 
 一般而言，Web 应用框架的选择将限制可用的 Web 服务器的选择，反之亦然。
 
-最初，Python 应用程序通常是为 CGI、FastCGI、mod_python，或者特定 Web 服务器的自定义的 API 接口而设计的。
+最初，Python 应用程序通常是为 CGI、FastCGI、mod\_python，或者特定 Web 服务器的自定义的 API 接口而设计的。
 
 基于现存的 CGI 标准而设计的 WSGI 可以作为 Web 服务器与 Web 应用程序或应用框架之间的一种低级别的接口来方便可移植 Web 应用开发。具体来说，WSGI 可以划分两个部分，分别为“服务器”（或“网关”）和“应用程序”（或“应用框架”）。
 
@@ -2357,8 +2580,8 @@ def app（environ, start_response）:
 
 
 \begin{compactitem}
-\item 第一行定义了一个名为 app 的 callable 并接受两个参数（environ 和 start_response），其中 environ 是一个字典包含了 CGI 中的环境变量，start_response 也是一个 callable，并接受两个必须的参数——status（HTTP 状态）和 response_headers（响应消息的头）。
-\item 第二行调用了 start_response，状态指定为“200 OK”，消息头指定为内容类型是“text/plain”。
+\item 第一行定义了一个名为 app 的 callable 并接受两个参数（environ 和 start\_response），其中 environ 是一个字典包含了 CGI 中的环境变量，start\_response 也是一个 callable，并接受两个必须的参数——status（HTTP 状态）和 response\_headers（响应消息的头）。
+\item 第二行调用了 start\_response，状态指定为“200 OK”，消息头指定为内容类型是“text/plain”。
 \item 第三行将响应消息的消息体返回。
 
 \end{compactitem}
@@ -2400,19 +2623,22 @@ status, headers, body = call_application（app, {...environ...}）
 \section{php.ini}
 
 
+配置文件（php.ini）在 PHP 启动时被读取，在 php.ini 中可以使用环境变量。
+
+\begin{compactitem}
+\item 对于服务器模块版本的 PHP，仅在 Web 服务器启动时读取一次。
+
+例如，对于Apache服务器模块版本的 PHP，仅在Web服务器启动时读取一次\footnote{Apache服务器在启动时会把目录转到根目录，这将导致 PHP 尝试在根目录下读取 php.ini。}。
+\item 对于 CGI 和 CLI 版本，每次调用都会读取。
+\end{compactitem}
+
 
 PHP的配置文件php.ini包含PHP运行时所需要的相关参数，并且在重启Web服务器后才能使新的php.ini设置生效。
 
-\begin{compactitem}
-\item 首先，php.ini在 PHP 启动时被读取。
-\item 其次，CGI 和 CLI 版本的PHP在每次调用时都会读取php.ini。
-\end{compactitem}
 
 php.ini使用Windows的INI文件的书写风格，使用“;”作为注释。
 
 另外，如果某些选项允许有多个值，那么应该使用系统列表分隔符（在Windows下是分号“;”，在UNIX下是冒号“:”）。
-
-对于Apache服务器模块版本的 PHP，仅在Web服务器启动时读取一次\footnote{Apache服务器在启动时会把目录转到根目录，这将导致 PHP 尝试在根目录下读取 php.ini。}，在 php.ini 中可以使用环境变量。
 
 
 
@@ -2420,12 +2646,12 @@ php.ini 的搜索路径如下（按顺序）：
 
 \begin{compactitem}
 \item SAPI 模块所指定的位置（Apache 2 中的 PHPIniDir 指令，CGI 和 CLI 中的 \texttt{-c} 命令行选项，NSAPI 中的 \texttt{php\_ini}参数，THTTPD 中的 \texttt{PHP\_INI\_PATH}环境变量）。
-\item PHPRC 环境变量。在 PHP 5.2.0 之前，其顺序在以下提及的注册表键值之后。
-\item 自 PHP 5.2.0 起，可以为不同版本的 PHP 指定不同的 php.ini 文件位置。将以下面的顺序检查注册表目录：\texttt{[HKEY\_LOCAL\_MACHINE{\textbackslash}SOFTWARE{\textbackslash}PHP{\textbackslash}x.y.z]}，\texttt{[HKEY\_LOCAL\_MACHINE{\textbackslash}SOFTWARE{\textbackslash}PHP{\textbackslash}x.y]} 和 \texttt{[HKEY\_LOCAL\_MACHINE{\textbackslash}SOFTWARE{\textbackslash}PHP{\textbackslash}x]}，其中的 x，y 和 z 指的是 PHP 主版本号，次版本号和发行批次。如果在其中任何目录下的 IniFilePath 有键值，则第一个值将被用作 php.ini 的位置（仅适用于Windows）。
+\item PHPRC 环境变量。
+\item 如果为不同版本的 PHP 指定了不同的 php.ini 文件位置，将以下面的顺序检查注册表目录：\texttt{[HKEY\_LOCAL\_MACHINE{\textbackslash}SOFTWARE{\textbackslash}PHP{\textbackslash}x.y.z]}，\texttt{[HKEY\_LOCAL\_MACHINE{\textbackslash}SOFTWARE{\textbackslash}PHP{\textbackslash}x.y]} 和 \texttt{[HKEY\_LOCAL\_MACHINE{\textbackslash}SOFTWARE{\textbackslash}PHP{\textbackslash}x]}，其中的 x，y 和 z 指的是 PHP 主版本号，次版本号和发行批次。如果在其中任何目录下的 IniFilePath 有键值，则第一个值将被用作 php.ini 的位置（仅适用于Windows）。
 \item \texttt{[HKEY\_LOCAL\_MACHINE{\textbackslash}SOFTWARE{\textbackslash}PHP]} 内 IniFilePath 的值（Windows 注册表位置）。
 \item 当前工作目录（对于 CLI）。
 \item Web服务器目录（对于 SAPI 模块）或 PHP 所在目录（Windows 下其它情况）。
-\item Windows 目录（\texttt{C:{\textbackslash}Windows}或 \texttt{C:{\textbackslash}Winnt}），或 \texttt{--with-config-file-path}编译时选项指定的位置。
+\item Windows 目录（\texttt{C:{\textbackslash}Windows}或 \texttt{C:{\textbackslash}Winnt}），或 \texttt{-\/-with-config-file-path}编译时选项指定的位置。
 \end{compactitem}
 
 \section{php-SAPI.ini}
@@ -2436,7 +2662,7 @@ php.ini 的搜索路径如下（按顺序）：
 
 由扩展库处理的 php.ini 指令的文档由扩展库提供，但是并非所有的 PHP 指令都有文档说明。
 
-要得到自己的 PHP 版本中的配置指令完整列表，可以阅读 php.ini 文件，也可以从 Git 得到的最新版 php.ini。
+
 
 
 
@@ -2456,10 +2682,16 @@ include_path = ".:/usr/local/lib/php"
 include_path = ".;c:\php\lib"
 \end{lstlisting}
 
-自 PHP 5.1.0 起，有可能在 .ini 文件内引用已存在的 .ini 变量，例如\texttt{open\_basedir = \$\{open\_basedir\} ":/new/dir"}。
+
+\section{.user.ini}
 
 
-自 PHP 5.3.0 起，PHP 支持基于每个目录的 .htaccess 风格的 INI 文件，不过仅被 CGI/FastCGI SAPI支持，并且导致PECL的htscanner扩展作废。如果使用 Apache，使用.htaccess 文件有同样效果。
+
+\begin{compactitem}
+\item 自 PHP 5.1.0 起，有可能在 .ini 文件内引用已存在的 .ini 变量，例如\texttt{open\_basedir = \$\{open\_basedir\} ":/new/dir"}。
+
+\item 自 PHP 5.3.0 起，PHP 支持基于每个目录的 .htaccess 风格的 INI 文件，不过仅被 CGI/FastCGI SAPI支持，并且导致PECL的htscanner扩展作废。如果使用 Apache，使用.htaccess 文件有同样效果。
+\end{compactitem}
 
 除了主 php.ini 之外，PHP 还会在每个目录下扫描 INI 文件，从被执行的 PHP 文件所在目录开始一直上升到Web根目录（\texttt{\$\_SERVER['DOCUMENT\_ROOT']} 所指定的）。如果被执行的 PHP 文件在Web根目录之外，则只扫描该目录。
 
@@ -2469,7 +2701,6 @@ include_path = ".;c:\php\lib"
 \item \texttt{user\_ini.filename}设定了 PHP 会在每个目录下搜寻的文件名，如果设定为空字符串则 PHP 不会搜寻，默认值是 .user.ini。
 
 \item \texttt{user\_ini.cache\_ttl}控制着重新读取用户 INI 文件的间隔时间，默认是 300 秒（5 分钟）。
-
 \end{compactitem}
 
 这些模式决定着一个 PHP 的指令在何时何地，是否能够被设定，而且每个指令都有其所属的模式。
@@ -2490,7 +2721,7 @@ include_path = ".;c:\php\lib"
 \rowcolors{1}{White}{Lavender}
 \begin{tabular}{m{80pt}m{280pt}}
 \hline
-模式							&含义\\
+模式						&含义\\
 \texttt{PHP\_INI\_USER}	 &可在用户脚本（例如 \texttt{ini\_set()}）或 Windows 注册表（自 PHP 5.3 起）以及 .user.ini 中设定\\
 \texttt{PHP\_INI\_PERDIR}	&可在 php.ini，.htaccess 或 httpd.conf 中设定\\
 \texttt{PHP\_INI\_SYSTEM}	&可在 php.ini 或 httpd.conf 中设定\\
@@ -2504,7 +2735,7 @@ include_path = ".;c:\php\lib"
 
 当使用 PHP 作为 Apache 模块时，也可以用 Apache 的配置文件（例如 httpd.conf）和 .htaccess 文件中的指令来修改 PHP 的配置设定，需要有“\texttt{AllowOverride Options}”或“\texttt{AllowOverride All}”权限才可以。
 
-有几个 Apache 指令可以使用户在 Apache 配置文件内部修改 PHP 的配置，至于哪些指令属于\texttt{PHP\_INI\_ALL}，\texttt{PHP\_INI\_PERDIR}或 \texttt{PHP\_INI\_SYSTEM}中的哪一个，需要参考附录中的 php.ini 配置选项列表。
+有几个 Apache 指令可以使用户在 Apache 配置文件内部修改 PHP 的配置，至于哪些指令属于\texttt{PHP\_INI\_ALL}，\texttt{PHP\_INI\_PERDIR}或 \texttt{PHP\_INI\_SYSTEM}中的哪一个，需要参考php.ini 配置选项列表。
 
 \begin{compactitem}
 \item \texttt{php\_value name value}
@@ -2583,60 +2814,32 @@ extension=php_ftp.dll
 
 
 
-
-\chapter{Framework}
-
-PHP框架可以使项目得到更快更简单的部署和更加敏捷的开发效率，因此在实际生产中框架的使用已非常普遍，例如PHP官方的框架为Zend framework。
-
-
-
-
-
-
-
-
-
-
-
-
-
 \chapter{Security}
 
 
 \section{Thread Safe}
 
-Windows版的PHP从版本5.2.1开始有Thread Safe（线程安全）和None Thread Safe（NTS，非线程安全）之分，这两者不同在于何处\cite{thread_safe}？到底应该用哪种？这里做一个简单的介绍。
+Windows版的PHP从版本5.2.1开始有Thread Safe（线程安全）和None Thread Safe（NTS，非线程安全）之分，这两者不同在于何处\cite{thread_safe}？到底应该用哪种？
 
-从2000年10月20日发布的第一 个Windows版的PHP3.0.17开始的都是线程安全的版本。与Linux/Unix系统是采用多进程的工作方式不同的是，Windows系统的是多线程的工作方式。如果在IIS下以CGI方式运行PHP会非常慢，这是由于CGI模式是建立在多进程的基础之上的，而非多线程。
+从2000年10月20日发布的第一个Windows版的PHP3.0.17开始的都是线程安全的版本。
 
-一般情况下，在Windows平台上需要把PHP配置成以ISAPI的方式来运行，ISAPI是多线程的方式，这样就快多了。
+与Linux/Unix系统是采用多进程的工作方式不同的是，Windows系统的是多线程的工作方式，因此在IIS下以CGI方式运行PHP就会非常慢，原因就是CGI模式是建立在多进程的基础上的，而非多线程。
 
+一般情况下，在Windows平台上需要把PHP配置成以ISAPI的方式来运行，ISAPI是多线程的方式，可以加快运行速度。
 
 
 不过，仍然存在一个问题，那就是很多常用的PHP扩展是以Linux/Unix的多进程思想来开发的，这些扩展在ISAPI的方式运行时就会出错并拖垮IIS，因此在IIS下CGI模式才是PHP运行的最安全方式。
 
 CGI模式的不足就是对于每个HTTP请求都需要重新加载和卸载整个PHP环境，其资源消耗是巨大的。
 
-为了兼顾IIS下PHP的效率和安全，微软给出了FastCGI的解决方案，从而可以让PHP的进程重复利用而不是每一个新的请求就新建一个进程，同时FastCGI也可以允许几个进程同时执行，这样既解决了CGI进程模式消耗太大的问题，又利用了CGI进程模式不存在线程安全问题的优势。
+为了兼顾IIS下PHP的效率和安全，微软给出了FastCGI的解决方案来让PHP的进程重复利用而不是每一个新的请求就新建一个进程，同时FastCGI也可以允许几个进程同时执行，从而既解决了CGI进程模式消耗太大的问题，又利用了CGI进程模式不存在线程安全问题的优势。
 
-综合来说，如果使用ISAPI的方式来运行PHP就必须用Thread Safe（线程安全）的版本，否则用FastCGI模式运行PHP的话就没有必要用线程安全检查，None Thread Safe（NTS，非线程安全）的版本能够更好的提高效率。
+综合来说，如果使用ISAPI的方式来运行PHP就必须用Thread Safe（线程安全）的版本，FastCGI模式运行PHP没有必要进行线程安全检查，None Thread Safe（非线程安全）的版本能够更好的提高效率。
 
-
-
-\section{Windows Version}
-
-If you are using PHP with Apache 1 or Apache2 from apache.org you need to use the VC6 versions of PHP
-
-If you are using PHP with IIS you should use the VC9 versions of PHP
-
-VC6 Versions are compiled with the legacy Visual Studio 6 compiler
-
-VC9 Versions are compiled with the Visual Studio 2008 compiler and have improvements in performance and stability. The VC9 versions require you to have the Microsoft 2008 C++ Runtime (x86) or the Microsoft 2008 C++ Runtime (x64) installed
-
-Do NOT use VC9 version with apache.org binaries
-
-VC9 versions of Apache can be fetched at Apache Lounge. We use their binaries to build the Apache SAPIs.
-
+\begin{compactitem}
+\item 在Windows版本的Apache下运行PHP时需要VC6版本的PHP；
+\item 在IIS下运行PHP则需要VC9版本的PHP。
+\end{compactitem}
 
 \section{Safe Mode}
 

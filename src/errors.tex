@@ -1,0 +1,74 @@
+\part{Errors}
+
+
+\chapter{Overview}
+
+PHP使用内部错误号来报告错误，而且每个PHP错误都带有一个类型，PHP可以显示或记录错误。
+
+如果没有设置错误处理器（error handler），PHP会根据配置文件来处理错误。例如，php.ini中的errror\_reporting配置项说明了哪些错误需要报告，哪些错误需要忽略。
+
+用户可以使用error\_reporting()在运行时设置错误报告级别和处理，推荐在php.ini中配置错误报告选项，这样有些错误可以脚本执行之前报告。
+
+\begin{compactitem}
+\item 开发阶段建议配置：\texttt{E\_ALL}
+\item 生产环境建议配置：\texttt{E\_ALL \& \~{}E\_NOTICE \& \~{}E\_STRICT \& \~{}E\_DEPRECATED}
+\end{compactitem}
+
+php.ini中的两个配置选项说明如何进一步处理错误：
+
+\begin{compactitem}
+\item display\_errors控制是否把错误显示为PHP脚本的输出（在生产环境中应该始终关闭）
+
+\item log\_errors控制是否记录错误到日志文件或syslog（通过error\_log指令）
+\end{compactitem}
+
+如果PHP默认的错误处理器不满足需求，用户还可以定制自己的错误处理器来针对不同类型的错误进行处理。 
+
+在生产环境中可以记录错误并生成错误报告来定位错误，不过PHP 7已经改变了大多数错误的报告方式，不同于传统的错误报告机制，现在大多数错误被作为 Error 异常抛出。
+
+现在Error 异常可以像 Exception 异常一样被第一个匹配的 try / catch 块所捕获。
+
+\begin{compactitem}
+\item 如果没有匹配的 catch 块，则调用异常处理函数（事先通过 set\_exception\_handler() 注册）进行处理。 
+\item 如果尚未注册异常处理函数，则按照传统方式处理（被报告为一个致命错误）。
+\end{compactitem}
+
+
+Error 类并非继承自 Exception 类，所以不能用 \texttt{catch (Exception \$e) \{ ... \}} 来捕获 Error，可以用\texttt{catch (Error \$e) \{ ... \}}，或者通过注册异常处理函数（ set\_exception\_handler()）来捕获 Error。
+
+\section{Error Handling}
+
+\subsection{error\_reporting()}
+
+
+\subsection{set\_error\_handler()}
+
+
+
+\section{Hierarchical structure}
+
+
+\subsection{Throwable}
+
+
+
+\subsection{ArithmeticError}
+
+
+
+\subsection{DivisionByZeroError}
+
+
+\subsection{AssertionError}
+
+
+\subsection{ParseError}
+
+
+\subsection{TypeError}
+
+
+
+
+
+

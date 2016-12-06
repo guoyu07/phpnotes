@@ -1,27 +1,30 @@
 \part{Functions}
 
+
+
+
+
+\chapter{Introduction}
+
+
 PHP提供了超过 700 个内建的函数，函数只需被编译一次就可以多次调用，因而PHP的真正威力源自于它的函数。
 
+PHP 支持函数是“第一等公民”，即函数可以被赋值给一个变量（包括用户自定义的或者是内置函数），然后动态调用它。函数可以作为参数传递给其他函数（称为高阶函数），也可以作为函数返回值返回。
 
 具体来说，函数是一种可以在任何被需要的时候执行的代码块，并且函数可以接受一组参数，然后返回操作结果。
 
 
 
-PHP 有很多标准的函数和结构。还有一些函数需要和特定地 PHP 扩展模块一起编译，否则在使用它们的时候就会得到一个致命的“未定义函数”错误。
+PHP 有很多标准的函数和结构，还有一些函数需要和特定地 PHP 扩展模块一起编译，否则在使用它们的时候就会得到一个致命的“未定义函数”错误。
 
-例如，要使用 image 函数中的 imagecreatetruecolor()，需要在编译 PHP 的时候加上 GD 的支持。或者，要使用 mysql\_connect() 函数，就需要在编译 PHP 的时候加上 MySQL 支持。有很多核心函数已包含在每个版本的 PHP 中如字符串和变量函数。调用 phpinfo() 或者 get\_loaded\_extensions() 可以得知 PHP 加载了那些扩展库。同时还应该注意，很多扩展库默认就是有效的。
+例如，要使用 image 函数中的 imagecreatetruecolor()，需要在编译 PHP 的时候加上 GD 的支持。或者，要使用 mysql\_connect() 函数，就需要在编译 PHP 的时候加上 MySQL 支持。
 
-通过阅读和理解一个函数的原型，可以确认一个函数将返回什么，或者函数是否直接作用于传递的参数。例如， str\_replace() 函数将返回修改过的字符串，而 usort() 却直接作用于传递的参数变量本身。
-
-
-
-如果传递给函数的参数类型与实际的类型不一致，例如将一个 array 传递给一个 string 类型的变量，那么函数的返回值是不确定的。在这种情况下，通常函数会返回 NULL。但这仅仅是一个惯例，并不一定如此。
-
-了解这些重要的（常常是细微的）差别是编写正确的 PHP 代码的关键。
+PHP的核心函数（例如字符串和变量函数）大多已经包含在每个版本的 PHP 中，调用 phpinfo() 或者 get\_loaded\_extensions() 可以得知 PHP 加载了哪些扩展库，而且很多扩展库默认就是有效的。
 
 
 
-\chapter{Introduction}
+
+
 
 
 \section{Function Prototype}
@@ -40,7 +43,7 @@ function foo($arg_1, $arg_2, /* ..., */ $arg_n)
 ?>
 \end{lstlisting}
 
-
+函数的原型说明了函数的返回值，或者函数是否直接作用于传递的参数。例如， str\_replace() 函数将返回修改过的字符串，而 usort() 却直接作用于传递的参数变量本身。
 
 \begin{compactitem}
 \item 所有的函数都使用关键词``\texttt{function()}" 来开始
@@ -112,13 +115,6 @@ in\_array() 返回一个“布尔”值，成功（如果在参数 haystack 中�
 (PHP 4 >= 4.3.0, PHP 5)
 \end{verbatim}
 
-它意味着该函数不可在 PHP 3 中使用，只可在 PHP 4.3.0 及以后发布的版本中使用。
-
-
-
-
-
-
 比较下面两个简单的函数，在其被调用时能输出名字。
 
 
@@ -145,7 +141,7 @@ echo writeMyName();
 
 
 
-函数无需在调用之前被定义，除非是下面两个例子中函数是有条件被定义时。
+函数无需在调用之前被定义，除非函数是有条件被定义时。
 
 \begin{tabular}{m{190pt}m{2pt}m{190pt}}
 /* 有条件的函数 */ 
@@ -244,13 +240,15 @@ function\_exists()函数用于检查指定的函数是否存在，这样在不�
 
 
 
-\section{Function Usage}
+\section{Function Scope}
 
-PHP 中的所有函数和类都具有全局作用域，可以定义在一个函数之内而在之外调用，反之亦然。
+PHP 中的所有函数和类都具有全局作用域，可以在内部定义一个函数而在外部调用，反之亦然。
 
-PHP 不支持函数重载，也不可能取消定义或者重定义已声明的函数。
+\begin{compactitem}
+\item PHP 不支持函数重载，也不可能取消定义或者重定义已声明的函数。
+\item PHP 的函数支持可变数量的参数和默认参数。
+\end{compactitem}
 
-PHP 的函数支持可变数量的参数和默认参数。
 
 
 下面的示例演示了如何在PHP脚本中使用定义的函数：
@@ -273,8 +271,10 @@ echo " is my name.";
 
 \section{Recursive Functions}
 
+PHP 支持递归（也就是函数自己调用自己），虽然多数 PHP 代码使用迭代。
 
-在 PHP 中可以调用递归函数，不过要避免递归函数/方法调用超过 100-200 层，否则可能导致堆栈崩溃并使当前脚本终止。
+
+PHP调用递归函数时要避免递归函数/方法调用超过 100-200 层，否则可能导致堆栈崩溃并使当前脚本终止。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -308,10 +308,15 @@ function Fractorial($n){
 
 在使用PHP开发应用程序时，递归的应用包括文件目录的搜索和删除等，不过需要注意设计不合理的递归运算可能需要耗费大量的系统资源，因此在使用递归解决问题时需要限制递归的层数。
 
+无限递归可视为编程错误。
 
 \section{Function Parameter}
 
-每个函数名称后面都有一个括号，比如 writeMyName()，而参数就是在括号中规定的，而且参数是从左向右求值的。
+
+
+每个函数名称后面都有一个括号（比如 writeMyName()），参数就是在括号中规定的。例如，可以向函数传递数组：
+
+
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -343,9 +348,19 @@ writeMyName("John");
 ?>
 \end{lstlisting}
 
-可以通过添加参数向函数添加更多的功能，其中参数类似一个变量。
+如果传递给函数的参数类型与实际的类型不一致，例如将一个 array 传递给一个 string 类型的变量，那么函数的返回值是不确定的，虽然通常会返回 NULL，不过实际并不确定。
 
-函数的参数列表是以逗号分隔的变量和常量的列表，可以将外部信息通过参数列表传入函数。例如，下面示例中的函数的参数列表包含两个参数：
+了解这些重要的（常常是细微的）差别是编写正确的 PHP 代码的关键。
+
+\begin{compactitem}
+\item 添加参数可以向函数添加更多的功能，其中参数类似一个变量。
+
+\item 参数列表可以传递信息到函数，即以逗号作为分隔符的表达式列表，而且参数是从左向右求值的。
+
+\item 外部信息可以通过参数列表传入函数。
+\end{compactitem}
+
+例如，下面示例中的函数的参数列表包含两个参数：
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -370,45 +385,6 @@ writeMyName("John","...");
 \item 在调用PHP函数时，将自动为没有赋值的参数赋予对应类型类型的默认值。
 \end{compactitem}
 
-PHP 在用户自定义函数中支持可变数量的参数列表，只需使用 func\_num\_args()， func\_get\_arg()，和 func\_get\_args() 函数。
-
-\begin{compactitem}
-\item func\_get\_args()函数作用于自定义函数内部，返回一个包含所有传递给函数的参数的数组。
-
-\begin{lstlisting}[language=PHP]
-<?php
-function more_args(){
-	$args = func_get_args();
-	foreach($args as $current_arg){
-		echo $current_arg . PATH_SEPARATOR;
-	}
-}
-more_args("A","B","C");
-?>
-\end{lstlisting}
-
-\item func\_num\_args()函数返回参数的总数。
-
-\begin{lstlisting}[language=PHP]
-<?php
-function more_args(){
-	$num = func_num_args();
-	for($i=0; $i<$num; $i++){
-		$current_arg = func_get_arg($i);
-		echo $current_arg . PATH_SEPARATOR;
-	}
-}
-?>
-\end{lstlisting}
-
-
-\item func\_num\_arg()函数接受一个数字参数，并返回指定的参数。
-
-\end{compactitem}
-
-
-
-可变参数并不需要特别的语法，参数列表仍按函数定义的方式传递给函数，并按通常的方式使用这些参数。
 
 
 
@@ -416,10 +392,10 @@ function more_args(){
 
 
 
-PHP 支持按值传递参数，通过引用传递参数以及默认参数\footnote{自 PHP 5 起，默认值才可以通过引用传递。}，而且PHP也支持可变长度参数列表。
+PHP 支持按值传递参数，通过引用传递参数以及默认参数\footnote{自 PHP 5 起，默认值才可以通过引用传递。}，也支持可变长度参数列表。其中，可变长度参数并不需要特别的语法，参数列表仍按函数定义的方式传递给函数，并按通常的方式使用这些参数。
 
 
-默认情况下，函数参数通过值传递（因而即使在函数内部改变参数的值，它并不会改变函数外部的值）。
+默认情况下，函数参数通过值传递，即使在函数内部改变参数的值，也不会改变函数外部的值。
 
 \begin{compactitem}
 \item 如果希望函数内部的改变不影响到函数外部，可以按值来传递参数。
@@ -428,7 +404,7 @@ PHP 支持按值传递参数，通过引用传递参数以及默认参数\footno
 
 变量和变量地址类似于旅馆中的房间和房间号码，PHP中的引用就是变量的“房间号码”，通过号码可以很容易找到变量。
 
-引用可以高效地处理大型变量、数组和对象，使用引用向函数传递参数时可以在函数定义中的对应参数的前面加上符号 \&。
+引用可以高效地处理大型变量、数组和对象，总是使用引用向函数传递参数时可以在函数定义中的对应参数的前面加上符号 \&，而且传引用的参数也可以有默认值。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -450,7 +426,7 @@ echo $str;    // outputs 'This is a string, and something extra.'
 
 
 
-PHP函数可以定义 C++ 风格的标量参数默认值，如下所示：
+PHP函数可以定义 C++ 风格的标量参数默认值。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -487,9 +463,9 @@ echo makecoffee(array("cappuccino", "lavazza"), "teapot");
 \end{lstlisting}
 
 
-默认值必须是常量表达式，不能是诸如变量，类成员，或者函数调用等。
+默认值必须是常量表达式，不能是变量、类成员或者函数调用等。
 
-注意当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧；否则，函数将不会按照预期的情况工作。考虑下面的代码片断：
+注意，当使用默认参数时，任何默认参数必须放在任何非默认参数的右侧，否则函数将不会按照预期的情况工作。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -532,18 +508,363 @@ Making a bowl of acidophilus raspberry.
 \end{verbatim}
 
 
+\section{Type declarations}
 
-\section{Function Return Values}
+类型声明允许函数在被调用时接收确定类型的参数，传入类型不符的参数会导致错误。
 
-函数也能用于返回值，值通过使用可选的返回语句返回。
+\begin{compactitem}
+\item PHP5产生可恢复的FATAL error；
+\item PHP7抛出TypeError错误。
+\end{compactitem}
 
-显式的return语句表示函数执行结束，并返回执行结果。如果省略了return，则返回值为NULL，这样函数的作用和过程类似。
+如果需要指定类型声明，需要在参数列表中指定参数类型。如果参数的默认值为NULL，那么参数声明可以接收NULL。
+
+
+\begin{longtable}{|m{80pt}|m{250pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+类型&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{类型声明可接受的类型}\\
+\hline
+类型&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+
+\hline
+class/interface name & 指定的类或接口的名字\\
+\hline
+array & 数组\\
+\hline
+callable & 有效的回调\\
+\hline
+bool & 布尔值\\
+\hline
+float & 浮点数\\
+\hline
+int & 整数\\
+\hline
+string & 字符串\\
+\hline
+\end{longtable}
+
+下面的示例说明了类型声明抛出TypeError错误的情况。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class C {}
+class D extends C {}
+
+// This doesn't extend C.
+class E {}
+
+function f(C $c) {
+    echo get_class($c)."\n";
+}
+
+f(new C);
+f(new D);
+f(new E);
+?>
+\end{lstlisting}
+
+
+上述示例的输出如下：
+
+
+\begin{lstlisting}[language=PHP]
+C
+D
+
+Fatal error: Uncaught TypeError: Argument 1 passed to f() must be an instance of C, instance of E given, called in - on line 14 and defined in -:8
+Stack trace:
+#0 -(14): f(Object(E))
+#1 {main}
+  thrown in - on line 8
+\end{lstlisting}
+
+
+如果类型声明中的参数要求是某个接口名，但是传入的参数未实现该接口也会抛出TypeError错误。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+interface I { public function f(); }
+class C implements I { public function f() {} }
+
+// This doesn't implement I.
+class E {}
+
+function f(I $i) {
+    echo get_class($i)."\n";
+}
+
+f(new C);
+f(new E);
+?>
+\end{lstlisting}
+
+上述示例会输出如下的结果：
+
+
+\begin{lstlisting}[language=PHP]
+C
+
+Fatal error: Uncaught TypeError: Argument 1 passed to f() must implement interface I, instance of E given, called in - on line 13 and defined in -:8
+Stack trace:
+#0 -(13): f(Object(E))
+#1 {main}
+  thrown in - on line 8
+\end{lstlisting}
+
+如果类型声明中可以接受的类实例有默认值NULL，那么就可以直接传入NULL，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+class C {}
+
+function f(C $c = null) {
+    var_dump($c);
+}
+
+f(new C);
+f(null);
+?>
+\end{lstlisting}
+
+上述示例会输出：
+
+\begin{lstlisting}[language=PHP]
+object(C)#1 (0) {
+}
+NULL
+\end{lstlisting}
+
+\section{Strict Typing}
+
+
+默认情况下，PHP会强制将错误的类型转换成期望的标量类型，例如一个参数类型为string的函数来接受到整型变量时会将其转换为string类型。
+
+如果开启强制类型，那么只有类型一致的变量才会被接受，否则会抛出TypeError错误。这里，唯一的例外是可以向类型声明为float的函数传入int型变量。
+
+需要在declare语句中指定strict\_types来启用严格模式，同时也会影响返回值的类型声明。
+
+\begin{lstlisting}[language=PHP]
+declare(strict_types=1);
+
+function sum(int $a, int $b) {
+    return $a + $b;
+}
+
+var_dump(sum(1, 2));
+var_dump(sum(1.5, 2.5));
+?>
+\end{lstlisting}
+
+如果不开启严格模式，那么上述示例是正常的，开启严格模式后就会输出：
+
+\begin{lstlisting}[language=PHP]
+int(3)
+
+Fatal error: Uncaught TypeError: Argument 1 passed to sum() must be of the type integer, float given, called in - on line 9 and defined in -:4
+Stack trace:
+#0 -(9): sum(1.5, 2.5)
+#1 {main}
+  thrown in - on line 4
+\end{lstlisting}
+
+Strict typing applies to function calls made from within the file with strict typing enabled, not to the functions declared within that file. If a file without strict typing enabled makes a call to a function that was defined in a file with strict typing, the caller's preference (weak typing) will be respected, and the value will be coerced.
+
+Strict typing is only defined for scalar type declarations, and as such, requires PHP 7.0.0 or later, as scalar type declarations were added in that version.
+
+如果需要捕获TypeError错误，可以使用try/catch，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+declare(strict_types=1);
+
+function sum(int $a, int $b) {
+    return $a + $b;
+}
+
+try {
+    var_dump(sum(1, 2));
+    var_dump(sum(1.5, 2.5));
+} catch (TypeError $e) {
+    echo 'Error: '.$e->getMessage();
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{lstlisting}[language=PHP]
+int(3)
+Error: Argument 1 passed to sum() must be of the type integer, float given, called in - on line 10
+\end{lstlisting}
+
+\section{Variadic arguments}
+
+PHP 在用户自定义函数中支持可变数量的参数列表。
+
+在 PHP 5.5 及更早版本中使用 func\_num\_args()， func\_get\_arg()和 func\_get\_args() 函数，在 PHP 5.6 及以上的版本中可以由 \texttt{...} 语法实现。
+
+\begin{compactitem}
+\item func\_get\_args()函数作用于自定义函数内部，返回一个包含所有传递给函数的参数的数组。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function more_args(){
+	$args = func_get_args();
+	foreach($args as $current_arg){
+		echo $current_arg . PATH_SEPARATOR;
+	}
+}
+more_args("A","B","C");
+?>
+\end{lstlisting}
+
+\item func\_num\_args()函数返回参数的总数。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function more_args(){
+	$num = func_num_args();
+	for($i=0; $i<$num; $i++){
+		$current_arg = func_get_arg($i);
+		echo $current_arg . PATH_SEPARATOR;
+	}
+}
+?>
+\end{lstlisting}
+
+
+\item func\_num\_arg()函数接受一个数字参数，并返回指定的参数。
+
+\end{compactitem}
+
+
+在PHP5.6以及以后，参数列表可以接受\texttt{...}来说明函数可以接受可变数量的参数列表，而且支持以数组的形式向函数传入变量。例如，下面的示例就可以把接收到的变量列表以数组的形式进行存储和处理，最终输出结果为10。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function sum(...$numbers) {
+    $acc = 0;
+    foreach ($numbers as $n) {
+        $acc += $n;
+    }
+    return $acc;
+}
+
+echo sum(1, 2, 3, 4);
+?>
+\end{lstlisting}
+
+支持可变数量的参数列表的函数也可以用来解包数组或Traversable类型的变量或者遍历参数列表，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+function add($a, $b) {
+    return $a + $b;
+}
+
+echo add(...[1, 2])."\n";
+
+$a = [1, 2];
+echo add(...$a);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{lstlisting}[language=PHP]
+3
+3
+\end{lstlisting}
+
+You may specify normal positional arguments before the \texttt{...} token. In this case, only the trailing arguments that don't match a positional argument will be added to the array generated by \texttt{...}.
+
+It is also possible to add a type hint before the \texttt{...} token. If this is present, then all arguments captured by \texttt{...} must be objects of the hinted class.
+
+\begin{lstlisting}[language=PHP]
+<?php
+function total_intervals($unit, DateInterval ...$intervals) {
+    $time = 0;
+    foreach ($intervals as $interval) {
+        $time += $interval->$unit;
+    }
+    return $time;
+}
+
+$a = new DateInterval('P1D');
+$b = new DateInterval('P2D');
+echo total_intervals('d', $a, $b).' days';
+
+// This will fail, since null isn't a DateInterval object.
+echo total_intervals('d', null);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{lstlisting}[language=PHP]
+3 days
+Catchable fatal error: Argument 2 passed to total_intervals() must be an instance of DateInterval, null given, called in - on line 14 and defined in - on line 2
+\end{lstlisting}
+
+You may also pass variable arguments by reference by prefixing the \texttt{...} with an ampersand (\&).
+
+在旧版本的PHP中没有指定的语法来说明函数是否接收可变数量的参数列表，需要func\_num\_args()、func\_get\_arg()和func\_get\_args()。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function sum() {
+    $acc = 0;
+    foreach (func_get_args() as $n) {
+        $acc += $n;
+    }
+    return $acc;
+}
+
+echo sum(1, 2, 3, 4);
+?>
+\end{lstlisting}
+
+上述示例输出的结果同样会是10。
+
+\subsection{func\_get\_args()}
+
+\subsection{func\_num\_args()}
+
+
+\subsection{func\_num\_arg()}
 
 
 
-函数可以返回的值包括数组和对象的任意类型，返回语句会立即中止函数的运行，并且将控制权交回调用该函数的代码行。
+\section{Return Values}
 
-函数的参数和返回值类型都是不受限制的，可以是标量，也可以是对象或资源，而且实际上参数列表和return都不是必须的。
+
+
+函数中的显式的return语句表示函数执行结束，并返回执行结果。如果省略了return，则返回值为NULL，这样函数的作用和过程类似。
+
+函数也能用于返回值，值通过使用可选的返回语句返回，可以返回的值包括数组和对象的任意类型，而且返回语句会立即中止函数的运行，并且将控制权交回调用该函数的代码行。
+
+实际上，函数的参数和返回值类型都是不受限制的，可以是标量，也可以是对象或资源，而且参数列表和return都不是必须的。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -558,7 +879,7 @@ echo "1 + 16 = " . add(1,16);
 \end{lstlisting}
 
 
-函数不能返回多个值，但可以通过返回一个数组来得到类似的效果。
+函数不能返回多个值，但是可以通过返回一个数组来得到类似的效果。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -570,7 +891,7 @@ list ($zero, $one, $two) = small_numbers();
 ?>
 \end{lstlisting}
 
-从函数返回一个引用，必须在函数声明和指派返回值给一个变量时都使用引用运算符 \&：
+从函数返回一个引用，必须在函数声明和指派返回值给一个变量时都使用引用运算符 \&。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -583,14 +904,82 @@ $newref =& returns_reference();
 ?>
 \end{lstlisting}
 
+从PHP7开始支持返回值类型声明，而且严格类型模式同时影响参数类型声明和返回值类型声明，类型错误都会抛出TypeError错误。
+
+如果需要重写父类的方法，子类的方法必须可以匹配父类中的任何返回值类型声明，即使父类中没有指定返回类型。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function sum($a, $b): float {
+    return $a + $b;
+}
+
+// Note that a float will be returned.
+var_dump(sum(1, 2));
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{lstlisting}[language=PHP]
+float(3)
+\end{lstlisting}
+
+下面的示例中进行严格类型声明：
+
+\begin{lstlisting}[language=PHP]
+<?php
+declare(strict_types=1);
+
+function sum($a, $b): int {
+    return $a + $b;
+}
+
+var_dump(sum(1, 2));
+var_dump(sum(1, 2.5));
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{lstlisting}[language=PHP]
+int(3)
+
+Fatal error: Uncaught TypeError: Return value of sum() must be of the type integer, float returned in - on line 5 in -:5
+Stack trace:
+#0 -(9): sum(1, 2.5)
+#1 {main}
+  thrown in - on line 5
+\end{lstlisting}
+
+如果在函数定义时指定了返回值类型，那么必须返回值必须匹配声明。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class C {}
+
+function getC(): C {
+    return new C;
+}
+
+var_dump(getC());
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{lstlisting}[language=PHP]
+object(C)#1 (0) {
+}
+\end{lstlisting}
 
 \chapter{Variable functions}
 
 
-PHP 支持可变函数的概念。这意味着如果一个变量名后有圆括号，PHP 将寻找与变量的值同名的函数，并且尝试执行它。可变函数可以用来实现包括回调函数，函数表在内的一些用途。
+PHP 支持可变函数的概念，这样如果一个变量名后有圆括号，PHP 将寻找与变量的值同名的函数，并且尝试执行它。
 
-
-可变函数不能用于例如 echo， print， unset()， isset()， empty()， include， require 以及类似的语言结构。需要使用自己的包装函数来将这些结构用作可变函数。
+可变函数可以用来实现包括回调函数和函数表等，但是可变函数不能用于例如 echo， print， unset()， isset()， empty()， include， require 以及类似的语言结构，需要使用自己的包装函数来将这些结构用作可变函数。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -661,14 +1050,15 @@ class Foo
 echo Foo::$variable; // This prints 'static property'. It does need a $variable in this scope.
 $variable = "Variable";
 Foo::$variable();  // This calls $foo->Variable() reading $variable in this scope.
-
 ?>
 \end{lstlisting}
 
 
 \chapter{Anonymous functions}
 
-匿名函数（Anonymous functions），也叫闭包函数（closures），允许 临时创建一个没有指定名称的函数。最经常用作回调函数（callback）参数的值。当然，也有其它应用的情况。
+匿名函数（Anonymous functions）也叫闭包函数（closures），允许临时创建一个没有指定名称的函数。
+
+匿名函数经常用作回调函数（callback）参数的值，当然也有其它应用的情况。
 
 
 \begin{lstlisting}[language=PHP]
@@ -680,7 +1070,9 @@ echo preg_replace_callback('~-([a-z])~', function ($match) {
 ?>
 \end{lstlisting}
 
-闭包函数也可以作为变量的值来使用。PHP 会自动把此种表达式转换成内置类 Closure 的对象实例。把一个 closure 对象赋值给一个变量的方式与普通变量赋值的语法是一样的，最后也要加上分号。
+闭包函数也可以作为变量的值来使用，而且匿名函数通过 Closure 类来实现的，因此PHP 会自动把此种表达式转换成内置类 Closure 的对象实例。
+
+把一个 closure 对象赋值给一个变量的方式与普通变量赋值的语法是一样的，最后也要加上分号。
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -694,7 +1086,74 @@ $greet('PHP');
 ?>
 \end{lstlisting}
 
-Closure 对象也会从父作用域中继承类属性。这些变量都必须在函数或类的头部声明。从父作用域中继承变量与使用全局变量是不同的。全局变量存在于一个全局的范围，无论当前在执行的是哪个函数。而 closure 的父作用域则是声明该 closure 的函数（不一定要是它被调用的函数）。示例如下：
+闭包可以从父作用域中继承变量，任何此类变量都应该用 use 语言结构传递进去，这些变量都必须在函数或类的头部声明。
+
+\begin{example}
+从父作用域继承变量
+\begin{lstlisting}[language=PHP]
+<?php
+$message = 'hello';
+
+// 没有 "use"
+$example = function () {
+    var_dump($message);
+};
+echo $example();
+
+// 继承 $message
+$example = function () use ($message) {
+    var_dump($message);
+};
+echo $example();
+
+// Inherited variable's value is from when the function
+// is defined, not when called
+$message = 'world';
+echo $example();
+
+// Reset message
+$message = 'hello';
+
+// Inherit by-reference
+$example = function () use (&$message) {
+    var_dump($message);
+};
+echo $example();
+
+// The changed value in the parent scope
+// is reflected inside the function call
+$message = 'world';
+echo $example();
+
+// Closures can also accept regular arguments
+$example = function ($arg) use ($message) {
+    var_dump($arg . ' ' . $message);
+};
+$example("hello");
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{lstlisting}[language=PHP]
+Notice: Undefined variable: message in /example.php on line 6
+NULL
+string(5) "hello"
+string(5) "hello"
+string(5) "hello"
+string(5) "world"
+string(11) "hello world"
+\end{lstlisting}
+
+从父作用域中继承变量与使用全局变量是不同的，其中：
+
+\begin{compactitem}
+\item 全局变量存在于一个全局的范围，无论当前在执行的是哪个函数。
+\item closure 的父作用域则是声明该 closure 的函数（不一定要是它被调用的函数）。
+\end{compactitem}
+
+
 
 \begin{lstlisting}[language=PHP]
 <?php
@@ -750,9 +1209,7 @@ print $my_cart->getTotal(0.05) . "\n";
 ?>
 \end{lstlisting}
 
-匿名函数目前是通过 Closure 类来实现的，可以在 closure 中使用 func\_num\_args()， func\_get\_arg() 和 func\_get\_args()。
-
-自PHP 5.3.0起，可以使用匿名函数。自PHP 5.4.0起，\$this 可用于匿名函数。
+和可变长度的参数列表的函数相同，可以在 closure 中使用 func\_num\_args()， func\_get\_arg() 和 func\_get\_args()，而且\$this 可用于匿名函数。
 
 
 \chapter{PHP Script}
@@ -845,7 +1302,7 @@ array\_values()和array\_keys()函数都把数组作为一维的进行处理，�
 
 \subsection{array\_flip()}
 
-array_flip() 返回一个反转后的 array，例如 trans 中的键名变成了值，而 trans 中的值成了键名。
+array\_flip() 返回一个反转后的 array，例如 trans 中的键名变成了值，而 trans 中的值成了键名。
 
 
 \begin{lstlisting}[language=PHP]
@@ -1157,7 +1614,7 @@ array array_filter ( array $input [, callable $callback = "" ] )
 
 \subsection{array\_reduce()}
 
-array_reduce() 将回调函数 function 迭代地作用到 input 数组中的每一个单元中，从而将数组简化为单一的值。
+array\_reduce() 将回调函数 function 迭代地作用到 input 数组中的每一个单元中，从而将数组简化为单一的值。
 
 \begin{lstlisting}[language=PHP]
 mixed array_reduce ( array $input , callable $function [, mixed $initial = NULL ] )
@@ -1483,7 +1940,7 @@ System.out.println(Integer.MAX_VALUE);
 
 \begin{longtable}{|m{80pt}|m{250pt}|}
 %head
-\multicolumn{4}{r}{}
+\multicolumn{2}{r}{}
 \tabularnewline\hline
 语言&操作
 \endhead
@@ -1497,7 +1954,7 @@ System.out.println(Integer.MAX_VALUE);
 %endfirsthead
 
 %foot
-\multicolumn{4}{r}{}
+\multicolumn{2}{r}{}
 \endfoot
 %endfoot
 
@@ -1512,7 +1969,7 @@ JavaScript&\texttt{Math.round(new Date().getTime()/1000)}，getTime()返回数�
 \hline
 Microsoft .NET / C\#&\texttt{epoch = (DateTime.Now.ToUniversalTime().Ticks - 621355968000000000) / 10000000}\\
 \hline
-MySQL	&\texttt{SELECT unix_timestamp(now())}\\
+MySQL	&\texttt{SELECT unix\_timestamp(now())}\\
 \hline
 Perl	&\texttt{time}\\
 \hline
@@ -1546,7 +2003,7 @@ Perl命令行状态&\texttt{perl -e "print time"}\\
 
 \begin{longtable}{|m{80pt}|m{250pt}|}
 %head
-\multicolumn{4}{r}{}
+\multicolumn{2}{r}{}
 \tabularnewline\hline
 语言&操作
 \endhead
@@ -1560,7 +2017,7 @@ Perl命令行状态&\texttt{perl -e "print time"}\\
 %endfirsthead
 
 %foot
-\multicolumn{4}{r}{}
+\multicolumn{2}{r}{}
 \endfoot
 %endfoot
 
@@ -1578,8 +2035,8 @@ Linux	&\texttt{date -d @Unix timestamp}\\
 \hline
 MySQL	&\texttt{from\_unixtime(Unix timestamp)}\\
 \hline
-\multirow{2}{80pt}{Perl}	&\texttt{my $time = Unix timestamp}\\ \cline{1-2}
-		&\texttt{my ($sec, $min, $hour, $day, $month, $year) = (localtime($time))[0,1,2,3,4,5,6]}\\
+\multirow{2}{80pt}{Perl}	&\texttt{my \$time = Unix timestamp}\\ \cline{1-2}
+		&\texttt{my (\$sec, \$min, \$hour, \$day, \$month, \$year) = (localtime(\$time))[0,1,2,3,4,5,6]}\\
 \hline
 PHP		&\texttt{date('r', Unix timestamp)}\\
 \hline
@@ -1588,11 +2045,11 @@ PostgreSQL&\texttt{SELECT TIMESTAMP WITH TIME ZONE 'epoch' + Unix timestamp) * I
 \multirow{2}{80pt}{Python}	&\texttt{import time}\\ \cline{1-2}
 		&\texttt{time.gmtime(Unix timestamp)}\\
 \hline
-Ruby	&Time.at(Unix timestamp)}\\
+Ruby	&\texttt{Time.at(Unix timestamp)}\\
 \hline
 SQL Server&\texttt{DATEADD(s, Unix timestamp, '1970-01-01 00:00:00')}\\
 \hline
-VBScript / ASP&DateAdd("s", Unix timestamp, "01/01/1970 00:00:00")}\\
+VBScript / ASP&\texttt{DateAdd("s", Unix timestamp, "01/01/1970 00:00:00")}\\
 \hline
 Perl命令行状态&\texttt{perl -e "print scalar(localtime(Unix timestamp))"}\\
 \hline
@@ -1604,7 +2061,7 @@ Perl命令行状态&\texttt{perl -e "print scalar(localtime(Unix timestamp))"}\\
 
 \begin{longtable}{|m{80pt}|m{250pt}|}
 %head
-\multicolumn{4}{r}{}
+\multicolumn{2}{r}{}
 \tabularnewline\hline
 语言&操作
 \endhead
@@ -1618,7 +2075,7 @@ Perl命令行状态&\texttt{perl -e "print scalar(localtime(Unix timestamp))"}\\
 %endfirsthead
 
 %foot
-\multicolumn{4}{r}{}
+\multicolumn{2}{r}{}
 \endfoot
 %endfoot
 
@@ -1634,13 +2091,13 @@ JavaScript&\texttt{var commonTime = new Date(Date.UTC(year, month - 1, day, hour
 MySQL	&\texttt{SELECT unix\_timestamp(time)}，时间格式: YYYY-MM-DD HH:MM:SS 或 YYMMDD 或 YYYYMMDD\\
 \hline
 Perl	&\texttt{use Time::Local}\\ \cline{1-2}
-	&\texttt{my $time = timelocal(\$sec, \$min, \$hour, \$day, \$month, \$year);}\\
+	&\texttt{my \$time = timelocal(\$sec, \$min, \$hour, \$day, \$month, \$year);}\\
 \hline
 PHP	&\texttt{mktime(hour, minute, second, month, day, year)}\\
 \hline
 PostgreSQL &\texttt{SELECT extract(epoch FROM date('YYYY-MM-DD HH:MM:SS'));}\\
 \hline
-\multirow{80pt}{Python}&\texttt{import time}\\ \cline{1-2}
+\multirow{2}{80pt}{Python}&\texttt{import time}\\ \cline{1-2}
 		&\texttt{int(time.mktime(time.strptime('YYYY-MM-DD HH:MM:SS', '\%Y-\%m-\%d \%H:\%M:\%S')))}\\
 \hline
 Ruby	&\texttt{Time.local(year, month, day, hour, minute, second)}\\
@@ -3356,7 +3813,7 @@ PHP提供了与目录操作相关的函数，也可以使用目录类实现对�
 
 \item readdir()返回目录中下一个文件的文件名。文件名以在文件系统中的排序返回。
 
-\item closedir()关闭由 dir_handle 指定的目录流。流必须之前被 opendir() 所打开。
+\item closedir()关闭由 dir\_handle 指定的目录流。流必须之前被 opendir() 所打开。
 
 \end{compactitem}
 
@@ -3479,7 +3936,7 @@ glob() 函数依照 libc glob() 函数使用的规则寻找所有与 pattern 匹
 
 glob()函数的返回值是一个包含目录检索结果的数组，其原型如下：
 
-\begin{lstlisting}[language=PHP
+\begin{lstlisting}[language=PHP]
 array glob ( string $pattern [, int $flags = 0 ] )
 \end{lstlisting}
 
@@ -3491,7 +3948,7 @@ array glob ( string $pattern [, int $flags = 0 ] )
 
 下面的示例说明如何使用glob()函数实现检索目录文件。
 
-\begin{lstlisting}[language=PHP
+\begin{lstlisting}[language=PHP]
 <?php
 	//检索当前目录中的所有“*.txt”文件
 	$files = glob("*.txt");
