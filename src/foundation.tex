@@ -2943,16 +2943,19 @@ I am B.
 \chapter{Superglobals}
 
 
+\section{Overview}
+
+
 PHP实现了自己的外部变量机制，因此可以以简单的方式来处理表单数据，获取环境变量等，并将外部数据或变量保存到全局数组变量中。
 
 
 
 
-对于全部脚本而言，PHP 提供了大量的预定义变量，而且这些预定义变量依赖于运行的服务器的版本和设置以及其它因素。
+对于全部脚本而言，PHP 提供了大量的预定义变量，不过这些预定义变量依赖于运行的服务器的版本和设置以及其它因素。
 
 
 
-一些预定义变量在 PHP 以命令行形式运行时并不生效，不过如果有可用的 PHP 预定义变量那还是最好使用（例如超全局数组等）。
+注意，一些预定义变量在 PHP 以命令行形式运行时并不生效，不过如果有可用的 PHP 预定义变量那还是最好使用（例如超全局数组等）。
 
 预定义变量可以让PHP将所有的外部变量表示成内建环境变量，并且将错误信息表示成返回头。
 
@@ -2960,29 +2963,37 @@ PHP实现了自己的外部变量机制，因此可以以简单的方式来处�
 
 
 
-PHP提供的附加的预定义数组变量包含了来自Web服务器、运行环境和用户输入的数据，而且这些数组非常特别，它们在全局范围内自动生效，因此通常被称为自动全局变量（autoglobals）或者超全局变量（superglobals）。
+具体来说，PHP提供的附加的预定义数组变量包含了来自Web服务器、运行环境和用户输入的数据，而且这些数据的特别之处在于它们是在全局范围内自动生效的，因此通常被称为自动全局变量（autoglobals）或者超全局变量（superglobals）。
 
 
 
-PHP超全局变量是在全部作用域中始终可用的内置变量，包括\$GLOBALS、\$\_SERVER、\$\_GET、\$\_POST、\$\_FILES、\$\_COOKIE、\$\_SESSION、\$\_REQUEST、\$\_ENV等。
-
-注意，与所有其他超全局变量不同，\$GLOBALS在PHP中总是可用的。
-
-PHP 中的许多预定义变量都是“超全局的”，“Superglobal”也称为自动化的全局变量，它们在脚本的全部作用域中都可用，因此在函数或方法中无需执行\texttt{global \$variable;}就可以访问它们。
+PHP超全局变量是在全部作用域中始终可用的内置变量，包括\$GLOBALS\footnote{与所有其他超全局变量不同，\$GLOBALS在PHP中总是可用的。}、\$\_SERVER、\$\_GET、\$\_POST、\$\_FILES、\$\_COOKIE、\$\_SESSION、\$\_REQUEST、\$\_ENV等。
 
 
 
+PHP 中的许多预定义变量都是“超全局的”，因此“Superglobal”也称为自动化的全局变量，它们在脚本的全部作用域中都可用，因此在函数或方法中无需执行\texttt{global \$variable;}就可以访问它们。
 
-PHP 4.2.0 以及后续版本中，PHP 指令 register\_globals 的默认值为 off。这是 PHP 的一个主要变化，让 register\_globals 的值为 off 将影响到预定义变量集在全局范围内的有效性。
+\subsection{register\_globals}
 
-例如，为了得到\texttt{DOCUMENT\_ROOT}的值，将必须使用\texttt{\$\_SERVER['DOCUMENT\_ROOT']}代替 \texttt{\$DOCUMENT\_ROOT}，又如，使用\texttt{\$\_GET['id']}来代替\texttt{\$id}从\url{http://www.example.com/test.php?id=3}中获取\texttt{id}值，亦或使用\texttt{\$\_ENV['HOME']}来代替\texttt{\$HOME}获取环境变量\texttt{HOME}的值。
+默认情况下，所有的超全局变量都是可用的，不过有一些指令会影响这种可用性。例如，PHP 的一个主要变化是register\_globals指令的默认值现在已经普遍设置为 off，这个事实（关闭register\_globals）将影响到预定义变量集在全局范围内的有效性。
 
-
-
-PHP 中没有用户自定义超全局变量的机制，而且超全局变量不能被用作函数或类方法中的可变变量。
+如果已经弃用的 register\_globals 指令被设置为 on 那么局部变量也将在脚本的全局作用域中可用。例如， \texttt{\$\_POST['foo']}也将以 \$foo 的形式存在。
 
 
-从PHP 5.0.0 起, 用 register\_long\_arrays 设置选项可禁用长类型的PHP 预定义变量数组。
+\begin{compactitem}
+\item 使用\texttt{\$\_SERVER['DOCUMENT\_ROOT']}代替 \texttt{\$DOCUMENT\_ROOT}来得到\texttt{DOCUMENT\_ROOT}的值。
+\item 使用\texttt{\$\_GET['id']}代替\texttt{\$id}从\url{http://www.example.com/test.php?id=3}中获取\texttt{id}值。
+\item 使用\texttt{\$\_ENV['HOME']}代替\texttt{\$HOME}获取环境变量\texttt{HOME}的值。
+\end{compactitem}
+
+
+
+PHP没有提供用户自定义超全局变量的机制，而且超全局变量也不能被用作函数或类方法中的可变变量。
+
+\subsection{register\_long\_arrays}
+
+
+PHP的register\_long\_arrays设置选项可禁用长类型的PHP 预定义变量数组。
 
 超全局变量和 HTTP\_*\_VARS 尽管可能同时存在，但是它们并不是同一个变量，所以改变其中一个的值并不会对另一个产生影响。
 
@@ -3002,14 +3013,15 @@ Email地址是：<?php echo $_GET['email']; ?>
 </pre>
 \end{lstlisting}
 
-
-
-
 PHP中的超全局变量\$\_GET和\$\_POST可以自动获取表单的HTML数据，并且可以以数组的方式来进行操作。
 
-\$\_REQUEST不仅包含\$\_GET和\$\_POST的值，还包括\$\_COOKIE的值。
+\begin{compactitem}
+\item \$\_REQUEST不仅包含\$\_GET和\$\_POST的值，还包括\$\_COOKIE的值。
 
-另外，\$\_REQUEST对\$\_GET、\$\_POST和\$\_COOKIE的包含是有顺序的，由php.ini中的variable\_order选项决定。例如，如果variable\_order的值为EGPCS，那么在\$\_REQUEST中的GET方法将覆盖POST方法的同名变量。
+\item \$\_REQUEST对\$\_GET、\$\_POST和\$\_COOKIE的包含是有顺序的，由php.ini中的variable\_order选项决定。
+\end{compactitem}
+
+例如，如果variable\_order的值为EGPCS，那么在\$\_REQUEST中的GET方法将覆盖POST方法的同名变量。
 
 如果php.ini中的某些 variables\_order 中的变量没有设定，它们的对应的 PHP 预定义数组也是空的。
 
@@ -3035,13 +3047,9 @@ Cookie和Session为PHP提供了两种不同的会话机制，可以允许Web应�
 
 \section{\$GLOBALS}
 
-\$GLOBALS——引用全局作用域中可用的全部变量。
-
-\$GLOBALS是一个包含了全部变量的全局组合数组，变量的名字就是数组的键。
+\$GLOBALS可以引用全局作用域中可用的全部变量，\$GLOBALS实际上是一个包含了全部变量的全局组合数组，其中变量的名字就是数组的键。
 
 
-\begin{example}
-\$GLOBALS 范例
 \begin{lstlisting}[language=PHP]
 <?php
 function test() {
@@ -3055,7 +3063,6 @@ $foo = "Example content";
 test();
 ?>
 \end{lstlisting}
-\end{example}
 
 以上例程的输出类似于：
 
@@ -3068,13 +3075,11 @@ $foo in current scope: local variable
 \section{\$\_SERVER}
 
 
-\$\_SERVER -- \$HTTP\_SERVER\_VARS$^{\text{[已弃用]}}$\footnote{自PHP4.1.0起，引入 \$\_SERVER，弃用 \$HTTP\_SERVER\_VARS。}——服务器和执行环境信息。
-
-\$\_SERVER 是一个包含了诸如头信息(header)、路径(path)、以及脚本位置(script locations)等等信息的数组。这个数组中的项目由 Web 服务器创建。
+\$\_SERVER（服务器和执行环境信息）是一个包含了诸如头信息(header)、路径(path)、以及脚本位置(script locations)等等信息的数组。这个数组中的项目由 Web 服务器创建。
 
 实际上，无法保证每个服务器都提供全部项目，服务器可能会忽略一些，或者提供一些没有在这里列举出来的项目，这也就意味着大量的此类变量都会在CGI 1.1 规范中说明。
 
-\$HTTP\_SERVER\_VARS 包含着相同的信息，但它不是一个超全局变量，\$HTTP\_SERVER\_VARS 与 \$\_SERVER 是不同的变量，PHP处理它们的方式不同。
+虽然\$HTTP\_SERVER\_VARS（已弃用）包含着相同的信息，但它不是一个超全局变量，\$HTTP\_SERVER\_VARS 与 \$\_SERVER 是不同的变量，PHP处理它们的方式不同。
 
 
 如果以命令行方式运行 PHP，下面列出的元素几乎没有有效的(或是没有任何实际意义的)。
@@ -3168,14 +3173,13 @@ URL中包含当前脚本的路径。这在页面需要指向自己时非常有�
 在被 PHP 处理之前，“PATH\_INFO” 的原始版本。
 \end{compactitem}
 
-\begin{example}
-\$\_SERVER 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 echo $_SERVER['SERVER_NAME'];
 ?>
 \end{lstlisting}
-\end{example}
+
 
 以上例程的输出类似于：
 
@@ -3188,7 +3192,7 @@ www.example.com
 
 
 
-\$\_GET -- \$HTTP\_GET\_VARS$^{\text{[已弃用]}}$\footnote{自PHP4.1.0起，引入 \$\_GET，弃用 \$HTTP\_GET\_VARS。}——HTTP GET 变量。
+
 
 \begin{compactitem}
 \item \$\_GET适用于HTTP查询字符串（query string），也就是URL中“?”之后的信息。
@@ -3196,16 +3200,15 @@ www.example.com
 \end{compactitem}
 
 
-\$HTTP\_GET\_VARS 包含相同的信息， 但它不是一个超全局变量，而且\$HTTP\_GET\_VARS 和 \$\_GET 是不同的变量，PHP 处理它们的方式是不同的。
+虽然\$HTTP\_GET\_VARS（已弃用）包含相同的信息， 但它不是一个超全局变量，而且\$HTTP\_GET\_VARS 和 \$\_GET 是不同的变量，PHP 处理它们的方式是不同的。
 
-\begin{example}
-\$\_GET 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 echo 'Hello ' . htmlspecialchars($_GET["name"]) . '!';
 ?>
 \end{lstlisting}
-\end{example}
+
 
 假设用户访问的是 \url{http://example.com/?name=Hannes}，以上例程的输出类似于：
 
@@ -3227,22 +3230,19 @@ Hello Hannes!
 
 \section{\$\_POST}
 
-\$\_POST -- \$HTTP\_POST\_VARS$^{\text{[已弃用]}}$\footnote{自PHP4.1.0起，引入 \$\_POST，弃用 \$HTTP\_POST\_VARS。}—— HTTP POST 变量。
+\$\_POST变量是通过 HTTP POST 方法传递给当前脚本的变量的数组。
 
-HTTP POST 变量是通过 HTTP POST 方法传递给当前脚本的变量的数组。
-
-\$HTTP\_POST\_VARS 包含相同的信息，但它不是一个超全局变量，而且\$HTTP\_POST\_VARS 和 \$\_POST 是不同的变量，PHP 处理它们的方式是不同的。
+虽然\$HTTP\_POST\_VARS（已弃用）包含相同的信息，但它不是一个超全局变量，而且\$HTTP\_POST\_VARS 和 \$\_POST 是不同的变量，PHP 处理它们的方式是不同的。
 
 
 
-\begin{example}
-\$\_POST 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 echo 'Hello ' . htmlspecialchars($_POST["name"]) . '!';
 ?>
 \end{lstlisting}
-\end{example}
+
 
 假设用户通过 HTTP POST 方式传递了参数\texttt{name=Hannes}，以上例程的输出类似于\texttt{Hello Hannes!}。
 
@@ -3316,19 +3316,19 @@ if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
 
 \section{\$\_FILES}
 
-\$\_FILES -- \$HTTP\_POST\_FILES$^{\text{[已弃用]}}$\footnote{自PHP4.1.0起，引入 \$\_FILES，弃用 \$HTTP\_POST\_FILES。}——HTTP 文件上传变量。
+\$\_FILES（HTTP 文件上传变量）是通过 HTTP POST 方式上传到当前脚本的项目的数组。
 
-HTTP FILES变量是通过 HTTP POST 方式上传到当前脚本的项目的数组。
-
-\$HTTP\_POST\_FILES 包含相同的信息，但它不是一个超全局变量，而且\$HTTP\_POST\_FILES 和 \$\_FILES 是不同的变量，PHP 处理它们的方式是不同的。
+虽然\$HTTP\_POST\_FILES（已弃用）包含相同的信息，但是它不是一个超全局变量，而且\$HTTP\_POST\_FILES 和 \$\_FILES 是不同的变量，PHP 处理它们的方式是不同的。
 
 
 \section{\$\_REQUEST}
 
 
-默认情况下，\$\_REQUEST\footnote{自PHP 4.1.0起，引入 \$\_REQUEST。}——HTTP Request 变量包含了 \$\_GET，\$\_POST 和 \$\_COOKIE 的数组\footnote{自PHP 4.3.0起，\$\_FILES 信息被从 \$\_REQUEST 中移除。}。
+默认情况下，\$\_REQUEST（HTTP Request 变量）包含了 \$\_GET，\$\_POST 和 \$\_COOKIE 的数组。
 
-由于 \$\_REQUEST 中的变量通过 GET，POST 和 COOKIE 输入机制传递给脚本文件，因此可以被远程用户篡改而并不可信。这个数组的项目及其顺序依赖于 PHP 的 variables\_order\footnote{自PHP 5.3.0起，引入 request\_order。该指令会影响 \$\_REQUEST 的内容。} 指令的配置。
+由于 \$\_REQUEST 中的变量通过 GET，POST 和 COOKIE 输入机制传递给脚本文件，因此可以被远程用户篡改而并不可信。
+
+\$\_REQUEST数组的项目及其顺序依赖于 PHP 的 variables\_order指令的配置。
 
 以命令行方式运行PHP时，\$\_REQUEST将不包含\texttt{argv}和\texttt{argc}信息，它们实际上存在于 \$\_SERVER 数组中。
 
@@ -3338,40 +3338,33 @@ HTTP FILES变量是通过 HTTP POST 方式上传到当前脚本的项目的数�
 \section{\$\_SESSION}
 
 
-\$\_SESSION -- \$HTTP\_SESSION\_VARS$^{\text{[已弃用]}}$\footnote{自PHP4.1.0起，引入 \$\_SESSION，弃用 \$HTTP\_SESSION\_VARS。}——Session 变量。
-
-
 \$\_SESSION变量是当前脚本可用 SESSION 变量的数组。
 
-\$HTTP\_SESSION\_VARS 包含相同的信息，但它不是一个超全局变量，\$HTTP\_SESSION\_VARS 和 \$\_SESSION 是不同的变量，PHP 处理它们的方式是不同的。
+虽然\$HTTP\_SESSION\_VARS（已弃用）包含相同的信息，但它不是一个超全局变量，\$HTTP\_SESSION\_VARS 和 \$\_SESSION 是不同的变量，PHP 处理它们的方式是不同的。
 
 
 \section{\$\_ENV}
 
 
-\$\_ENV -- \$HTTP\_ENV\_VARS$^{\text{[已弃用]}}$\footnote{自PHP4.1.0起，引入 \$\_ENV，弃用 \$HTTP\_ENV\_VARS。}——ENV 变量（环境变量）。
-
-
-\$\_ENV变量是通过环境方式传递给当前脚本的变量的数组。
+\$\_ENV（环境变量）是通过环境方式传递给当前脚本的变量的数组。
 
 这些变量被从 PHP 解析器的运行环境导入到 PHP 的全局命名空间。很多是由支持 PHP 运行的 Shell 提供的，并且不同的系统很可能运行着不同种类的 Shell，所以不可能有一份确定的列表。
 
 其他环境变量包含了 CGI 变量，而不管 PHP 是以服务器模块还是 CGI 处理器的方式运行。
 
-\$HTTP\_ENV\_VARS 包含相同的信息，但它不是一个超全局变量，\$HTTP\_ENV\_VARS 和 \$\_ENV 是不同的变量，PHP 处理它们的方式是不同的。
+虽然\$HTTP\_ENV\_VARS（已弃用）包含相同的信息，但它不是一个超全局变量，\$HTTP\_ENV\_VARS 和 \$\_ENV 是不同的变量，PHP 处理它们的方式是不同的。
 
 
 
 
 
-\begin{example}
-\$\_ENV 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 echo 'My username is ' .$_ENV["USER"] . '!';
 ?>
 \end{lstlisting}
-\end{example}
+
 
 假设\texttt{"bjori"}运行此段脚本，以上例程的输出类似于：
 
@@ -3384,25 +3377,20 @@ My username is bjori!
 
 \section{\$\_COOKIE}
 
-\$\_COOKIE -- \$HTTP\_COOKIE\_VARS$^{\text{[已弃用]}}$\footnote{自PHP4.1.0起，引入 \$\_COOKIE，弃用 \$HTTP\_COOKIE\_VARS。}——HTTP Cookies 变量。
+\$\_COOKIE变量是通过 HTTP Cookies 方式传递给当前脚本的变量的数组。
 
-
-
-通过 HTTP Cookies 方式传递给当前脚本的变量的数组。
-
-\$HTTP\_COOKIE\_VARS 包含相同的信息，但它不是一个超全局变量，\$HTTP\_COOKIE\_VARS 和 \$\_COOKIE 是不同的变量，PHP 处理它们的方式是不同的。
+虽然\$HTTP\_COOKIE\_VARS（已弃用）包含相同的信息，但它不是一个超全局变量，\$HTTP\_COOKIE\_VARS 和 \$\_COOKIE 是不同的变量，PHP 处理它们的方式是不同的。
 
 
 
 
-\begin{example}
-\$\_COOKIE 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 echo 'Hello ' . htmlspecialchars($_COOKIE["name"]) . '!';
 ?>
 \end{lstlisting}
-\end{example}
+
 
 假设之前发送了\texttt{"name"}~Cookie，以上例程的输出类似于：
 
@@ -3410,9 +3398,9 @@ echo 'Hello ' . htmlspecialchars($_COOKIE["name"]) . '!';
 Hello Hannes!
 \end{verbatim}
 
-PHP 透明地支持RFC 6265定义中的 HTTP cookies。Cookies 是一种在远端浏览器端存储数据并能追踪或识别再次访问的用户的机制。
+Cookies 是一种在远端浏览器端存储数据并能追踪或识别再次访问的用户的机制，PHP 透明地支持RFC 6265定义中的 HTTP cookies。
 
-PHP提供了setcookie() 函数来设定 cookies。Cookies 是 HTTP 信息头中的一部分，因此setcookie 函数必须在向浏览器发送任何输出之前调用。对于 header() 函数也有同样的限制。
+Cookies 是 HTTP 信息头中的一部分，PHP提供了setcookie() 函数来设定 cookies，而且setcookie 函数必须在向浏览器发送任何输出之前调用，对于 header() 函数也有同样的限制。
 
 HTTP Cookie 数据会在相应的COOKIE数据数组中可用，例如 \$\_COOKIE，\$HTTP\_COOKIE\_VARS 和 \$\_REQUEST。
 
@@ -3442,22 +3430,21 @@ setcookie("Cart[$count]", $item, time()+3600);
 
 \section{\$php\_errormsg}
 
-\$php\_errormsg\footnote{这个变量仅在 php.ini 文件中的 track\_errors 配置项开启的情况下可用。}——前一个错误信息，\$php\_errormsg 变量包含由 PHP 生成的最新错误信息。
+\$php\_errormsg 变量包含由 PHP 生成的最新错误信息，并且仅在 php.ini 文件中的 track\_errors 配置项开启的情况下可用。
 
 \$php\_errormsg变量只在错误发生的作用域内可用，并且要求 track\_errors 配置项是开启的（默认是关闭的）。
 
 如果用户定义了错误处理句柄（ set\_error\_handler()）并且返回 FALSE 的时候，\$php\_errormsg 就会被设置。
 
 
-\begin{example}
-\$php\_errormsg 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 @strpos();
 echo $php_errormsg;
 ?>
 \end{lstlisting}
-\end{example}
+
 
 以上例程的输出类似于：
 
@@ -3473,32 +3460,26 @@ Wrong parameter count for strpos()
 \section{\$HTTP\_RAW\_POST\_DATA}
 
 
-\$HTTP\_RAW\_POST\_DATA——原生POST数据， 包含 POST 提交的原始数据。
+\$HTTP\_RAW\_POST\_DATA（已弃用）是原生POST数据， 包含 POST 提交的原始数据。
 
-\begin{example}
+一般而言，使用 php://input 代替\$HTTP\_RAW\_POST\_DATA。
 
-\begin{lstlisting}[language=PHP]
 
-\end{lstlisting}
-\end{example}
 
 \section{\$http\_response\_header}
 
+当使用HTTP 包装器时，\$http\_response\_header（HTTP 响应头）将会被 HTTP 响应头信息填充。
 
-
-\$http\_response\_header——HTTP 响应头
 
 \begin{compactitem}
 \item \$http\_response\_header 数组与 get\_headers() 函数类似。
 \item \$http\_response\_header 将被创建于局部作用域中。
 \end{compactitem}
 
-当使用HTTP 包装器时，\$http\_response\_header 将会被 HTTP 响应头信息填充。
 
 
 
-\begin{example}
-\$http\_response\_header 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 function get_contents() {
@@ -3509,11 +3490,12 @@ get_contents();
 var_dump($http_response_header);
 ?>
 \end{lstlisting}
-\end{example}
+
 
 以上例程的输出类似于：
 
-\begin{verbatim}
+
+\begin{lstlisting}[language=PHP]
 array(9) {
   [0]=>
   string(15) "HTTP/1.1 200 OK"
@@ -3535,7 +3517,7 @@ array(9) {
   string(38) "Content-Type: text/html; charset=UTF-8"
 }
 NULL
-\end{verbatim}
+\end{lstlisting}
 
 
 
@@ -3545,20 +3527,19 @@ NULL
 \section{\$argc}
 
 
-\$argc——传递给PHP脚本的参数数目，包含当运行于命令行下时传递给当前脚本的参数的数目。这个变量仅在 register\_argc\_argv 打开时可用。
+\$argc包含当运行于命令行下时传递给当前脚本的参数的数目，而且这个变量仅在 register\_argc\_argv 打开时可用。
 
 脚本的文件名总是作为参数传递给当前脚本，因此 \$argc 的最小值为 1。
 
 
 
-\begin{example}
-\$argc 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 var_dump($argc);
 ?>
 \end{lstlisting}
-\end{example}
+
 
 当使用这个命令执行: \verb|php script.php arg1 arg2 arg3|，以上例程的输出类似于：
 
@@ -3567,45 +3548,20 @@ int(4)
 \end{verbatim}
 
 
-
-\begin{example}
-
-\begin{lstlisting}[language=PHP]
-
-\end{lstlisting}
-\end{example}
-
-\begin{example}
-
-\begin{lstlisting}[language=PHP]
-
-\end{lstlisting}
-\end{example}
-
-\begin{example}
-
-\begin{lstlisting}[language=PHP]
-
-\end{lstlisting}
-\end{example}
-
-
-
 \section{\$argv}
 
-\$argv——传递给脚本的参数数组，\$argv变量包含当运行于命令行下时传递给当前脚本的参数的数组。这个变量仅在 register\_argc\_argv 打开时可用。
+\$argv变量包含当运行于命令行下时传递给当前脚本的参数的数组，而且这个变量仅在 register\_argc\_argv 打开时可用。
 
 第一个参数总是当前脚本的文件名，因此\texttt{\$argv[0]}就是脚本文件名。
 
 
-\begin{example}
-\$argv 范例
+
 \begin{lstlisting}[language=PHP]
 <?php
 var_dump($argv);
 ?>
 \end{lstlisting}
-\end{example}
+
 
 当使用这个命令执行：\verb|php script.php arg1 arg2 arg3|，以上例程的输出类似于：
 

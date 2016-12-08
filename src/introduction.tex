@@ -90,7 +90,7 @@ PHP 支持和所有Web开发语言之间的 WDDX 复杂数据交换，而且PHP�
 
 PHP框架可以使项目得到更快更简单的部署和更加敏捷的开发效率，因此在实际生产中框架的使用已非常普遍，例如PHP官方的框架为Zend framework。
 
-
+在使用框架进行开发时，绝大部分的上层代码以及项目结构都会基于所使用的框架，因此很多关于设计模式的决定已经由框架提前实现。
 
 
 
@@ -231,10 +231,125 @@ PHP保留的超全局变量\texttt{\$\_SESSION}包含所有的SESSION数据。
 
 
 
+\section{Template Engine}
+
+原生 PHP 模板就是指直接用 PHP 来写模板，这是很自然的选择，因为 PHP 本身其实是个模板语言。这代表你可以在其他的语言（比如 HTML）中结合 PHP 使用 。这对 PHP 开发者相当有利，因为不需要额外学习新的语法，他们熟知可以使用的函数，并且使用的编辑器也已经内置了语法高亮和自动补全。
+
+原生的 PHP 模板没有了Blade等模板引擎的编译阶段，速度会更快。
+
+现今的 PHP 框架都会使用一些模板系统，其中大多数是使用原生的 PHP 语法。在框架之外，一些类库（比如 Plates 或 Aura.View）都提供了现代化模板的常见功能，比如继承、布局、扩展，让原生的 PHP 模板更容易使用。
+
+\begin{compactitem}
+\item Aura.View(\url{https://github.com/auraphp/Aura.View})
+\item Blade(\url{https://github.com/laravel/laravel})
+\item Brainy(\url{https://github.com/box/brainy})
+\item Dwoo(\url{https://github.com/dwoo-project/dwoo})
+\item Latte(\url{https://github.com/nette/latte})
+\item Mustache(\url{https://github.com/bobthecow/mustache.php})
+\item PHPTAL(\url{https://github.com/phptal/PHPTAL})
+\item Plates(\url{https://github.com/thephpleague/plates})
+\item Smarty(\url{https://github.com/smarty-php/smarty/})
+\item Twig(\url{https://github.com/twigphp/Twig})
+\item Zend\textbackslash View(\url{https://github.com/zendframework/zend-view})
+\end{compactitem}
+
+\subsection{Plates}
+
+\begin{lstlisting}[language=PHP]
+<?php // user_profile.php ?>
+
+<?php $this->insert('header', ['title' => 'User Profile']) ?>
+
+<h1>User Profile</h1>
+<p>Hello, <?=$this->escape($name)?></p>
+
+<?php $this->insert('footer') ?>
+\end{lstlisting}
+
+\begin{example}
+原生 PHP 模板使用 Plates类库实现继承
+\begin{lstlisting}[language=PHP]
+<?php // template.php ?>
+
+<html>
+<head>
+    <title><?=$title?></title>
+</head>
+<body>
+
+<main>
+    <?=$this->section('content')?>
+</main>
+
+</body>
+</html>
+\end{lstlisting}
+\end{example}
+
+\begin{lstlisting}[language=PHP]
+<?php // user_profile.php ?>
+
+<?php $this->layout('template', ['title' => 'User Profile']) ?>
+
+<h1>User Profile</h1>
+<p>Hello, <?=$this->escape($name)?></p>
+\end{lstlisting}
+
+\subsection{Smarty}
 
 
+尽管 PHP 不断升级为成熟的、面向对象的语言，但是作为模板语言的特性并没有改善多少。编译模板（比如 Twig 或 Smarty）提供了模板专用的新语法，填补了这片空白。
 
-\section{Server}
+从自动转义\footnote{虽然 Smarty 提供了自动转义的功能，不过这个功能默认是关闭的。}到继承以及简化控制结构，编译模板被设计地更容易编写，可读性更高，同时使用上也更加的安全。
+
+编译模板也可以在不同的语言中使用（例如Mustache），虽然这些编译模板时需要在性能上产生一些轻微的影响，不过如果适当的使用缓存，影响就变得非常小了。
+
+\begin{example}
+使用 Twig 类库编译模板
+\begin{lstlisting}[language=PHP]
+{% include 'header.html' with {'title': 'User Profile'} %}
+
+<h1>User Profile</h1>
+<p>Hello, {{ name }}</p>
+
+{% include 'footer.html' %}
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+使用 Twig 类库实现继承
+\begin{lstlisting}[language=PHP]
+// template.html
+
+<html>
+<head>
+    <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>
+\end{lstlisting}
+\end{example}
+
+\begin{lstlisting}[language=PHP]
+// user_profile.html
+
+{% extends "template.html" %}
+
+{% block title %}User Profile{% endblock %}
+{% block content %}
+    <h1>User Profile</h1>
+    <p>Hello, {{ name }}</p>
+{% endblock %}
+\end{lstlisting}
+
+
+\section{Development Server}
 
 PHP的命令行（CLI）脚本接口可以帮助用户完成自动化的任务（例如测试、部署和应用管理），而且可以直接调用程序代码而无需创建 Web 图形界面。
 
@@ -373,18 +488,40 @@ Press Ctrl-C to quit.
 ::1:55804 GET /favicon.ico - Request read
 \end{lstlisting}
 
+\subsection{Template}
 
-\section{Closure}
+模板提供了一种简便的方式，将展现逻辑从控制器和业务逻辑中分离出来。
+
+
+一般来说，模板包含应用程序的 HTML 代码，但是也可以使用其他的格式（例如 XML）。
+
+模板通常也被称为「视图」, 模板其实只是MVC（模型-视图-控制器）软件架构模式第二个元素的一部份 。
+
+模板的主要好处是可以将呈现逻辑与应用程序的其他部分进行分离，模板的单一职责只是呈现格式化后的内容。
+
+模板不负责数据的查询、保存或是其他复杂的任务，从而进一步促成了更干净、更具可读性的代码，开发者在团队协作开发中可以专注服务端的代码（控制器、模型），而设计师则专注客户端代码 (网页) 。
+
+模板还改善了前端代码的组织架构。一般来说，模板放置在「视图」文件夹中，每一个模板都放在独立的一个文件中。
+
+模板的组织方式鼓励代码重用，它将大块的代码拆成较小的、可重用的片段（通常称为局部模板）。举例来说，网站的头、尾区块可以各自定义为一个模板，之后将它们放在每一个页面模板的上、下位置。
+
+最后，根据用户选择的类库，模板可以通过自动转义用户的内容来提供更多的安全性。有些类库可以提供沙箱机制，模板设计者只能使用在白名单中的变量和函数。
+
+
+
+
+
+\section{Closure/Anonymous}
 
 PHP从5.3（2009年）之后开始引入对闭包以及匿名函数的支持，并在接下来的PHP 5.4中增加了将闭包绑定到对象作用域中的特性，并改善其可调用性，从此在大部分情况下可以使用匿名函数取代一般的函数。
 
-\section{Reflection}
+\section{Meta Programming}
 
 PHP 通过反射 API 和魔术方法可以实现多种方式的元编程。开发者通过魔术方法（例如\_\_get()、\_\_set()、 \_\_clone()、\_\_toString()、\_\_invoke()等）可以改变类的行为。
 
 PHP通过\_\_call()和\_\_callStatic()可以实现和Ruby的method\_missing方法完成相同的功能。
 
-\section{Functional}
+\section{Functional Program}
 
 
 函数式编程是一种不同于对象式编程的思想，PHP并不是天生就属于函数式编程的语言。
@@ -531,6 +668,109 @@ $rs = $fun->filter('strlen($it) > 1')
 PHP实际上距离函数式编程的道路还很遥远，比如柯里化、部分施用、偏函数、Either类、Opeion类、值不可变，而且有很多在PHP中是明显很难实现的（例如上下文的处理）。
 
 
+\section{Dependency Injection}
+
+依赖注入是一种允许用户从硬编码的依赖中解耦出来，从而在运行时或者编译时能够修改的软件设计模式。
+
+具体来说，依赖注入通过构造注入、函数调用或者属性的设置来提供组件的依赖关系。
+
+下面我们可以用一个简单的例子来说明依赖注入的概念，代码中有一个 Database 的类需要一个适配器来与数据库交互，在构造函数里实例化了适配器就会产生耦合，使得测试变得很困难，而且 Database 类和适配器耦合的很紧密。
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace Database;
+
+class Database
+{
+    protected $adapter;
+
+    public function __construct()
+    {
+        $this->adapter = new MySqlAdapter;
+    }
+}
+
+class MysqlAdapter {
+}
+\end{lstlisting}
+
+上述这段代码可以用依赖注入进行重构来实现解耦。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace Database;
+
+
+class Database 
+{
+    protected $adapter;
+
+    public function __construct(MySqlAdapter $adapter) 
+    {
+        $this->adapter = $adapter;
+    }
+}
+
+class MySqlAdapter {
+}
+\end{lstlisting}
+
+依赖注入使得代码通过外界给予 Database 类的依赖，而不是让它自己产生依赖的对象，还可以使用可以接受依赖对象参数的成员函数来设置，或者如果 \$adapter 属性本身是 public的就可以直接给它赋值。
+
+“控制反转”(Inversion of Control) 或者 “依赖反转准则”(Dependency Inversion Principle)是依赖注入可以解决的更复杂的问题。
+
+\subsection{Inversion of Control}
+
+顾名思义，一个系统通过组织控制和对象的完全分离来实现”控制反转”。对于依赖注入，这就意味着通过在系统的其他地方控制和实例化依赖对象来实现解耦。
+
+虽然PHP框架可以实现控制反转，不过现实问题是应该反转哪些部分以及到反转到什么程度。比如， MVC 框架通常会提供超类（Superclass）或者基本的控制器类以便其他控制器可以通过继承来获得相应的依赖，这就是控制反转的例子，但是这种方法是直接移除了依赖而不是减轻了依赖。
+
+依赖注入允许通过按需注入的方式更加优雅地解决上述这个问题，完全不需要任何耦合。
+
+\subsection{Dependency Inversion}
+
+
+依赖反转准则（Dependency Inversion Principle）是面向对象设计准则S.O.L.I.D中的 “D”，倡导 “依赖于抽象而不是具体”。简单来说，依赖反转准则就是指依赖应该是接口/约定或者抽象类，而不是具体的实现。
+
+接下来开始重构前面的例子使其遵循依赖反转准则：
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace Database;
+
+class Database
+{
+    protected $adapter;
+
+    public function __construct(AdapterInterface $adapter)
+    {
+        $this->adapter = $adapter;
+    }
+}
+
+interface AdapterInterface {}
+
+class MysqlAdapter implements AdapterInterface {}
+\end{lstlisting}
+
+遵循依赖反转准则的实现（例如Database 类）依赖于接口，相比依赖于具体实现有更多的优势。例如，假设工作团队中的一位同事负责设计适配器，那么在第一个例子中，我们需要等待适配器设计完之后才能单元测试。现在由于依赖是一个接口/约定，于是我们能轻松地模拟接口测试，因为我们知道同事会基于约定实现那个适配器
+
+依赖反转的一个更大的好处是代码扩展性变得更高。例如，如果一段时间之后我们决定要迁移到一种不同的数据库，接下来只需要写一个实现相应接口的适配器并且注入进去，由于适配器遵循接口的约定，因此不再需要额外的重构。
+
+\section{Framework Container}
+
+
+依赖注入容器和依赖注入不是相同的概念。容器是帮助用户更方便地实现依赖注入的工具，但是它们通常被误用来实现反模式设计 Service Location 。
+
+把一个依赖注入容器作为 Service Locator 注入进类中隐式地建立了对于容器的依赖，而不是真正需要替换的依赖，而且还会让代码更不透明，最终变得更难测试。
+
+大多数现代的框架都有自己的依赖注入容器，允许通过配置将依赖绑定在一起，这样就可以写出和框架层同样干净、解耦的应用层代码。
+
+
 \chapter{Syntax}
 
 
@@ -541,7 +781,7 @@ PHP的语法和语义说明了PHP代码中的文本和符号的意义，它们�
 
 =用于变量赋值操作，每条PHP语句以逗号结束，可以使用echo语句来输出PHP变量（以\$开头）的内容，同时PHP命名是大小写敏感的。
 
-用户可以使用function和class来进行代码模块化，而且PHP支持if、while、for、foreach、switch等控制结构，而且PHP也支持类似end*的控制代码结构。
+用户可以使用function和class来进行代码模块化，而且PHP支持if、while、for、foreach、switch等控制结构，同时PHP也支持类似end*的控制代码结构。
 
 \begin{lstlisting}[language=PHP]
 if ($x==0) : 
@@ -709,6 +949,140 @@ function print_star($num){
 在对函数或类的定义进行注释说明时，应该包含功能说明、参数列表和返回值等信息，也可以加入应用范例。
 
 
+\chapter{Encoding}
+
+PHP没有在底层实现对 Unicode 的支持。虽然有很多途径可以确保 UTF-8 字符串能够被正确地处理，但是这并不是很简单，通常需要对 Web 应用进行全方面的检查（从 HTML 到 SQL 再到 PHP）。
+
+
+\section{String}
+
+
+最基本的字符串操作（例如连结两个字符串或将字符串赋值给变量）往往并不需要对 UTF-8 做特别的处理，然而大多数字符串的函数（例如strpos() 和 strlen()）确实需要特别的处理。
+
+字符串函数名中通常包含 mb\_*（例如mb\_strpos() 和 mb\_strlen()），这些 mb\_* 字符串是由mbstring（Multibyte String Extension）提供支持并专门为操作 Unicode 字符串而特别设计。
+
+在操作 Unicode 字符串时务必使用 mb\_* 函数。例如，如果对一个 UTF-8 字符串使用 substr()，那返回的结果中有很大可能会包含一些乱码，正确的方式是使用 mb\_substr()。
+
+最难的地方在于每次都要记得使用 mb\_* 函数，哪怕只有一次忘记了使用，Unicode 字符串就有在接下来的过程中变成乱码的风险。
+
+事实上，不是所有的字符串函数都有一个对应的 mb\_* 函数，应该在所有的 PHP 脚本（或全局包含的脚本）的开头使用 mb\_internal\_encoding() 函数，然后紧接着在可能对浏览器进行输出的脚本中使用 mb\_http\_output()，在每一个脚本当中明确声明字符串的编码可以避开风险。
+
+另外，许多对字符串进行操作的函数都有一个可选的参数用来指定字符串编码。当可以设定这类参数时，应该始终明确指定使用 UTF-8。例如，htmlentities() 有一个字符编码的选项，应该始终将其设为 UTF-8\footnote{从 PHP 5.4.0 开始, htmlentities() 和 htmlspecialchars() 的编码都已经被默认设为了 UTF-8。}。
+
+最后，如果分布式的应用程序中不能确定mbstring扩展一定开启的话，可以考虑使用 patchwork/utf8包，这样就会在 mbstring 可用时自动使用，否则自动切换回非 UTF-8 函数。
+
+\subsection{strpos()}
+
+
+\subsection{strlen()}
+
+
+\subsection{substr()}
+
+\subsection{mb\_strpos()}
+
+
+\subsection{mb\_strlen()}
+
+
+\subsection{mb\_substr()}
+
+
+
+
+
+
+\section{Browser}
+
+
+
+\subsection{htmlentities()}
+
+
+\subsection{htmlspecialchars()}
+
+\subsection{mb\_http\_output()}
+
+
+使用 mb\_http\_output() 函数来确保 PHP 向浏览器输出 UTF-8 格式的字符串。
+
+浏览器需要接收 HTTP 应答来指定页面是由 UTF-8 进行编码的。以前这一步是通过在页面 <head> 标签下包含字符集 <meta> 标签实现的，这是一种可行的方式，现在更好的做法是在 Content-Type 响应头中进行设置，可以让处理速度更快。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// Tell PHP that we're using UTF-8 strings until the end of the script
+mb_internal_encoding('UTF-8');
+
+// Tell PHP that we'll be outputting UTF-8 to the browser
+mb_http_output('UTF-8');
+
+// Our UTF-8 test string
+$string = 'Êl síla erin lû e-govaned vîn.';
+
+// Transform the string in some way with a multibyte function
+// Note how we cut the string at a non-Ascii character for demonstration purposes
+$string = mb_substr($string, 0, 15);
+
+// Connect to a database to store the transformed string
+// See the PDO example in this document for more information
+// Note the `charset=utf8mb4` in the Data Source Name (DSN)
+$link = new PDO(
+    'mysql:host=your-hostname;dbname=your-db;charset=utf8mb4',
+    'your-username',
+    'your-password',
+    array(
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_PERSISTENT => false
+    )
+);
+
+// Store our transformed string as UTF-8 in our database
+// Your DB and tables are in the utf8mb4 character set and collation, right?
+$handle = $link->prepare('insert into ElvishSentences (Id, Body) values (?, ?)');
+$handle->bindValue(1, 1, PDO::PARAM_INT);
+$handle->bindValue(2, $string);
+$handle->execute();
+
+// Retrieve the string we just stored to prove it was stored correctly
+$handle = $link->prepare('select * from ElvishSentences where Id = ?');
+$handle->bindValue(1, 1, PDO::PARAM_INT);
+$handle->execute();
+
+// Store the result into an object that we'll output later in our HTML
+$result = $handle->fetchAll(\PDO::FETCH_OBJ);
+
+header('Content-Type: text/html; charset=UTF-8');
+?><!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>UTF-8 test page</title>
+    </head>
+    <body>
+        <?php
+        foreach($result as $row){
+            print($row->Body);  // This should correctly output our transformed UTF-8 string to the browser
+        }
+        ?>
+    </body>
+</html>
+\end{lstlisting}
+
+
+\subsection{mb\_internal\_encoding()}
+
+
+\section{Database}
+
+如果使用 PHP 来操作 MySQL，即使做到了上面的每一点，字符串仍可能面临在数据库中以非 UTF-8 的格式进行存储的问题。
+
+为了确保字符串从 PHP 到 MySQL都使用 UTF-8，需要检查确认数据库和数据表都设定为 utf8mb4 字符集和整理，并且确保 PDO 连接请求也使用了 utf8mb4 字符集。
+
+
+
+
+在实践中，为了完整的 UTF-8 支持必须使用 utf8mb4 而不是 utf8。
 
 \chapter{Data types}
 
@@ -2088,6 +2462,9 @@ Windows Registry Editor Version 5.0
 
 
 
+
+
+
 \begin{lstlisting}[language=bash]
 
 \end{lstlisting}
@@ -2815,6 +3192,136 @@ extension=php_ftp.dll
 
 
 \chapter{Security}
+
+攻击者无时无刻不在准备对Web 应用程序进行攻击，因此提高Web应用程序的安全性是非常有必要的。
+
+幸运的是，来自开放式 Web 应用程序安全项目 (OWASP) 的有心人已经整理了一份包含了已知安全问题和防御方式的全面的清单，这份清单对于具有安全意识的开发者来说是必读的。
+
+
+
+
+
+
+\section{Password Hash}
+
+每个人在建构 PHP 应用时终究都会加入用户登录的模块，用户的帐号及密码会被储存在数据库中，在登录时用来验证用户。
+
+在存储密码前正确的哈希密码是非常重要的。哈希密码是单向不可逆的，该哈希值是一段固定长度的字符串且无法逆向推算出原始密码。这就代表你可以哈希另一串密码来比较两者是否是同一个密码，但又无需知道原始的密码。如果不将密码哈希，那么当未授权的第三者进入你的数据库时，所有用户的帐号资料将会一览无遗。有些用户可能（很不幸的）在别的网站也使用相同的密码，所以务必要重视数据安全的问题。
+
+password\_hash函数现在使用的是目前 PHP 所支持的最强大的加密算法 BCrypt，而且该函数未来会支持更多的加密算法。password\_compat 库的出现是为了提供对 PHP >= 5.3.7 版本的支持。
+
+在下面例子中，我们哈希一个字符串，然后和新的哈希值对比。因为我们使用的两个字符串是不同的（’secret-password’ 与 ‘bad-password’），所以登录失败。
+
+\begin{lstlisting}[language=PHP]
+<?php 
+require 'password.php';
+
+$passwordHash = password_hash('secret-password',PASSWORD_DEFAULT);
+
+if($password_verify('bad-password',$passwordHash)) {
+  // correct password
+} else {
+  // wrong password
+}
+\end{lstlisting}
+
+
+\section{Variable filter}
+
+
+永远不要信任外部输入，务必在使用外部输入前进行过滤和验证。filter\_var() 和 filter\_input() 函数可以过滤文本并对格式进行校验（例如 email 地址）。
+
+外部输入可以是任何东西：\$\_GET 和 \$\_POST 等表单输入数据，\$\_SERVER 超全局变量中的某些值，还有通过\texttt{fopen('php://input', 'r')}得到的 HTTP 请求体。
+
+外部输入的定义并不局限于用户通过表单提交的数据，其他诸如上传和下载的文档、session 值、cookie 数据，还有来自第三方 Web 服务的数据等，这些都是外服输入。
+
+虽然外部输入可以被存储、组合并在以后继续使用，但是它依旧是外部输入。每次处理、输出、连接或在代码中包含时，都需要提醒自己检查数据是否已经安全地完成了过滤。
+
+数据可以根据不同的目的进行不同的 过滤 。比如，当原始的外部输入被传入到了 HTML 页面的输出当中，它可以在站点上执行 HTML 和 JavaScript 脚本（即跨站脚本攻击（XSS））。
+
+一种避免 XSS 攻击的方法是在输出到页面前对所有用户生成的数据进行清理，使用 strip\_tags() 函数来去除 HTML 标签或者使用 htmlentities() 或是 htmlspecialchars() 函数来对特殊字符分别进行转义从而得到各自的 HTML 实体。
+
+另一个例子是传入能够在命令行中执行的选项。这是非常危险的（同时也是一个不好的做法），不过可以使用自带的 escapeshellarg() 函数来过滤执行命令的参数。
+
+最后的一个例子是接受外部输入来从文件系统中加载文件。这可以通过将文件名修改为文件路径来进行利用。你需要过滤掉"/", "../", null 字符或者其他文件路径的字符来确保不会去加载隐藏、私有或者敏感的文件。
+
+\section{Variable clean}
+
+数据清理是指删除（或转义）外部输入中的非法和不安全的字符。例如，需要在将外部输入包含在 HTML 中或者插入到原始的 SQL 请求之前对它进行过滤。当使用 PDO 中的限制参数功能时，它可以用来自动完成过滤的工作。
+
+有些时候，可能需要允许一些安全的 HTML 标签输入进来并被包含在输出的 HTML 页面中，但这实现起来并不容易。尽管有一些像 HTML Purifier 的白名单类库为了这个原因而出现，实际上更多的人通过使用其他更加严格的格式限制方式（例如使用 Markdown 或 BBCode）来避免出现问题。
+
+验证是来确保外部输入的是你所想要的内容。比如，你也许需要在处理注册申请时验证 email 地址、手机号码或者年龄等信息的有效性。
+
+
+\section{Validity Verify}
+
+
+有效性验证是来确保外部输入的是应用程序实际所想要的内容。比如，用户需要在处理注册申请时验证 email 地址、手机号码或者年龄等信息的有效性。
+
+\section{Configure file}
+
+在应用程序创建配置文件时，最好的选择时参照以下的做法：
+
+\begin{compactitem}
+\item 推荐将配置信息存储在无法被直接读取和上传的位置上。
+\item 如果一定要存储配置文件在根目录下，那么使用 .php 的扩展名来进行命名。这将可以确保即使脚本被直接访问到，它也不会被以明文的形式输出出来。
+\item 配置文件中的信息需要被针对性的保护起来，对其进行加密或者设置访问权限。
+\end{compactitem}
+
+\section{Global Variable}
+
+register\_globals 选项已经被移除并不再使用，同时也在提醒如果正在升级旧的应用程序的话，需要注意这一点。
+
+当 register\_globals 选项被开启时，它会使许多类型的变量（包括 \$\_POST, \$\_GET 和 \$\_REQUEST）被注册为全局变量，这样就很容易使程序无法有效地判断数据的来源并导致安全问题。例如，\texttt{\$\_GET['foo']}可以通过 \$foo 被访问到，也就是可以对未声明的变量进行覆盖。如果使用的PHP版本低于5.4.0，务必确保 register\_globals 是被设置为off。
+
+
+\section{Error Reporting}
+
+虽然错误日志对于发现程序中的错误是非常有帮助的，但是有些时候它也会将应用程序的结构暴露给外部。
+
+为了有效的保护应用程序不受到由此而引发的问题，需要将在你的服务器上使用开发和生产（线上）两套不同的配置。
+
+为了在开发环境中显示所有可能的错误，将php.ini 进行如下配置：
+
+\begin{lstlisting}[language=bash]
+display_errors = On
+display_startup_errors = On
+error_reporting = -1
+log_errors = On
+\end{lstlisting}
+
+将error\_reporting的值设为 -1 将会显示出所有的错误，也包括在未来的 PHP 版本中新增加的类型和参数，-1和最初的 E\_ALL 是相同的。
+
+E\_STRICT 类型的错误已经被包含在了 E\_ALL 中，如果需要在 5.3 中显示所有的错误信息，就需要使用 -1 或者 \texttt{E\_ALL | E\_STRICT}。
+
+下面的示例说明了如何在不同版本的PHP中开启全部错误：
+
+\begin{compactitem}
+\item < PHP 5.3 
+
+-1或E\_ALL
+\item PHP 5.3 
+
+-1或E\_ALL | E\_STRICT
+
+\item > PHP 5.3
+
+-1或E\_ALL
+\end{compactitem}
+
+为了在生产环境中隐藏错误显示，将php.ini 进行如下配置：
+
+\begin{lstlisting}[language=bash]
+display_errors = Off
+display_startup_errors = Off
+error_reporting = E_ALL
+log_errors = On
+\end{lstlisting}
+
+当在生产环境中使用这个配置时，错误信息依旧会被照常存储在 web 服务器的错误日志中，唯一不同的是将不再显示给用户。
+
+
 
 
 \section{Thread Safe}

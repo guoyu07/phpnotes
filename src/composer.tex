@@ -4,6 +4,8 @@
 
 \chapter{Overview}
 
+虽然PHP有很多库、框架和组件，但是PHP没有一个很好的方式来管理项目依赖，即使通过手动的方式去管理，依然需要解决自动加载器的问题。
+
 Composer 是一个跨平台的PHP依赖管理工具，允许用户声明项目所依赖的代码库，并且可以在项目中安装它们。
 
 Composer 不是一个包管理器。虽然涉及 ``packages" 和 ``libraries"，但是composer在每个项目的基础上进行管理，在指定项目的某个目录中（例如 vendor）进行安装。
@@ -20,11 +22,9 @@ Composer 受到了 node npm 和 ruby's bundler 的强烈启发，可以这样为
 \item 其中一些库依赖于其他库。
 
 \item 声明所依赖的东西。
-
-\item Composer 会找出哪个版本的包需要安装，并安装它们（将它们下载到你的项目中）。
 \end{compactenum}
 
-比方说，正在创建的一个项目需要一个库来做日志记录，当前决定使用 monolog。为了将它添加到项目中，用户所需要做的就是创建一个 composer.json 文件，其中描述了项目的依赖关系。
+Composer 会找出哪个版本的包需要安装，并安装它们（将它们下载到你的项目中）。例如，正在创建的一个项目需要一个库来做日志记录，当前决定使用 monolog。为了将它添加到项目中，用户所需要做的就是创建一个 composer.json 文件，其中描述了项目的依赖关系。
 
 composer.json的内容指出当前的项目需要一些 monolog/monolog 的包，从 1.2 开始的任何版本。
 
@@ -36,11 +36,19 @@ composer.json的内容指出当前的项目需要一些 monolog/monolog 的包�
 }
 \end{lstlisting}
 
-运行 Composer 需要 PHP 5.3.2+ 以上版本。一些敏感的 PHP 设置和编译标志也是必须的，但是对于任何不兼容项安装程序都会抛出警告。
+Composer使用PHP开发，因此运行 Composer 需要 PHP 5.3.2+ 以上版本。一些敏感的 PHP 设置和编译标志也是必须的，但是对于任何不兼容项安装程序都会抛出警告。
 
 目前支持Composer的框架包括Symfony、Laravel、CodeIgniter、CakePHP、FuelPHP、Drupal和SilverStripe等。
 
+Security Advisories Checker 提供一个 web 服务和一个命令行工具，二者都会仔细检查你的 composer.lock 文件，并且告诉你任何你需要更新的依赖。
+
+VersionEye web 服务可以监控你的 Github 及 BitBucket 帐号中的 composer.json 文件，并且当包有新更新时会发送邮件给你。
+
+
+
 \section{Installation}
+
+用户可以安装 Composer 到局部（当前工作目录）或是全局（例如/usr/local/bin）。
 
 \subsection{Project}
 
@@ -66,7 +74,7 @@ $ curl -sS https://getcomposer.org/installer | php -- --install-dir=bin
 
 \subsection{Global}
 
-可以将composer.phar放在任何地方。如果把它放在系统的 PATH 目录中，就能在全局访问它。 在类Unix系统中可以在使用时不加 php 前缀。
+如果把composer.phar保存到系统的 PATH 目录中就能在全局访问它，而且在类Unix系统中可以在使用时不加 php 前缀。
 
 可以执行如下命令让 composer 在你的系统中进行全局调用：
 
@@ -131,19 +139,70 @@ Composer的进程退出代码意义如下：
 $ curl -sS https://getcomposer.org/installer | php -- --help
 \end{lstlisting}
 
+PEAR 是另一个跟 Composer 很类似的依赖包管理器，但是也有一些显著的区别。
+
+\begin{lstlisting}[language=bash]
+$ sudo apt-get install php-pear
+$ pear install foo
+\end{lstlisting}
+
+首先，PEAR 需要扩展包有专属的结构，开发者在开发扩展包的时候要提前考虑为 PEAR 定制，否则后面将无法使用 PEAR。
+
+其次，PEAR 安装扩展包的时候是全局安装的，安装了某个扩展包之后同一台服务器上的所有项目都能用上，好处是当多个项目共同使用同一个扩展包的同一个版本，坏处是如果需要使用不同版本就会产生冲突。
+
+现在，Composer可以用来安装PEAR扩展包，例如：
+
+
+\begin{lstlisting}[language=bash]
+{
+    "repositories": [
+        {
+            "type": "pear",
+            "url": "http://pear2.php.net"
+        }
+    ],
+    "require": {
+        "pear-pear2/PEAR2_Text_Markdown": "*",
+        "pear-pear2/PEAR2_HTTP_Request": "*"
+    }
+}
+\end{lstlisting}
+
+第一部分 \texttt{"repositories"} 是让 Composer 从哪个渠道去获取扩展包，然后\texttt{"repositories"}部分使用如下的命名规范\footnote{前缀 “pear” 是为了避免冲突。}：
+
+
+\begin{lstlisting}[language=bash]
+pear-channel/Package
+\end{lstlisting}
+
+在成功安装扩展包以后，代码会放到项目的 vendor 文件夹中，并且可以通过加载 Composer 的自动加载器进行加载，例如：
+
+\begin{lstlisting}[language=bash]
+vendor/pear-pear2.php.net/PEAR2_HTTP_Request/pear2/HTTP/Request.php
+\end{lstlisting}
+
+在代码里面可以这样使用：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$request = new pear2\HTTP\Request();
+\end{lstlisting}
+
+
 \section{Dependence}
 
-使用 Composer 来安装项目的依赖时，如果在当前目录下没有一个 composer.json 文件，需要手动创建。
+Composer通过一个 composer.json 文件持续地追踪项目依赖，用户可以手动管理composer.json或是使用 Composer 自己管理。
 
-要解决和下载依赖，执行\texttt{install}命令：
+Composer安装项目的依赖时，如果在当前目录下没有一个 composer.json 文件，需要手动创建，然后执行\texttt{install}命令来解决和下载依赖：
 
 
 \begin{lstlisting}[language=bash]
 $ php composer.phar install
 \end{lstlisting}
 
+除此之外，\texttt{composer init}命令将会引导用户创建一个完整的 composer.json 文件到项目中。
 
-如果你进行了全局安装，并且没有 phar 文件在当前目录，可以使用下面的命令代替：
+如果进行了全局安装，并且没有 phar 文件在当前目录，可以使用下面的命令代替：
 
 \begin{lstlisting}[language=bash]
 $ composer install
@@ -151,7 +210,13 @@ $ composer install
 
 上述命令将下载指定的依赖（例如monolog）到 vendor目录（例如vendor/monolog/monolog） 目录。
 
+Composer 也可以处理全局依赖和对应的二进制文件，只需要在命令前加上global前缀。例如，如果想安装 PHPUnit 并使它全局可用，可以运行下面的命令：
 
+\begin{lstlisting}[language=bash]
+$ composer global require phpunit/phpunit
+\end{lstlisting}
+
+上述指令将创建一个 \~{}/.composer 目录存放全局依赖，而且添加\~{}/.composer/vendor/bin 目录到\$PATH 变量让已安装依赖的二进制命令全局可用。
 
 
 \section{Repository}
@@ -1499,9 +1564,11 @@ $extra = $event->getComposer()->getPackage()->getExtra();
 
 \section{composer.lock}
 
-在安装依赖后，Composer 将把安装时确切的版本号列表写入 composer.lock 文件。这将锁定改项目的特定版本，因此需要提交应用程序的 composer.lock （包括 composer.json）到版本库中
+在安装依赖后，Composer 将把安装时确切的版本号列表写入 composer.lock 文件。
 
-这是非常重要的，因为 install 命令将会检查锁文件是否存在，如果存在，它将下载指定的版本（忽略 composer.json 文件中的定义）。
+composer.lock将锁定该项目的特定版本，因此需要提交应用程序的 composer.lock （包括 composer.json）到版本库中
+
+这是非常重要的，因为 install 命令将会检查锁文件是否存在，如果存在就会下载指定的版本（忽略 composer.json 文件中的定义）。
 
 这意味着，任何人建立项目都将下载与指定版本完全相同的依赖。你的持续集成服务器、生产环境、你团队中的其他开发人员、每件事、每个人都使用相同的依赖，从而减轻潜在的错误对部署的影响。即使你独自开发项目，在六个月内重新安装项目时，你也可以放心的继续工作，即使从那时起你的依赖已经发布了许多新的版本。
 
@@ -1981,6 +2048,8 @@ create-project命令的常见的用途如下：
 $ php composer.phar create-project doctrine/orm path 2.2.*
 \end{lstlisting}
 
+
+
 此外，也可以无需使用这个命令，而是通过现有的 composer.json 文件来启动这个项目。
 
 默认情况下，这个命令会在 packagist.org 上查找指定的包。
@@ -1999,6 +2068,33 @@ $ php composer.phar create-project doctrine/orm path 2.2.*
 \item \texttt{--no-progress}: 移除进度信息，这可以避免一些不处理换行的终端或脚本出现混乱的显示。
 \item \texttt{--keep-vcs}: 创建时跳过缺失的 VCS 。如果在非交互模式下运行创建命令，这将是非常有用的。
 \end{compactitem}
+
+Laravel框架可以通过如下的命令进行安装：
+
+\begin{compactitem}
+\item 可以全局安装Laravel并且在安装完成后可以通过命令新建多个Laravel框架
+
+
+\begin{lstlisting}[language=bash]
+$ sudo composer global require "laravel/laravel=~1.1"
+\end{lstlisting}
+
+\item 安装一个全新的Laravel框架到当前目录
+
+\begin{lstlisting}[language=bash]
+$ php composer.phar create-project laravel/laravel --prefer-dist
+\end{lstlisting}
+
+\end{compactitem}
+
+
+
+注意，Laravel需要PHP的openssl扩展的支持，而且Laravel要求PHP对storage和/bootstrap/cache目录可写。
+
+\begin{lstlisting}[language=bash]
+$ sudo chmod 777 -R storage/
+$ sudo chmod 777 bootstrap/cache
+\end{lstlisting}
 
 \section{dump-autoload}
 
@@ -2076,9 +2172,9 @@ $ php composer.phar help install
 
 \chapter{Autoloading}
 
-除了库的下载，Composer 还生成了一个自动加载文件（vendor/autoload.php），它可以加载 Composer 下载的库中所有的类文件。
+除了库的下载，Composer 还生成了一个自动加载文件（vendor/autoload.php）。
 
-只需要将下面这行代码添加到项目的引导文件中就可以实现自动加载，例如：
+如果将下面这行代码添加到项目的引导文件中，就可以在需要时自动加载 Composer 下载的库中所有的类文件，例如：
 
 \begin{lstlisting}[language=PHP]
 require 'vendor/autoload.php';
@@ -2121,6 +2217,945 @@ $loader->add('Acme\\Test\\',__DIR__);
 除了 PSR-4 自动加载，classmap 也是支持的，这样就允许类被自动加载（即使不符合 PSR-0 规范）。
 
 Composer 提供了自己的 autoloader。如果不想使用它，可以仅仅引入 vendor/composer/autoload\_*.php 文件，它返回一个关联数组，可以通过这个关联数组配置自己的 autoloader。
+
+\section{Spec}
+
+
+\subsection{PSR-0}
+
+
+
+\subsection{PSR-4}
+
+
+
+\section{Init}
+
+
+在服务器的web目录下创建一个lara目录作为网站的根目录，并且在该目录下创建一个composer.json文件，例如：
+
+\begin{lstlisting}[language=bash]
+$ cd /srv/web
+$ mkdir lara
+$ cd lara
+$ cat > composer.json
+{
+   "require": {
+   
+   }
+}
+
+\end{lstlisting}
+
+接下来的lara目录下执行\texttt{composer update}来开始项目初始化，完成后在lara目录下会自动生成自动加载文件，例如：
+
+\begin{lstlisting}[language=bash]
+$ cd /srv/web/lara
+$ composer update
+Loading composer repositories with package information
+Updating dependencies (including require-dev)
+Nothing to install or update
+Generating autoload files
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash]
+$ tree /srv/web/lara
+/srv/web/lara
+|— composer.json
+|— vendor
+    |— autoload.php
+    |— composer
+         |— autoload_classmap.php
+         |— autoload_namespaces.php
+         |— autoload_psr4.php
+         |— autoload_real.php
+         |— autoload_static.php
+         |— ClassLoader.php
+         |— installed.json
+         |— LICENSE
+\end{lstlisting}
+
+
+
+
+
+\section{Route}
+
+在项目初始化完成后，首先添加的第一个组件就是路由组件。
+
+这里选择使用illuminate/routing作为路由组件，该路由组件同时也通过自己的composer.json文件依赖其他组件（例如symfony/routing和illuminate/container。
+
+在添加illuminate/routing组件的同时还需要添加illuminate/events组件。
+
+
+\begin{lstlisting}[language=bash]
+$ vim /srv/web/lara
+{
+  "require": {
+    "illuminate/routing": "*",
+    "illuminate/events": "*"
+  }
+}
+$ cd /srv/web/lara
+$ composer update
+\end{lstlisting}
+
+
+
+在添加路由组件成功，接下来首先需要添加两个文件，一个是路由文件，另一个是服务器端程序入口文件。
+
+\begin{lstlisting}[language=bash]
+$ tree /srv/web/lara
+/srv/web/lara
+|— app
+|        |— Http
+|                |— routes.php
+|— composer.json
+|— vendor
+    |— autoload.php
+    |— composer
+         |— autoload_classmap.php
+         |— autoload_namespaces.php
+         |— autoload_psr4.php
+         |— autoload_real.php
+         |— autoload_static.php
+         |— ClassLoader.php
+         |— installed.json
+         |— LICENSE
+\end{lstlisting}
+
+\subsection{Router}
+
+
+对于路由配置文件，需要在lara目录下创建一个app目录，然后在app目录下创建Http目录来存储处理HTTP请求的文件。
+
+路由文件放置在Http目录下，路由文件的代码如下：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$app['router']->get('/', function () {
+    return '<h1>路由成功</h1>';
+});
+\end{lstlisting}
+
+在路由文件中可以通过路由实例的对应方法（例如get()）添加路由规则，例如\texttt{/}表示网站根目录。
+
+路由的处理函数是一个匿名函数，可以用来返回响应。
+
+具体来说，入口文件通过Illuminate\textbackslash Http\textbackslash Request类的静态方法createFromGlobals()实现请求的实例化，然后通过路由进行分发处理。
+
+\begin{compactenum}
+\item 路由根据请求的地址查找路由表。
+\item 从路由表中找到对应的函数来处理请求并返回响应，如果从路由表无法找到对应的处理函数就返回404错误。
+\end{compactenum}
+
+以上就是路由的基本过程。
+
+\subsection{Entry}
+
+服务器端程序的请求入口文件位于lara目录下的public目录中。
+
+public目录用于存放项目的公共文件，也就是通过HTTP请求可以访问到的文件（包括入口文件、js文件和CSS文件等）。
+
+\begin{lstlisting}[language=bash]
+$ tree /srv/web/lara
+/srv/web/lara
+|— app
+|        |— Http
+|                |— routes.php
+|— public
+|        |— index.php
+|— composer.json
+|— vendor
+    |— autoload.php
+    |— composer
+         |— autoload_classmap.php
+         |— autoload_namespaces.php
+         |— autoload_psr4.php
+         |— autoload_real.php
+         |— autoload_static.php
+         |— ClassLoader.php
+         |— installed.json
+         |— LICENSE
+\end{lstlisting}
+
+在/srv/web/lara/public目录下创建一个index.php文件作为服务器端程序的请求入口文件。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 调用自动加载文件，添加自动加载文件函数
+require __DIR__ . '/../vendor/autoload.php';
+
+// 实例化服务容器，注册事件、路由服务提供者
+$app = new Illuminate\Container\Container();
+with(new Illuminate\Events\EventServiceProvider($app))->register();
+with(new Illuminate\Routing\RoutingServiceProvider($app))->register();
+
+// 加载路由
+require __DIR__ . '/../app/Http/routes.php';
+
+// 实例化请求并分发处理请求
+$request = Illuminate\Http\Request::createFromGlobals();
+$response = $app['router']->dispatch($request);
+// 返回请求响应
+$response->send();
+\end{lstlisting}
+
+入口文件完成的主要工作如下：
+
+\begin{compactitem}
+\item 添加自动加载函数
+\item 服务容器实例化和服务注册
+\item 路由加载
+\item 请求实例化和路由分发
+\item 响应生成与发送
+\end{compactitem}
+
+自动加载函数用于自动包含引用文件，需要首先添加。
+
+
+
+\section{Container}
+
+Laravel框架的一些功能的生成都需要服务容器来实现，即Illuminate\textbackslash Container\textbackslash Container类的实例。
+
+具体来说，服务容器用于服务注册和解析，也就是说向服务容器注册能够实现某些功能的实例或回调函数，这样当需要某些功能（例如事件和路由功能）时就可以从服务容器中获取相应的实例来完成。
+
+在实例化服务容器后立刻注册了事件和路由的服务，然后就可以通过这个服务容器（\$app）来获取路由处理的相关实例并完成路由的加载和请求处理。
+
+其中，获取路由实例通过\texttt{\$app['router']}实现。
+
+\begin{compactitem}
+\item \texttt{\$app}：服务容器实例
+\item \texttt{['router']}：服务容器中注册的路由服务名称
+\end{compactitem}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+var_dump($app);
+
+object(Illuminate\Container\Container)[3]
+  protected 'resolved' => 
+    array (size=0)
+      empty
+  protected 'bindings' => 
+    array (size=7)
+      'events' => 
+        array (size=2)
+          'concrete' => 
+            object(Closure)[4]
+              ...
+          'shared' => boolean true
+      'router' => 
+        array (size=2)
+          'concrete' => 
+            object(Closure)[7]
+              ...
+          'shared' => boolean false
+      'url' => 
+        array (size=2)
+          'concrete' => 
+            object(Closure)[9]
+              ...
+          'shared' => boolean false
+      'redirect' => 
+        array (size=2)
+          'concrete' => 
+            object(Closure)[11]
+              ...
+          'shared' => boolean false
+      'Psr\Http\Message\ServerRequestInterface' => 
+        array (size=2)
+          'concrete' => 
+            object(Closure)[12]
+              ...
+          'shared' => boolean false
+      'Psr\Http\Message\ResponseInterface' => 
+        array (size=2)
+          'concrete' => 
+            object(Closure)[13]
+              ...
+          'shared' => boolean false
+      'Illuminate\Contracts\Routing\ResponseFactory' => 
+        array (size=2)
+          'concrete' => 
+            object(Closure)[14]
+              ...
+          'shared' => boolean true
+  protected 'instances' => 
+    array (size=0)
+      empty
+  protected 'aliases' => 
+    array (size=0)
+      empty
+  protected 'extenders' => 
+    array (size=0)
+      empty
+  protected 'tags' => 
+    array (size=0)
+      empty
+  protected 'buildStack' => 
+    array (size=0)
+      empty
+  public 'contextual' => 
+    array (size=0)
+      empty
+  protected 'reboundCallbacks' => 
+    array (size=0)
+      empty
+  protected 'globalResolvingCallbacks' => 
+    array (size=0)
+      empty
+  protected 'globalAfterResolvingCallbacks' => 
+    array (size=0)
+      empty
+  protected 'resolvingCallbacks' => 
+    array (size=0)
+      empty
+  protected 'afterResolvingCallbacks' => 
+    array (size=0)
+      empty
+\end{lstlisting}
+
+
+\section{Request}
+
+\begin{lstlisting}[language=PHP]
+<?php
+var_dump($request);
+
+object(Illuminate\Http\Request)[22]
+  protected 'json' => null
+  protected 'convertedFiles' => null
+  protected 'userResolver' => null
+  protected 'routeResolver' => null
+  public 'attributes' => 
+    object(Symfony\Component\HttpFoundation\ParameterBag)[25]
+      protected 'parameters' => 
+        array (size=0)
+          empty
+  public 'request' => 
+    object(Symfony\Component\HttpFoundation\ParameterBag)[23]
+      protected 'parameters' => 
+        array (size=0)
+          empty
+  public 'query' => 
+    object(Symfony\Component\HttpFoundation\ParameterBag)[24]
+      protected 'parameters' => 
+        array (size=0)
+          empty
+  public 'server' => 
+    object(Symfony\Component\HttpFoundation\ServerBag)[28]
+      protected 'parameters' => 
+        array (size=34)
+          'USER' => string 'www-data' (length=8)
+          'HOME' => string '/var/www' (length=8)
+          'HTTP_ACCEPT_LANGUAGE' => string 'en-US,en;q=0.8,zh-CN;q=0.6,zh;q=0.4,zh-TW;q=0.2' (length=47)
+          'HTTP_ACCEPT_ENCODING' => string 'gzip, deflate, sdch' (length=19)
+          'HTTP_DNT' => string '1' (length=1)
+          'HTTP_ACCEPT' => string 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' (length=74)
+          'HTTP_USER_AGENT' => string 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.82 Safari/537.36' (length=104)
+          'HTTP_UPGRADE_INSECURE_REQUESTS' => string '1' (length=1)
+          'HTTP_CACHE_CONTROL' => string 'max-age=0' (length=9)
+          'HTTP_CONNECTION' => string 'keep-alive' (length=10)
+          'HTTP_HOST' => string 'lara.in' (length=7)
+          'REDIRECT_STATUS' => string '200' (length=3)
+          'SERVER_NAME' => string 'lara.in' (length=7)
+          'SERVER_PORT' => string '80' (length=2)
+          'SERVER_ADDR' => string '172.17.0.18' (length=11)
+          'REMOTE_PORT' => string '47842' (length=5)
+          'REMOTE_ADDR' => string '172.17.0.1' (length=10)
+          'PATH_INFO' => string '' (length=0)
+          'SCRIPT_NAME' => string '/index.php' (length=10)
+          'SERVER_SOFTWARE' => string 'nginx' (length=5)
+          'GATEWAY_INTERFACE' => string 'CGI/1.1' (length=7)
+          'SERVER_PROTOCOL' => string 'HTTP/1.1' (length=8)
+          'DOCUMENT_ROOT' => string '/usr/share/nginx/lara/public' (length=28)
+          'DOCUMENT_URI' => string '/index.php' (length=10)
+          'REQUEST_URI' => string '/' (length=1)
+          'CONTENT_LENGTH' => string '' (length=0)
+          'CONTENT_TYPE' => string '' (length=0)
+          'REQUEST_METHOD' => string 'GET' (length=3)
+          'QUERY_STRING' => string '' (length=0)
+          'SCRIPT_FILENAME' => string '/usr/share/nginx/lara/public/index.php' (length=38)
+          'FCGI_ROLE' => string 'RESPONDER' (length=9)
+          'PHP_SELF' => string '/index.php' (length=10)
+          'REQUEST_TIME_FLOAT' => float 1481011635.6761
+          'REQUEST_TIME' => int 1481011635
+  public 'files' => 
+    object(Symfony\Component\HttpFoundation\FileBag)[27]
+      protected 'parameters' => 
+        array (size=0)
+          empty
+  public 'cookies' => 
+    object(Symfony\Component\HttpFoundation\ParameterBag)[26]
+      protected 'parameters' => 
+        array (size=0)
+          empty
+  public 'headers' => 
+    object(Symfony\Component\HttpFoundation\HeaderBag)[29]
+      protected 'headers' => 
+        array (size=11)
+          'accept-language' => 
+            array (size=1)
+              ...
+          'accept-encoding' => 
+            array (size=1)
+              ...
+          'dnt' => 
+            array (size=1)
+              ...
+          'accept' => 
+            array (size=1)
+              ...
+          'user-agent' => 
+            array (size=1)
+              ...
+          'upgrade-insecure-requests' => 
+            array (size=1)
+              ...
+          'cache-control' => 
+            array (size=1)
+              ...
+          'connection' => 
+            array (size=1)
+              ...
+          'host' => 
+            array (size=1)
+              ...
+          'content-length' => 
+            array (size=1)
+              ...
+          'content-type' => 
+            array (size=1)
+              ...
+      protected 'cacheControl' => 
+        array (size=1)
+          'max-age' => string '0' (length=1)
+  protected 'content' => null
+  protected 'languages' => null
+  protected 'charsets' => null
+  protected 'encodings' => null
+  protected 'acceptableContentTypes' => null
+  protected 'pathInfo' => null
+  protected 'requestUri' => null
+  protected 'baseUrl' => null
+  protected 'basePath' => null
+  protected 'method' => null
+  protected 'format' => null
+  protected 'session' => null
+  protected 'locale' => null
+  protected 'defaultLocale' => string 'en' (length=2)
+\end{lstlisting}
+
+\section{Response}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+var_dump($response);
+
+object(Illuminate\Http\Response)[39]
+  public 'original' => string '<h1>路由成功</h1>' (length=21)
+  public 'headers' => 
+    object(Symfony\Component\HttpFoundation\ResponseHeaderBag)[40]
+      protected 'computedCacheControl' => 
+        array (size=1)
+          'no-cache' => boolean true
+      protected 'cookies' => 
+        array (size=0)
+          empty
+      protected 'headerNames' => 
+        array (size=2)
+          'cache-control' => string 'Cache-Control' (length=13)
+          'content-type' => string 'Content-Type' (length=12)
+      protected 'headers' => 
+        array (size=2)
+          'cache-control' => 
+            array (size=1)
+              ...
+          'content-type' => 
+            array (size=1)
+              ...
+      protected 'cacheControl' => 
+        array (size=0)
+          empty
+  protected 'content' => string '<h1>路由成功</h1>' (length=21)
+  protected 'version' => string '1.1' (length=3)
+  protected 'statusCode' => int 200
+  protected 'statusText' => string 'OK' (length=2)
+  protected 'charset' => null
+  public 'exception' => null
+\end{lstlisting}
+
+
+
+\section{Controller}
+
+实际项目中的请求处理往往比较复杂，这样就不便于把请求的处理函数直接写在路由文件中。
+
+一般情况下，路由的请求处理部分单独使用控制器类来实现，而且在添加路由组件时已经添加了基本控制器类，即Illuminate\textbackslash Routing\textbackslash Controller类，因此在添加控制器模块时可以使用这个类作为基类对控制器的功能进行扩展。
+
+如果需要让不同模块之间功能划分清晰，也可以不使用Illuminate\textbackslash Routing\textbackslash Controller类作为基类，而是直接创建控制器类。
+
+在/srv/web/lara/app/Http目录下创建Controllers目录，开始添加第一个Controller类——WelcomeController.php。
+
+\begin{lstlisting}[language=bash]
+$ tree /srv/web/lara
+/srv/web/lara
+|— app
+|        |— Http
+|                |— Controllers
+|                |       |— WelcomeController.php 
+|                |— routes.php
+|— public
+|        |— index.php
+|— composer.json
+|— vendor
+    |— autoload.php
+    |— composer
+         |— autoload_classmap.php
+         |— autoload_namespaces.php
+         |— autoload_psr4.php
+         |— autoload_real.php
+         |— autoload_static.php
+         |— ClassLoader.php
+         |— installed.json
+         |— LICENSE
+\end{lstlisting}
+
+为了实现文件的自动加载，还需要根据PSR-4规范进行相关配置，并在composer.json中添加自动加载路径，然后执行\texttt{composer dump-autoload}更新自动加载文件。
+
+
+
+
+\begin{lstlisting}[language=bash]
+{
+  "require": {
+    "illuminate/routing": "*",
+    "illuminate/events": "*"
+  },
+  "autoload": {
+    "psr-4": {
+       "App\\": "app/"
+    }
+  }
+}
+\end{lstlisting}
+
+在浏览器中访问lara.in/welcome时可以打印出\texttt{PATH\_INFO}如下：
+
+
+
+
+\begin{lstlisting}[language=bash]
+'PATH_INFO' => '/welcome'
+\end{lstlisting}
+
+
+对于控制器类文件，需要按照文件路径添加正确的命名空间，其中类名要与文件名相同，@后面跟的是控制器类的处理函数的名称。
+
+
+\section{Model}
+
+除了可以在控制器类中添加相应的组件之外，还可以继续添加模型组件（相当于MVC模式中的M）来实现数据处理功能。
+
+在添加模型组件之前，需要修改composer.json文件并更新来最终完成模型组件及其依赖的下载。
+
+\begin{lstlisting}[language=bash]
+{
+  "require": {
+    "illuminate/routing": "*",
+    "illuminate/events": "*",
+    "illuminate/database": "*"
+  },
+  "autoload": {
+    "psr-4": {
+       "App\\": "app/"
+    }
+  }
+}
+\end{lstlisting}
+
+
+illuminate\textbackslash database组件主要用于操作数据库，而且该组件提供了两种操作数据库的方式，分别是查询构造器方式和Eloquent ORM方式。
+
+\subsection{Eloquent ORM}
+
+Eloquent ORM方式操作数据库需要完成五个步骤，分别是创建数据库、添加数据库配置信息、启动Eloquent ORM模块、创建model类和通过model类来操作数据库。
+
+\begin{lstlisting}[language=bash]
+$ tree /srv/web/lara
+/srv/web/lara
+|— app
+|        |— Http
+|                |— Controllers
+|                |       |— WelcomeController.php 
+|                |— routes.php
+|— config
+|        |— api.php
+|        |— app.php
+|        |— cache.php
+|        |— database.php
+|        |— mail.php
+|        |— oauth2.php
+|        |— queue.php
+|        |— services.php
+|        |— session.php
+|        |— view.php
+|— public
+|        |— index.php
+|— composer.json
+|— vendor
+    |— autoload.php
+    |— composer
+         |— autoload_classmap.php
+         |— autoload_namespaces.php
+         |— autoload_psr4.php
+         |— autoload_real.php
+         |— autoload_static.php
+         |— ClassLoader.php
+         |— installed.json
+         |— LICENSE
+\end{lstlisting}
+
+按照Laravel框架的目录结构，在/srv/web/lara目录下创建config目录来保存整个应用程序的配置文件。
+
+\begin{compactitem}
+\item database.php存储对数据库的配置信息（以数组的形式）
+\item api.php存储API接口的配置信息（例如接口频率限制等）
+\item app.php存储应用程序的配置信息（例如时区信息等）
+\item cache.php存储缓存数据库的配置信息（例如Memcached和Redis等）
+\item mail.php存储邮件服务器的配置信息
+\item oauth2.php存储使用第三方登录的OAuth2配置信息
+\item queue.php存储队列服务器信息（例如Redis等）
+\item services.php存储接入的第三方服务（例如支付、微信等）
+\item session.php存储会话存储的配置信息
+\item view.php存储视图的配置信息
+\end{compactitem}
+
+\begin{lstlisting}[language=PHP]
+$ cat > /srv/web/lara/config/database.php
+<?php
+return [
+   'driver'=>'mysql',
+   'host'=>'localhost',
+   'database'=>'lara',
+   'username'=>'root',
+   'password'=>'rootp@ssw0rd',
+   'charset'=>'utf8',
+   'collation'=>'utf8_general_ci',
+   'prefix'=>'lara_'
+];
+\end{lstlisting}
+
+
+在配置数据库后就可以在访问入口文件中启动Eloquent ORM模块。
+
+
+\begin{lstlisting}[language=PHP]
+$ cat > /srv/web/lara/public/index.php
+use Illuminate\Database\Capsule\Manager;
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = new Illuminate\Container\Container();
+
+with(new Illuminate\Events\EventServiceProvider($app))->register();
+with(new Illuminate\Routing\RoutingServiceProvider($app))->register();
+$manager = new Manager();
+$manager->addConnection(require '../config/database.php');
+$manager->bootEloquent();
+
+require __DIR__ . '/../app/Http/routes.php';
+
+$request = Illuminate\Http\Request::createFromGlobals();
+$response = $app['router']->dispatch($request);
+$response->send();
+\end{lstlisting}
+
+
+启动Eloquent ORM模块需要使用数据库的管理类，即Illuminate\textbackslash Database\textbackslash Capsule\textbackslash Manager类，因此需要添加对应的命名空间并进行初始化。
+
+\begin{compactitem}
+\item addConnection()函数完成数据库的相关配置
+\item bootEloquent()函数完成Eloquent ORM模块的启动
+\end{compactitem}
+
+启动Eloquent ORM模块后就可以操作数据库，注意Eloquent ORM操作数据库需要两个步骤来实现，分别是创建模型类和通过模型类的方法操作数据库。
+
+\begin{lstlisting}[language=bash]
+$ tree /srv/web/lara
+/srv/web/lara
+|— app
+|        |— Http
+|        |        |— Controllers
+|        |        |       |— WelcomeController.php 
+|        |        |— routes.php
+|        |— Models
+|                 |— Student.php
+|— config
+|        |— api.php
+|        |— app.php
+|        |— cache.php
+|        |— database.php
+|        |— mail.php
+|        |— oauth2.php
+|        |— queue.php
+|        |— services.php
+|        |— session.php
+|        |— view.php
+|— public
+|        |— index.php
+|— composer.json
+|— vendor
+    |— autoload.php
+    |— composer
+         |— autoload_classmap.php
+         |— autoload_namespaces.php
+         |— autoload_psr4.php
+         |— autoload_real.php
+         |— autoload_static.php
+         |— ClassLoader.php
+         |— installed.json
+         |— LICENSE
+\end{lstlisting}
+
+模型类可以保存在app目录下的Models目录下来统一管理。例如，建立/srv/web/lara/app/Models/Student.php来创建App\textbackslash Models\textbackslash Student模型类如下：
+
+\begin{lstlisting}[language=PHP]
+$ cat > /srv/web/lara/app/Models/Student.php
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Student extends Model {
+    public $timestamps = false;
+}
+\end{lstlisting}
+
+
+Eloquent ORM操作数据库时首先需要引入模型类，例如使用use关键字引入App\textbackslash Models\textbackslash Student模型类，接下来就可以使用first()函数获取students表中的第一行数据（封装在模型类实例\$student中）。
+
+模型类实例的getAttributes()函数可以返回相应的数据并展示在页面上。
+
+\begin{compactitem}
+\item 每个模型类都需要继承Illuminate\textbackslash Database\textbackslash Eloquent\textbackslash Model类。
+\item 每个模型类只对应一个数据表（默认情况下类名小写后的复数就是对应的表名）。
+\end{compactitem}
+
+
+在通过模型类调用相应方法时就会操作对应的表中的数据（例如first()函数可以获取表中的第一行数据）。
+
+
+\section{View}
+
+Laravel框架的Illuminate\textbackslash view视图组件可以将视图以模板的方式创建，而且在其他视图中也可以调用、继承已经创建的模板，并通过模板语法来简化视图设计。
+
+更新composer.json文件来引入Illuminate\textbackslash view视图组件。
+
+\begin{lstlisting}[language=bash]
+{
+  "require": {
+    "illuminate/routing": "*",
+    "illuminate/events": "*",
+    "illuminate/database": "*",
+    "illuminate/view": "*"
+  },
+  "autoload": {
+    "psr-4": {
+       "App\\": "app/"
+    }
+  }
+}
+\end{lstlisting}
+
+
+视图组件的使用需要完成以下4个工作，分别是：
+
+\begin{compactenum}
+\item 添加视图模板文件和编译文件的存储路径；
+\item 对视图进行相关配置和服务注册；
+\item 使用视图文件；
+\item 创建视图模板文件。
+\end{compactenum}
+
+
+Illuminate\textbackslash view视图组件将视图模板文件编译成普通的视图文件并进行存储，因此第一步需要添加相应的存储路径。
+
+\begin{lstlisting}[language=bash]
+$ tree /srv/web/lara
+/srv/web/lara
+|— app
+|        |— Http
+|        |        |— Controllers
+|        |        |       |— WelcomeController.php 
+|        |        |— routes.php
+|        |— Models
+|                 |— Student.php
+|— config
+|        |— api.php
+|        |— app.php
+|        |— cache.php
+|        |— database.php
+|        |— mail.php
+|        |— oauth2.php
+|        |— queue.php
+|        |— services.php
+|        |— session.php
+|        |— view.php
+|— public
+|        |— index.php
+|— resources
+|        |— views
+|                 |— welcome.blade.php
+|— storage
+|        |— framework
+|                 |— views
+|                         |— 7f8ac86c71cd9a8c22ddf0a79647c4e238965f6a.php
+|— composer.json
+|— vendor
+    |— autoload.php
+    |— composer
+         |— autoload_classmap.php
+         |— autoload_namespaces.php
+         |— autoload_psr4.php
+         |— autoload_real.php
+         |— autoload_static.php
+         |— ClassLoader.php
+         |— installed.json
+         |— LICENSE
+\end{lstlisting}
+
+默认情况下，视图模板文件存储在resource/views目录下，编译出的视图文件存储在storage/framework/views目录下，其中storage目录和bootstrap/cache目录需要设置为PHP可写权限，例如：
+
+\begin{lstlisting}[language=bash]
+$ sudo chmod 777 -R storage/
+\end{lstlisting}
+
+
+
+
+在index.php文件中完成视图组件的相关配置和服务注册如下：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+use Illuminate\Database\Capsule\Manager;
+use Illuminate\Support\Fluent;
+require __DIR__ . '/../vendor/autoload.php';
+
+$app = new Illuminate\Container\Container();
+Illuminate\Container\Container::setInstance($app);
+with(new Illuminate\Events\EventServiceProvider($app))->register();
+with(new Illuminate\Routing\RoutingServiceProvider($app))->register();
+// Eloquent ORM
+$manager = new Manager();
+$manager->addConnection(require '../config/database.php');
+$manager->bootEloquent();
+
+$app->instance('config',new Fluent);
+$app['config']['view.compiled']='../storage/framework/views';
+$app['config']['view.paths']=['../resources/views'];
+with(new Illuminate\View\ViewServiceProvider($app))->register();
+with(new Illuminate\Filesystem\FilesystemServiceProvider($app))->register();
+require __DIR__ . '/../app/Http/routes.php';
+
+$request = Illuminate\Http\Request::createFromGlobals();
+$response = $app['router']->dispatch($request);
+$response->send();
+\end{lstlisting}
+
+
+\subsection{setInstance()}
+
+服务容器的setInstance()静态方法可以将服务容器实例添加为静态属性，从而可以在任何位置获取服务容器的实例。
+
+\subsection{instance()}
+
+在配置视图模块时，首先通过服务容器实例的instance()方法将服务名称为config和Illuminate\textbackslash Support\textbackslash Fluent类的实例进行绑定。
+
+
+Illuminate\textbackslash Support\textbackslash Fluent类的实例主要用于存储视图模块的配置信息，这里的配置信息包括视图模板文件和编译文件的存储路径，需要分别添加到配置实例中。
+
+
+视图模块的使用需要文件模块的支持，在下载视图组件时，文件模块会作为依赖下载，因此可以直接使用文件组件的服务提供者进行服务注册。
+
+在使用视图组件时，在处理函数中使用视图组件实现视图的加载，其中路由文件和在控制器模块中添加的相同，这里还是使用index()函数进行处理。
+
+视图模块返回视图响应的处理函数内容如下：
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace App\Http\Controllers;
+
+use App\Models\Student;
+use Illuminate\Container\Container;
+
+class WelcomeController{
+    public function index(){
+        $student = Student::first();
+        $data = $student->getAttributes();
+        $app = Container::getInstance();
+        $factory = $app->make('view');
+        return $factory->make('welcome')->with('data',$data);
+    }
+}
+\end{lstlisting}
+
+
+\begin{compactitem}
+\item 服务容器的getInstance()静态方法获取到服务容器的实例。
+\item 服务容器获取服务名称为view的实例对象（即视图创建工厂类（Illuminate\textbackslash View\textbackslash Factory）的实例），其中的参数就是视图文件的名称，实际上是在视图模板文件路径中查找对应文件名的文件，视图文件就在后面创建。
+\item 视图实例的with()方法用来添加数据，这样就可以在视图文件中使用。
+\end{compactitem}
+
+视图模板文件默认位于/resources/views目录下（例如welcome.blade.php），Illuminate\textbackslash view视图组件规定模板文件使用.blade.php为后缀，而且文件名要和视图创建工厂的make()方法中的字符串参数相同。
+
+\begin{lstlisting}[language=PHP]
+$ cat > welcome.blade.php
+<h3>Students</h3>
+<p>id:{{$data['id']}};</p>
+<p>name:{{$data['name']}};</p>
+<p>age:{{$data['age']}};</p>
+\end{lstlisting}
+
+在视图文件中可以按照HTML格式创建视图，传入的数据可以通过\texttt{\{\{变量\}\}}的形式输出。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

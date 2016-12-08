@@ -1,0 +1,1175 @@
+\part{Interface}
+
+
+\chapter{Overview}
+
+
+
+
+\chapter{Traversable}
+
+Traversable接口检测类是否支持使用foreach进行遍历。
+
+抽象的基本接口不能单独实现，必须由IteratorAggregate接口或Iterator接口实现，不过实现了Traversable接口的内部类可以使用foreach进行遍历，无需实现IteratorAggregate接口或Iterator接口。
+
+实际上，Traversable接口是一个内部引擎接口，无法在脚本中实现，必须使用IteratorAggregate接口或Iterator接口代替。
+
+在实现扩展Traversable接口的接口时，需要确保implements子句中的名称之前已经列出了IteratorAggregate接口或Iterator接口。
+
+\section{Interface synopsis}
+
+\begin{lstlisting}[language=PHP]
+Traversable {
+}
+\end{lstlisting}
+
+Traverable接口没有提供方法，其作用是作为所有实现Traversable接口的类（可遍历类）的基础接口。
+
+
+\chapter{Iterator Interface}
+
+Iterator接口是用于外部迭代器或对象的接口，可以在内部自行迭代。
+
+\section{Interface synopsis}
+
+
+\begin{lstlisting}[language=PHP]
+Iterator extends Traversable {
+/* Methods */
+abstract public mixed current ( void )
+abstract public scalar key ( void )
+abstract public void next ( void )
+abstract public void rewind ( void )
+abstract public boolean valid ( void )
+}
+\end{lstlisting}
+
+PHP已经通过SPL为许多日常任务提供了对应的迭代器。
+
+下面的示例说明了使用foreach和迭代器时调用方法的顺序。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+/**
+ * Created by PhpStorm.
+ * User: zgy
+ * Date: 12/7/16
+ * Time: 9:16 PM
+ */
+class myIterator implements Iterator {
+    private $position = 0;
+    private $array = array(
+        "firstelement",
+        "secondelement",
+        "lastelement"
+    );
+
+    public function __construct() {
+        $this->position = 0;
+    }
+
+    function rewind() {
+        var_dump(__METHOD__);
+        $this->position = 0;
+    }
+
+    function current() {
+        var_dump(__METHOD__);
+        return $this->array[$this->position];
+    }
+
+    function key() {
+        var_dump(__METHOD__);
+        return $this->position;
+    }
+
+    function next() {
+        var_dump(__METHOD__);
+        ++$this->position;
+    }
+
+    function valid() {
+        var_dump(__METHOD__);
+        return isset($this->array[$this->position]);
+    }
+}
+
+$it = new myIterator();
+foreach ($it as $key => $value) {
+    var_dump($key, $value);
+    echo "\n";
+}
+\end{lstlisting}
+
+上述示例输出如下：
+
+\begin{lstlisting}[language=PHP]
+string(18) "myIterator::rewind"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(0)
+string(12) "firstelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(1)
+string(13) "secondelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(2)
+string(11) "lastelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+\end{lstlisting}
+
+\section{Iterator::current()}
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed Iterator::current ( void )
+\end{lstlisting}
+
+返回当前元素（可以是任何类型）
+
+\section{Iterator::key()}
+
+\begin{lstlisting}[language=PHP]
+abstract public scalar Iterator::key ( void )
+\end{lstlisting}
+
+返回当前元素的key（成功时返回标量，失败返回NULL，发生故障时报告E\_NOTICE）。
+
+
+
+\section{Iterator::next()}
+
+\begin{lstlisting}[language=PHP]
+abstract public void Iterator::next ( void )
+\end{lstlisting}
+
+把当前位置移动到下一个元素（在每一次foreach循环后都会调用该方法），并且忽略任何返回值。
+
+\section{Iterator::rewind()}
+
+\begin{lstlisting}[language=PHP]
+abstract public void Iterator::rewind ( void )
+\end{lstlisting}
+
+返回到Iterator的第一个元素，Iterator::rewind()是foreach循环开始后调用的第一个方法，不会在foreach循环后执行，而且会忽略任何返回值。
+
+
+
+\section{Iterator::valid()}
+
+
+\begin{lstlisting}[language=PHP]
+abstract public boolean Iterator::valid ( void )
+\end{lstlisting}
+
+检查当前位置是否合法，在Iterator::rewind()或Iterator::next()方法执行后都会调用该方法。
+
+返回值会被强制转换为布尔值，然后再进行计算，成功返回true，失败返回false。
+
+
+\chapter{IteratorAggregate Interface}
+
+IteratorAggregate接口用于创建一个外部迭代器。
+
+\section{Interface synopsis}
+
+
+\begin{lstlisting}[language=PHP]
+IteratorAggregate extends Traversable {
+/* Methods */
+abstract public Traversable getIterator ( void )
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=PHP]
+<?php
+class myData implements IteratorAggregate {
+    public $property1 = "Public property one";
+    public $property2 = "Public property two";
+    public $property3 = "Public property three";
+
+    public function __construct() {
+        $this->property4 = "last property";
+    }
+
+    public function getIterator() {
+        return new ArrayIterator($this);
+    }
+}
+
+$obj = new myData;
+
+foreach($obj as $key => $value) {
+    var_dump($key, $value);
+    echo "\n";
+}
+\end{lstlisting}
+
+上述示例的输出如下：
+
+
+\begin{lstlisting}[language=PHP]
+string(9) "property1"
+string(19) "Public property one"
+
+string(9) "property2"
+string(19) "Public property two"
+
+string(9) "property3"
+string(21) "Public property three"
+
+string(9) "property4"
+string(13) "last property"
+\end{lstlisting}
+
+\section{IteratorAggregate::getIterator()}
+
+
+\begin{lstlisting}[language=PHP]
+abstract public Traversable IteratorAggregate::getIterator ( void )
+\end{lstlisting}
+
+返回一个外部迭代器（实现了Iterator或Traversable的对象的实例），失败时会抛出Exception异常。
+
+
+
+\chapter{Throwable Interface}
+
+
+\section{Interface synopsis}
+
+
+
+\begin{lstlisting}[language=PHP]
+Throwable {
+/* Methods */
+abstract public string getMessage ( void )
+abstract public int getCode ( void )
+abstract public string getFile ( void )
+abstract public int getLine ( void )
+abstract public array getTrace ( void )
+abstract public string getTraceAsString ( void )
+abstract public Throwable getPrevious ( void )
+abstract public string __toString ( void )
+}
+\end{lstlisting}
+
+Throwable接口是任何可以抛出异常/错误（包括Error和Exception）的对象的基础接口。
+
+PHP类不能直接实现Throwable接口，必须通过扩展Exception接口实现。
+
+\section{Throwable::getMessage()}
+
+\begin{lstlisting}[language=PHP]
+abstract public string Throwable::getMessage ( void )
+\end{lstlisting}
+
+返回与抛出对象相关联的消息。
+
+
+\section{Throwable::getCode()}
+
+\begin{lstlisting}[language=PHP]
+abstract public int Throwable::getCode ( void )
+\end{lstlisting}
+
+
+返回与抛出对象相关联的错误代码。
+
+通常情况下，在Exception中的异常代码为整数，但是也可以是Exception子类中的其他类型（例如作为PDOException中的字符串）。
+
+
+
+\section{Throwable::getFile()}
+
+\begin{lstlisting}[language=PHP]
+abstract public string Throwable::getFile ( void )
+\end{lstlisting}
+
+
+返回与抛出对象相关联的文件名。
+
+\section{Throwable::getLine()}
+
+\begin{lstlisting}[language=PHP]
+abstract public int Throwable::getLine ( void )
+\end{lstlisting}
+
+返回与抛出对象被实例化的行号。
+
+\section{Throwable::getTrace()}
+
+\begin{lstlisting}[language=PHP]
+abstract public array Throwable::getTrace ( void )
+\end{lstlisting}
+
+以与debug\_backtrace()相同的格式返回堆栈跟踪数组。
+
+
+\section{Throwable::getTraceAsString()}
+
+\begin{lstlisting}[language=PHP]
+abstract public string Throwable::getTraceAsString ( void )
+\end{lstlisting}
+
+以字符串形式返回堆栈跟踪。
+
+
+\section{Throwable::getPrevious()}
+
+\begin{lstlisting}[language=PHP]
+abstract public Throwable Throwable::getPrevious ( void )
+\end{lstlisting}
+
+返回任何先前的Throwable对象（例如作为第三个参数传递给给Exception::\_\_construct()），否则返回NULL。
+
+
+\section{Throwable::\_\_toString()}
+
+\begin{lstlisting}[language=PHP]
+abstract public string Throwable::__toString ( void )
+\end{lstlisting}
+
+
+返回抛出对象的字符串表示形式。
+
+
+
+
+
+
+\chapter{ArrayAccess Interface}
+
+提供把访问对象作为数组的接口。
+
+\section{Interface synopsis}
+
+
+\begin{lstlisting}[language=PHP]
+ArrayAccess {
+/* Methods */
+abstract public boolean offsetExists ( mixed $offset )
+abstract public mixed offsetGet ( mixed $offset )
+abstract public void offsetSet ( mixed $offset , mixed $value )
+abstract public void offsetUnset ( mixed $offset )
+}
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements ArrayAccess {
+    private $container = array();
+
+    public function __construct() {
+        $this->container = array(
+            "one"   => 1,
+            "two"   => 2,
+            "three" => 3,
+        );
+    }
+
+    public function offsetSet($offset, $value) {
+        if (is_null($offset)) {
+            $this->container[] = $value;
+        } else {
+            $this->container[$offset] = $value;
+        }
+    }
+
+    public function offsetExists($offset) {
+        return isset($this->container[$offset]);
+    }
+
+    public function offsetUnset($offset) {
+        unset($this->container[$offset]);
+    }
+
+    public function offsetGet($offset) {
+        return isset($this->container[$offset]) ? $this->container[$offset] : null;
+    }
+}
+
+$obj = new obj;
+
+var_dump(isset($obj["two"]));
+var_dump($obj["two"]);
+unset($obj["two"]);
+var_dump(isset($obj["two"]));
+$obj["two"] = "A value";
+var_dump($obj["two"]);
+$obj[] = 'Append 1';
+$obj[] = 'Append 2';
+$obj[] = 'Append 3';
+print_r($obj);
+\end{lstlisting}
+
+上述示例的输出如下：
+
+\begin{lstlisting}[language=PHP]
+bool(true)
+int(2)
+bool(false)
+string(7) "A value"
+obj Object
+(
+    [container:obj:private] => Array
+        (
+            [one] => 1
+            [three] => 3
+            [two] => A value
+            [0] => Append 1
+            [1] => Append 2
+            [2] => Append 3
+        )
+)
+\end{lstlisting}
+
+\section{ArrayAccess::offsetExists()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public boolean ArrayAccess::offsetExists ( mixed $offset )
+\end{lstlisting}
+
+检测偏移是否存在，实现ArrayAccess接口的对象在调用isset()或empty()时就会执行ArrayAccess::offsetExists()。
+
+实际上，在调用empty()时，如果ArrayAccess::offsetExists()返回true时，ArrayAccess::offsetGet()将被调用并检查是否为空。
+
+\$offset是需要检查的偏移。
+
+实现ArrayAccess接口的对象在执行ArrayAccess::offsetExists()时，成功返回TRUE，失败返回FALSE，如果返回值不是布尔值则会被强制转换为布尔型。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements arrayaccess {
+    public function offsetSet($offset, $value) {
+        var_dump(__METHOD__);
+    }
+    public function offsetExists($var) {
+        var_dump(__METHOD__);
+        if ($var == "foobar") {
+            return true;
+        }
+        return false;
+    }
+    public function offsetUnset($var) {
+        var_dump(__METHOD__);
+    }
+    public function offsetGet($var) {
+        var_dump(__METHOD__);
+        return "value";
+    }
+}
+
+$obj = new obj;
+
+echo "Runs obj::offsetExists()\n";
+var_dump(isset($obj["foobar"]));
+
+echo "\nRuns obj::offsetExists() and obj::offsetGet()\n";
+var_dump(empty($obj["foobar"]));
+
+echo "\nRuns obj::offsetExists(), *not* obj:offsetGet() as there is nothing to get\n";
+var_dump(empty($obj["foobaz"]));
+\end{lstlisting}
+
+上述示例将会返回：
+
+
+
+\begin{lstlisting}[language=PHP]
+Runs obj::offsetExists()
+string(17) "obj::offsetExists"
+bool(true)
+
+Runs obj::offsetExists() and obj::offsetGet()
+string(17) "obj::offsetExists"
+string(14) "obj::offsetGet"
+bool(false)
+
+Runs obj::offsetExists(), *not* obj:offsetGet() as there is nothing to get
+string(17) "obj::offsetExists"
+bool(true)
+\end{lstlisting}
+
+\section{ArrayAccess::offsetGet()}
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed ArrayAccess::offsetGet ( mixed $offset )
+\end{lstlisting}
+
+返回指定偏移处的值，并且在使用empty()检查偏移是否存在时会自动调用该方法。
+
+\$offset是要检索的偏移量。
+
+ArrayAccess::offsetGet()可以返回任何类型的值。
+
+PHP已经放宽了原型检查而且可以通过引用返回，从而使得对于ArrayAccess对象的重载数组的间接修改成为可能。
+
+\begin{compactitem}
+\item 直接修改是完全替换数组维度的值。例如，\$obj[6]=7。
+\item 间接修改仅仅更改维度的一部分，或者尝试通过引用来分配维度。例如，\$obj[6][7]=7或者\$var=\&\$obj[6]。
+\end{compactitem}
+
+递增（\texttt{++}）和递减（\texttt{-\/-}）操作同样也是使用间接修改的方式实现。
+
+\begin{compactitem}
+\item 直接修改会触发ArrayAccess::offsetGet()；
+\item 间接修改会触发ArrayAccess::offsetSet()。
+\end{compactitem}
+
+ArrayAccess::offsetGet()的实现必须能够通过引用返回，否则会报告E\_NOTICE消息。
+
+\section{ArrayAccess::offsetSet()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public void ArrayAccess::offsetSet ( mixed $offset , mixed $value )
+\end{lstlisting}
+
+为指定的偏移分配一个值（该方法没有返回值）。
+
+如果指定的值不可用，那么offset参数将被设置为NULL，例如：
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arrayaccess[] = "first value";
+$arrayaccess[] = "second value";
+print_r($arrayaccess);
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+Array
+(
+    [0] => first value
+    [1] => second value
+)
+\end{lstlisting}
+
+注意，在引用赋值（assignment by reference），否则使用ArrayAccess来进行数组维度的间接修改。
+
+从某种意义上说，它们并不是直接更改维度，而是通过引用其他变量来实现更改子维度或子属性或分配数组维度。
+
+只有ArrayAccess::offsetGet()通过引用返回时，操作才会成功。
+
+\section{ArrayAccess::offsetUnset()}
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public void ArrayAccess::offsetUnset ( mixed $offset )
+\end{lstlisting}
+
+取消（删除）偏移，而且执行ArrayAccess::unset()来进行类型转换时不会调用该方法。
+
+
+
+
+\chapter{Serializable Interface}
+
+Serializable接口用于自定义序列化。
+
+实现Serializable接口的类不再支持\_\_sleep()和\_\_wakeup()魔术方法。
+
+实现Serializable接口后，只要对象实例需要序列化就会执行Serializable接口中的Serializable::serialize()方法，不会调用\_\_destruct()方法或其他任何有副作用的方法（除非在方法内部进行了自定义）。
+
+如果已知类的序列化数据进行反序列化，那么就会调用unserialize()方法而不是\_\_construct()方法，如果用户需要执行标准的构造函数，那么需要自己在Serializable::unserialize()方法自己指定。
+
+注意，实现Serialize接口的类的一个旧实例（在类实现Serialize接口之前已经被序列化）进行反序列化时，还是会调用\_\_wakeup()而不是Serializable::serialize()方法，因此可以用来进行有目的的代码迁移。
+
+
+
+
+\section{Serialize synopsis}
+
+
+\begin{lstlisting}[language=PHP]
+Serializable {
+/* Methods */
+abstract public string serialize ( void )
+abstract public void unserialize ( string $serialized )
+}
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements Serializable {
+    private $data;
+    public function __construct() {
+        $this->data = "My private data";
+    }
+    public function serialize() {
+        return serialize($this->data);
+    }
+    public function unserialize($data) {
+        $this->data = unserialize($data);
+    }
+    public function getData() {
+        return $this->data;
+    }
+}
+
+$obj = new obj;
+$ser = serialize($obj);
+
+var_dump($ser);
+
+$newobj = unserialize($ser);
+
+var_dump($newobj->getData());
+\end{lstlisting}
+
+上述示例的输出如下：
+
+
+\begin{lstlisting}[language=PHP]
+string(38) "C:3:"obj":23:{s:15:"My private data";}"
+string(15) "My private data"
+\end{lstlisting}
+
+\section{Serialize::serialize()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public string Serializable::serialize ( void )
+\end{lstlisting}
+
+返回对象的序列化（字符串）表示（或NULL）。
+
+Serializable::serialize()方法替代了对象的析构函数，在Serializable::serialize()方法之后不会再调用\_\_destruct()方法。
+
+如果序列化结果不是字符串或NULL，Serializable::serialize()方法会抛出Exception异常。
+
+\section{Serialize::unserialize()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public void Serializable::unserialize ( string $serialized )
+\end{lstlisting}
+
+对对象进行反序列化，没有返回值。
+
+Serializable::unserialize()方法替代了对象的构造函数，在Serializable::unserialize()方法之后不会再调用\_\_construct()方法。
+
+
+
+
+\chapter{Closure Class}
+
+
+\section{Closure synopsis}
+
+Closure接口用于表示匿名函数的类。
+
+PHP支持依赖Closure接口来实现闭包函数和yield，而且PHP允许在匿名函数创建以后进一步控制匿名函数类。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+Closure {
+/* Methods */
+private __construct ( void )
+public static Closure bind ( Closure $closure , object $newthis [, mixed $newscope = "static" ] )
+public Closure bindTo ( object $newthis [, mixed $newscope = "static" ] )
+public mixed call ( object $newthis [, mixed $... ] )
+}
+\end{lstlisting}
+
+除了Closure::\_\_construct()、Closure::bind()、Closure::bindTo()和Closure::call()方法之外，匿名类还有一个Closure::\_\_invoke()方法来保持和其他实现魔术方法调用的类的一致性，不过在这里，Closure::\_\_invoke()方法不再用于魔术方法。
+
+\section{Closure::\_\_construct()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+private Closure::__construct ( void )
+\end{lstlisting}
+
+匿名类的对象以匿名函数指定的形式被实例化。
+
+匿名类不允许实例化也没有返回值，强制调用会返回E\_RECOVERABLE\_ERROR错误。
+
+\section{Closure::bind()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public static Closure Closure::bind ( Closure $closure , object $newthis [, mixed $newscope = "static" ] )
+\end{lstlisting}
+
+使用指定的绑定对象和类作用域来复制闭包，可以把Closure::bind()方法看作是Closure::bindTo()方法的静态版本，成功返回新的闭包对象，失败返回FALSE。
+
+\begin{compactitem}
+\item closure
+
+The anonymous functions to bind.
+
+\item newthis
+
+The object to which the given anonymous function should be bound, or NULL for the closure to be unbound.
+
+\item newscope
+
+The class scope to which associate the closure is to be associated, or 'static' to keep the current one. If an object is given, the type of the object will be used instead. This determines the visibility of protected and private methods of the bound object. It is not allowed to pass (an object of) an internal class as this parameter.
+
+\end{compactitem}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    private static $sfoo = 1;
+    private $ifoo = 2;
+}
+$cl1 = static function() {
+    return A::$sfoo;
+};
+$cl2 = function() {
+    return $this->ifoo;
+};
+
+$bcl1 = Closure::bind($cl1, null, 'A');
+$bcl2 = Closure::bind($cl2, new A(), 'A');
+echo $bcl1(), "\n";
+echo $bcl2(), "\n";
+\end{lstlisting}
+
+上述示例的输出如下：
+
+\begin{lstlisting}[language=PHP]
+1
+2
+\end{lstlisting}
+
+\section{Closure::bindTo()}
+
+
+
+\begin{lstlisting}[language=PHP]
+public Closure Closure::bindTo ( object $newthis [, mixed $newscope = "static" ] )
+\end{lstlisting}
+
+创建并返回一个新的匿名函数（即闭包对象），该函数具有与原匿名函数一样的主体和绑定变量，不过可能具有不同的绑定对象和新的类作用域，失败返回FALSE。
+
+The “bound object” determines the value \$this will have in the function body and the “class scope” represents a class which determines which private and protected members the anonymous function will be able to access. Namely, the members that will be visible are the same as if the anonymous function were a method of the class given as value of the newscope parameter.
+
+Static closures cannot have any bound object (the value of the parameter newthis should be NULL), but this function can nevertheless be used to change their class scope.
+
+This function will ensure that for a non-static closure, having a bound instance will imply being scoped and vice-versa. To this end, non-static closures that are given a scope but a NULL instance are made static and non-static non-scoped closures that are given a non-null instance are scoped to an unspecified class.
+
+
+如果只是需要复制匿名函数，那么可以改用clone（克隆）来代替Closure::bindTo()。
+
+\begin{compactitem}
+\item newthis
+
+The object to which the given anonymous function should be bound, or NULL for the closure to be unbound.
+
+\item newscope
+
+The class scope to which associate the closure is to be associated, or 'static' to keep the current one. If an object is given, the type of the object will be used instead. This determines the visibility of protected and private methods of the bound object.
+
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    function __construct($val) {
+        $this->val = $val;
+    }
+    function getClosure() {
+        //returns closure bound to this object and scope
+        return function() { return $this->val; };
+    }
+}
+
+$ob1 = new A(1);
+$ob2 = new A(2);
+
+$cl = $ob1->getClosure();
+echo $cl(), "\n";
+$cl = $cl->bindTo($ob2);
+echo $cl(), "\n";
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+1
+2
+\end{lstlisting}
+
+\section{Closure::call()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public mixed Closure::call ( object $newthis [, mixed $... ] )
+\end{lstlisting}
+
+绑定和调用闭包（Closure::call()会把闭包临时绑定到\$newthis，并且使用任何给定的参数来调用它），并且返回闭包的返回值。
+
+\begin{compactitem}
+\item \$newthis
+
+The object to bind the closure to for the duration of the call.
+
+\item \$...
+
+Zero or more parameters, which will be given as parameters to the closure.
+
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Value {
+    protected $value;
+
+    public function __construct($value) {
+        $this->value = $value;
+    }
+
+    public function getValue() {
+        return $this->value;
+    }
+}
+
+$three = new Value(3);
+$four = new Value(4);
+
+$closure = function ($delta) { var_dump($this->getValue() + $delta); };
+$closure->call($three, 4);
+$closure->call($four, 4);
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+int(7)
+int(8)
+\end{lstlisting}
+
+
+
+
+
+
+\chapter{Generator Class}
+
+\section{Generator sysopsis}
+
+
+
+\begin{lstlisting}[language=PHP]
+Generator implements Iterator {
+/* Methods */
+public mixed current ( void )
+public mixed getReturn ( void )
+public mixed key ( void )
+public void next ( void )
+public void rewind ( void )
+public mixed send ( mixed $value )
+public mixed throw ( Exception $exception )
+public bool valid ( void )
+public void __wakeup ( void )
+}
+\end{lstlisting}
+
+从生成器类可以返回生成器对象，生成器对象不能通过new操作实例化。
+
+\section{Generator::current()}
+
+
+\begin{lstlisting}[language=PHP]
+public mixed Generator::current ( void )
+\end{lstlisting}
+
+获取yield操作的值
+
+\section{Generator::getReturn()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public mixed Generator::getReturn ( void )
+\end{lstlisting}
+
+获取生成器当前执行（也就是说生成器要执行一次）的返回值。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$gen = (function() {
+    yield 1;
+    yield 2;
+
+    return 3;
+})();
+
+foreach ($gen as $val) {
+    echo $val, PHP_EOL;
+}
+
+echo $gen->getReturn(), PHP_EOL;
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+1
+2
+3
+\end{lstlisting}
+
+\section{Generator::key()}
+
+
+
+\begin{lstlisting}[language=PHP]
+public mixed Generator::key ( void )
+\end{lstlisting}
+
+返回yield操作的key
+
+\begin{lstlisting}[language=PHP]
+<?php
+function Gen()
+{
+    yield 'key' => 'value';
+}
+
+$gen = Gen();
+
+echo "{$gen->key()} => {$gen->current()}";
+\end{lstlisting}
+
+上述操作的结果如下：
+
+\begin{lstlisting}[language=PHP]
+key => value
+\end{lstlisting}
+
+
+\section{Generator::next()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public void Generator::next ( void )
+\end{lstlisting}
+
+恢复生成器的执行，没有返回值。
+
+\section{Generator::rewind()}
+
+
+
+\begin{lstlisting}[language=PHP]
+public void Generator::rewind ( void )
+\end{lstlisting}
+
+回滚生成器，没有返回值，不过如果此时迭代已经开始，那么会抛出异常。
+
+
+\section{Generator::send()}
+
+
+\begin{lstlisting}[language=PHP]
+public mixed Generator::send ( mixed $value )
+\end{lstlisting}
+
+把上一次yield操作的结果发送给生成器，并恢复生成器的执行，然后返回本次yield操作的值。
+
+如果在调用Generator::send()方法时，生成器没有yield表达式，就会先把生成器回滚到第一个yield表达式，因此实际上没有必要使用Generator::next()来启动生成器（类似于Python）。
+
+\begin{compactitem}
+\item \$value 
+
+Value to send into the generator. This value will be the return value of the yield expression the generator is currently at.
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function printer() {
+    echo "I'm printer!".PHP_EOL;
+    while (true) {
+        $string = yield;
+        echo $string.PHP_EOL;
+    }
+}
+
+$printer = printer();
+$printer->send('Hello world!');
+$printer->send('Bye world!');
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+I'm printer!
+Hello world!
+Bye world!
+\end{lstlisting}
+
+
+\section{Generator::throw()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public mixed Generator::throw ( Exception $exception )
+\end{lstlisting}
+
+把异常抛出到生成器中，并恢复生成器的执行，并返回本次yield操作的结果。
+
+Generator::throw()的行为和使用\texttt{throw \$exception}语句替换当前yield表达式的结果相同。
+
+如果在调用Generator::throw()方法时生成器已经关闭，异常将被抛出在调用者的上下文中。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function gen() {
+    echo "Foo\n";
+    try {
+        yield;
+    } catch (Exception $e) {
+        echo "Exception: {$e->getMessage()}\n";
+    }
+    echo "Bar\n";
+}
+ 
+$gen = gen();
+$gen->rewind();
+$gen->throw(new Exception('Test'));
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+Foo
+Exception: Test
+Bar
+\end{lstlisting}
+
+\section{Generator::valid()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public bool Generator::valid ( void )
+\end{lstlisting}
+
+检查生成器是否已关闭，如果生成器已关闭则返回FALSE，如果生成器未关闭则返回TRUE。
+
+
+\section{Generator::\_\_wakeup()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public void Generator::__wakeup ( void )
+\end{lstlisting}
+
+没有返回值，只有在生成器无法被序列化时会抛出异常。
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

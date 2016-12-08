@@ -3,27 +3,25 @@
 
 
 
-\chapter{Introduction}
+\chapter{Overview}
 
-异常（Exception）用于在指定的错误发生时改变脚本的正常流程，这种情况称为异常。
 
-PHP 5 提供了类似于其它面向对象的异常处理模块\footnote{PHP 内部函数主要使用错误报告, 只有现代面向对象的扩展才使用异常，但错误可以很容易的通过ErrorException转换为异常。PHP标准库 (SPL) 提供了许多内建的异常类。}。当异常被触发时，通常会发生的情况如下：
 
-\begin{compactitem}
-\item 当前代码状态被保存
-\item 代码执行被切换到预定义的异常处理器函数
-\item 根据情况，处理器也许会从保存的代码状态重新开始执行代码，终止脚本执行，或从代码中另外的位置继续执行脚本
-\end{compactitem}
 
-在 PHP 代码中所产生的异常可被 throw 语句抛出并被 catch 语句捕获。需要进行异常处理的代码都必须放入 try 代码块内，以便捕获可能存在的异常。每一个 try 至少要有一个与之对应的 catch。使用多个 catch 可以捕获不同的类所产生的异常。当 try 代码块不再抛出异常或者找不到 catch 能匹配所抛出的异常时，PHP 代码就会在跳转到最后一个 catch 的后面继续执行。当然，PHP 允许在 catch 代码块内再次抛出（throw）异常。
+异常（Exception）用于在指定的错误发生时改变脚本的正常流程。
 
+异常是许多流行编程语言的标配，但它们往往被 PHP 开发人员所忽视，而Ruby就是一个极度重视异常的语言，无论有什么错误发生（例如HTTP请求失败或者数据库查询有问题，甚至找不到一个图片资源），Ruby （或是所使用的 gems）将会抛出异常，用户可以通过屏幕立刻知道所发生的问题。
+
+一般情况下，PHP内置的函数使用错误报告来处理异常，只有使用PHP进行面向对象编程时才会使用异常处理，不过PHP现在已经可以简单地把错误转换为异常并抛出。
+
+注意，Exception对象不能被复制，尝试对 Exception 对象复制会导致一个 E\_ERROR 级别的错误。
 
 \section{Basic Exception}
 
 
 当一个异常被抛出时，其后的代码（指抛出异常时所在的代码块）不会继续执行，而PHP 会尝试查找第一个能与之匹配的``catch" 代码块。
 
-如果异常没有被捕获，而且又没用使用 set\_exception\_handler() 作相应的处理的话，那么 PHP 将会产生一个严重的错误（致命错误），并且输出 ``Uncaught Exception ...''（未捕获异常）的错误提示信息。
+如果一个异常没有被捕获，而且又没有使用 set\_exception\_handler() 作相应的处理的话，那么 PHP 将会产生一个严重的错误（致命错误），并且输出 ``Uncaught Exception ...''（未捕获异常）的错误提示信息。
 
 
 
@@ -37,7 +35,7 @@ function checkNum($number)
  {
  if($number>1)
   {
-  throw new Exception("Value must be 1 or below");
+    throw new Exception("Value must be 1 or below");
   }
  return true;
  }
@@ -65,7 +63,6 @@ checkNum(28) #1 {main} thrown in test.php on line 6
 \begin{example}
 抛出一个异常
 \begin{lstlisting}[language=PHP]
-<![CDATA[
 <?php
 function inverse($x) {
     if (!$x) {
@@ -99,7 +96,6 @@ Hello World
 嵌套的异常
 \begin{lstlisting}[language=PHP]
 <?php
-
 class MyException extends Exception { }
 
 class Test {
@@ -130,7 +126,7 @@ $foo->testing();
 string(4) "foo!"
 \end{verbatim}
 
-\section{try,throw and catch}
+\section{try/throw/catch}
 
 要避免上面例子出现的错误，我们需要创建适当的代码来处理异常。
 
@@ -156,7 +152,7 @@ function checkNum($number)
  {
  if($number>1)
   {
-  throw new Exception("Value must be 1 or below");
+    throw new Exception("Value must be 1 or below");
   }
  return true;
  }
@@ -192,9 +188,92 @@ catch(Exception $e)
 
 不过，为了遵循“每个 throw 必须对应一个 catch”的原则，可以设置一个顶层的异常处理器来处理漏掉的错误。
 
+\section{Build-in Exception}
+
+PHP的SPL（Standard PHP Library）提供了一系列的内置异常类。
 
 
-\section{Custom Exception Class}
+\begin{compactitem}
+\item LogicException (extends Exception)
+
+\begin{compactitem}
+\item BadFunctionException
+\begin{compactitem}
+\item BadMethodException
+\end{compactitem}
+\item DomainException
+\item InvalidArgumentException
+\item LengthException
+\item OutOfRangeException
+\end{compactitem}
+
+\item RuntimeException (extends Exception)
+
+\begin{compactitem}
+\item OutOfBoundsException
+\item OverflowException
+\item RangeException
+\item UnderflowException
+\item UnexpectedValueException
+\end{compactitem}
+\end{compactitem}
+
+\subsection{BadFunctionCallException}
+
+
+\subsection{BadMethodCallException}
+
+
+\subsection{DomainException}
+
+
+\subsection{InvalidArgumentException}
+
+
+\subsection{LengthException}
+
+
+\subsection{LogicException}
+
+
+\subsection{OutOfBoundsException}
+
+
+\subsection{OutOfRangeException}
+
+
+\subsection{OverflowException}
+
+
+\subsection{RangeException}
+
+
+\subsection{RuntimeException}
+
+
+\subsection{UnderflowException}
+
+
+\subsection{UnexpectedValueException}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Custom Exception}
 
 以下这段代码只为说明内置异常处理类的结构，它并不是一段有实际意义的可用代码。
 
@@ -226,9 +305,7 @@ class Exception
 \end{example}
 
 
-用户可以用自定义的异常处理类来扩展 PHP 内置的异常处理类，而创建自定义的异常处理程序非常简单。
-
-通过自定义exception类，当 PHP 中发生异常时，可调用其函数，注意该类必须是 Exception 类的一个扩展。
+用户可以用自定义的异常处理类来扩展 PHP 内置的异常处理类，这样就可以在发生异常时调用自定义exception类的函数，只要自定义异常类是 Exception 类的一个扩展。
 
 以下的代码说明了在内置的异常处理类中，哪些属性和方法在子类中是可访问和可继承的。
 
@@ -284,7 +361,9 @@ catch (customException $e)
 \item "catch" 代码块捕获异常，并显示错误消息
 \end{compactenum}
 
-如果使用自定义的类来扩展内置异常处理类，并且要重新定义构造函数的话，建议同时调用 parent::\_\_construct() 来检查所有的变量是否已被赋值。当对象要输出字符串的时候，可以重载 \_\_toString() 并自定义输出的样式。
+如果使用自定义的类来扩展内置异常处理类，并且要重新定义构造函数的话，建议同时调用 parent::\_\_construct() 来检查所有的变量是否已被赋值。
+
+当对象要输出字符串的时候，可以重载 \_\_toString() 并自定义输出的样式。
 
 \begin{example}
 扩展 PHP 内置的异常处理类
@@ -403,7 +482,109 @@ echo "\n\n";
 \end{lstlisting}
 \end{example}
 
+\section{Exception Handler}
 
+
+\subsection{catch}
+
+
+
+PHP本身实际上提供了类似于其它面向对象的异常处理模块，例如异常可以被抛出（throw），也可以被抓住（catch），但是PHP内部函数主要使用错误报告，只有现代面向对象的扩展才可能使用异常。
+
+\begin{compactitem}
+\item 异常检测被包含在try代码块中来捕捉潜在的异常。
+\item 每个try块必须至少有一个对应的catch块或finally块。
+\end{compactitem}
+
+PHP错误可以很容易的通过ErrorException转换为异常，而且PHP标准库 (SPL) 提供了许多内建的异常类。
+
+实际上，可以被抛出的对象必须是异常类及其子类的实例，如果试图抛出一个正常对象会导致一个致命错误。
+
+当异常被触发时，通常会发生的情况如下：
+
+\begin{compactitem}
+\item 当前代码状态被保存
+\item 代码执行被切换到预定义的异常处理器函数
+\item 根据情况，处理器也许会从保存的代码状态重新开始执行代码，终止脚本执行，或从代码中另外的位置继续执行脚本
+\end{compactitem}
+
+在 PHP 代码中所产生的异常可被 throw 语句抛出并被 catch 语句捕获。需要进行异常处理的代码都必须放入 try 代码块内，以便捕获可能存在的异常。
+
+\begin{compactitem}
+\item 每一个 try 至少要有一个与之对应的 catch。
+\item 使用多个 catch 可以捕获不同的异常类实例。
+\end{compactitem}
+
+当 try 代码块不再抛出异常或者找不到 catch 能匹配所抛出的异常时，PHP 代码就会在跳转到最后一个 catch 的后面继续执行，而且PHP 允许在 catch 代码块内再次抛出（throw）异常。
+
+\subsection{finally}
+
+finally块可以定义在catch块后面或者代替catch块，这样catch块中的代码将始终会被执行，无论是否已抛出异常，而且正常执行流程恢复之前也会执行finally块中的代码。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function inverse($x) {
+    if (!$x) {
+        throw new Exception('Division by zero.');
+    }
+    return 1/$x;
+}
+
+try {
+    echo inverse(5) . "\n";
+} catch (Exception $e) {
+    echo 'Caught exception: ',  $e->getMessage(), "\n";
+} finally {
+    echo "First finally.\n";
+}
+
+try {
+    echo inverse(0) . "\n";
+} catch (Exception $e) {
+    echo 'Caught exception: ',  $e->getMessage(), "\n";
+} finally {
+    echo "Second finally.\n";
+}
+
+// Continue execution
+echo "Hello World\n";
+\end{lstlisting}
+
+
+\begin{example}
+嵌套的异常处理
+\begin{lstlisting}[language=PHP]
+<?php
+
+class MyException extends Exception { }
+
+class Test {
+    public function testing() {
+        try {
+            try {
+                throw new MyException('foo!');
+            } catch (MyException $e) {
+                // rethrow it
+                throw $e;
+            }
+        } catch (Exception $e) {
+            var_dump($e->getMessage());
+        }
+    }
+}
+
+$foo = new Test;
+$foo->testing();
+\end{lstlisting}
+\end{example}
+
+上述示例会输出：
+
+\begin{lstlisting}[language=PHP]
+<?php
+string(4) "foo!"
+\end{lstlisting}
 
 \section{Multiple Exceptions}
 
@@ -534,7 +715,10 @@ catch (customException $e)
 如果在其目前的``try" 代码块中异常没有被捕获，则它将在更高层级上查找 catch 代码块。
 
 
-\section{Top Level Exception Handler}
+
+
+
+\section{Top-level Exception Handler}
 
 set\_exception\_handler() 函数可设置处理所有未捕获异常的用户定义函数。
 
@@ -575,10 +759,27 @@ throw new Exception('Uncaught Exception occurred');
 
 \chapter{Exception}
 
+Exception是所有异常的基类，不过原生的 Exception 类并没有提供太多的调试情境给开发人员，不过可以通过建立一个特殊的 Exception 来弥补它，也就是建立一个继承自原生 Exception 类的一个子类，例如：
 
-Exception是所有异常的基类\footnote{自PHP 5.1.0起，引入Exception类。}。
+\begin{lstlisting}[language=PHP]
+<?php
+class ValidationException extends Exception {}
+\end{lstlisting}
 
-\textbf{Exception类摘要}
+扩展原生的Exception类可以加入多个catch区块，并且根据不同的异常分别处理，这样就可以建立许多自定义异常，而且其中有些已经在 SPL 扩展提供的 SPL 异常中定义了。
+
+举例来说，如果使用了\_\_call()魔术方法去调用一个无效的方法而不是抛出一个模糊的标准 Exception 或是建立自定义的异常处理，就可以直接抛出自定义异常，例如：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+throw new BadMethodCallException;
+\end{lstlisting}
+
+
+
+\section{Summary}
+
 
 \begin{lstlisting}[language=PHP]
 Exception {
@@ -602,27 +803,19 @@ Exception {
 \end{lstlisting}
 
 
-\textbf{Exception类属性}
+\section{Property}
+
 
 \begin{compactitem}
-\item message
-
-异常消息内容
-\item code
-
-异常代码
-\item file
-
-抛出异常的文件名
-\item line
-
-抛出异常在该文件中的行号
-
+\item message 异常消息内容
+\item code 异常代码
+\item file 抛出异常的文件名
+\item line 抛出异常在该文件中的行号
 \end{compactitem}
 
 
+\section{Method}
 
-\textbf{Exception类方法}
 
 \begin{compactitem}
 \item Exception::\_\_construct — 异常构造函数
@@ -637,7 +830,7 @@ Exception {
 \item Exception::\_\_clone — 异常克隆
 \end{compactitem}
 
-\section{Exception::\_\_construct}
+\subsection{Exception::\_\_construct}
 
 
 Exception::\_\_construct —— 异常构造函数\footnote{自PHP 5.3.0起，增加previous参数。}。
@@ -662,7 +855,7 @@ public Exception::__construct() ([ string $message = "" [, int $code = 0 [, Exce
 \end{compactitem}
 
 
-\section{Exception::getMessage}
+\subsection{Exception::getMessage}
 
 Exception::getMessage — 获取异常消息内容，返回字符串类型的异常消息内容。此函数没有参数。
 
@@ -692,7 +885,7 @@ try {
 Some error message
 \end{verbatim}
 
-\section{Exception::getPrevious}
+\subsection{Exception::getPrevious}
 
 Exception::getPrevious — 返回异常链中的前一个异常（ Exception::\_\_construct()方法的第三个参数），否则返回NULL。此函数没有参数。
 
@@ -739,7 +932,7 @@ try {
 
 
 
-\section{Exception::getCode}
+\subsection{Exception::getCode}
 
 
 Exception::getCode — 获取并返回整型（integer）类型的异常代码，此函数没有参数。
@@ -771,7 +964,7 @@ try {
 The exception code is: 30
 \end{verbatim}
 
-\section{Exception::getFile}
+\subsection{Exception::getFile}
 
 
 Exception::getFile — 获取并返回发生异常的程序文件名称，此函数没有参数。
@@ -802,7 +995,7 @@ try {
 \end{verbatim}
 
 
-\section{Exception::getLine}
+\subsection{Exception::getLine}
 
 Exception::getLine — 获取并返回发生异常的代码在文件中的行号，此函数没有参数。
 
@@ -834,7 +1027,7 @@ The exception was thrown on line: 3
 \end{verbatim}
 
 
-\section{Exception::getTrace}
+\subsection{Exception::getTrace}
 
 Exception::getTrace — 获取并返回异常追踪信息的数组（array），此函数没有参数。
 
@@ -882,7 +1075,7 @@ array(1) {
 \end{verbatim}
 
 
-\section{Exception::getTraceAsString}
+\subsection{Exception::getTraceAsString}
 
 
 Exception::getTraceAsString — 获取并返回字符串类型的异常追踪信息。此函数没有参数。
@@ -918,7 +1111,7 @@ try {
 #1 {main}
 \end{verbatim}
 
-\section{Exception::\_\_toString}
+\subsection{Exception::\_\_toString}
 
 Exception::\_\_toString — 将异常对象转换为字符串并返回。此函数没有参数。
 
@@ -950,7 +1143,7 @@ Stack trace:
 \end{verbatim}
 
 
-\section{Exception::\_\_clone}
+\subsection{Exception::\_\_clone}
 
 Exception::\_\_clone — 尝试异常克隆。因为异常被不允许克隆，因而这将导致一个致命错误。此函数没有参数，没有返回值。
 
@@ -962,9 +1155,10 @@ final private void Exception::__clone ( void )
 
 \chapter{ErrorException}
 
-错误异常\footnote{自PHP 5.1.0起，引入ErrorException类。}。
+错误异常。
 
-\textbf{ErrorException类摘要}
+\section{Summary}
+
 
 
 
@@ -988,15 +1182,16 @@ ErrorException extends Exception {
 }
 \end{lstlisting}
 
-\textbf{ErrorException类属性}
+\section{Property}
+
 
 \begin{compactitem}
-\item severity
-异常级别
+\item severity 异常级别
 \end{compactitem}
 
 
-\textbf{ErrorException类方法}
+\section{Method}
+
 
 \begin{compactitem}
 \item ErrorException::\_\_construct — 异常构造函数
@@ -1033,10 +1228,10 @@ Stack trace:
 
 
 
-\section{ErrorException::\_\_construct}
+\subsection{ErrorException::\_\_construct}
 
 
-ErrorException::\_\_construct — 异常构造函数\footnote{自PHP 5.3.0起，增加previous参数。}。
+
 
 \begin{lstlisting}[language=PHP]
 public ErrorException::__construct() ([ string $message = "" [, int $code = 0 [, int $severity = 1 [, string $filename = __FILE__ [, int $lineno = __LINE__ [, Exception $previous = NULL ]]]]]] )
@@ -1058,7 +1253,7 @@ public ErrorException::__construct() ([ string $message = "" [, int $code = 0 [,
 \end{compactitem}
 
 
-\section{ErrorException::getSeverity}
+\subsection{ErrorException::getSeverity}
 
 ErrorException::getSeverity — 获取并返回异常的严重程度，此函数没有参数。
 

@@ -12,5 +12,34 @@
 通常，你需要修改你的 Apache VHost 或者 .htaccess 文件的这些值:
 
 \begin{lstlisting}[language=bash]
-
+php_value xdebug.remote_host=192.168.?.?
+php_value xdebug.remote_port=9000
 \end{lstlisting}
+
+
+
+「remote host」 和 「remote port」 这两项对应和你本地开发机监听的地址和端口。然后将IDE设置成「listen for connections」模式，并访问网址：
+
+
+\begin{lstlisting}[language=bash]
+http://your-website.example.com/index.php?XDEBUG_SESSION_START=1
+\end{lstlisting}
+
+
+
+IDE 将会拦截当前执行的脚本状态，运行你设置的断点并查看内存中的值。
+
+例如：
+
+\begin{lstlisting}[language=bash]
+[xdebug]
+zend_extension=xdebug.so
+xdebug.remote_enable=On
+xdebug.remote_handler=dbgp
+xdebug.remote_host=localhost
+xdebug.remote_port=9000
+xdebug.idekey=PHPSTORM
+\end{lstlisting}
+
+
+图形化的调试器可以让你非常容易的逐步的查看代码、变量，以及运行时的 evel 代码。许多 IDE 已经内置或提供了插件支持 XDebug 图形化调试器。比如 MacGDBp 是 Mac 上的一个免费，开源的单机调试器。

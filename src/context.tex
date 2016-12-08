@@ -1,0 +1,525 @@
+\part{Context}
+
+
+\chapter{Overview}
+
+
+PHP提供了可以用于所有的文件系统或数据流封装协议的上下文参数和选项，其中上下文（context）由stream\_context\_create()创建。
+
+\begin{compactitem}
+\item 选项可以通过stream\_context\_set\_option()进行设置；
+\item 参数可以通过stream\_context\_set\_params()进行设置。
+\end{compactitem}
+
+
+\section{Socket context}
+
+
+套接字上下文选项可用于所有工作在套接字上的封装协议（例如TCP、HTTP和FTP等）。
+
+
+\subsection{bindto}
+
+bindto设置用户PHP访问网络的指定的IP地址（IPv4或IPv6其中的一个）和/或 端口号（例如\texttt{ip:port}）。如果把IP或端口号设置为0，则允许系统自动选择IP或端口号。
+
+\begin{compactitem}
+\item 把bindto设置为0:0来强制使用IPv4协议
+\item 把bindto设置为[0]0来强制使用IPv6协议
+\end{compactitem}
+
+
+在正常操作环境中，FTP需要打开两条Socket连接（控制连接和数据连接），因此无法使用bindto来指定端口号。
+
+
+
+\subsection{backlog}
+
+backlog设置用于限制套接字侦听队列中未完成的连接数，仅对stream\_socket\_server()有效。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// connect to the internet using the '192.168.0.100' IP
+$opts = array(
+    'socket' => array(
+        'bindto' => '192.168.0.100:0',
+    ),
+);
+
+// connect to the internet using the '192.168.0.100' IP and port '7000'
+$opts = array(
+    'socket' => array(
+        'bindto' => '192.168.0.100:7000',
+    ),
+);
+
+// connect to the internet using port '7000'
+$opts = array(
+    'socket' => array(
+        'bindto' => '0:7000',
+    ),
+);
+
+// create the context...
+$context = stream_context_create($opts);
+
+// ...and use it to fetch the data
+echo file_get_contents('http://www.example.com', false, $context);
+\end{lstlisting}
+
+
+
+
+
+\section{HTTP context}
+
+HTTP上下文选项可以设置提供给 http:// 和 https:// 传输协议的 context 选项。
+
+\subsection{method}
+
+string类型 - 远程服务器支持的 GET，POST 或其它 HTTP 方法，默认值是 GET。
+
+
+
+\subsection{header}
+
+string类型 - 请求期间发送的额外 header ，使用header选项可以覆盖其他值 （例如User-agent:， Host: 和 Authentication:）。
+
+\subsection{user\_agent}
+
+string类型 - 要发送的 header User-Agent: 的值。如果在header context 选项中没有指定 user-agent，此值将被使用（默认使用 php.ini 中设置的 user\_agent）。
+
+
+
+\subsection{content}
+
+string类型 - 在 header 后面要发送的额外数据，通常使用POST或PUT请求。
+
+
+
+\subsection{proxy}
+
+string类型 - URI 指定的代理服务器的地址（例如\texttt{tcp://proxy.example.com:5100}）。
+
+
+
+\subsection{request\_fulluri}
+
+boolean类型 - 当设置为 TRUE 时（默认值是 FALSE），在构建请求时将使用整个 URI 。例如：\texttt{GET http://www.example.com/path/to/file.html HTTP/1.0}。 
+
+虽然上述是一个非标准的请求格式，但是某些代理服务器需要它。
+
+
+
+\subsection{follow\_location}
+
+integer类型 - 跟随 Location header 的重定向。设置为 0 以禁用（默认值为1）。
+
+\subsection{max\_redirects}
+
+integer类型 - 跟随重定向的最大次数（默认值是 20）。值为 1 或更少则意味不跟随重定向。
+
+\subsection{protocol\_version}
+
+float类型 - HTTP 协议版本（默认值是 1.0）。如果设置为1.1，可能需要自己处理分块传输解码操作。
+
+\subsection{timeout}
+
+float类型 - 读取超时时间，单位为秒（s），用 float 指定（例如10.5），默认会使用 php.ini 中设置的 default\_socket\_timeout。
+
+\subsection{ignore\_errors}
+
+boolean类型 - 即使是故障状态码依然获取内容，默认值为 FALSE。
+
+\begin{example}
+获取一个页面并发送 POST 数据
+\begin{lstlisting}[language=PHP]
+<?php
+
+$postdata = http_build_query(
+    array(
+        'var1' => 'some content',
+        'var2' => 'doh'
+    )
+);
+
+$opts = array('http' =>
+    array(
+        'method'  => 'POST',
+        'header'  => 'Content-type: application/x-www-form-urlencoded',
+        'content' => $postdata
+    )
+);
+
+$context = stream_context_create($opts);
+
+$result = file_get_contents('http://example.com/submit.php', false, $context);
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+忽略重定向并获取 header 和内容
+\begin{lstlisting}[language=PHP]
+<?php
+
+$url = "http://www.example.org/header.php";
+
+$opts = array('http' =>
+    array(
+        'method' => 'GET',
+        'max_redirects' => '0',
+        'ignore_errors' => '1'
+    )
+);
+
+$context = stream_context_create($opts);
+$stream = fopen($url, 'r', false, $context);
+
+// header information as well as meta data
+// about the stream
+var_dump(stream_get_meta_data($stream));
+
+// actual data at $url
+var_dump(stream_get_contents($stream));
+fclose($stream);
+\end{lstlisting}
+\end{example}
+
+底层的Socket数据流上下文选项可以通过tcp://和或ssl://来为上层的http://或https://提供服务。
+
+如果需要实现可以跟随HTTP状态码来进行重定向的流封装器，stream\_get\_meta\_data()返回的wrapper\_data不一定包含实际应用于索引0处的内容数据的HTTP状态行。
+
+
+\begin{lstlisting}[language=PHP]
+array (
+  'wrapper_data' =>
+  array (
+    0 => 'HTTP/1.0 301 Moved Permantenly',
+    1 => 'Cache-Control: no-cache',
+    2 => 'Connection: close',
+    3 => 'Location: http://example.com/foo.jpg',
+    4 => 'HTTP/1.1 200 OK',
+    ...
+\end{lstlisting}
+
+如果第一个请求返回301重定向，那么流包装器需要自动跟随重定向来获得200响应（也就是上述的索引4）。
+
+\section{FTP context}
+
+FTP上下文选项支持ftp://和ftps://数据传输。
+
+\subsection{overwrite}
+
+boolean类型 - 是否允许覆盖远程服务器上已有的文件，仅适用于写入模式（上传），默认值为FALSE。
+
+\subsection{resume\_pos}
+
+integer类型 - 开始传输的文件偏移量，仅适用于读取模式（下载），默认值为0（即文件开头）。
+
+
+\subsection{proxy}
+
+string类型 - 通过HTTP代理服务器（例如\texttt{tcp://squid.example.com:8000}）发送代理FTP请求，仅适用于文件读取操作。
+
+
+底层的Socket数据流上下文选项可以通过tcp://和或ssl://来为上层的ftp://或ftps://提供服务。
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{SSL context}
+
+SSL上下文选项提供ssl://和tls://传输协议的上下文选项清单。
+
+\subsection{peer\_name}
+
+string类型 - 要连接的服务器名称。如果未设置，那么服务器名称将根据打开 SSL 流的主机名称猜测得出。
+
+
+\subsection{verify\_peer}
+
+boolean类型 - 是否需要验证 SSL 证书，默认为FALSE。
+
+
+\subsection{verify\_peer\_name}
+
+boolean类型 - 需要验证对等名称。
+
+\subsection{allow\_self\_signed}
+
+boolean类型 - 是否允许自签名证书（默认为FALSE）。需要配合 verify\_peer 参数使用。
+
+当 verify\_peer 参数为 true 时才会根据 allow\_self\_signed 参数值来决定是否允许自签名证书。
+
+\subsection{cafile}
+
+string类型 - 当设置 verify\_peer 为 true 时用来验证远端证书所用到的 CA 证书，cafile的值为 CA 证书在本地文件系统的全路径及文件名。
+
+\subsection{capath}
+
+capath类型 - 如果未设置 cafile，或者 cafile 所指的文件不存在时，就会在 capath 所指定的目录搜索适用的证书。 
+
+capath指定的目录必须是已经经过哈希处理的证书目录，这里的已经经过哈希处理的证书目录（hashed certificate）是指使用类似 c\_rehash 命令将目录中的 .pem 和 .crt 文件扫描并提取哈希码，然后根据此哈希码创建文件链接，可以便于快速查找证书。
+
+
+
+
+\subsection{local\_cert}
+
+string类型 - 本地证书路径，要求必须是 PEM 格式，并且包含本地的证书及私钥，或者也可以包含证书颁发者证书链，也可以通过 local\_pk 指定包含私钥的独立文件。
+
+
+
+
+\subsection{local\_pk}
+
+string类型 - 如果使用独立的文件来存储证书（local\_cert）和私钥， 那么使用此选项来指明私钥文件的路径。
+
+
+\subsection{passphrase}
+
+string类型 - local\_cert 文件的密码。
+
+
+\subsection{CN\_match}
+
+string类型 - 期望的远端证书的 CN 名称，PHP 会进行有限的通配符匹配， 如果服务器给出的 CN 名称和本地访问的名称不匹配，则视为连接失败。
+
+CN\_match选项已被废弃，并被替换为peer\_name选项。
+
+
+\subsection{verify\_depth}
+
+integer类型 - 如果证书链条层次太深，超过了本选项的设定值，则终止验证。默认情况下不限制证书链条层次深度。
+
+
+
+
+
+
+\subsection{ciphers}
+
+string类型 - 设置可用的密码列表，默认值为DEFAULT。
+
+
+\subsection{capture\_peer\_cert}
+
+boolean类型 - 如果设置为 TRUE 将会在上下文中创建 peer\_certificate 选项， 该选项中包含远端证书。
+
+
+\subsection{capture\_peer\_cert\_chain}
+
+boolean类型 - 如果设置为 TRUE 将会在上下文中创建 peer\_certificate\_chain 选项， 该选项中包含远端证书链条。
+
+
+\subsection{SNI\_enabled}
+
+boolean类型 - 设置为 TRUE 将启用服务器名称指示（server name indication）。 启用 SNI 将允许同一 IP 地址使用多个证书。
+
+
+
+\subsection{SNI\_server\_name}
+
+string类型 - 如果设置此参数，那么其设置值将被视为 SNI 服务器名称。 如果未设置，那么服务器名称将基于打开 SSL 流的主机名称猜测得出。
+
+SNI\_server\_name选项已被废弃，并替换为peer\_name。
+
+\subsection{disable\_compression}
+
+boolean类型 - 如果设置，则禁用 TLS 压缩，有助于减轻恶意攻击。
+
+\subsection{peer\_fingerprint}
+
+当远程服务器证书的摘要和指定的散列值不相同的时候， 终止操作。
+
+\begin{compactitem}
+\item 当使用 string 时， 会根据字符串的长度来检测所使用的散列算法：“md5”（32 字节）还是“sha1”（40 字节）。
+
+\item 当使用 array 时， 数组的键表示散列算法名称，其对应的值是预期的摘要值。
+\end{compactitem}
+
+ssl://是https://和ftps://的底层传输协议，因此ssl://的上下文选项同样适用于https://和ftps://的上下文。
+
+
+
+PHP必须配合OpenSSL编译才能支持SNI，同时也支持使用 OPENSSL\_TLSEXT\_SERVER\_NAME 来探测 SNI 服务器名称。
+
+
+
+
+
+
+
+
+
+
+
+\section{CURL context}
+
+CURL 上下文选项在 CURL 扩展被编译（通过\texttt{-\/-with-curlwrappers}选项）时可用。
+
+
+\subsection{method}
+
+string类型 - GET、POST或者其他远程服务器支持的 HTTP 方法，默认为GET。
+
+
+
+\subsection{header}
+
+string类型 - 额外的请求标头，而且这个值会覆盖通过其他选项设定的值（例如User-agent:，Host:， ，Authentication:）。
+
+
+\subsection{user\_agent}
+
+string类型 - 设置请求时 User-Agent 标头的值，默认为 php.ini 中的 user\_agent 设定值。
+
+
+\subsection{content}
+
+string类型 - 在头部之后发送的额外数据，该选项在 GET 和 HEAD 请求中不使用。
+
+\subsection{proxy}
+
+string类型 - 用于指定代理服务器的URI地址（例如\texttt{tcp://proxy.example.com:5100}）。
+
+\subsection{max\_redirects}
+
+integer类型 - 最大重定向次数，如果为1 或者更小则代表不会跟随重定向，默认为 20。
+
+\subsection{curl\_verify\_ssl\_host}
+
+boolean类型 - 是否校验服务器，默认为 FALSE。
+
+curl\_verify\_ssl\_host选项在 HTTP 和 FTP 协议中均可使用。
+
+
+\subsection{curl\_verify\_ssl\_peer}
+
+
+boolean类型 - 是否要求对使用的SSL证书进行校验，默认为 FALSE。
+
+curl\_verify\_ssl\_peer选项在 HTTP 和 FTP 协议中均可使用。
+
+
+
+\begin{example}
+获取一个页面，并以POST发送数据
+\begin{lstlisting}[language=PHP]
+<?php
+$postdata = http_build_query(
+    array(
+        'var1' => 'some content',
+        'var2' => 'doh'
+    )
+);
+
+$opts = array('http' =>
+    array(
+        'method'  => 'POST',
+        'header'  => 'Content-type: application/x-www-form-urlencoded',
+        'content' => $postdata
+    )
+);
+
+$context = stream_context_create($opts);
+$result = file_get_contents('http://example.com/submit.php', false, $context);
+\end{lstlisting}
+\end{example}
+
+
+\section{Phar context}
+
+phar:// 封装（wrapper）的上下文（context）选项。
+
+\subsection{compress}
+
+int类型 - Phar compression constants 中的一个。
+
+\begin{compactitem}
+\item Phar::None
+\item Phar::COMPRESSED
+\item Phar::GZ
+\item Phar::BZ2
+\end{compactitem}
+
+\subsection{metadata}
+
+mixed类型 - Phar 元数据（metadata）。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// make sure it doesn't exist
+@unlink('brandnewphar.phar');
+try {
+    $p = new Phar(dirname(__FILE__) . '/brandnewphar.phar', 0, 'brandnewphar.phar');
+    $p['file.php'] = '<?php echo "hello"';
+    $p->setMetadata(array('bootstrap' => 'file.php'));
+    var_dump($p->getMetadata());
+} catch (Exception $e) {
+    echo 'Could not create and/or modify phar:', $e;
+}
+\end{lstlisting}
+
+
+
+
+
+\section{MongoDB context}
+
+mongodb://传输协议的上下文选项。
+
+\subsection{log\_cmd\_insert}
+
+callable类型 - 插入文档时调用的回调函数
+
+\subsection{log\_cmd\_delete}
+
+callable类型 - 删除文档时调用的回调函数
+
+\subsection{log\_cmd\_update}
+
+
+callable类型 - 更新文档时调用的回调函数
+
+\subsection{log\_cmd\_batch}
+
+callable类型 - 在执行写入批处理时调用的回调函数
+
+\subsection{log\_reply}
+
+callable类型 - 从MongoDB读取回复时调用的回调函数
+
+\subsection{log\_getmore}
+
+callable类型 - 从MongoDB游标检索更多结果时调用的回调函数
+
+\subsection{log\_killcursor}
+
+callable类型 - 执行killcursor时调用的回调函数
+
+
+
+\section{Context parameters}
+
+Context参数（parameters）可以设置为由函数 stream\_context\_set\_params() 返回的 context。
+
+\subsection{notification}
+
+callable类型 - 当一个流（stream）上发生事件时，notification指定的回调函数将被调用。
+

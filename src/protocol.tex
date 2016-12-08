@@ -1,0 +1,1268 @@
+\part{Protocol}
+
+
+\chapter{Overview}
+
+
+PHP提供了很多内置 URL 风格的封装协议，可用于类似 fopen()、 copy()、 file\_exists() 和 filesize() 的文件系统函数。 除了这些封装协议，还能通过 stream\_wrapper\_register() 来注册自定义的封装协议。
+
+注意，用于描述一个封装协议的 URL 语法仅支持 scheme://的语法，scheme:/ 和 scheme: 语法是不支持的。
+
+\section{file://}
+
+文件系统协议是 PHP 使用的默认封装协议，file://协议用于访问本地文件系统资源。
+
+当指定了一个相对路径（不以/、\textbackslash 、\textbackslash \textbackslash 或 Windows 盘符开头的路径）提供的路径时，PHP将基于当前的工作目录，在很多情况下是脚本所在的目录（除非被修改了）。
+
+使用PHP CLI时，目录默认是脚本被调用时所在的目录。
+
+\begin{compactitem}
+\item /path/to/file.ext
+\item relative/path/to/file.ext
+\item fileInCwd.ext
+\item C:/path/to/winfile.ext
+\item C:\textbackslash path\textbackslash to\textbackslash winfile.ext
+\item \textbackslash \textbackslash smbserver\textbackslash share\textbackslash path\textbackslash to\textbackslash winfile.ext
+\item file:///path/to/file.ext
+\end{compactitem}
+
+另外，在某些函数（例如 fopen()和file\_get\_contents()）中，include\_path 会被可选地搜索，也作为相对的路径。
+
+\begin{longtable}{|m{150pt}|m{100pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{file://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受 allow\_url\_fopen 影响	&No\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&Yes\\
+\hline
+允许添加	&Yes\\
+\hline
+允许同时读和写	&Yes\\
+\hline
+支持 stat()	&Yes\\
+\hline
+支持 unlink()	&Yes\\
+\hline
+支持 rename()	&Yes\\
+\hline
+支持 mkdir() &Yes\\
+\hline
+支持 rmdir()	&Yes\\
+\hline
+\end{longtable}
+
+\section{http://}
+
+http://协议允许通过 HTTP 1.0 的 GET方法以只读访问文件或资源，并且在启用openssl扩展后可以使用https://协议。
+
+HTTP 连接是只读的，不支持对一个 HTTP 资源进行写数据或者复制文件（比如发送 POST 和 PUT 请求）， 可以在 HTTP Contexts 的支持下实现POST请求和PUT请求等。
+
+
+
+\begin{compactitem}
+\item http://example.com
+\item http://example.com/file.php?var1=val1\&var2=val2
+\item http://user:password@example.com
+\item https://example.com
+\item https://example.com/file.php?var1=val1\&var2=val2
+\item https://user:password@example.com
+\end{compactitem}
+
+HTTP 请求会附带一个 Host: 头来兼容基于域名的虚拟主机。 如果在php.ini 文件中或字节流上下文（context）配置了 user\_agent 字符串，那么它也会被包含在请求之中。
+
+数据流允许读取资源的 body，而 headers 则储存在了 \$http\_response\_header 变量里。
+
+stream\_get\_meta\_data()可以从封装协议文件指针中取得报头/元数据，因此如果需要知道文档资源来自哪个 URL（经过所有重定向的处理后）， 需要使用stream\_get\_meta\_data()处理数据流返回的系列响应报头（response headers）。
+
+如果设置了From:头且没有被上下文（Context）选项和参数覆盖，那么From:头可以被from指令使用。
+
+
+\begin{longtable}{|m{150pt}|m{100pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{http://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受 allow\_url\_fopen 限制&Yes\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&No\\
+\hline
+允许添加	&No\\
+\hline
+允许同时读和写&N/A\\
+\hline
+支持 stat()	&No\\
+\hline
+支持 unlink()	&No\\
+\hline
+支持 rename()	&No\\
+\hline
+支持 mkdir()	&No\\
+\hline
+支持 rmdir()	&No\\
+\hline
+\end{longtable}
+
+\begin{example}
+检测重定向后最终的 URL
+\begin{lstlisting}[language=PHP]
+<?php
+$url = 'http://www.example.com/redirecting_page.php';
+
+$fp = fopen($url, 'r');
+
+$meta_data = stream_get_meta_data($fp);
+foreach ($meta_data['wrapper_data'] as $response) {
+
+    /* 我们是否被重定向了？ */
+    if (strtolower(substr($response, 0, 10)) == 'location: ') {
+
+        /* 更新我们被重定向后的 $url */
+        $url = substr($response, 10);
+    }
+}
+\end{lstlisting}
+\end{example}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{ftp://}
+
+ftp://协议用于访问FTP(s)资源并允许通过 FTP 读取存在的文件、创建新文件以及追加（append）文件，在启用openssl扩展后可以支持ftps://。
+
+
+
+如果服务器不支持被动（passive）模式的 FTP，连接会失败。
+
+\begin{compactitem}
+\item ftp://example.com/pub/file.txt
+\item ftp://user:password@example.com/pub/file.txt
+\item ftps://example.com/pub/file.txt
+\item ftps://user:password@example.com/pub/file.txt
+\end{compactitem}
+
+
+
+ftp://协议在打开文件后既可以执行读操作也可以执行写操作，不过二者不能同时进行。
+
+\begin{compactitem}
+\item 如果远程文件已经存在于FTP服务器上，如果尝试打开并写入文件时未指定上下文（context）选项 overwrite，连接会失败。
+
+\item 如果要通过 FTP 覆盖存在的文件， 需要指定上下文（context）的 overwrite 选项来打开和写入，或者可以使用 FTP 扩展来代替ftp://协议操作。
+\end{compactitem}
+
+如果服务器不支持 SSL，这个连接会降级（falls back）到普通未加密的 ftp。
+
+如果设置了 php.ini 中的 from 指令， 这个值会被作为匿名FTP（anonymous）的密码。
+
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{ftp://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受 allow\_url\_fopen 影响	&Yes\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&Yes (新文件/启用 overwrite 后已存在的文件)\\
+\hline
+允许添加	&Yes\\
+\hline
+允许同时读和写&	No\\
+\hline
+支持 stat()	&仅filesize()、 filetype()、 file\_exists()、 is\_file()、is\_dir()和filemtime()\\
+\hline
+支持 unlink()	&Yes\\
+\hline
+支持 rename()	&Yes\\
+\hline
+支持 mkdir()	&Yes\\
+\hline
+支持 rmdir()	&Yes\\
+\hline
+\end{longtable}
+
+\section{php://}
+
+php://协议用于访问输入/输出流（I/O stream）、标准输入输出和错误描述符、内存和磁盘中的临时文件流以及可以操作其他读取/写入文件资源的过滤器。
+
+PHP提供了常量 STDIN、 STDOUT 和 STDERR 来代替手工打开php://stdin、php://stdout和php://stderr封装器。
+
+\begin{compactitem}
+\item php://stdin 是只读的；
+\item php://stdout是只写的；
+\item php://stderr 是只写的。
+\end{compactitem}
+
+\subsection{php://fd}
+
+php://fd 允许直接访问指定的文件描述符。 例如，php://fd/3 引用了文件描述符 3。
+
+\subsection{php://stdin}
+
+php://stdin允许直接访问PHP进程相应的输入流，数据流引用了复制的文件描述符，所以如果在打开 php://stdin 并在之后关了它，那么仅仅是关闭了复制品，真正被引用的 STDIN 并不受影响。
+
+\subsection{php://stdout}
+
+php://stdin允许直接访问PHP进程相应的输出流
+
+\subsection{php://stderr}
+
+php://stdin允许直接访问PHP进程相应的错误流
+
+
+
+\subsection{php://filter}
+
+php://filter 是一种设计用于数据流打开时的筛选过滤应用的元封装器，因此对于一体式（all-in-one）的文件函数非常有用，类似readfile()、 file() 和 file\_get\_contents()等函数在数据流内容读取之前没有机会应用其他过滤器。
+
+
+php://filter 目标是使用以下的参数作为它路径的一部分，复合过滤链能够在一个路径上指定。
+
+
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+参数&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{php://filter参数}\\
+\hline
+参数&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+resource=<要过滤的数据流>	&必选，指定要筛选过滤的数据流。\\
+\hline
+read=<读链的筛选列表>	 &可选，可以设定一个或多个过滤器名称，以管道符（|）分隔。\\
+\hline
+write=<写链的筛选列表>	&可选，可以设定一个或多个过滤器名称，以管道符（|）分隔。\\
+\hline
+<;两个链的筛选列表>	&任何没有以 read= 或 write= 作前缀 的筛选器列表会视情况应用于读或写链。\\
+\hline
+\end{longtable}
+
+
+
+\begin{example}
+php://filter/resource=<待过滤的数据流>
+\begin{lstlisting}[language=PHP]
+<?php
+/* 这简单等同于：
+  readfile("http://www.example.com");
+  实际上没有指定过滤器 */
+
+readfile("php://filter/resource=http://www.example.com");
+\end{lstlisting}
+\end{example}
+
+
+\texttt{resource=}参数必须位于 php://filter 的末尾，并且指向需要过滤筛选的数据流。
+
+\begin{example}
+php://filter/read=<读链需要应用的过滤器列表>
+\begin{lstlisting}[language=PHP]
+<?php
+/* 这会以大写字母输出 www.example.com 的全部内容 */
+readfile("php://filter/read=string.toupper/resource=http://www.example.com");
+
+/* 这会和以上所做的一样，但还会用 ROT13 加密。 */
+readfile("php://filter/read=string.toupper|string.rot13/resource=http://www.example.com");
+\end{lstlisting}
+\end{example}
+
+\texttt{read=}参数采用一个或以管道符 | 分隔的多个过滤器名称。
+
+\begin{example}
+php://filter/write=<写链需要应用的过滤器列表>
+\begin{lstlisting}[language=PHP]
+<?php
+/* 这会通过 rot13 过滤器筛选出字符 "Hello World"
+  然后写入当前目录下的 example.txt */
+file_put_contents("php://filter/write=string.rot13/resource=example.txt","Hello World");
+\end{lstlisting}
+\end{example}
+
+\texttt{write=}参数采用一个或以管道符 | 分隔的多个过滤器名称。
+
+\subsection{php://input}
+
+php://input 是一个可以访问请求的原始数据的只读流，可以反复使用。 
+
+在处理POST请求时，最好使用 php://input 来代替\$HTTP\_RAW\_POST\_DATA，不依赖于特定的 php.ini 指令，而且\$HTTP\_RAW\_POST\_DATA在这样的情况下默认没有填充，因此比激活 always\_populate\_raw\_post\_data 潜在需要更少的内存。
+
+如果传入的数据类型是\texttt{enctype="multipart/form-data"}时，php://input 是无效的。
+
+PHP在保存POST请求体数据时可以打开另一个 php://input 数据流并重新读取，这种情况只是针对 POST 请求而非其他请求方式（比如 PUT 或者 PROPFIND）。
+
+
+PHP SAPI 的实现允许可以多次读取php://input打开的数据流，而且php://input数据流支持seek操作。
+
+
+\subsection{php://output}
+
+php://output 是一个只写的数据流， 允许使用和print 和 echo相同的方式写入到输出缓冲区。
+
+
+
+
+
+\subsection{php://memory}
+
+php://memory 和 php://temp 是一个类似文件包装器的数据流，都允许读写临时数据，两者的唯一区别如下：
+
+\begin{compactitem}
+\item php://memory 总是把数据储存在内存中；
+\item php://temp 会在内存量达到预定义的限制后（默认是 2MB）存入临时文件中，临时文件位置的决定和 sys\_get\_temp\_dir() 的方式一致。
+\end{compactitem}
+
+
+
+
+
+\subsection{php://temp}
+
+php://temp是一个允许读写临时数据的类似文件包装器的数据流， 其内存限制可以通过添加 /maxmemory:NN 来控制，NN 是以字节为单位、保留在内存的最大数据量，超过则使用临时文件。
+
+
+\begin{example}
+设置 php://temp 开始使用临时文件前的最大内存限制
+\begin{lstlisting}[language=PHP]
+<?php
+// Set the limit to 5 MB.
+$fiveMBs = 5 * 1024 * 1024;
+$fp = fopen("php://temp/maxmemory:$fiveMBs", 'r+');
+
+fputs($fp, "hello\n");
+
+// Read what we have written.
+rewind($fp);
+echo stream_get_contents($fp);
+\end{lstlisting}
+\end{example}
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{php://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+首先于 allow\_url\_fopen	&No\\
+\hline
+首先于 allow\_url\_include	&仅 php://input、 php://stdin、 php://memory 和 php://temp。\\
+\hline
+允许读取	&仅 php://stdin、 php://input、 php://fd、 php://memory 和 php://temp。\\
+\hline
+允许写入	&仅 php://stdout、 php://stderr、 php://output、 php://fd、 php://memory 和 php://temp。\\
+\hline
+允许追加	&仅 php://stdout、 php://stderr、 php://output、 php://fd、 php://memory 和 php://temp（等于写入）\\
+\hline
+允许同时读写	&仅 php://fd、 php://memory 和 php://temp。\\
+\hline
+支持 stat()	&仅 php://memory 和 php://temp。\\
+\hline
+支持 unlink()	&No\\
+\hline
+支持 rename()	&No\\
+\hline
+支持 mkdir()	&No\\
+\hline
+支持 rmdir()	&No\\
+\hline
+仅仅支持 stream\_select()&php://stdin、 php://stdout、 php://stderr、 php://fd 和 php://temp。\\
+\hline
+\end{longtable}
+
+\section{zlib://}
+
+zlib://协议用于访问压缩流，其功能类似 gzopen()，而且其数据流还能被 fread() 和其他文件系统函数使用，不过现在建议使用 compress.zlib:// 作为替代，后来zip扩展又注册了zip://协议。
+
+\begin{compactitem}
+\item compress.zlib://file.gz
+\item compress.bzip2://file.bz2
+\item zip://archive.zip\#dir/file.txt
+\end{compactitem}
+
+compress.zlib://、 compress.bzip2:// 和 gzopen()、bzopen() 是相等的，并且可以在不支持 fopencookie 的系统中使用。
+
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{zlib://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受限于 allow\_url\_fopen &No\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&Yes（除了 zip://）\\
+\hline
+允许附加	&Yes（除了 zip://）\\
+\hline
+允许同时读写	&No\\
+\hline
+支持 stat()	&No（使用普通的 file:// 封装器统计压缩文件）\\
+\hline
+支持 unlink()	&No（使用 file:// 封装器删除压缩文件）\\
+\hline
+支持 rename()	&No\\
+\hline
+支持 mkdir()	&No\\
+\hline
+支持 rmdir()	&No\\
+\hline
+\end{longtable}
+
+\section{data://}
+
+data://协议用于访问符合RFC 2397规范的数据流（例如\texttt{data://text/plain;base64}）。
+
+\begin{example}
+打印data:// 的内容
+\begin{lstlisting}[language=PHP]
+<?php
+// 打印 "I love PHP"
+echo file_get_contents('data://text/plain;base64,SSBsb3ZlIFBIUAo=');
+\end{lstlisting}
+\end{example}
+
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{data://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受限于 allow\_url\_fopen&No\\
+\hline
+受限于 allow\_url\_include&Yes\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&No\\
+\hline
+允许追加	&No\\
+\hline
+允许同时读写&No\\
+\hline
+支持 stat()	&No\\
+\hline
+支持 unlink()	&No\\
+\hline
+支持 rename()	&No\\
+\hline
+支持 mkdir()	&No\\
+\hline
+支持 rmdir()	&No\\
+\hline
+\end{longtable}
+
+
+
+
+\begin{example}
+获取媒体类型
+\begin{lstlisting}[language=PHP]
+<?php
+$fp   = fopen('data://text/plain;base64,', 'r');
+$meta = stream_get_meta_data($fp);
+
+// 打印 "text/plain"
+echo $meta['mediatype'];
+\end{lstlisting}
+\end{example}
+
+\section{glob://}
+
+glob://协议用于查找匹配的文件路径模式。
+
+
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{glob://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受限于 allow\_url\_fopen&No\\
+\hline
+受限于 allow\_url\_include&No\\
+\hline
+允许读取	&No\\
+\hline
+允许写入	&No\\
+\hline
+允许附加	&No\\
+\hline
+允许同时读写	&No\\
+\hline
+支持 stat()	&No\\
+\hline
+支持 unlink()	&No\\
+\hline
+支持 rename()	&No\\
+\hline
+支持 mkdir()	&No\\
+\hline
+支持 rmdir()	&No\\
+\hline
+\end{longtable}
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 循环 ext/spl/examples/ 目录里所有 *.php 文件
+// 并打印文件名和文件尺寸
+$it = new DirectoryIterator("glob://ext/spl/examples/*.php");
+foreach($it as $f) {
+    printf("%s: %.1FK\n", $f->getFilename(), $f->getSize()/1024);
+}
+\end{lstlisting}
+
+
+上述示例的结果可能如下：
+
+\begin{lstlisting}[language=PHP]
+tree.php: 1.0K
+findregex.php: 0.6K
+findfile.php: 0.7K
+dba_dump.php: 0.9K
+nocvsdir.php: 1.1K
+phar_from_dir.php: 1.0K
+ini_groups.php: 0.9K
+directorytree.php: 0.9K
+dba_array.php: 1.1K
+class_tree.php: 1.8K
+\end{lstlisting}
+
+
+\section{phar://}
+
+phar://协议用于PHP归档。
+
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{glob://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+支持 allow\_url\_fopen&No\\
+\hline
+支持 allow\_url\_include&No\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&Yes\\
+\hline
+允许附加	&No\\
+\hline
+允许同时读写	&Yes\\
+\hline
+支持 stat()	&Yes\\
+\hline
+支持 unlink()	&Yes\\
+\hline
+支持 rename()	&Yes\\
+\hline
+支持 mkdir()	&Yes\\
+\hline
+支持 rmdir()	&Yes\\
+\hline
+\end{longtable}
+
+\section{ssh2://}
+
+ssh2://协议用于执行SSH操作，ssh2://封装器默认未激活，而且必须安装ssh2扩展才能使用ssh2://协议封装器。
+
+\begin{compactitem}
+\item ssh2.shell://user:pass@example.com:22/xterm
+\item ssh2.exec://user:pass@example.com:22/usr/local/bin/somecmd
+\item ssh2.tunnel://user:pass@example.com:22/192.168.0.1:14
+\item ssh2.sftp://user:pass@example.com:22/path/to/filename
+\end{compactitem}
+
+除了支持传统的 URI 登录信息，ssh2 封装协议也支持通过 URL 的主机（host）部分来复用打开连接。
+
+\begin{compactitem}
+\item ssh2.shell:// 
+\item ssh2.exec:// 
+\item ssh2.tunnel:// 
+\item ssh2.sftp:// 
+\item ssh2.scp://
+\end{compactitem}
+
+
+\begin{longtable}{|m{100pt}|m{40pt}|m{40pt}|m{40pt}|m{40pt}|m{40pt}|}
+%head
+\multicolumn{6}{r}{}
+\tabularnewline\hline
+属性&ssh2.shell&ssh2.exec&ssh2.tunnel&ssh2.sftp&ssh2.scp
+\endhead
+%endhead
+
+%firsthead
+\caption{ssh2://封装协议概要}\\
+\hline
+属性&ssh2.shell&ssh2.exec&ssh2.tunnel&ssh2.sftp&ssh2.scp
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{6}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受 allow\_url\_fopen 影响&Yes	&Yes	&Yes	&Yes	&Yes\\
+\hline
+允许读取				&Yes	&Yes	&Yes	&Yes	&Yes\\
+\hline
+允许写入				&Yes	&Yes	&Yes	&Yes	&No\\
+\hline
+允许追加				&No		&No		&No		&Yes（需要服务器支持）&No\\
+\hline
+允许同时读和写		&Yes	&Yes	&Yes	&Yes	&No\\
+\hline
+支持 stat()			&No		&No		&No		&Yes	&No\\
+\hline
+支持 unlink()			&No		&No		&No		&Yes	&No\\
+\hline
+支持 rename()			&No		&No		&No		&Yes	&No\\
+\hline
+支持 mkdir()			&No		&No		&No		&Yes	&No\\
+\hline
+支持 rmdir()			&No		&No		&No		&Yes	&No\\
+\hline
+\end{longtable}
+
+
+ssh2://协议支持的上下文选项如下：
+
+\begin{compactitem}
+\item ssesion 重复使用预连接的 ssh2 资源
+
+\item sftp 重复使用预先分配的 sftp 资源
+
+
+\item methods 密钥交换（key exchange）、主机密钥（hostkey）、cipher、压缩和 MAC 方法
+
+\item callbacks
+
+\item username 以该用户名连接
+
+\item password 使用的密码来进行密码验证
+
+\item pubkey\_file 用于验证的公钥（public key）文件
+
+\item privkey\_file 用于验证的私钥（private key）文件
+
+\item env 需要设置的环境变量的关联数组
+
+\item term 在分配一个 pty 时请求的终端类型
+
+\item term\_width 在分配一个 pty 时请求的终端宽度
+
+
+\item term\_height 在分配一个 pty 时请求的终端宽度高度
+
+\item term\_units erm\_width 和 term\_height 的单位
+
+\end{compactitem}
+
+\begin{example}
+从一个活动连接中打开字节流
+\begin{lstlisting}[language=PHP]
+<?php
+$session = ssh2_connect('example.com', 22);
+ssh2_auth_pubkey_file($session, 'username', '/home/username/.ssh/id_rsa.pub',
+                                            '/home/username/.ssh/id_rsa', 'secret');
+$stream = fopen("ssh2.tunnel://$session/remote.example.com:1234", 'r');
+\end{lstlisting}
+\end{example}
+
+
+
+\begin{example}
+通过\$session重复使用预连接的 ssh2 资源
+\begin{lstlisting}[language=PHP]
+<?php
+$session = ssh2_connect('example.com', 22);
+ssh2_auth_pubkey_file($session, 'username', '/home/username/.ssh/id_rsa.pub',
+                                            '/home/username/.ssh/id_rsa', 'secret');
+$connection_string = "ssh2.sftp://$session/";
+unset($session);
+$stream = fopen($connection_string . "path/to/file", 'r');
+\end{lstlisting}
+\end{example}
+
+unset()可以关闭会话，而且\$connecting\_string不保持对\$session变量的引用。
+
+
+
+
+
+\section{rar://}
+
+rar://协议用于访问RAR文件流，并且需要启用rar扩展才能使用rar://包装器。
+
+rar://协议支持使用存储在存档中的RAR存档（相对或绝对）的url编码路径，可选的asterik(*)，可选的数字符号(\#)和可选的URL编码的条目名称。
+
+rar://协议要求指定条目名称时需要数字符号，条目名称中的前导正斜杠是可选的。例如，\texttt{rar://<url encoded archive name>[*][\#[<url encoded entry name>]]}
+
+rar://协议可以打开文件或目录，其中：
+
+\begin{compactitem}
+\item 打开目录时，指定星号符号强制返回未编码的目录条目名称。
+\item 打开目录时，未指定星号返回url encoded数据。
+\end{compactitem}
+
+rar://允许包装器正确地使用PHP内置的功能（例如RecursiveDirectoryIterator），而且也可能存在类似url编码的文件名。
+
+如果不包括\#号和条目名称部分，rar://将显示归档的根目录。
+
+不同于常规目录，rar://生成的流不包含诸如修改时间（mtime）等的信息，因为根目录不存储在存档中的单个条目中。 
+
+在使用RecursiveDirectoryIterator的包装器时，需要在访问根目录的时候在URL中包含数字符号，以便可以正确构建内部的URL。
+
+
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{rar://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+支持 allow\_url\_fopen&No\\
+\hline
+支持 allow\_url\_include&No\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&No\\
+\hline
+允许附加	&No\\
+\hline
+允许同时读写	&No\\
+\hline
+支持 stat()	&Yes\\
+\hline
+支持 unlink()	&No\\
+\hline
+支持 rename()	&No\\
+\hline
+支持 mkdir()	&No\\
+\hline
+支持 rmdir()	&No\\
+\hline
+\end{longtable}
+
+rar://协议支持的上下文选项包括open\_password、file\_password和volume\_callback等。
+
+\begin{compactitem}
+\item open\_password - 用于加密存档标题（如果有）的密码。 WinRAR将使用与头文件密码相同的密码加密所有文件，因此对于具有加密头的文件，file\_password将被忽略。
+
+\item file\_password - 用于加密文件的密码（如果有）。 如果文件头也被加密，则此选项将被忽略以支持open\_password。 
+
+\item valume\_callback - 确定丢失卷路径的回调。
+\end{compactitem}
+
+
+
+
+\begin{example}
+遍历RAR归档
+\begin{lstlisting}[language=PHP]
+<?php
+class MyRecDirIt extends RecursiveDirectoryIterator {
+    function current() {
+        return rawurldecode($this->getSubPathName()) .
+            (is_dir(parent::current())?" [DIR]":"");
+    }
+}
+
+$f = "rar://" . rawurlencode(dirname(__FILE__)) .
+    DIRECTORY_SEPARATOR . 'dirs_and_extra_headers.rar#';
+
+$it = new RecursiveTreeIterator(new MyRecDirIt($f));
+
+foreach ($it as $s) {
+    echo $s, "\n";
+}
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+打开加密文件（标头加密）
+\begin{lstlisting}[language=PHP]
+<?php
+$stream = fopen("rar://" .
+    rawurlencode(dirname(__FILE__)) . DIRECTORY_SEPARATOR .
+    'encrypted_headers.rar' . '#encfile1.txt', "r", false,
+    stream_context_create(
+        array(
+            'rar' =>
+                array(
+                    'open_password' => 'samplepassword'
+                )
+            )
+        )
+    );
+var_dump(stream_get_contents($stream));
+/* creation and last access date is opt-in in WinRAR, hence most
+ * files don't have them */
+var_dump(fstat($stream));
+\end{lstlisting}
+\end{example}
+
+上述示例可能输出如下：
+
+\begin{lstlisting}[language=PHP]
+string(26) "Encrypted file 1 contents."
+Array
+(
+    [0] => 0
+    [1] => 0
+    [2] => 33206
+    [3] => 1
+    [4] => 0
+    [5] => 0
+    [6] => 0
+    [7] => 26
+    [8] => 0
+    [9] => 1259550052
+    [10] => 0
+    [11] => -1
+    [12] => -1
+    [dev] => 0
+    [ino] => 0
+    [mode] => 33206
+    [nlink] => 1
+    [uid] => 0
+    [gid] => 0
+    [rdev] => 0
+    [size] => 26
+    [atime] => 0
+    [mtime] => 1259550052
+    [ctime] => 0
+    [blksize] => -1
+    [blocks] => -1
+)
+\end{lstlisting}
+
+
+\section{ogg://}
+
+ogg://协议用于音频流，因此通过ogg://包装器读取的文件使用OGG/Vorbis格式的压缩音频编码，而且使用ogg://包装器写入或追加的数据格式也是压缩音频编码。
+
+\begin{compactitem}
+\item ogg://soundfile.ogg
+\item ogg:///path/to/soundfile.ogg
+\item ogg://http://www.example.com/path/to/soundstream.ogg
+\end{compactitem}
+
+
+
+如果使用stream\_get\_meta\_data()来打开并读取一个OGG/Vorbis格式的文件时，可以获得关于数据流的详细信息（例如vendor 标签、任何内含的 comments、 channels 数字、采样率（rate）以及用 bitrate\_lower、bitrate\_upper、 bitrate\_nominal 和 bitrate\_window 描述的可变比特率范围等）。
+
+默认情况下，需要启用OGG/Vorbis扩展才能激活ogg://封装器。
+
+
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{ogg://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受限于 allow\_url\_fopen	&No\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&Yes\\
+\hline
+允许附加	&Yes\\
+\hline
+允许同时读写	&No\\
+\hline
+支持 stat()	&No\\
+\hline
+支持 unlink()	&No\\
+\hline
+支持 rename()	&No\\
+\hline
+支持 mkdir()	&No\\
+\hline
+支持 rmdir()	&No\\
+\hline
+\end{longtable}
+
+ogg://协议的上下文选项包括pcm\_mode、rate、bitrate、channels、comments等。
+
+
+\begin{longtable}{|m{40pt}|m{150pt}|m{60pt}|m{100pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+Name&Usage&Default&Mode
+\endhead
+%endhead
+
+%firsthead
+\caption{ogg://协议上下文选项}\\
+\hline
+Name&Usage&Default&Mode
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+pcm\_mode&读取时使用如下 PCM 编码之一: OGGVORBIS\_PCM\_U8、OGGVORBIS\_PCM\_S8、 OGGVORBIS\_PCM\_U16\_BE、OGGVORBIS\_PCM\_S16\_BE、 OGGVORBIS\_PCM\_U16\_LE 和 OGGVORBIS\_PCM\_S16\_LE。 (8 或 16 位，签名或未签名，大或小的 endian)	&OGGVORBIS\_PCM\_S16\_LE	&读取\\
+\hline
+rate	&输入数据的采样率，单位为 Hz	&44100	&写入/附加\\
+\hline
+bitrate&若给的值为整数，则是用固定的比特率进行编码。（16000 到 131072）若给的值为浮点数，则使用可变的比特率（质。(-1.0 到 1.0）&128000	&写入/附加\\
+\hline
+channels&要编码的声道的数量，典型为 1 (单声道), 或 2 (立体声)。最高支持 16 声道&2&写入/附加\\
+\hline
+comments&编码到音轨头部的字符串数组&& 	写入/附加\\
+\hline
+\end{longtable}
+
+\section{expect://}
+
+expect://协议用于处理交互式的流，由 expect:// 封装协议打开的数据流 PTY 通过提供了对进程 stdio、stdout 和 stderr 的访问。
+
+默认情况下，需要开启Expect扩展才能激活expect://封装协议。
+
+\begin{longtable}{|m{100pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+属性&支持
+\endhead
+%endhead
+
+%firsthead
+\caption{expect://封装协议概要}\\
+\hline
+属性&支持
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+受限于 allow\_url\_fopen	&No\\
+\hline
+允许读取	&Yes\\
+\hline
+允许写入	&Yes\\
+\hline
+允许附加	&Yes\\
+\hline
+允许同时读写	&No\\
+\hline
+支持 stat()	&No\\
+\hline
+支持 unlink()	&No\\
+\hline
+支持 rename()	&No\\
+\hline
+支持 mkdir()	&No\\
+\hline
+支持 rmdir()	&No\\
+\hline
+\end{longtable}
+
+
+
+
+
+
+
+
+
+
+
