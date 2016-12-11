@@ -2,3 +2,726 @@
 
 
 \chapter{Overview}
+
+
+绝对安全的系统是不存在的，因此安全业界常用的方法有助于平衡可用性和风险。例如，对用户提交的每一个变量都进行双重验证可能是一个很负责任的行为，不过同时也会导致用户必须花很多时间去填写一张复杂无比的表格，这样就会让某些用户尝试去绕过安全机制。
+
+
+
+最好的安全机制应该能在不防碍用户，并且不过多地增加开发难度的情况下做到能满足需求，而且过度强化安全机制的系统上也可能出现某些问题。
+
+一个系统的的强度是由它最薄弱的环节决定的。例如，如果所有的事务都基于时间、地点、事务种类进行详细的记录，但是用户验证却只依靠一个 cookie，那么用户所对应的事务记录的可信度就被大大剥弱了。
+
+调试代码时也要事先明白就算是一个简单的页面也很难对所有可能发生的情况进行检测，黑客有足够的时间研究系统，因此必须检查所有的代码去发现哪里可以引入不正当的数据，然后对代码改进、简化或者增强。
+
+PHP 解释器放在Web 目录外的地方无疑是一个非常安全的做法，这样做唯一不便的地方就是必须在每一个包含 PHP 代码的文件的第一行加入如下语句，还要将这些文件的属性改成可执行。
+
+\begin{lstlisting}[language=PHP]
+#!/usr/local/bin/php
+<?php
+\end{lstlisting}
+
+PHP解释器移出Web目录后，在编译 PHP 解释器时必须加入\texttt{-\/-enable-discard-path}参数才能正确处理 PATH\_INFO 和 PATH\_TRANSLATED 等变量。
+
+
+除了把PHP以模块的形式嵌入到Apache等服务器内部之外，还可以以CGI模式安装PHP，那么应该做到的安全措施包括如下：
+
+\begin{compactitem}
+\item 只运行公开的文件
+\item 使用\texttt{-\/-enable-force-cgi-redirect}选项
+\item 设置 doc\_root 或 user\_dir
+\item PHP 解释器放在 web 目录以外
+\end{compactitem}
+
+实际上，还可以把 PHP 用于不同的 CGI 封装来为代码创建安全的 chroot 和 setuid 环境。
+
+通常情况下，用户可能会把 PHP 的可执行文件安装到 Web 服务器的 cgi-bin 目录，现在建议不要把任何的解释器放到 cgi-bin 目录。
+
+如果以类似http://my.host/cgi-bin/php?/etc/passwd的方式来访问系统文件，那么在 URL 请求的问号（?）后面的信息会传给 CGI 接口作为命名行的参数。
+
+其它的解释器可能会在命令行中打开并执行第一个参数所指定的文件，不过以 CGI 模式安装的 PHP 解释器被调用时会拒绝解释这些参数。
+
+如果以类似http://my.host/cgi-bin/php/secret/doc.html的方式来访问服务器上的任意目录，PHP 解释器所在目录后面的 URL 信息 /secret/doc.html 将会例行地传给 CGI 程序并进行解释。
+
+一些Web服务器会重定向到页面（例如如 http://my.host/secret/script.php），那么这些服务器就会先检查用户是否有访问 /secret 目录的权限，然后创建 http://my.host/cgi-bin/php/secret/script.php上的页面重定向。
+
+实际情况是很多服务器并不会检查用户访问 /secret/script.php 的权限，仅仅只检查了 /cgi-bin/php 的权限，这样任何能访问 /cgi-bin/php 的用户就可以访问 web 目录下的任意文件了。
+
+用户可以编译PHP时配置选项\texttt{-\/-enable-force-cgi-redirect}以及运行时配置指令 doc\_root 和 user\_dir来对服务器上的文件和目录添加限制以防止这类攻击。
+
+\texttt{-\/-enable-force-cgi-redirect}编译选项可以防止任何人通过请求http://my.host/cgi-bin/php/secretdir/script.php 这样的 URL来直接调用 PHP，PHP 在此模式下只会解析已经通过了Web 服务器的重定向规则的 URL。
+
+
+
+如果Web服务器中所有内容都受到密码或 IP 地址的访问限制，就不需要设置上述这些选项。如果Web 服务器不支持重定向，或者Web 服务器不能和 PHP 通信都可以使访问请求变得更为安全，可以在 configure 脚本中指定\texttt{-\/-enable-force-cgi-redirect}选项。
+
+除此之外，用户还要确认 PHP 程序不依赖其它方式调用，例如通过直接访问http://my.host/cgi-bin/php/dir/script.php 访问或通过重定向访问 http://my.host/dir/script.php。
+
+在Apache中，重定向可以使用 AddHandler 和 Action 语句来设置。
+
+\begin{lstlisting}[language=bash]
+Action php-script /cgi-bin/php
+AddHandler php-script .php
+\end{lstlisting}
+
+
+Apache重定向依赖于非标准 CGI 环境变量 REDIRECT\_STATUS，因此如果Web服务器不支持任何方式能够判断请求是直接的还是重定向的，就不能使用这个选项，而是应该考虑用其它方法。
+
+在Web 服务器的主文档目录中包含动态内容（例如脚本和可执行程序）有时被认为是一种不安全的实践。如果因为配置上的错误而未能执行脚本而作为普通 HTML 文档显示，很可能导致敏感信息泄露。
+
+为了安全性考虑，应该专门设置一个只能通过 PHP CGI 来访问的目录，这样该目录中的内容只会被解析而不会原样显示出来。
+
+对于无法判断是否重定向的情况，很有必要在主文档目录之外建立一个专用于脚本的 doc\_root 目录。例如，PHP的配置文件中提供了doc\_root 或设置环境变量 PHP\_DOCUMENT\_ROOT 来自定义PHP脚本主目录，这样PHP就只解释 doc\_root 目录下的文件，从而确保目录外的脚本不会被 PHP 解释器执行（user\_dir 除外）。
+
+如果未设置user\_dir，doc\_root 就是唯一能控制在哪里打开文件的选项。例如，访问 \texttt{http://my.host/\~{}user/doc.php}并不会打开用户主目录下文件，而只会执行 doc\_root 目录下的 \texttt{\~{}user/doc.php}（这个子目录以 [\~{}] 开头）。
+
+
+
+如果设置了 user\_dir（例如 public\_php），那么类似\texttt{http://my.host/\~{}user/doc.php}的请求就会执行用户主目录下的 public\_php 子目录下的 doc.php 文件。如果用户主目录的绝对路径是 /home/user，那么被执行文件将会是 /home/user/public\_php/doc.php。
+
+user\_dir 的设置与 doc\_root 无关，可以用来分别控制 PHP 脚本的主目录和用户目录。
+
+某些情况下，尽可能的多增加一份安全性都是值得的。例如，使用隐藏PHP的手段提高安全性被认为是作用不大但是也值得的做法，或者在 php.ini 文件里设置 \texttt{expose\_php = off}也可以减少攻击者能获得的有用信息。
+
+Web 服务器可以配置成使用PHP解析不同的扩展名，通过 .htaccess 文件和Apache 的配置文件都可以设置误导攻击者的文件扩展名：
+
+\begin{lstlisting}[language=bash]
+AddType application/x-httpd-php .asp .py .pl
+\end{lstlisting}
+
+
+\begin{example}
+使用未知的扩展名作为 PHP 的扩展名
+\begin{lstlisting}[language=bash]
+AddType application/x-httpd-php .bop .foo .133t
+\end{lstlisting}
+\end{example}
+
+或者，可以把PHP文件隐藏为 HTML 页面，这样所有的 HTML 文件都会通过 PHP 引擎，会为服务器增加一些负担。
+
+\begin{lstlisting}[language=bash]
+AddType application/x-httpd-php .htm .html
+\end{lstlisting}
+
+虽然把 PHP 文件的扩展名改为以上的扩展名可以通过隐藏来提高安全性，但是防御能力仍然很低而且有缺点。
+
+
+\section{Apache Permission}
+
+
+如果以Apache模块的方式安装PHP，那么PHP将继承 Apache 用户（通常为“nobody”）的权限，进而对安全和认证有一些影响。比如，如果用 PHP 来访问数据库，除非数据库有自己的访问控制，否则就要使“nobody”用户可以访问数据库，这样就意味着恶意的脚本在不用提供用户名和密码时就可能访问和修改数据库，而且Web Spider 也完全有可能偶然发现数据库的管理页面，并且删除所有的数据库。
+
+用户可以通过 Apache 认证来避免权限问题，或者用 LDAP、.htaccess 等技术来设计自己的访问模型，并把这些代码作为 PHP 脚本的一部份。
+
+通常情况下，在安全性达到可以使 PHP 用户（这里也就是 Apache 用户）承担的风险极小的程度时候，可能 PHP 已经到了阻止向用户目录写入任何文件或禁止访问和修改数据库的程度。也就是说，无论是正常的文件还是非正常的文件，无论是正常的数据库事务来是恶意的请求都会被拒之门外。
+
+另外一个常犯的对安全性不利的错误就是让 Apache 拥有 root 权限，或者通过其它途径斌予 Apache 更强大的功能。
+
+必须注意的是，把 Apache 用户的权限提升为 root 是极度危险的做法，而且可能会危及到整个系统的安全，所以不要考虑使用 su，chroot 或者以 root 权限运行Apache。
+
+除此之外，还可以使用 open\_basedir 来限制哪些目录可以被 PHP 使用，也可以设置 Apache 的专属区域来把所有的Web活动都限制到非用户和非系统文件中。
+
+
+\section{Session Management}
+
+保持 HTTP 会话管理的安全是重要的。
+
+
+\section{Filesystem Permission}
+
+
+PHP 遵从大多数服务器系统中关于文件和目录权限的安全机制，因此可以控制哪些文件在文件系统内是可读的。必须特别注意的是全局的可读文件，并确保每一个有权限的用户对这些文件的读取动作都是安全的。
+
+PHP 被设计为以用户级别来访问文件系统，所以完全有可能通过编写PHP代码来读取系统文件（例如/etc/passwd），更改网络连接以及发送海量打印任务等等，因此必须确保 PHP 代码读取和写入的是合适的文件。
+
+例如，用户需要删除自己主目录中的一个文件时，如果通过Web界面来管理文件系统，那么Apache用户就有权删除用户目录下的文件。
+
+\begin{example}
+应该对变量进行安全检查
+\begin{lstlisting}[language=PHP]
+<?php
+// 从用户目录中删除指定的文件
+$username = $_POST['user_submitted_name'];
+$userfile = $_POST['user_submitted_filename'];
+$homedir = "/home/$username";
+unlink ("$homedir/$userfile");
+echo "The file has been deleted!";
+\end{lstlisting}
+\end{example}
+
+如果username 和 filename 变量可以通过用户表单来提交，那么就可以提交别人的用户名和文件名来删掉他人的文件。这里，如果提交的变量是“../etc/”和“passwd”就会导致无法登录系统，因此需要考虑其它方式的认证。
+
+\begin{compactitem}
+\item 仅赋予PHP的Web用户有限的权限。
+\item 必须检查用户提交的所有变量。
+\end{compactitem}
+
+
+
+\begin{example}
+构造文件系统攻击
+\begin{lstlisting}[language=PHP]
+<?php
+// 删除硬盘中任何 PHP 有访问权限的文件。如果 PHP 有 root 权限：
+$username = $_POST['user_submitted_name']; // "../etc"
+$userfile = $_POST['user_submitted_filename']; // "passwd"
+$homedir  = "/home/$username"; // "/home/../etc"
+
+unlink("$homedir/$userfile"); // "/home/../etc/passwd"
+
+echo "The file has been deleted!";
+\end{lstlisting}
+\end{example}
+
+
+\begin{example}
+更安全的文件名检查
+\begin{lstlisting}[language=PHP]
+<?php
+// 删除硬盘中 PHP 有权访问的文件
+$username = $_SERVER['REMOTE_USER']; // 使用认证机制
+$userfile = basename($_POST['user_submitted_filename']);
+$homedir = "/home/$username";
+
+$filepath = "$homedir/$userfile";
+
+
+if (file_exists($filepath) && unlink($filepath)) {
+    $logstring = "Deleted $filepath\n";
+} else {
+    $logstring = "Failed to delete $filepath\n";
+}
+$fp = fopen("/home/logging/filedelete.log", "a");
+fwrite ($fp, $logstring);
+fclose($fp);
+
+echo htmlentities($logstring, ENT_QUOTES);
+\end{lstlisting}
+\end{example}
+
+
+即使进行变量过滤和权限检查，仍然还是有缺陷。例如，如果认证系统允许用户建立自己的登录用户名，而用户选择用“../etc/”作为用户名，那么攻击还是可以实现的。
+
+\begin{example}
+改进的更安全的文件名检查
+\begin{lstlisting}[language=PHP]
+<?php
+$username = $_SERVER['REMOTE_USER']; // 使用认证机制
+$userfile     = $_POST['user_submitted_filename'];
+$homedir = "/home/$username";
+
+$filepath     = "$homedir/$userfile";
+if (!ctype_alnum($username) || !preg_match('/^(?:[a-z0-9_-]|\.(?!\.))+$/iD', $userfile)) {
+    die("Bad username/filename");
+}
+\end{lstlisting}
+\end{example}
+
+
+不同的操作系统存在着各种不同的需要注意的文件，包括系统设备（/dev/ 或者 COM1）、配置文件（/etc/和 .ini文件）、常用的存储区域（/home/ 或者 My Documents）等，因此更应该建立一个禁止所有权限而只开放明确允许的资源的策略。
+
+\section{Null bytes issue}
+
+
+PHP 的文件系统操作是基于 C 语言函数，所以PHP可能会以用户意想不到的方式处理 Null 字符。例如，Null字符在 C 语言中用于标识字符串结束，一个完整的字符串是从其开头到遇见 Null 字符为止。
+
+\begin{example}
+Null字符攻击
+\begin{lstlisting}[language=PHP]
+<?php
+$file = $_GET['file']; // "../../etc/passwd\0"
+if (file_exists('/home/wwwrun/'.$file.'.php')) {
+    // file_exists will return true as the file /home/wwwrun/../../etc/passwd exists
+    include '/home/wwwrun/'.$file.'.php';
+    // the file /etc/passwd will be included
+}
+\end{lstlisting}
+\end{example}
+
+
+任何用于操作文件系统的字符串（特别是程序外部输入的字符串）都必须经过适当的检查。
+
+\begin{example}
+正确验证用户输入
+\begin{lstlisting}[language=PHP]
+<?php
+$file = $_GET['file']; 
+
+// 对字符串进行白名单检查
+switch ($file) {
+    case 'main':
+    case 'foo':
+    case 'bar':
+        include '/home/wwwrun/include/'.$file.'.php';
+        break;
+    default:
+        include '/home/wwwrun/include/main.php';
+}
+\end{lstlisting}
+\end{example}
+
+
+
+
+\section{Database Attack}
+
+
+从数据库中提取或者存入数据必须经过连接数据库、发送一条合法查询、获取结果、关闭连接等步骤，攻击者可以通过篡改SQL查询语句实现SQL注入攻击。
+
+数据库安全的原则就是深入防御，虽然PHP 本身并不能保护数据库的安全，不过可以利用PHP脚本对数据库进行基本的访问和操作，而且保护数据库的措施越多就越难让攻击者获得和使用数据库内的信息。
+
+正确地设计和应用数据库同样也可以减少被攻击的担忧。
+
+\subsection{Design Database}
+
+
+在设计数据库时，除非是使用第三方的数据库服务，否则应用程序永远不要使用数据库所有者或超级用户帐号来连接数据库，因为这些帐号可以执行任意的操作，比如说修改数据库结构（例如删除一个表）或者清空整个数据库的内容。
+
+用户应该为程序的每个方面创建不同的数据库帐号，并赋予对数据库对象的极有限的权限。例如，仅分配给能完成其功能所需的权限，避免同一个用户可以完成另一个用户的事情，这样即使攻击者利用程序漏洞取得了数据库的访问权限，也最多只能做到和该程序一样的影响范围。
+
+
+鼓励用户不要把所有的事务逻辑都通过Web应用程序（即用户的脚本）来实现，最好用视图（view）、触发器（trigger）或者规则（rule）在数据库层面完成，否则当系统升级的时候，就需要为数据库开辟新的接口，同时必须重做所有的数据库客户端。
+
+除此之外，触发器还可以透明和自动地处理字段，而且可以在调试程序和跟踪事实时提供有用的信息。
+
+\subsection{Connect Database}
+
+把连接建立在 SSL 加密技术上可以增加客户端和服务器端通信的安全性，或者 SSH 也可以用于加密客户端和数据库之间的连接。如果使用了这些技术的话，攻击者要监视服务器的通信或者得到数据库的信息是很困难的。
+
+\subsection{Encryption/Decryption}
+
+
+虽然SSL/SSH可以保护客户端和服务器端交换的数据，但是SSL/SSH 并不能保护数据库中已有的数据，毕竟SSL 只是一个加密网络数据流的协议。
+
+如果攻击者取得了直接访问数据库的许可（绕过Web 服务器），敏感数据就可能暴露或者被滥用（除非数据库自己保护了这些信息）。对数据库内的数据加密是减少这类风险的有效途径，但是只有很少的数据库提供这些加密功能。
+
+对于存储模型的加密问题，简单的解决办法就是创建自己的加密机制，然后将其应用到PHP程序中。例如，PHP提供了相关的扩展库（例如Mcrypt 和 Mhash等）来实现加密。
+
+Mcrypt和Mhash包含多种加密运算法则，这样PHP脚本可以在插入数据库之前先把数据加密，以后提取出来时再解密。
+
+对某些真正隐蔽的数据，如果不需要以明文的形式存在（即不用显示），可以考虑用散列算法。使用散列算法最常见的例子就是把密码经过 MD5 加密后的散列存进数据库来代替原来的明文密码。
+
+
+\begin{example}
+对密码字段进行散列加密
+\begin{lstlisting}[language=PHP]
+<?php
+// 存储密码散列
+$query  = sprintf("INSERT INTO users(name,pwd) VALUES('%s','%s');",
+            pg_escape_string($username), md5($password));
+$result = pg_query($connection, $query);
+
+// 发送请求来验证用户密码
+$query = sprintf("SELECT 1 FROM users WHERE name='%s' AND pwd='%s';",
+            pg_escape_string($username), md5($password));
+$result = pg_query($connection, $query);
+
+if (pg_num_rows($result) > 0) {
+    echo 'Welcome, $username!';
+} else {
+    echo 'Authentication failed for $username.';
+}
+\end{lstlisting}
+\end{example}
+
+
+\subsection{SQL Injection}
+
+
+篡改SQL查询可以绕开访问控制、身份验证和权限检查，并且可以通过 SQL 查询去运行主机操作系统级的命令。
+
+
+创建或修改已有 SQL 语句可以实现直接SQL注入，从而可以获取到敏感数据或者覆盖关键的数据，以及执行数据库主机操作系统命令。
+
+攻击者可以通过应用程序取得用户输入并与静态参数组合成 SQL 查询来实现SQL注入。例如，在缺乏对输入的数据进行验证，并且使用了超级用户或其它有权创建新用户的数据库帐号来连接数据库时，攻击者可以在数据库中新建一个超级用户。
+
+\begin{example}
+在数据分页显示的代码中构造SQL注入创建超级用户
+\begin{lstlisting}[language=PHP]
+<?php
+$offset = $argv[0]; // 注意，没有输入验证！
+$query  = "SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET $offset;";
+$result = pg_query($conn, $query);
+\end{lstlisting}
+\end{example}
+
+
+原本代码默认只会认为 \$offset 是一个数值，但是攻击者可以通过把以下语句经过 urlencode() 处理后加入URL来实现创建超级用户的操作：
+
+\begin{lstlisting}[language=SQL]
+0;
+insert into pg_shadow(usename,usesysid,usesuper,usecatupd,passwd)
+    select 'crack', usesysid, 't','t','crack'
+    from pg_shadow where usename='postgres';
+--
+\end{lstlisting}
+
+
+
+注意，上述攻击示例代码中的\texttt{0;}只不过是为了提供一个正确的偏移量以便补充完整原来的查询来确保SQL不要出错，SQL的注释标记\texttt{-\/-}可以使用来指示SQL解释器忽略后面的语句。
+
+
+从显示搜索结果的页面入手是一个能得到密码的可行办法，攻击者所要做的只不过是找出哪些提交上去的变量是用于 SQL 语句并且处理不当的，而且通常这类的变量都被用于 SELECT 查询中的条件语句（例如 WHERE, ORDER BY, LIMIT 和 OFFSET）。
+
+如果数据库支持 UNION 构造，攻击者还可能会把一个完整的 SQL 查询附加到原来的语句上以便从任意数据表中得到密码，因此对密码字段加密是很重要的。
+
+\begin{example}
+获取用户密码
+\begin{lstlisting}[language=PHP]
+<?php
+$query  = "SELECT id, name, inserted, size FROM products
+                  WHERE size = '$size'
+                  ORDER BY $order LIMIT $limit, $offset;";
+$result = odbc_exec($conn, $query);
+\end{lstlisting}
+\end{example}
+
+例如，可以在原来的查询的基础上添加另一个 SELECT 查询来获得密码：
+
+
+\begin{lstlisting}[language=SQL]
+'
+union select '1', concat(uname||'-'||passwd) as name, '1971-01-01', '0' from usertable;
+--
+\end{lstlisting}
+
+
+如果上述语句（使用\texttt{'} 和 \texttt{-\/-}）被加入到 \$query 中的任意一个变量中，就可能会成功取得敏感数据。
+
+同样地，SQL 中的 UPDATE 也会受到攻击，虽然UPDATE查询也可能被插入或附加上另一个完整的请求，不过攻击者往往更愿意对 SET 子句入手，这样就可以更改数据表中的一些数据。
+
+在使用SET子句进行攻击时，攻击者必须事先知道数据库的结构才能修改查询成功进行，但是这些都可以通过表单上的变量名对字段进行猜测，或者进行暴力破解，而且实际上对于存放用户名和密码的字段，命名的方法并不多。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$query = "UPDATE usertable SET pwd='$pwd' WHERE uid='$uid';";
+\end{lstlisting}
+
+恶意的用户会把\texttt{' or uid like'\%admin\%'; -\/-}作为变量的值提交给 \$uid 来改变 admin 的密码，或者把 \$pwd 的值提交为 \texttt{"password', admin='yes', trusted=100 "}（后面有个空格）来获得更多的权限。
+
+\begin{example}
+通过重置密码实现攻击
+\begin{lstlisting}[language=PHP]
+<?php
+// $uid == ' or uid like'%admin%'; --
+$query = "UPDATE usertable SET pwd='...' WHERE uid='' or uid like '%admin%'; --";
+
+// $pwd == "hehehe', admin='yes', trusted=100 "
+$query = "UPDATE usertable SET pwd='hehehe', admin='yes', trusted=100 WHERE ...;";
+\end{lstlisting}
+\end{example}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$query  = "SELECT * FROM products WHERE id LIKE '%$prod%'";
+$result = mssql_query($query);
+\end{lstlisting}
+
+如果攻击提交 \texttt{a\%' exec master..xp\_cmdshell 'net user test testpass /ADD' -\/-}作为变量 \$prod的值，那么 \$query 将可以用来攻击数据库主机的操作系统。
+
+\begin{example}
+攻击数据库主机的操作系统
+\begin{lstlisting}[language=PHP]
+<?php
+$query  = "SELECT * FROM products
+                    WHERE id LIKE '%a%'
+                    exec master..xp_cmdshell 'net user test testpass /ADD'--";
+$result = mssql_query($query);
+\end{lstlisting}
+\end{example}
+
+MSSQL 服务器会执行上述这条 SQL 语句，包括它后面那个用于向系统添加用户的命令。如果这个程序是以 sa 运行而 MSSQLSERVER 服务又有足够的权限的话，攻击者就可以获得一个系统帐号来访问主机。
+
+针对某一特定的数据库系统的攻击可以遵循类似的原理来构造对其它数据库系统实施类似的攻击。
+
+永远不要信任外界输入的数据，特别是来自于客户端的，包括选择框、表单隐藏域和 cookie，攻击者使用正常的查询也有可能给服务器造成灾难。
+
+\begin{compactitem}
+\item 永远不要使用超级用户或所有者帐号去连接数据库，必须使用用权限被严格限制的帐号。
+\item 检查输入的数据是否具有所期望的数据格式，例如使用变量函数和字符类型函数（比如 is\_numeric()，ctype\_digit()）到复杂的 Perl 兼容正则表达式函数来进行格式校验。
+\item 如果程序等待输入一个数字，可以考虑使用 is\_numeric() 来检查，或者直接使用 settype() 来转换类型，也可以用 sprintf()格式化为数字。
+\item 使用数据库特定的敏感字符转义函数（比如 mysql\_escape\_string() 和 sql\_escape\_string()）把用户提交上来的非数字数据进行转义。如果数据库没有专门的敏感字符转义功能的话 addslashes() 和 str\_replace() 可以代替完成这个工作。
+\end{compactitem}
+
+仅在查询的静态部分加上引号是不够的，查询很容易被攻破。
+
+\begin{example}
+安全地实现分页
+\begin{lstlisting}[language=PHP]
+<?php
+settype($offset, 'integer');
+$query = "SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET $offset;";
+
+// 注意格式字符串中的 %d，如果用 %s 就毫无意义了
+$query = sprintf("SELECT id, name FROM products ORDER BY name LIMIT 20 OFFSET %d;", $offset);
+\end{lstlisting}
+\end{example}
+
+
+在实践中，要尽量避免显示出任何有关数据库的信息，尤其是数据库结构。或者，也可以选择使用数据库的存储过程和预定义指针等特性来抽象数库访问，使用户不能直接访问数据表和视图，不过这个办法又会产生其他的影响。
+
+
+除此之外，在允许的情况下，使用代码或数据库系统保存查询日志也是一个好办法。显然，日志并不能防止任何攻击，但是利用查询日志可以跟踪到哪个程序曾经被尝试攻击过。
+
+
+\section{Error Reporting}
+
+
+错误报告对于安全加固来说是一把双刃剑，在提高安全性的同时也会有一定的害处。例如，攻击者可以通过输入不正确的数据，然后查看错误提示的类型及上下文来收集服务器的信息以便寻找弱点。
+
+如果一个攻击者知道了一个页面所基于的表单信息，那么就可能会尝试修改变量：
+
+
+\begin{example}
+用自定义的 HTML 页面攻击变量
+\begin{lstlisting}[language=HTML]
+<form method="post" action="attacktarget?username=badfoo&amp;password=badfoo">
+<input type="hidden" name="username" value="badfoo" />
+<input type="hidden" name="password" value="badfoo" />
+</form>
+\end{lstlisting}
+\end{example}
+
+
+
+
+通常情况下，PHP返回的错误提示可以帮助开发者调试程序，例如错误提示中可以包含哪个文件的哪些函数或代码出错，并指出错误发生的在文件的第几行，这些就是 PHP 本身所能给出的信息。
+
+PHP的show\_source()、highlight\_string() 或者 highlight\_file() 函数在调试代码时可能会暴露出隐藏的变量、未检查的语法和其它的可能危及系统安全的信息，这种行为在运行一些具有内部调试处理的程序，或者使用通用调试技术是很危险的。如果让攻击者确定了程序是使用了哪种具体的调试技术，他们会尝试发送变量来打开调试功能：
+
+
+
+\begin{example}
+利用变量打开调式功能
+\begin{lstlisting}[language=HTML]
+<form method="post" action="attacktarget?errors=Y&amp;showerrors=1&amp;debug=1">
+<input type="hidden" name="errors" value="Y" />
+<input type="hidden" name="showerrors" value="1" />
+<input type="hidden" name="debug" value="1" />
+</form>
+\end{lstlisting}
+\end{example}
+
+
+错误处理机制可以被攻击者用来探测系统信息，例如PHP 的独有的错误提示风格可以说明系统在运行 PHP。
+
+一个函数错误就可能暴露系统正在使用的数据库，或者为攻击者提供有关网页、程序或设计方面的有用信息。攻击者往往会顺藤摸瓜地找到开放的数据库端口，以及页面上某些 bug 或弱点等。比如说，攻击者可以一些不正常的数据使程序出错，来探测脚本中认证的顺序（通过错误提示的行号数字）以及脚本中其它位置可能泄露的信息。
+
+一个文件系统或者 PHP 的错误就会暴露 Web 服务器具有的权限，以及文件在服务器上的组织结构，错误代码更可能会加剧此问题，最终导致泄漏了原本隐藏的信息。
+
+一般情况下有三个常用的办法处理这些问题。其中，第一个是彻底地检查所有函数，并尝试弥补大多数错误，第二个是对在线系统彻底关闭错误报告，第三个是使用 PHP 自定义的错误处理函数创建自己的错误处理机制。根据不同的安全策略，三种方法可能都适用。
+
+一个能提前阻止这个问题发生的方法就是利用 error\_reporting() 来帮助使代码更安全并发现变量使用的危险之处。例如，在发布程序之前，先打开 E\_ALL 测试代码来找到变量使用不当的地方，并且在准备正式发布时把 error\_reporting() 的参数设为 0 来彻底关闭错误报告或者把 php.ini 中的 display\_errors 设为 off 来关闭所有的错误显示以将代码隔绝于探测。
+
+如果要迟一些再这样做，就不要忘记打开 ini 文件内的 log\_errors 选项，并通过 error\_log 指定用于记录错误信息的文件。
+
+
+\begin{example}
+用 E\_ALL 来查找危险的变量
+\begin{lstlisting}[language=HTML]
+<?php
+if ($username) {  // Not initialized or checked before usage
+    $good_login = 1;
+}
+if ($good_login == 1) { // If above test fails, not initialized or checked before usage
+    readfile ("/highly/sensitive/data/index.html");
+}
+\end{lstlisting}
+\end{example}
+
+\section{Register Globals}
+
+PHP通过关闭配置文件中的register\_globals来废弃了注册全局变量的机制，在register\_globals打开时候可以把各种变量（包括来自HTML表单的请求变量）都注入代码。
+
+PHP默认在使用变量之前是无需进行初始化的，从而使得在打开register\_globals的情况下更容易写出不安全的代码，register\_globals 的关闭改变了代码内部变量和客户端发送的变量混杂在一起的糟糕情况。
+
+
+
+\begin{example}
+错误使用 register\_globals
+\begin{lstlisting}[language=HTML]
+<?php
+// 当用户合法的时候，赋值 $authorized = true
+if (authenticated_user()) {
+    $authorized = true;
+}
+
+// 由于并没有事先把 $authorized 初始化为 false，
+// 当 register_globals 打开时，可能通过GET auth.php?authorized=1 来定义该变量值
+// 所以任何人都可以绕过身份验证
+if ($authorized) {
+    include "/highly/sensitive/data.php";
+}
+\end{lstlisting}
+\end{example}
+
+
+
+如果register\_globals = on，那么上述的代码就很危险，关闭之后\$authorized 就不能通过URL请求等方式进行改变。
+
+初始化变量是一个良好的编程习惯。例如，如果在上面的代码执行之前加入 \$authorized = false，无论 register\_globals 是 on 还是 off 都可以，因为用户状态被初始化为未经认证。
+
+register\_globals = on还影响会话管理，例如\$username 也可以用在下面的代码中，而且\$username 也可能会从其它途径进来（比如说通过 URL 的 GET）。
+
+\begin{example}
+使用会话时同时兼容 register\_globals
+\begin{lstlisting}[language=HTML]
+<?php
+// 我们不知道 $username 的来源，但很清楚 $_SESSION 是
+// 来源于会话数据
+if (isset($_SESSION['username'])) {
+
+    echo "Hello <b>{$_SESSION['username']}</b>";
+
+} else {
+
+    echo "Hello <b>Guest</b><br />";
+    echo "Would you like to login?";
+
+}
+\end{lstlisting}
+\end{example}
+
+
+
+开发者采取相应的预防措施以便在伪造变量输入的时候给予警告是完全有可能的。如果事先确切知道变量是哪里来的，就可以检查所提交的数据是否是从不正当的表单提交而来。不过这不能保证变量未被伪造，还是需要攻击者去猜测应该怎样去伪造。如果不在乎请求数据来源的话，可以使用 \$\_REQUEST 数组，它包括了 GET、POST 和 COOKIE 的所有数据。
+
+
+
+\begin{example}
+探测有害变量
+\begin{lstlisting}[language=HTML]
+<?php
+if (isset($_COOKIE['MAGIC_COOKIE'])) {
+    // MAGIC_COOKIE 来自 cookie
+    // 这样做是确保是来自 cookie 的数据
+} elseif (isset($_GET['MAGIC_COOKIE']) || isset($_POST['MAGIC_COOKIE'])) {
+   mail("admin@example.com", "Possible breakin attempt", $_SERVER['REMOTE_ADDR']);
+   echo "Security violation, admin has been alerted.";
+   exit;
+} else {
+   // 这一次请求中并没有设置 MAGIC_COOKIE 变量
+}
+\end{lstlisting}
+\end{example}
+
+
+单纯地关闭 register\_globals 并不代表所有的代码都安全。每一段提交上来的数据都要进行具体的检查，永远要验证用户数据和对变量进行初始化，把 error\_reporting() 设为 E\_NOTICE 级别可以检查未初始化的变量。
+
+
+
+
+\begin{example}
+危险的变量用法
+\begin{lstlisting}[language=HTML]
+<?php
+// 从用户目录中删除一个文件，或者……能删除更多的东西？
+unlink ($evil_var);
+
+// 记录用户的登陆，或者……能否在 /etc/passwd 添加数据？
+fwrite ($fp, $evil_var);
+
+// 执行一些普通的命令，或者……可以执行 rm -rf * ？
+system ($evil_var);
+exec ($evil_var);
+\end{lstlisting}
+\end{example}
+
+必须时常留意自己的代码以确保每一个从客户端提交的变量都经过适当的检查，然后问自己以下一些问题：
+
+
+\begin{compactitem}
+\item 此脚本是否只能影响所预期的文件？
+\item 非正常的数据被提交后能否产生作用？
+\item 此脚本能用于计划外的用途吗？
+\item 此脚本能否和其它脚本结合起来做坏事？
+\item 是否所有的事务都被充分记录了？
+\end{compactitem}
+
+在写代码的时候向自己提问这些问题，否则以后可能要为了增加安全性而重写代码，虽然并不完全能保证系统的安全，但是至少可以提高安全性。
+
+register\_globals和magic\_quotes 或者其它使编程更方便但会使某个变量的合法性，来源和其值被搞乱的设置都必须被关闭。
+
+在开发阶段，可以使用\texttt{error\_reporting(E\_ALL)}模式来检查变量使用前是否有被检查或被初始化，这样就可以防止某些非正常的数据。
+
+\section{Magic Quotes}
+
+PHP通过配置来关闭和移除了魔术引号（Magic Quote）特性，其本身是一个自动把进入 PHP 脚本的数据进行转义的过程，最好在编码时不要转义而在运行时根据需要而转义。
+
+当打开魔术引号时，所有的 \texttt{'}（单引号）、\texttt{"}（双引号）、\textbackslash （反斜线）和 NULL 字符都会被自动加上一个反斜线进行转义，和 addslashes() 作用完全相同。
+
+PHP提供了三个魔术引号指令：
+
+\begin{compactitem}
+\item magic\_quotes\_gpc影响到 HTTP 请求数据（GET，POST 和 COOKIE），而且不能在运行时使用ini\_set()改变，只能在系统级别关闭。
+\item magic\_quotes\_runtime打开时会把大部份从外部来源取得数据并返回的函数（包括从数据库和文本文件）所返回的数据使用反斜线转义。该选项可在运行的时改变，在 PHP 中的默认值为 off。 
+\item magic\_quotes\_sybase打开时会使用单引号对单引号进行转义而非反斜线。此选项会完全覆盖 magic\_quotes\_gpc。如果同时打开两个选项的话，单引号将会被转义成 \texttt{''}，双引号、反斜线 和 NULL 字符将不会进行转义。
+\end{compactitem}
+
+\begin{lstlisting}[language=bash]
+; Magic quotes
+;
+
+; Magic quotes for incoming GET/POST/Cookie data.
+magic_quotes_gpc = Off
+
+; Magic quotes for runtime-generated data, e.g. data from SQL, from exec(), etc.
+magic_quotes_runtime = Off
+
+; Use Sybase-style magic quotes (escape ' with '' instead of \').
+magic_quotes_sybase = Off
+\end{lstlisting}
+
+如果不能修改服务器端的配置文件，也使用 .htaccess来关闭魔术引号：
+
+\begin{lstlisting}[language=bash]
+php_flag magic_quotes_gpc Off
+\end{lstlisting}
+
+
+
+没有理由再使用魔术引号，因为它不再是 PHP 支持的一部分，而且在处理代码时最好是更改自己的代码而不是依赖于魔术引号的开启。
+
+魔术引号最初被引入是为了阻止SQL注入，不过现在已经可以使用数据库转义机制或者 prepared 语句来取代魔术引号功能。
+
+虽然可以使用get\_magic\_quotes\_gpc()来检测是否打开魔术引号，但是魔术引号的存在会影响到程序的可移植性，而且魔术引号在进行转义时会对程序的效率产生一定的影响，毕竟并不是所有的数据都需要被插入数据库中。
+
+在运行时调用转义函数（如 addslashes()）比打开魔术引号会更有效率，因为并不是所有数据都需要被转义。例如，通过表单发送邮件时可以使用stripslashes() 函数来处理转义。
+
+虽然可以在运行时关闭 magic\_quotes\_gpc，但是这样做比较低效，适当的修改配置才是更好的办法。
+
+
+\begin{example}
+在运行时关闭魔术引号
+\begin{lstlisting}[language=HTML]
+<?php
+if (get_magic_quotes_gpc()) {
+    function stripslashes_deep($value)
+    {
+        $value = is_array($value) ?
+                    array_map('stripslashes_deep', $value) :
+                    stripslashes($value);
+
+        return $value;
+    }
+
+    $_POST = array_map('stripslashes_deep', $_POST);
+    $_GET = array_map('stripslashes_deep', $_GET);
+    $_COOKIE = array_map('stripslashes_deep', $_COOKIE);
+    $_REQUEST = array_map('stripslashes_deep', $_REQUEST);
+}
+\end{lstlisting}
+\end{example}
+
+
+
+
+
+
+
+
+
+
+
+

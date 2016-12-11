@@ -4493,8 +4493,24 @@ FILE\_SKIP\_EMPTY\_LINES	&& 	 \\
 
 \chapter{PHP Cookie}
 
-cookie 是服务器存储在用户计算机中的小文件，cookie用来识别用户。每当相同的计算机通过浏览器请求页面时，它同时会发送这个 cookie，通过 PHP能够创建并取回 cookie 的值。
 
+cookie 是一种在远程浏览器端储存数据并以此来跟踪和识别用户的机制。
+
+cookie本身只是服务器存储在用户计算机中的小文件，每次相同的计算机通过浏览器请求页面时，都会同时发送cookie，这样就可以使用cookie来识别用户。
+
+
+PHP 透明地支持 HTTP cookie，能够通过setcookie() 或 setrawcookie()创建cookie并通过\$\_COOKIE取回 cookie 的值。
+
+cookie 是 HTTP 标头的一部分，因此 setcookie() 函数必须在其它信息被输出到浏览器前调用，这就和对 header() 函数的限制类似。
+
+用户可以使用输出缓冲函数来延迟脚本的输出，直到按需要设置好了所有的 cookie 或者其它 HTTP 标头。
+
+如果php.ini中的配置项variables\_order 中包括“C”，那么任何从客户端发送的 cookie 都会被自动包括进 \$\_COOKIE 自动全局数组。如果希望对一个 cookie 变量设置多个值，则需要在 cookie 的名称后加 [] 符号。
+
+\begin{compactitem}
+\item 在打开register\_globals配置选项时，可以从 cookie 建立普通的 PHP 变量。
+\item 在打开track\_vars 配置选项时，系统还会设定 \$HTTP\_COOKIE\_VARS。
+\end{compactitem}
 
 
 \section{setcookie()}
@@ -4599,11 +4615,20 @@ Age: <input type="text" name="age" />
 
 \chapter{PHP Session}
 
-当我们在本地运行一个应用程序时，可能会打开它，做些更改，然后关闭它，这个过程很像一次会话，而且在这个过程中计算机清楚当前用户是谁，而且它知道我们何时启动应用程序，并在何时终止。但是在因特网上存在一个问题：服务器不知道当前用户是谁以及用户做什么，这是由于 HTTP 地址不能维持状态（stateless）。
+当用户在本地运行一个应用程序时，可能会执行打开、更改和关闭应用程序的操作，这个过程很像一次会话，而且在这个过程中计算机清楚当前用户是谁，而且它知道我们何时启动应用程序，并在何时终止。
 
-PHP Session解决了这个问题，Session指的是一个用户在一段时间内对某一个站点的一次访问。通过在服务器上存储用户信息（比如用户名称、购买商品等）来供随后使用。不过，会话信息是临时的，在用户离开网站后将被删除。如果需要永久储存信息，可以把数据存储在数据库中。
+在因特网上运行一个应用程序时会产生一个问题，即服务器不知道当前用户是谁以及用户做什么，原因出在HTTP 地址不能维持状态（stateless）。
 
-Session即会话，Session可以保存变量，该变量只能供一个用户使用，也就是说，每一个网页浏览者都有自己的Session对象变量，即Session对象具有唯一性，因此对于一个Web应用程序而言，所有用户访问到的Application对象的内容是完全一样的，但是不同用户会话访问到的Session对象的内容却各不相同，而且存储于Session 对象中的变量持有单一用户的信息，并且对于一个应用程序中的所有页面都是可用的。
+PHP会话（session）机制可以用来解决上述问题，并且保持用户连续访问Web应用时的相关数据，从而有助于创建高度定制化的程序。
+
+Session本身是一个用户在一段时间内对某一个站点的一次访问，通过使用Session在服务器上存储用户信息（比如用户名称、购买商品等）实现随后继续访问用户会话数据。
+
+通常情况下，会话信息都是临时的，在用户离开网站后就将被删除，因此往往需要把数据存储在数据库中来永久储存会话信息。
+
+Session保存的变量只能供一个用户使用，每一个访客都有自己的Session对象变量，因此Session对象具有唯一性。
+
+
+对于一个Web应用程序而言，所有用户访问到的Application对象的内容是完全一样的，但是不同用户会话访问到的Session对象的内容则各不相同，而且存储于Session 对象中的变量持有单一用户的信息，并且对于一个应用程序中的所有页面都是可用的。
 
 
 
@@ -4850,17 +4875,6 @@ session_destroy();
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 \chapter{PHP Forms}
 
 \vspace{-30pt}
@@ -4943,10 +4957,10 @@ PHP 一个很有用的特点体现在它处理 PHP 表单的方式。当一个�
 通过HTTP POST机制传送的数据量较大，一般被默认为不受限制。但理论上，IIS4中最大量为80KB，IIS5中为100KB。
 \end{compactitem}
 
-也可以在 PHP 中处理 XForms 的输入，尽管用户可能更喜欢使用长久以来支持良好的 HTML 表单。
 
 
-如果并不关心请求数据的来源，也可以用超全局变量 \texttt{\$\_REQUEST}，它包含了所有 \texttt{GET}、\texttt{POST}、\texttt{COOKIE}和 \texttt{FILE}的数据\footnote{超全局数组例如 \texttt{\$\_POST} 和 \texttt{\$\_GET}，自 PHP 4.1.0 起可用。}。
+
+如果并不关心请求数据的来源，也可以用超全局变量 \texttt{\$\_REQUEST}，它包含了所有 \texttt{GET}、\texttt{POST}、\texttt{COOKIE}和 \texttt{FILE}的数据。
 
 通常，PHP 不会改变传递给脚本中的变量名，但是应该注意到点（句号）不是 PHP 变量名中的合法字符，因此变量名中的点和空格会被转换成下划线。例如 \texttt{<input name="a.b" />} 变成了 \texttt{\$\_REQUEST["a\_b"]}。
 
@@ -5043,6 +5057,66 @@ if (isset($_POST['action']) && $_POST['action'] == 'submitted') {
 在服务器验证表单的一种好的方式是，把表单传给它自己，而不是跳转到不同的页面。这样用户就可以在同一张表单页面得到错误信息，也就更容易发现错误了。
 
 
+
+\section{XForms}
+
+XForms 定义了一种传统 web 表单的变种，可以用于更多的平台和浏览器（包括非传统的媒体（例如 PDF 文档）），PHP支持处理 XForms 的输入，尽管用户可能更喜欢使用长久以来支持良好的 HTML 表单。
+
+XFroms 的第一个关键区别是表单怎样发送到客户端的信息。例如，下面的XForms表单显示一个文本输入框（命名为 q）和一个提交按钮，当用户点击提交按钮后，表单将被发送到 action 所指示的页面。
+
+\begin{example}
+XForms 搜索表单
+\begin{lstlisting}[language=PHP]
+<h:html xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns="http://www.w3.org/2002/xforms">
+<h:head>
+ <h:title>Search</h:title>
+ <model>
+  <submission action="http://example.com/search"
+              method="post" xml:id="s"/>
+ </model>
+</h:head>
+<h:body>
+ <h:p>
+  <input ref="q"><label>Find</label></input>
+  <submit submission="s"><label>Go</label></submit>
+ </h:p>
+</h:body>
+</h:html>
+\end{lstlisting}
+\end{example}
+
+\begin{compactitem}
+\item 在普通的 HTML 表单中，数据发送格式是 application/x-www-form-urlencoded；
+\item 在 XForms 表单中，数据发送格式是XML。
+\end{compactitem}
+
+XForms传送回服务器后，\$HTTP\_RAW\_POST\_DATA 中包含了由浏览器产生的 XML 文档，可以将其传递给相应的 XSLT 引擎或者文档解析器。
+
+如果需要让数据保存到传统的\$\_POST 变量中，可以将 method 属性改成 urlencoded-post，并且指示客户端浏览器将其以 application/x-www-form-urlencoded 格式发送给服务器。
+
+
+\begin{example}
+使用 XForm 来产生\$\_POST
+\begin{lstlisting}[language=PHP]
+<h:html xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns="http://www.w3.org/2002/xforms">
+<h:head>
+ <h:title>Search</h:title>
+ <model>
+  <submission action="http://example.com/search"
+              method="urlencoded-post" xml:id="s"/>
+ </model>
+</h:head>
+<h:body>
+ <h:p>
+  <input ref="q"><label>Find</label></input>
+  <submit submission="s"><label>Go</label></submit>
+ </h:p>
+</h:body>
+</h:html>
+\end{lstlisting}
+\end{example}
 
 \chapter{PHP \$\_GET}
 

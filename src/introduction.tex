@@ -225,9 +225,79 @@ PHP保留的超全局变量\texttt{\$\_SESSION}包含所有的SESSION数据。
 
 \end{compactitem}
 
-建议用以上提到的超全局数组变量来访问这些值，但是可能老的脚本、书籍以及教程都可能建立在该设置为\texttt{on} 的基础上。
+建议用以上提到的超全局数组变量来访问这些值。
 
 如果该选项被设置为\texttt{on}，则可以在 \url{http://www.example.com/foo.php?id=42}中直接使用变量 \texttt{\$id}。不过，不管被设置为 \texttt{on}还是\texttt{off}，\texttt{\$\_GET['id']}一直有效。
+
+
+
+\section{Dynamic Parser}
+
+无论以模块还是CGI的形式安装PHP，PHP的解释器都可以在服务器上执行访问文件、运行命令以及创建网络连接等操作，而且这些操作可能产生不安全隐患，因此需要正确地安装和配置PHP以及编写安全的代码。
+
+PHP提供的CLI SAPI 不会将当前目录改为已运行的脚本所在的目录。例如，下面示例可以反映CLI SAPI模块与 CGI SAPI 模块之间的不同：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 名为 test.php 的简单测试程序
+echo getcwd(), "\n";
+\end{lstlisting}
+
+CGI SAPI将当前目录修改为运行PHP脚本所在的目录，因此输出结果如下：
+
+\begin{lstlisting}[language=PHP]
+$ pwd
+/tmp
+$ php-cgi -f another_directory/test.php
+/tmp/another_directory
+\end{lstlisting}
+
+CLI SAPI将使用当前的目录，因此输出结果如下：
+
+
+\begin{lstlisting}[language=PHP]
+$ pwd
+/tmp
+$ php -q another_directory/test.php
+/tmp
+\end{lstlisting}
+
+用户在命令行运行PHP CGI应用程序时可以给CGI SAPI加上 -C 参数来使其支持 CLI SAPI 的功能。
+
+CLI SAPI 模块有以下三种不同的方法来获取要运行的 PHP 代码：
+
+\begin{compactenum}
+\item 使用PHP 运行指定文件
+
+
+\begin{lstlisting}[language=PHP]
+$ php my_script.php
+$ php -f my_script.php
+\end{lstlisting}
+
+CLI SAPI指定的 PHP 脚本并非必须要以 .php 为扩展名，可以有任意的文件名和扩展名来运行任何文件。
+
+\item 使用PHP在命令行直接运行 PHP 代码
+
+\begin{lstlisting}[language=PHP]
+$ php -r 'print_r(get_defined_constants());'
+\end{lstlisting}
+
+\item 使用PHP运行通过标准输入（stdin）提供的 PHP 代码
+
+
+\begin{lstlisting}[language=PHP]
+$ some_application | some_filter | php | sort -u >final_output.txt
+\end{lstlisting}
+
+
+CLI SAPI可以动态地生成 PHP 代码并通过命令行运行这些代码。
+
+\end{compactenum}
+
+以上三种运行代码的方法不能同时使用。
+
 
 
 
@@ -349,38 +419,742 @@ PHP保留的超全局变量\texttt{\$\_SESSION}包含所有的SESSION数据。
 \end{lstlisting}
 
 
-\section{Development Server}
+\section{Dynamic Tracing}
 
-PHP的命令行（CLI）脚本接口可以帮助用户完成自动化的任务（例如测试、部署和应用管理），而且可以直接调用程序代码而无需创建 Web 图形界面。
+DTrace 跟踪调试框架永远可用，并且额外消耗极低。
 
-用户执行\texttt{php -a}选项就可以进入和 Ruby 的 IRB 或 python 的交互式 shell 相似的交互式shell。例如，一个简单的 “Hello, \$name” CLI 程序：
+DTrace 可以跟踪操作系统行为和用户程序的执行情况，可以显示参数值，也可以用来分析性能问题。例如，用户可以使用 DTrace D 脚本语言创建脚本文件来监控探针来高效地分析数据指针。
 
 
+除非用户使用 DTrace D 脚本激活并监控 PHP 探针，否则它并不会运行，所以不会给正常的应用执行带来任何性能损耗。 即使 PHP 探针被激活，它的消耗也是非常低的，甚至可以直接在生产系统中使用。
+
+
+
+在运行时可以激活 PHP “用户级静态定义跟踪”（USDT）探针。 举例来说，如果 D 脚本正在监控 PHP function-entry 探针， 那么，每当 PHP 脚本函数被调用的时候，这个探针将被触发，同时 D 脚本中所关联的动作代码将被执行。 在D脚本的动作代码中，可以打印出诸如函数所在源文件等信息的探针参数， 也可以记录诸如函数执行次数这样的聚合数据。
+
+
+虽然不同平台提供的 DTrace 功能并不完全相同，不过DTrace一般都可以跟踪函数调用以及操作系统行为等。
+
+\texttt{-\/-enable-dtrace}配置参数可以来开启PHP核心的静态探针，PHP 扩展可以拥有额外的静态探针，不过提供了自有探针的 PHP 扩展需要分别构建。
+
+\begin{lstlisting}[language=bash]
+$ ./configure --enable-dtrace
+$ make
+$ make install
+\end{lstlisting}
+
+
+\begin{longtable}{|m{40pt}|m{60pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+探针名称&探针描述&探针参数
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP DTrace 静态探针}\\
+\hline
+探针名称&探针描述&探针参数
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+request-startup	&请求开始时触发。		&\texttt{char *file, char *request\_uri, char *request\_method}\\
+\hline
+request-shutdown	&请求关闭时触发。		&\texttt{char *file, char *request\_uri, char *request\_method}\\
+\hline
+compile-file-entry	&脚本开始编译时触发。	&\texttt{char *compile\_file, char *compile\_file\_translated}\\
+\hline
+compile-file-return	&脚本完成编译时触发。	&\texttt{char *compile\_file, char *compile\_file\_translated}\\
+\hline
+execute-entry		&操作数数组开始执行时触发，例如函数调用、文件包含以及生成器恢复时会被触发。&\texttt{char *request\_file, int lineno}\\
+\hline
+execute-return	&操作数数组执行完毕之后触发。	&\texttt{char *request\_file, int lineno}\\
+\hline
+function-entry	PHP &引擎进入 PHP 函数或者方法调用时触发。	&\texttt{char *function\_name, char *request\_file, int lineno, char *classname, char *scope}\\
+\hline
+function-return	&PHP 引擎从 PHP 函数或者方法调用返回后触发。&\texttt{char *function\_name, char *request\_file, int lineno, char *classname, char *scope}\\
+\hline
+exception-thrown	&有异常抛出时触发。	&\texttt{char *classname}\\
+\hline
+exception-caught	&有异常被捕获时触发。	&\texttt{char *classname}\\
+\hline
+error			&无论 error\_reporting 的设定如何，在发生错误时都会触发。&\texttt{char *errormsg, char *request\_file, int lineno}\\
+\hline
+\end{longtable}
+
+要列出 PHP 中可用的静态探针，开启一个 PHP 进程，然后执行\texttt{dtrace -l}，输出结果如下：
+
+\begin{lstlisting}[language=bash]
+$ dtrace -l
+ID   PROVIDER            MODULE                          FUNCTION NAME
+[ . . . ]
+4   php15271               php               dtrace_compile_file compile-file-entry
+5   php15271               php               dtrace_compile_file compile-file-return
+6   php15271               php                        zend_error error
+7   php15271               php  ZEND_CATCH_SPEC_CONST_CV_HANDLER exception-caught
+8   php15271               php     zend_throw_exception_internal exception-thrown
+9   php15271               php                 dtrace_execute_ex execute-entry
+10   php15271               php           dtrace_execute_internal execute-entry
+11   php15271               php                 dtrace_execute_ex execute-return
+12   php15271               php           dtrace_execute_internal execute-return
+13   php15271               php                 dtrace_execute_ex function-entry
+14   php15271               php                 dtrace_execute_ex function-return
+15   php15271               php              php_request_shutdown request-shutdown
+16   php15271               php               php_request_startup request-startup
+\end{lstlisting}
+
+如果运行的是 Apache web 服务器，那么模块名称可能是 libphp5.so， 并且可能会出现多块信息，每个运行中的 Apache 进程对应一个输出块。
+
+\begin{compactitem}
+\item Provider列由PHP和当前进程 id 的组成。
+\item Function Name列表示 Provider 对应的 PHP 内部 C 实现函数名称。
+\end{compactitem}
+
+如果没有运行任何 PHP 进程，那么就不会显示任何 PHP 探针。
+
+下面的示例展示了基本的 DTrace D 脚本。
+
+\begin{example}
+PHP静态探针
+\begin{lstlisting}[language=bash]
+#!/usr/sbin/dtrace -Zs
+
+#pragma D option quiet
+
+php*:::compile-file-entry
+{
+    printf("PHP compile-file-entry\n");
+    printf("  compile_file              %s\n", copyinstr(arg0));
+    printf("  compile_file_translated   %s\n", copyinstr(arg1));
+}
+
+php*:::compile-file-return
+{
+    printf("PHP compile-file-return\n");
+    printf("  compile_file              %s\n", copyinstr(arg0));
+    printf("  compile_file_translated   %s\n", copyinstr(arg1));
+}
+
+php*:::error
+{
+    printf("PHP error\n");
+    printf("  errormsg                  %s\n", copyinstr(arg0));
+    printf("  request_file              %s\n", copyinstr(arg1));
+    printf("  lineno                    %d\n", (int)arg2);
+}
+
+php*:::exception-caught
+{
+    printf("PHP exception-caught\n");
+    printf("  classname                 %s\n", copyinstr(arg0));
+}
+
+php*:::exception-thrown
+{
+    printf("PHP exception-thrown\n");
+    printf("  classname                 %s\n", copyinstr(arg0));
+}
+
+php*:::execute-entry
+{
+    printf("PHP execute-entry\n");
+    printf("  request_file              %s\n", copyinstr(arg0));
+    printf("  lineno                    %d\n", (int)arg1);
+}
+
+php*:::execute-return
+{
+    printf("PHP execute-return\n");
+    printf("  request_file              %s\n", copyinstr(arg0));
+    printf("  lineno                    %d\n", (int)arg1);
+}
+
+php*:::function-entry
+{
+    printf("PHP function-entry\n");
+    printf("  function_name             %s\n", copyinstr(arg0));
+    printf("  request_file              %s\n", copyinstr(arg1));
+    printf("  lineno                    %d\n", (int)arg2);
+    printf("  classname                 %s\n", copyinstr(arg3));
+    printf("  scope                     %s\n", copyinstr(arg4));
+}
+
+php*:::function-return
+{
+    printf("PHP function-return\n");
+    printf("  function_name             %s\n", copyinstr(arg0));
+    printf("  request_file              %s\n", copyinstr(arg1));
+    printf("  lineno                    %d\n", (int)arg2);
+    printf("  classname                 %s\n", copyinstr(arg3));
+    printf("  scope                     %s\n", copyinstr(arg4));
+}
+
+php*:::request-shutdown
+{
+    printf("PHP request-shutdown\n");
+    printf("  file                      %s\n", copyinstr(arg0));
+    printf("  request_uri               %s\n", copyinstr(arg1));
+    printf("  request_method            %s\n", copyinstr(arg2));
+}
+
+php*:::request-startup
+{
+    printf("PHP request-startup\n");
+    printf("  file                      %s\n", copyinstr(arg0));
+    printf("  request_uri               %s\n", copyinstr(arg1));
+    printf("  request_method            %s\n", copyinstr(arg2));
+}
+\end{lstlisting}
+\end{example}
+
+此脚本在 dtrace 命令中使用了 -Z 选项，此选项保证即使在没有任何 PHP 进程运行的时候脚本也能够正确执行。 如果省略了此选项，当没有任何探针可监控的时候，脚本会立即终止执行。
+
+在运行此脚本的过程中，它将监控全部 PHP 核心静态探针。 
+
+在下面的示例，运行 D 脚本后再运行一个 PHP 脚本或者 PHP 应用，用来进行监控的 D 脚本就会输出每个探针被触发时所携带的参数。
+
+\begin{lstlisting}[language=bash]
+# ./all_probes.d
+\end{lstlisting}
+
+在多 CPU 的主机上，探针的显示顺序可能不是连续的，主要取决于哪颗 CPU 执行探针以及多个 CPU 之间的线程迁移情况，可以通过显示探针时间戳来减少混淆。
+
+\begin{lstlisting}[language=bash]
+php*:::function-entry
+{
+      printf("%lld: PHP function-entry ", walltimestamp);
+      [ . . .]
+}
+\end{lstlisting}
+
+在某些 Linux 发行版中，可以使用 SystemTap 工具来监控 PHP内置的DTrace 静态探针，或者可以配置 PHP 打开 DTrace 静态探针。 例如，在 Oracle Linux 系统上启动 UEK3 内核，并进行如下操作可以打开 DTrace 静态探针。
+
+\begin{lstlisting}[language=bash]
+# yum install systemtap-sdt-devel
+# ./configure --enable-dtrace ...
+# make
+# make install
+# modprobe fasttrap
+# chmod 666 /dev/dtrace/helper
+\end{lstlisting}
+
+除了 chmod 命令，也可以使用 ACL 包规则来限制特定用户对于设备的访问权限。
+
+stap命令可以列出 PHP 静态探针，例如：
+
+
+\begin{lstlisting}[language=bash]
+# stap -l 'process.provider("php").mark("*")' -c 'sapi/cli/php -i'
+\end{lstlisting}
+
+输出如下：
+
+\begin{lstlisting}[language=bash]
+process("sapi/cli/php").provider("php").mark("compile__file__entry")
+process("sapi/cli/php").provider("php").mark("compile__file__return")
+process("sapi/cli/php").provider("php").mark("error")
+process("sapi/cli/php").provider("php").mark("exception__caught")
+process("sapi/cli/php").provider("php").mark("exception__thrown")
+process("sapi/cli/php").provider("php").mark("execute__entry")
+process("sapi/cli/php").provider("php").mark("execute__return")
+process("sapi/cli/php").provider("php").mark("function__entry")
+process("sapi/cli/php").provider("php").mark("function__return")
+process("sapi/cli/php").provider("php").mark("request__shutdown")
+process("sapi/cli/php").provider("php").mark("request__startup")
+\end{lstlisting}
+
+
+\begin{example}
+使用SystemTap追踪PHP静态探针
+\begin{lstlisting}[language=bash]
+probe process("sapi/cli/php").provider("php").mark("compile__file__entry") {
+    printf("Probe compile__file__entry\n");
+    printf("  compile_file %s\n", user_string($arg1));
+    printf("  compile_file_translated %s\n", user_string($arg2));
+}
+probe process("sapi/cli/php").provider("php").mark("compile__file__return") {
+    printf("Probe compile__file__return\n");
+    printf("  compile_file %s\n", user_string($arg1));
+    printf("  compile_file_translated %s\n", user_string($arg2));
+}
+probe process("sapi/cli/php").provider("php").mark("error") {
+    printf("Probe error\n");
+    printf("  errormsg %s\n", user_string($arg1));
+    printf("  request_file %s\n", user_string($arg2));
+    printf("  lineno %d\n", $arg3);
+}
+probe process("sapi/cli/php").provider("php").mark("exception__caught") {
+    printf("Probe exception__caught\n");
+    printf("  classname %s\n", user_string($arg1));
+}
+probe process("sapi/cli/php").provider("php").mark("exception__thrown") {
+    printf("Probe exception__thrown\n");
+    printf("  classname %s\n", user_string($arg1));
+}
+probe process("sapi/cli/php").provider("php").mark("execute__entry") {
+    printf("Probe execute__entry\n");
+    printf("  request_file %s\n", user_string($arg1));
+    printf("  lineno %d\n", $arg2);
+}
+probe process("sapi/cli/php").provider("php").mark("execute__return") {
+    printf("Probe execute__return\n");
+    printf("  request_file %s\n", user_string($arg1));
+    printf("  lineno %d\n", $arg2);
+}
+probe process("sapi/cli/php").provider("php").mark("function__entry") {
+    printf("Probe function__entry\n");
+    printf("  function_name %s\n", user_string($arg1));
+    printf("  request_file %s\n", user_string($arg2));
+    printf("  lineno %d\n", $arg3);
+    printf("  classname %s\n", user_string($arg4));
+    printf("  scope %s\n", user_string($arg5));
+}
+probe process("sapi/cli/php").provider("php").mark("function__return") {
+    printf("Probe function__return: %s\n", user_string($arg1));
+    printf(" function_name %s\n", user_string($arg1));
+    printf("  request_file %s\n", user_string($arg2));
+    printf("  lineno %d\n", $arg3);
+    printf("  classname %s\n", user_string($arg4));
+    printf("  scope %s\n", user_string($arg5));
+}
+probe process("sapi/cli/php").provider("php").mark("request__shutdown") {
+    printf("Probe request__shutdown\n");
+    printf("  file %s\n", user_string($arg1));
+    printf("  request_uri %s\n", user_string($arg2));
+    printf("  request_method %s\n", user_string($arg3));
+}
+probe process("sapi/cli/php").provider("php").mark("request__startup") {
+    printf("Probe request__startup\n");
+    printf("  file %s\n", user_string($arg1));
+    printf("  request_uri %s\n", user_string($arg2));
+    printf("  request_method %s\n", user_string($arg3));
+}
+\end{lstlisting}
+\end{example}
+
+在 PHP 脚本的执行过程中，上述脚本会跟踪所有的 PHP 核心静态探针：
+
+\begin{lstlisting}[language=bash]
+# stap -c 'sapi/cli/php test.php' all_probes.stp
+\end{lstlisting}
+
+
+\section{Garbage Collection}
+
+每个php变量存在一个叫\texttt{"zval"}的变量容器中。
+
+
+一个zval变量容器，除了包含变量的类型和值，还包括两个字节的额外信息。
+
+第一个是\texttt{"is\_ref"}，本身是一个用来标识这个变量是否是属于引用集合(reference set)的bool值。通过这个字节，php引擎才能把普通变量和引用变量区分开来。
+
+PHP允许用户通过使用\&来使用自定义引用，因此zval变量容器中还有一个内部引用计数机制来优化内存使用。
+
+第二个额外字节是\texttt{"refcount"}，用以表示指向这个zval变量容器的变量(也称符号即symbol)个数，所有的符号存在一个符号表中，其中每个符号都有作用域(scope)，那些主脚本（例如通过浏览器请求的的PHP脚本）和每个函数或者方法也都有作用域。
+
+当一个变量被赋常量值时，就会生成一个zval变量容器。
+
+\begin{example}
+生成一个新的zval容器
 \begin{lstlisting}[language=PHP]
 <?php
-if ($argc != 2) {
-    echo "Usage: php hello.php [name].\n";
-    exit(1);
-}
-$name = $argv[1];
-echo "Hello, $name\n";
+$a = "new string";
 \end{lstlisting}
+\end{example}
 
-PHP 会在脚本运行时根据参数设置两个特殊的变量，\$argc 是一个表示参数个数的整数，\$argv 是一个数组变量，包含每个参数的值， 它的第一个元素一直是 PHP 脚本的名称（例如这里就是hello.php）。
+上述PHP脚本中定义了新的变量a，是在当前作用域中生成的，同时还生成了类型为 string 和值为new string的变量容器，其额外的两个字节的信息如下：
 
+\begin{compactitem}
+\item \texttt{"is\_ref"}被默认设置为 FALSE，因为没有任何自定义的引用生成。
+\item \texttt{"refcount"}被设定为 1，因为这里只有一个变量使用这个变量容器。
+\end{compactitem}
+
+当\texttt{"refcount"}的值是1时，\texttt{"is\_ref"}的值总是FALSE，使用Xdebug提供的函数 xdebug\_debug\_zval()可以显示\texttt{"refcount"}和\texttt{"is\_ref"}的值。
+
+\begin{example}
+显示zval信息
 \begin{lstlisting}[language=PHP]
-$ php -a
-Interactive mode enabled
+<?php
+xdebug_debug_zval('a');
+\end{lstlisting}
+\end{example}
 
-> php hello.php
-Usage: php hello.php [name]
-> php hello.php world
-Hello, world
+上述示例的结果如下：
+
+\begin{lstlisting}[language=bash]
+a: (refcount=1, is_ref=0)='new string'
 \end{lstlisting}
 
-命令运行失败时，可以通过 exit() 表达式返回一个非 0 整数来通知 shell，
+把一个变量赋值给另一变量将增加引用次数(refcount)，变量容器在”refcount“变成0时就被销毁，而且当任何关联到某个变量容器的变量离开它的作用域（例如函数执行结束）或者对变量调用了函数 unset()时，”refcount“就会减1。
 
-PHP CLI SAPI还提供了一个内置的Web服务器，从命令行终端进入项目的 Web 根目录并执行下面的命令就可以启动内置的 Web 服务器来进行本地开发调试。
+
+\begin{example}
+增加一个zval的引用计数
+\begin{lstlisting}[language=PHP]
+<?php
+$a = "new string";
+$b = $a;
+xdebug_debug_zval( 'a' );
+\end{lstlisting}
+\end{example}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=bash]
+a: (refcount=2, is_ref=0)='new string'
+\end{lstlisting}
+
+同一个变量容器被变量 a 和变量 b关联时，如果没有必要，PHP就不会去复制已生成的变量容器。
+
+\begin{example}
+减少一个zval的引用计数
+\begin{lstlisting}[language=PHP]
+<?php
+$a = "new string";
+$c = $b = $a;
+xdebug_debug_zval( 'a' );
+unset( $b, $c );
+xdebug_debug_zval( 'a' );
+\end{lstlisting}
+\end{example}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=bash]
+a: (refcount=3, is_ref=0)='new string'
+a: (refcount=1, is_ref=0)='new string'
+\end{lstlisting}
+
+如果现在执行\texttt{unset(\$a);}，那么包含类型和值的这个变量容器就会从内存中删除。
+
+PHP的复合数据类型（例如array和object）的值与标量(scalar)类型的值不同，array和 object类型的变量把它们的成员或属性存在自己的符号表中。例如，下面的例子将生成三个zval变量容器：
+
+
+\begin{example}
+生成一个array zval
+\begin{lstlisting}[language=PHP]
+<?php
+$a = array( 'meaning' => 'life', 'number' => 42 );
+xdebug_debug_zval( 'a' );
+\end{lstlisting}
+\end{example}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=bash]
+a: (refcount=1, is_ref=0)=array (
+   'meaning' => (refcount=1, is_ref=0)='life',
+   'number' => (refcount=1, is_ref=0)=42
+)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.5]{simple-array.png}
+\caption{array zval}
+\end{figure}
+
+这里的array生成的三个zval变量容器分别是a、meaning和 number，增加和减少”refcount”的规则和上面提到的相同。
+
+下面的示例在数组中再添加一个元素，并且把它的值设为数组中已存在元素的值：
+
+
+\begin{example}
+添加一个已经存在的元素到数组中
+\begin{lstlisting}[language=PHP]
+<?php
+$a = array( 'meaning' => 'life', 'number' => 42 );
+$a['life'] = $a['meaning'];
+xdebug_debug_zval( 'a' );
+\end{lstlisting}
+\end{example}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=bash]
+a: (refcount=1, is_ref=0)=array (
+   'meaning' => (refcount=2, is_ref=0)='life',
+   'number' => (refcount=1, is_ref=0)=42,
+   'life' => (refcount=2, is_ref=0)='life'
+)
+\end{lstlisting}
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.5]{simple-array2.png}
+\caption{修改array zval}
+\end{figure}
+
+从上面的xdebug输出信息可以看到原有的数组元素和新添加的数组元素关联到同一个"refcount=2"的zval变量容器.
+
+尽管 Xdebug的输出显示两个值为'life'的 zval 变量容器，其实是同一个，xdebug\_debug\_zval()不显示这个信息，不过还是能通过显示内存指针信息来看到。
+
+删除数组中的一个元素类似于从作用域中删除一个变量，删除后的数组中的这个元素所在的容器的“refcount”值减少。同样地，当“refcount”为0时，这个变量容器就从内存中被删除。
+
+\begin{example}
+从数组中删除一个元素
+\begin{lstlisting}[language=PHP]
+<?php
+$a = array( 'meaning' => 'life', 'number' => 42 );
+$a['life'] = $a['meaning'];
+unset( $a['meaning'], $a['number'] );
+xdebug_debug_zval( 'a' );
+\end{lstlisting}
+\end{example}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=bash]
+a: (refcount=1, is_ref=0)=array (
+   'life' => (refcount=1, is_ref=0)='life'
+)
+\end{lstlisting}
+
+在添加一个数组本身作为这个数组的元素时，需要加入引用操作符，否则PHP将生成一个复制。
+
+\begin{example}
+把数组作为一个元素添加到自己
+\begin{lstlisting}[language=PHP]
+<?php
+$a = array( 'one' );
+$a[] =& $a;
+xdebug_debug_zval( 'a' );
+\end{lstlisting}
+\end{example}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=bash]
+a: (refcount=2, is_ref=1)=array (
+   0 => (refcount=1, is_ref=0)='one',
+   1 => (refcount=2, is_ref=1)=...
+)
+\end{lstlisting}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.5]{loop-array.png}
+\caption{把数组作为一个元素添加到自己}
+\end{figure}
+
+数组变量 (a) 同时也是这个数组的第二个元素(1) 指向的变量容器中“refcount”为 2，上面的输出结果中的\texttt{"..."}说明发生了递归操作，显然在这种情况下意味着\texttt{"..."}指向原始数组。
+
+
+对一个变量调用unset将删除这个符号，而且它指向的变量容器中的引用次数也减1，所以如果在执行完上面的代码后对变量\$a调用unset，那么变量\$a 和数组元素\texttt{"1"}所指向的变量容器的引用次数减1，即从\texttt{"2"}变成\texttt{"1"}。
+
+\begin{example}
+删除数组元素
+\begin{lstlisting}[language=bash]
+(refcount=1, is_ref=1)=array (
+   0 => (refcount=1, is_ref=0)='one',
+   1 => (refcount=1, is_ref=1)=...
+)
+\end{lstlisting}
+\end{example}
+
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.5]{leak-array.png}
+\caption{删除数组元素}
+\end{figure}
+
+另外，尽管不再有某个作用域中的任何符号指向这个结构(就是变量容器)，由于数组元素“1”仍然指向数组本身，所以这个容器不能被清除 。事实上，如果没有其他的符号指向它，用户没有办法清除这个结构，结果就会导致内存泄漏。
+
+PHP通过在脚本执行结束时清除这个数据结构来避免内存泄露，但是在PHP清除之前需要耗费不少内存。如果要实现分析算法，或者要做其他像一个子元素指向它的父元素这样的操作，这种情况就会经常发生。
+
+上述同样的情况也会发生在对象上，实际上对象更有可能出现这种情况，因为对象总是隐式的被引用，结果就是上面这样的情况发生仅仅一两次可能没什么问题，但是如果出现多次的内存泄漏，结果就显然是个大问题。
+
+这样的问题往往发生在长时间运行的脚本中，比如请求基本上不会结束的守护进程(deamons)或者单元测试中的大的套件(sets)中。其中，后者的例子就是在给巨大的eZ组件库的模板组件执行单元测试就可能会出现问题，有时测试可能需要耗用2GB的内存，而测试服务器很可能没有这么大的内存。
+
+总而言之，引用计数内存机制无法处理循环的引用内存泄漏，需要考虑使用引用计数系统中的同步周期回收中的同步算法来处理这个内存泄漏问题。
+
+
+
+
+\subsection{Reference Counting}
+
+首先，我们先要建立一些基本规则，如果一个引用计数增加，它将继续被使用，当然就不再在垃圾中。如果引用计数减少到零，所在变量容器将被清除(free)。就是说，仅仅在引用计数减少到非零值时，才会产生垃圾周期(garbage cycle)。
+
+其次，在一个垃圾周期中，通过检查引用计数是否减1，并且检查哪些变量容器的引用次数是零，来发现哪部分是垃圾。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.5]{gc-algorithm.png}
+\caption{内存回收算法}
+\end{figure}
+
+
+在步骤 A中，为避免不得不检查所有引用计数可能减少的垃圾周期，这个算法把所有可能根(possible roots 都是zval变量容器)都放在根缓冲区(root buffer)中(用紫色来标记，称为疑似垃圾)，这样可以同时确保每个可能的垃圾根(possible garbage root)在缓冲区中只出现一次。
+
+仅仅在根缓冲区满了时，才对缓冲区内部所有不同的变量容器执行垃圾回收操作。
+
+在步骤 B 中，模拟删除每个紫色变量。模拟删除时可能将不是紫色的普通变量引用数减1，如果某个普通变量引用计数变成0了，就对这个普通变量再做一次模拟删除。每个变量只能被模拟删除一次，模拟删除后标记为灰。
+
+在步骤 C 中，模拟恢复每个紫色变量。恢复是有条件的，当变量的引用计数大于0时才对其做模拟恢复。同样每个变量只能恢复一次，恢复后标记为黑，基本就是步骤 B 的逆运算。这样剩下的一堆没能恢复的就是该删除的蓝色节点了，在步骤 D 中遍历出来真的删除掉。
+
+算法中都是模拟删除、模拟恢复、物理删除，都使用简单的遍历即可（最典型的深度搜索遍历），复杂度为执行模拟操作的节点数正相关，不只是紫色的那些疑似垃圾变量。
+
+默认情况下，PHP的垃圾回收机制是打开的，而且允许在php.ini设置和修改\texttt{zend.enable\_gc}配置项。
+
+当垃圾回收机制打开时，每当根缓存区存满时，就会执行上面描述的循环查找算法。
+
+根缓存区有固定的大小，可以存储10,000个可能根，也可以通过修改PHP源码文件Zend/zend\_gc.c中的常量GC\_ROOT\_BUFFER\_MAX\_ENTRIES并重新编译PHP来修改这个10,000值。
+
+当垃圾回收机制关闭时，循环查找算法永不执行，实际上可能根就将一直存在根缓冲区中，不管在配置中垃圾回收机制是否激活。
+
+当垃圾回收机制关闭时，如果根缓冲区存满了可能根，更多的可能根显然不会被记录。那些没被记录的可能根，将不会被这个算法来分析处理。如果它们是循环引用周期的一部分，将永不能被清除进而导致内存泄漏。
+
+即使在垃圾回收机制不可用时，可能根也被记录的原因在于相对于每次找到可能根后检查垃圾回收机制是否打开而言，记录可能根的操作更快。不过垃圾回收和分析机制本身要耗不少时间。
+
+除了修改配置\texttt{zend.enable\_gc}，也能通过分别调用gc\_enable() 和 gc\_disable()函数来打开和关闭垃圾回收机制。
+
+调用gc\_enable() 和 gc\_disable()函数与修改配置项来打开或关闭垃圾回收机制的效果是一样的。即使在可能根缓冲区还没满时，也能强制执行周期回收，通过调用gc\_collect\_cycles()函数可以达到这个目的，这个函数将返回使用这个算法回收的周期数。
+
+允许打开和关闭垃圾回收机制并且允许自主的初始化的原因，是由于应用程序的某部分可能是高时效性的。在这种情况下，用户就可能不想使用垃圾回收机制。
+
+对应用程序的某部分关闭垃圾回收机制是在冒着可能内存泄漏的风险，因为一些可能根也许存不进有限的根缓冲区，因此就在调用gc\_disable()函数释放内存之前，先调用gc\_collect\_cycles()函数可能比较明智。因为这将清除已存放在根缓冲区中的所有可能根，然后在垃圾回收机制被关闭时，可留下空缓冲区以有更多空间来存储可能根。
+
+
+
+\subsection{Collecting Cycles}
+
+
+虽然回收可能根有细微的性能上影响，例如记录可能根相对于完全不记录可能根要慢些，不过后来对PHP run-time 的其他修改减少了这个性能损失。
+
+
+在进行垃圾回收时产生的性能影响中，第一个是内存占用空间的节省，另一个是垃圾回收机制执行内存清理时的执行时间增加(run-time delay)。
+
+首先，实现垃圾回收机制的整个原因是为了，一旦先决条件满足，通过清理循环引用的变量来节省内存占用。
+
+在PHP执行中，一旦根缓冲区满了或者调用gc\_collect\_cycles() 函数时，就会执行垃圾回收。例如，下面的示例显示了在PHP 5.2 和 PHP 5.3环境下的内存占用情况，其中排除了脚本启动时PHP本身占用的基本内存。
+
+
+\begin{example}
+GC内存使用情况
+\begin{lstlisting}[language=PHP]
+<?php
+class Foo
+{
+    public $var = '3.1415962654';
+}
+
+$baseMemory = memory_get_usage();
+
+for ( $i = 0; $i <= 100000; $i++ )
+{
+    $a = new Foo;
+    $a->self = $a;
+    if ( $i % 500 === 0 )
+    {
+        echo sprintf( '%8d: ', $i ), memory_get_usage() - $baseMemory, "\n";
+    }
+}
+\end{lstlisting}
+\end{example}
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[scale=0.5]{gc-benchmark.png}
+\caption{GC内存使用情况}
+\end{figure}
+
+在这个示例中，首先创建了一个对象，这个对象中的一个属性被设置为指回对象本身。在循环的下一个重复(iteration)中，当脚本中的变量被重新复制时，就会发生典型性的内存泄漏。
+
+在这个例子中，两个变量容器是泄漏的(对象容器和属性容器)，但是仅仅能找到一个可能根——就是被unset的那个变量。在10,000次重复后(也就产生总共10,000个可能根)，当根缓冲区满时，就执行垃圾回收机制，并且释放那些关联的可能根的内存。
+
+从PHP 5.3的锯齿型内存占用图中很容易就能看到，每次执行完10,000次重复后，执行垃圾回收，并释放相关的重复使用的引用变量。这里由于泄漏的数据结构非常简单，所以垃圾回收机制本身不必做太多工作。从这个图表中，可以能看到 PHP 5.3的最大内存占用大概是9 Mb，而PHP 5.2的内存占用一直增加。
+
+垃圾回收影响性能的第二个领域是它释放已泄漏的内存耗费的时间，可以修改上述的示例来查看这个耗时的多少，有更多次数的重复并且删除了循环中的内存占用计算。
+
+
+\begin{example}
+GC性能影响
+\begin{lstlisting}[language=PHP]
+<?php
+class Foo
+{
+    public $var = '3.1415962654';
+}
+
+for ( $i = 0; $i <= 1000000; $i++ )
+{
+    $a = new Foo;
+    $a->self = $a;
+}
+echo memory_get_peak_usage(), "\n";
+\end{lstlisting}
+\end{example}
+
+下面运行这个脚本两次，一次通过配置zend.enable\_gc 打开垃圾回收机制时，另一次是它关闭时。
+
+
+\begin{lstlisting}[language=bash]
+$ time php -dzend.enable_gc=0 -dmemory_limit=-1 -n example2.php
+10.7s
+$ time php -dzend.enable_gc=1 -dmemory_limit=-1 -n example2.php
+11.4s
+\end{lstlisting}
+
+后面一次执行比第一次执行的结果在时间上增加了7\%，不过执行这个脚本时内存占用的峰值降低了98\%（从931Mb 降到 10Mb），从而可以显示出垃圾回收机制在内存占用方面的好处就是在执行中出现更多的循环引用变量时，内存节省的更多的情况下，每次时间增加的百分比都是7\%。
+
+为了在PHP内部可以显示更多的关于垃圾回收机制如何运行的信息，需要先重新编译PHP使benchmark和data-collecting code可用，在执行./configure之前先把环境变量CFLAGS设置成\texttt{-DGC\_BENCH=1}。
+
+\begin{example}
+启用GC benchmarking
+\begin{lstlisting}[language=bash]
+$ export CFLAGS=-DGC_BENCH=1
+$ ./config.nice
+$ make clean
+$ make
+\end{lstlisting}
+\end{example}
+
+在打开PHP的benchmark和data-collecting code来重新执行上面的例子代码时，PHP执行结束后可以看到下面的GC统计信息：
+
+\begin{lstlisting}[language=bash]
+GC Statistics
+-------------
+Runs:               110
+Collected:          2072204
+Root buffer length: 0
+Root buffer peak:   10000
+
+      Possible            Remove from  Marked
+        Root    Buffered     buffer     grey
+      --------  --------  -----------  ------
+ZVAL   7175487   1491291    1241690   3611871
+ZOBJ  28506264   1527980     677581   1025731
+\end{lstlisting}
+
+其中，主要的信息统计在第一个块，可以看到垃圾回收机制运行了110次，而且在这110次运行中，总共有超过两百万的内存分配被释放。只要垃圾回收机制运行了至少一次，根缓冲区峰值(Root buffer peak)总是10000.
+
+通常情况下，PHP中的垃圾回收机制仅仅在循环回收算法确实运行时会有时间消耗上的增加，但是在平常的(更小的)脚本中没有性能影响。
+
+
+
+在普通的PHP脚本中有循环回收机制运行的情况下，内存的节省将允许更多的PHP脚本同时运行在服务器上，而且总共使用的内存并不会达到上限。
+
+这种好处在长时间运行脚本（例如长时间的测试套件或者daemon脚本等）中尤其明显，同时对通常比Web脚本运行时间长的PHP-GTK应用程序，新的垃圾回收机制也可以大大改变一直以来认为内存泄漏问题难以解决的看法。
+
+\section{Development Server}
+
+
+
+PHP CLI SAPI提供了一个内置的Web服务器，从命令行终端进入项目的 Web 根目录并执行下面的命令就可以启动内置的 Web 服务器来进行本地开发调试。
 
 \begin{lstlisting}[language=bash]
 $ cd ~/public_html
@@ -402,11 +1176,7 @@ Document root is /home/me/public_html/foo
 Press Ctrl-C to quit.
 \end{lstlisting}
 
-如果请求未指定执行哪个PHP文件，则默认执行目录内的index.php 或者 index.html。如果这两个文件都不存在，服务器会返回404错误。
-
-在命令行启动PHP内置的Web Server时，如果指定了一个PHP文件，则这个文件会作为一个“路由”脚本，意味着每次请求都会先执行这个脚本。如果这个脚本返回 FALSE ，那么直接返回请求的文件（例如请求静态文件不作任何处理），否则会把输出返回到浏览器。
-
-如果访问http://localhost:8000/和http://localhost:8000/myscript.html，窗口会显示：
+如果请求未指定执行哪个PHP文件，则默认执行目录内的index.php 或者 index.html。如果这两个文件都不存在，服务器会返回404错误。例如，访问http://localhost:8000/和http://localhost:8000/myscript.html的输出窗口如下显示：
 
 \begin{lstlisting}[language=bash]
 $ cd ~/public_html
@@ -457,6 +1227,8 @@ cli\_server.color&\texttt{"0"}&PHP\_INI\_ALL\\
 
 
 
+如果在启动PHP内置的Web服务器时指定了一个PHP文件，则这个文件会作为一个“路由”脚本，意味着每次请求都会先执行这个脚本。
+
 
 
 
@@ -487,6 +1259,9 @@ Press Ctrl-C to quit.
 ::1:55803 GET /abc.html - Request read
 ::1:55804 GET /favicon.ico - Request read
 \end{lstlisting}
+
+
+如果路由脚本返回 FALSE ，那么直接返回请求的文件（例如请求静态文件不作任何处理），否则会把输出返回到浏览器。
 
 \subsection{Template}
 
@@ -770,6 +1545,272 @@ class MysqlAdapter implements AdapterInterface {}
 
 大多数现代的框架都有自己的依赖注入容器，允许通过配置将依赖绑定在一起，这样就可以写出和框架层同样干净、解耦的应用层代码。
 
+
+\section{Commandline Interface}
+
+
+PHP提供的CLI SAPI（Server Application Programming Interface，服务端应用编程端口）允许使用PHP开发命令行应用。
+
+\begin{compactitem}
+\item CLI SAPI 和其它 CLI SAPI 模块相比有很多的不同之处；
+\item CLI 和 CGI 是不同的 SAPI，尽管它们之间有很多共同的行为。
+\end{compactitem}
+
+PHP的命令行（CLI）脚本接口可以帮助用户完成自动化的任务（例如测试、部署和应用管理），而且可以直接调用程序代码而无需创建 Web 图形界面。
+
+用户执行\texttt{php -a}选项就可以进入和 Ruby 的 IRB 或 python 的交互式 shell 相似的交互式shell。例如，一个简单的 “Hello, \$name” CLI 程序：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($argc != 2) {
+    echo "Usage: php hello.php [name].\n";
+    exit(1);
+}
+$name = $argv[1];
+echo "Hello, $name\n";
+\end{lstlisting}
+
+PHP 会在脚本运行时根据参数设置两个特殊的变量，\$argc 是一个表示参数个数的整数，\$argv 是一个数组变量，包含每个参数的值， 它的第一个元素一直是 PHP 脚本的名称（例如这里就是hello.php）。
+
+\begin{lstlisting}[language=PHP]
+$ php -a
+Interactive mode enabled
+
+> php hello.php
+Usage: php hello.php [name]
+> php hello.php world
+Hello, world
+\end{lstlisting}
+
+命令运行失败时，可以通过 exit() 表达式返回一个非 0 整数来通知 shell。
+
+以下为 CLI SAPI 和其它 CLI SAPI 模块相比的显著区别：
+
+\begin{compactenum}
+\item 与 CGI SAPI 不同，其输出没有任何头信息。
+
+尽管 CGI SAPI 提供了取消 HTTP 头信息的方法，但在 CLI SAPI 中并不存在类似的方法以开启 HTTP 头信息的输出。
+
+CLI 默认以安静模式开始，但为了保证兼容性，\texttt{-q}和\texttt{-\/-no-header}参数为了向后兼容仍然保留，使得可以使用旧的 CGI 脚本。
+
+在运行时，PHP CLI不会把工作目录改为脚本的当前目录（可以使用\texttt{-C}和\texttt{-\/-no-chdir}参数来兼容 CGI 模式）。
+
+出错时输出纯文本的错误信息（非 HTML 格式）。
+
+\item CLI SAPI 强制覆盖了 php.ini 中的某些设置，这些设置在命令行环境下是没有意义的。
+
+CLI SAPI覆盖的php.ini设置选项包括html\_errors，implicit\_flush，max\_execution\_time和register\_argc\_argv。
+
+\item CLI SAPI 不会将当前目录改为已运行的脚本所在的目录。
+
+可以在命令行运行时给该 CGI SAPI 加上\texttt{-C}参数，使其支持 CLI SAPI 的功能。
+\end{compactenum}
+
+
+
+\begin{longtable}{|m{60pt}|m{100pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+设置选项&CLI SAPI 默认值&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{CLI SAPI 强制覆盖的设置选项}\\
+\hline
+设置选项&CLI SAPI 默认值&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+html\_errors&FALSE&无意义的 HTML 标记符使出错信息很凌乱，所以在命令行下阅读报错信息十分困难，因此将该选项的默认值改为 FALSE。\\
+\hline
+implicit\_flush&TRUE&命令行模式所有来自 print 和 echo 的输出将被立即写到输出端，而不作任何地缓冲操作。如果希望延缓或控制标准输出，仍然可以使用 output buffering 设置项。\\
+\hline
+max\_execution\_time&0（无限值）&命令行环境下使用 PHP时取消了最大运行时间的限制，命令行应用程序可以在后台持久运行。\\
+\hline
+register\_argc\_argv&TRUE&设置为 TRUE就总是可以在 CLI SAPI 中访问到 argc（传送给应用程序参数的个数）和 argv（包含有实际参数的数组）。\\
+\hline
+\end{longtable}
+
+上述这些设置无法在php.ini或任何指定的其它文件中被初始化为其它值，这些默认值被限制在所有其它的设置文件被解析后改变，不过这些设置的值可以在程序运行的过程中被改变（尽管对于该运行过程来说，这些设置项是没有意义的）。
+
+
+
+CLI/CGI 二进制执行文件的文件名、位置和是否存在会根据 PHP 在系统上的安装而不同，在命令行下运行\texttt{php -v}就可以输出该 php 是 CGI 还是 CLI的相关信息。
+
+在默认情况下，当运行 make 时，CGI 和 CLI 都会被编译并且分别放置在 PHP 源文件目录的 sapi/cgi/php 和 sapi/cli/php 下，而且这两个文件都被命名为php。
+
+在 make install 的过程中会发生的行为取决于配置行。
+
+\begin{compactitem}
+\item 如果在配置的时候选择了一个 SAPI 模块（例如apxs），或者使用了\texttt{-\/-disable-cgi} 参数，则在 make install 的过程中，CLI 将被拷贝到 \{PREFIX\}/bin/php，除非 CGI 已经被放置在了那个位置。
+\item 如果希望撤销 CGI 执行文件的安装，需要在 make install 之后运行 make install-cli，或者在配置行中加上\texttt{-\/-disable-cgi}参数。
+\end{compactitem}
+
+\texttt{-\/-enable-cli}和\texttt{-\/-enable-cgi}同时默认有效，因此不需要再配置行中加上\texttt{-\/-enable-cli}来使得 CLI 在 make install 过程中被拷贝到\{PREFIX\}/bin/php。
+
+CLI SAPI提供了命令行环境下专用的常量，例如STDIN、STDOUT和STDERR，这样用户就无需自己建立指向诸如 stderr 的流，只需简单的使用这些常量来代替流指向即可，同时无需用户自己来关闭这些流，PHP 会自动完成这些操作。
+
+\begin{lstlisting}[language=bash]
+$ php -r 'fwrite(STDERR, "stderr\n");'
+\end{lstlisting}
+
+\begin{compactitem}
+\item STDIN是一个已打开的指向 stdin 的流。可以用如下方法来调用：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$stdin = fopen('php://stdin', 'r');
+\end{lstlisting}
+
+\item STDOUT是一个已打开的指向 stdout 的流。可以用如下方式来调用：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$stdout = fopen('php://stdout', 'w');
+\end{lstlisting}
+
+\item STDERR是一个已打开的指向 stderr 的流。可以用如下方式来调用：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$stderr = fopen('php://stderr', 'w');
+\end{lstlisting}
+
+\end{compactitem}
+
+如果需要从 stdin 读取一行内容，可以使用如下方式：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$line = trim(fgets(STDIN)); // 从 STDIN 读取一行
+fscanf(STDIN, "%d\n", $number); // 从 STDIN 读取数字
+\end{lstlisting}
+
+
+\subsection{\$argv}
+
+除了STDIN、STDOUT和STDERR之外，PHP CLI没有限制传送给脚本程序的参数的个数（shell程序对命令行的字符数有限制，但通常都不会超过该限制）。
+
+命令行中传递给脚本的参数可在全局变量\$argv 中获取。该数组中下标为零的成员为脚本的名称（当 PHP 代码来自标准输入获直接用 -r 参数以命令行方式运行时，该名称为“-”）。
+
+
+\subsection{\$argv}
+
+全局变量 \$argc 存有\$argv 数组中成员变量的个数（而非传送给脚本程序的参数的个数）。
+
+
+
+向脚本传送以 - 开头的参数会导致错误，因为 PHP 会认为应该由它自身来处理这些参数。可以用参数列表分隔符\texttt{-\/-}来解决这个问题。在 PHP 解析完参数后，该符号后所有的参数将会被原样传送给脚本程序。
+
+
+\begin{compactitem}
+\item 以下命令将不会运行 PHP 代码，而只显示 PHP 命令行模式的使用说明：
+
+\begin{lstlisting}[language=bash]
+$ php -r 'var_dump($argv);' -h
+Usage: php [options] [-f] <file> [args...]
+[...]
+\end{lstlisting}
+
+\item 以下命令将会把“-h”参数传送给脚本程序，PHP 不会显示命令行模式的使用说明：
+
+\begin{lstlisting}[language=bash]
+$ php -r 'var_dump($argv);' -- -h
+array(2) {
+  [0]=>
+  string(1) "-"
+  [1]=>
+  string(2) "-h"
+}
+\end{lstlisting}
+\end{compactitem}
+
+\subsection{shibang}
+
+PHP 的命令行模式能使得 PHP 脚本能完全独立于 web 服务器单独运行。
+
+\begin{compactitem}
+\item 如果使用Unix系统，需要在 PHP 脚本的最前面加上一行特殊的代码，使得它能够被执行，这样系统就能知道用哪个程序去运行该脚本。
+\item 如果使用Windows系统，可以将 php.exe 和 .php 文件的双击属性相关联，也可以编写一个批处理文件来用 PHP 执行脚本。
+\end{compactitem}
+
+为 Unix 系统增加的第一行代码不会影响该脚本在 Windows 下的运行，因此也可以用该方法编写跨平台的脚本程序。具体来说，在PHP脚本的第一行以\texttt{\#!/usr/bin/php}开头，在其后加上以 PHP 开始和结尾标记符包含的正常的 PHP 代码，然后为该文件设置正确的运行属性（例如\texttt{-r-xr-xr-x}），就可以使得该文件能够像shell脚本或 PERL 脚本一样被直接执行。
+
+\begin{lstlisting}[language=bash]
+#!/usr/bin/php
+<?php
+var_dump($argv);
+\end{lstlisting}
+
+在向上述该脚本传送以 - 开头的参数时，脚本仍然能够正常运行。
+
+
+\begin{lstlisting}[language=bash]
+$ chmod +x test
+$ ./test -h -- foo
+array(4) {
+  [0]=>
+  string(6) "./test"
+  [1]=>
+  string(2) "-h"
+  [2]=>
+  string(2) "--"
+  [3]=>
+  string(3) "foo"
+}
+\end{lstlisting}
+
+
+下面是一个以命令行方式运行的 PHP 脚本的示例。
+
+\begin{lstlisting}[language=PHP]
+#!/usr/bin/php
+<?php
+if ($argc != 2 || in_array($argv[1], array('--help', '-help', '-h', '-?'))) {
+?>
+
+This is a command line PHP script with one option.
+
+  Usage:
+  <?php echo $argv[0]; ?> <option>
+
+  <option> can be some word you would like
+  to print out. With the --help, -help, -h,
+  or -? options, you can get this help.
+
+<?php
+} else {
+    echo $argv[1];
+}
+?>
+\end{lstlisting}
+
+这个示例程序检查了参数的个数是大于 1 个还是小于 1 个，而且如果参数是\texttt{-\/-help} ，\texttt{-help} ，\texttt{-h} 或 \texttt{-?} 时，打印出帮助信息，并同时动态输出脚本的名称，最后如果还收到了其它参数则显示其内容。
+
+在第一行中用特殊的代码来指明该文件应该由 PHP 来执行。在这里使用 CLI 的版本，因此不会有 HTTP 头信息输出。
+
+在用 PHP 编写命令行应用程序时，可以使用两个参数\$argc 和 \$argv。其中，前面一个的值是比参数个数大 1 的整数（运行的脚本本身的名称也被当作一个参数），第二个是包含有参数的数组，其第一个元素为脚本的名称，下标为数字 0（\$argv[0]）。
+
+如果希望在 Unix 下运行以上脚本，需要使其属性为可执行文件，然后简单的运行 script.php echothis 或 script.php -h。在 Windows 下，可以为此编写一个批处理文件：
+
+
+\begin{lstlisting}[language=bash]
+@C:\php\php.exe script.php %1 %2 %3 %
+\end{lstlisting}
+
+上述这个批处理文件会帮助将附加的参数传给脚本程序：\texttt{script.bat echothis}或\texttt{script.bat -h}。
 
 \chapter{Syntax}
 
@@ -2999,8 +4040,9 @@ status, headers, body = call_application（app, {...environ...}）
 
 \section{php.ini}
 
+PHP可以基于内置的配置选项进行配置，也可以在运行时动态指定。
 
-配置文件（php.ini）在 PHP 启动时被读取，在 php.ini 中可以使用环境变量。
+PHP的配置文件（php.ini）在 PHP 启动时被读取，在 php.ini 中可以使用环境变量。
 
 \begin{compactitem}
 \item 对于服务器模块版本的 PHP，仅在 Web 服务器启动时读取一次。
@@ -3195,12 +4237,209 @@ extension=php_ftp.dll
 
 攻击者无时无刻不在准备对Web 应用程序进行攻击，因此提高Web应用程序的安全性是非常有必要的。
 
-幸运的是，来自开放式 Web 应用程序安全项目 (OWASP) 的有心人已经整理了一份包含了已知安全问题和防御方式的全面的清单，这份清单对于具有安全意识的开发者来说是必读的。
+
+\section{Remote files}
+
+只要在 php.ini 文件中激活了 allow\_url\_fopen 选项，就可以在大多数需要用文件名作为参数的函数中使用 HTTP 和 FTP 的 URL 来代替文件名，同时也可以在 include、include\_once、require 及 require\_once 语句中使用 URL。
+
+例如，可以用以下示例的方式来打开远程 web 服务器上的文件，解析需要的输出数据，然后将这些数据用在数据库的检索中，或者简单地以和自己网站其它页面相同的风格输出其内容。
 
 
+\begin{example}
+获取远程文件的标题
+\begin{lstlisting}[language=PHP]
+<?php
+$file = fopen ("http://www.example.com/", "r");
+if (!$file) {
+    echo "<p>Unable to open remote file.\n";
+    exit;
+}
+while (!feof ($file)) {
+    $line = fgets ($file, 1024);
+    /* This only works if the title and its tags are on one line */
+    if (eregi ("<title>(.*)</title>", $line, $out)) {
+        $title = $out[1];
+        break;
+    }
+}
+fclose($file);
+\end{lstlisting}
+\end{example}
+
+如果有合法的访问权限，以一个用户的身份和某 FTP 服务器建立了链接，还可以向该 FTP 服务器端的文件进行写操作，不过仅可以使用该方法来创建新的文件，如果尝试覆盖已经存在的文件，fopen() 函数的调用将会失败。
+
+要以“anonymous”以外的用户名连接服务器，需要指明用户名以及密码（例如\url{ftp://user:password@ftp.example.com/path/to/file}），也可以在通过需要 Basic 认证的 HTTP 协议访问远程文件时使用相同的语法。
+
+\begin{example}
+上传数据到远程服务器
+\begin{lstlisting}[language=PHP]
+<?php
+$file = fopen ("ftp://ftp.example.com/incoming/outputfile", "w");
+if (!$file) {
+    echo "<p>Unable to open remote file for writing.\n";
+    exit;
+}
+/* Write the data here. */
+fwrite ($file, $_SERVER['HTTP_USER_AGENT'] . "\n");
+fclose ($file);
+\end{lstlisting}
+\end{example}
+
+PHP对远程文件的操作可以用来存储远程日志文件等，但是 fopen() 方式打开的 URL 中，仅能对新文件进行写操作。如果远程文件已经存在则 fopen() 函数的操作将会失败。
+
+实际上，如果需要实现类似于分布式日志系统，需要使用syslog() 函数等。
+
+\section{Authentication}
+
+PHP 的 HTTP 认证机制仅在 PHP 以 Apache 模块方式运行时才有效，因此该功能不适用于 CGI 版本。
+
+在 Apache 模块的 PHP 脚本中，可以用 header() 函数来向客户端浏览器发送“Authentication Required”信息，使其弹出一个用户名/密码输入窗口。
+
+当用户输入用户名和密码后，包含有 URL 的 PHP 脚本将会加上预定义变量 PHP\_AUTH\_USER，PHP\_AUTH\_PW 和 AUTH\_TYPE 被再次调用，这三个变量分别被设定为用户名，密码和认证类型。预定义变量保存在 \$\_SERVER数组中，支持“Basic”和“Digest”认证方法。
+
+以下是在页面上强制客户端认证的脚本范例：
+
+\begin{example}
+Basic HTTP认证
+\begin{lstlisting}[language=PHP]
+<?php
+if(!isset($_SERVER['PHP_AUTH_USER'])){
+  header('WWW-Authenticate: Basic realm="My Realm"');
+  header('HTTP/1.0 401 Unauthorized');
+  echo 'Text to send if user hits Cancel button';
+  exit;
+}else{
+  echo '<p>Hello {$_SERVER['PHP_AUTH_USER']}.</p>';
+  echo '<p>You entered {$_SERVER['PHP_AUTH_PW']} as your password';
+}
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+Digest HTTP认证
+\begin{lstlisting}[language=PHP]
+<?php
+$realm = 'Restricted area';
+
+//user => password
+$users = array('admin' => 'mypass', 'guest' => 'guest');
 
 
+if (empty($_SERVER['PHP_AUTH_DIGEST'])) {
+    header('HTTP/1.1 401 Unauthorized');
+    header('WWW-Authenticate: Digest realm="'.$realm.
+           '" qop="auth" nonce="'.uniqid().'" opaque="'.md5($realm).'"');
 
+    die('Text to send if user hits Cancel button');
+}
+
+
+// analyze the PHP_AUTH_DIGEST variable
+if (!($data = http_digest_parse($_SERVER['PHP_AUTH_DIGEST'])) ||
+    !isset($users[$data['username']]))
+    die('Wrong Credentials!');
+
+
+// generate the valid response
+$A1 = md5($data['username'] . ':' . $realm . ':' . $users[$data['username']]);
+$A2 = md5($_SERVER['REQUEST_METHOD'].':'.$data['uri']);
+$valid_response = md5($A1.':'.$data['nonce'].':'.$data['nc'].':'.$data['cnonce'].':'.$data['qop'].':'.$A2);
+
+if ($data['response'] != $valid_response)
+    die('Wrong Credentials!');
+
+// ok, valid username & password
+echo 'Your are logged in as: ' . $data['username'];
+
+
+// function to parse the http auth header
+function http_digest_parse($txt)
+{
+    // protect against missing data
+    $needed_parts = array('nonce'=>1, 'nc'=>1, 'cnonce'=>1, 'qop'=>1, 'username'=>1, 'uri'=>1, 'response'=>1);
+    $data = array();
+
+    preg_match_all('@(\w+)=([\'"]?)([a-zA-Z0-9=./\_-]+)\2@', $txt, $matches, PREG_SET_ORDER);
+
+    foreach ($matches as $m) {
+        $data[$m[1]] = $m[3];
+        unset($needed_parts[$m[1]]);
+    }
+
+    return $needed_parts ? false : $data;
+}
+\end{lstlisting}
+\end{example}
+
+在编写 HTTP 标头代码时要格外小心。为了对所有的客户端保证兼容性，关键字“Basic”的第一个字母必须大写为“B”，分界字符串必须用双引号（不是单引号）引用，并且在标头行 \texttt{HTTP/1.0 401}中，在 401 前必须有且仅有一个空格。
+
+在实际运用中，可能需要对用户名和密码的合法性进行检查。或许进行数据库的查询，或许从 dbm 文件中检索。
+
+有些 Internet Explorer 浏览器对标头的顺序要求严格，可以在发送\texttt{HTTP/1.0 401}之前首先发送 WWW-Authenticate 标头来可以解决该问题。
+
+为了防止恶意用户通过编写脚本来从用传统外部机制认证的页面上获取密码，当外部认证对特定页面有效且安全模式被开启时，PHP\_AUTH 变量将不会被设置，不过REMOTE\_USER 可以被用来辨认外部认证的用户，因此可以用\texttt{\$\_SERVER['REMOTE\_USER']}变量来获取用户名。
+
+PHP内部通过是否有 AuthType 指令来判断外部认证机制是否有效，不过仍然不能防止有人通过未认证的 URL 来从同一服务器上认证的 URL 上偷取密码。
+
+Netscape Navigator 和 Internet Explorer 浏览器都会在收到 401 的服务端返回信息时清空所有的本地浏览器整个域的 Windows 认证缓存，从而可以有效地注销一个用户，并强制用户重新输入用户名和密码，因此可以使用这种方法来使登录状态“过期”，或者作为“注销”按钮的响应行为。
+
+
+\begin{example}
+强制重新输入用户名和密码的 HTTP 认证
+\begin{lstlisting}[language=PHP]
+<?php
+function authenticate() {
+    header('WWW-Authenticate: Basic realm="Test Authentication System"');
+    header('HTTP/1.0 401 Unauthorized');
+    echo "You must enter a valid login ID and password to access this resource\n";
+    exit;
+}
+
+if (!isset($_SERVER['PHP_AUTH_USER']) ||
+    ($_POST['SeenBefore'] == 1 && $_POST['OldAuth'] == $_SERVER['PHP_AUTH_USER'])
+) {
+    authenticate();
+} else {
+    echo "<p>Welcome: {$_SERVER['PHP_AUTH_USER']}<br />";
+    echo "Old: {$_REQUEST['OldAuth']}";
+    echo "<form action='{$_SERVER['PHP_SELF']}' METHOD='post'>\n";
+    echo "<input type='hidden' name='SeenBefore' value='1' />\n";
+    echo "<input type='hidden' name='OldAuth' value='{$_SERVER['PHP_AUTH_USER']}' />\n";
+    echo "<input type='submit' value='Re Authenticate' />\n";
+    echo "</form></p>\n";
+}
+\end{lstlisting}
+\end{example}
+
+该行为对于 HTTP 的 Basic 认证标准来说并不是必须的，因此不能依靠这种方法。例如，对 Lynx 浏览器的测试表明 Lynx 在收到 401 的服务端返回信息时不会清空认证文件，因此只要对认证文件的检查要求没有变化，只要用户点击“后退”按钮，再点击“前进”按钮，其原有资源仍然能够被访问。不过，用户可以通过按“\_”键来清空他们的认证信息。
+
+HTTP 认证无法工作在 IIS 服务器的 CGI 模式下，需要编辑 IIS 的设置“目录安全”，点击“编辑”并且只选择“匿名访问”，其它所有的复选框都应该留空。
+
+在 IIS 的 ISAPI 模式下使用 PHP 4 的时候，无法使用 PHP\_AUTH\_* 变量，只能使用 HTTP\_AUTHORIZATION。
+
+\begin{lstlisting}[language=PHP]
+<?php
+list($user, $pw) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));。
+\end{lstlisting}
+
+
+如果要 HTTP 认证能够在 IIS 下工作，PHP 配置选项 cgi.rfc2616\_headers 必须设置成 0（默认值）。
+
+如果安全模式被激活，脚本的 UID 会被加到 WWW-Authenticate 标头的 realm 部分。
+
+\begin{lstlisting}[language=PHP]
+Cache-Control:no-store, no-cache, must-revalidate
+Connection:keep-alive
+Content-Security-Policy:script-src 'self' 'nonce-pagejs' 'nonce-global' 'unsafe-inline' 'unsafe-eval'
+Content-Type:text/html; charset=UTF-8
+Date:Fri, 09 Dec 2016 09:26:43 GMT
+Expires:Thu, 19 Nov 1981 08:52:00 GMT
+Pragma:no-cache
+Server:nginx/1.11.1
+Strict-Transport-Security:max-age=31536000; includeSubdomains; preload
+Transfer-Encoding:chunked
+WWW-Authenticate:Basic realm='%E8%AF%B7%E8%BE%93%E5%85%A5%E8%B4%A6%E6%88%B7%E5%AF%86%E7%A0%81'
+\end{lstlisting}
 
 \section{Password Hash}
 
@@ -3324,6 +4563,348 @@ log_errors = On
 
 
 
+\section{Upload Handling}
+
+PHP支持使用POST和PUT方法来上传文本和二进制文件，并且提供了认证和文件操作函数来完全控制允许哪些用户上传以及文件上传后怎样处理。
+
+PHP 能够接受任何来自符合 RFC-1867 标准的HTTP客户端（包括浏览器）上传的文件。
+
+php.ini 的 file\_uploads，upload\_max\_filesize，upload\_tmp\_dirpost\_max\_size 以及 max\_input\_time 设置选项。
+
+\begin{example}
+文件上传表单
+\begin{lstlisting}[language=HTML]
+<!-- The data encoding type, enctype, MUST be specified as below -->
+<form enctype="multipart/form-data" action="__URL__" method="POST">
+    <!-- MAX_FILE_SIZE must precede the file input field -->
+    <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
+    <!-- Name of input element determines name in $_FILES array -->
+    Send this file: <input name="userfile" type="file" />
+    <input type="submit" value="Send File" />
+</form>
+\end{lstlisting}
+\end{example}
+
+
+
+\subsection{memory\_limit}
+
+如果内存限制设置被激活，可能需要将 memory\_limit 设置的更大，需要确认 memory\_limit 的设置的足够大。
+
+
+
+\subsection{post\_max\_size}
+
+如果 post\_max\_size 设置的值太小，则较大的文件会无法被上传，因此需要保证 post\_max\_size的值足够大。
+
+
+
+
+
+文件上传表单的属性必须是\texttt{enctype="multipart/form-data"}，否则文件无法上传。
+
+PHP的\$\_FILES全局变量包含了所有上传的文件信息，以上范例产生的\$\_FILES 数组的内容如下所示：
+
+\begin{compactitem}
+\item \texttt{\$\_FILES['userfile']['name']} 客户端机器文件的原名称。
+
+\item \texttt{\$\_FILES['userfile']['type']} 文件的 MIME 类型（如果浏览器提供该信息，例如“image/gif”），PHP默认不检查MIME类型。
+
+\item \texttt{\$\_FILES['userfile']['size']} 已上传文件的大小（单位为字节）。
+
+\item \texttt{\$\_FILES['userfile']['tmp\_name']} 文件被上传后在服务端储存的临时文件名。
+
+\item \texttt{\$\_FILES['userfile']['error']} 和该文件上传相关的错误代码。
+
+\begin{compactenum}
+\item \texttt{UPLOAD\_ERR\_OK} 值为 0表示没有错误发生，文件上传成功。
+\item \texttt{UPLOAD\_ERR\_INI\_SIZE} 值为1表示上传的文件超过了 php.ini 中 upload\_max\_filesize 选项限制的值。
+\item \texttt{UPLOAD\_ERR\_FORM\_SIZE}值为 2表示上传文件的大小超过了 HTML 表单中 MAX\_FILE\_SIZE 选项指定的值。
+\item \texttt{UPLOAD\_ERR\_PARTIAL}值为 3表示文件只有部分被上传。
+\item \texttt{UPLOAD\_ERR\_NO\_FILE}值为 4表示没有文件被上传。
+\item \texttt{UPLOAD\_ERR\_NO\_TMP\_DIR}值为 6表示找不到临时文件夹。
+\item \texttt{UPLOAD\_ERR\_CANT\_WRITE}值为 7表示文件写入失败。
+\end{compactenum}
+
+\end{compactitem}
+
+
+
+\subsection{upload\_tmp\_dir}
+
+
+上传的文件默认会被储存到服务端的默认临时目录中，除非 php.ini 中的 upload\_tmp\_dir 设置为其它的路径。
+
+服务端的默认临时目录可以通过更改 PHP 运行环境的环境变量 TMPDIR 来重新设置，但是在 PHP 脚本内部通过运行 putenv() 函数来设置是不起作用的。该环境变量也可以用来确认其它的操作是否也是在上传的文件上进行的。
+
+
+\begin{example}
+完成文件上传
+\begin{lstlisting}[language=PHP]
+<?php
+$uploaddir = '/var/www/uploads/';
+$uploadfile = $uploaddir . basename($_FILES['userfile']['name']);
+
+echo '<pre>';
+if (move_uploaded_file($_FILES['userfile']['tmp_name'], $uploadfile)) {
+    echo "File is valid, and was successfully uploaded.\n";
+} else {
+    echo "Possible file upload attack!\n";
+}
+
+echo 'Here is some more debugging info:';
+print_r($_FILES);
+
+print "</pre>";
+\end{lstlisting}
+\end{example}
+
+文件路径的表示方法有很多种，PHP无法确保使用生僻外语的文件名（尤其是包含空格的）能够被正确的处理。
+
+
+为了决定接下来要对该文件进行哪些操作，接受上传文件的 PHP 脚本应该实现任何逻辑上必要的检查，否则不对正在操作的文件进行验证就意味着用户能够访问其它目录下的敏感信息。
+
+
+
+\begin{compactitem}
+\item \texttt{\$\_FILES['userfile']['size']}变量可以排除过大或过小的文件；
+\item \texttt{\$\_FILES['userfile']['type']}变量可以排除文件类型和某种标准不相符合的文件；
+\item \texttt{\$\_FILES['userfile']['error']}变量可以根据不同的错误代码来计划下一步如何处理。
+\end{compactitem}
+
+不过只能把这些当作一系列检查中的第一步，因为有些值完全由客户端控制而在 PHP 端并不检查，PHP脚本要么将上传的文件从临时目录中删除，要么将其移动到其它的地方（例如上传到云存储）。
+
+如果上传的文件没有被移动到其它地方也没有被改名，则该文件将在表单请求结束时被删除。
+
+
+
+如果表单中没有选择上传的文件，则\texttt{\$\_FILES['userfile']['size']}的值将为 0，\texttt{\$\_FILES['userfile']['tmp\_name']}将为空。
+
+\subsection{max\_input\_time}
+
+
+
+max\_input\_time 以秒为单位设定了脚本接收输入（例如文件上传）的最大时间。对于较大或多个文件或者用户的网速较慢时，可能会超过默认的 60 秒。
+
+
+\subsection{upload\_max\_filesize}
+
+
+MAX\_FILE\_SIZE 隐藏字段（单位为字节）必须放在文件输入字段之前，其值为接收文件的最大尺寸。这是对浏览器的一个建议，而且PHP 也会检查此项，不过用户可以在HTTP客户端端简单绕过此设置，因此不要指望用此特性来阻挡大文件。
+
+
+虽然PHP 设置中的上传文件最大值不会失效，但是最好还是在表单中加上MAX\_FILE\_SIZE项目，这样可以避免用户在等待上传大文件上传之后才发现文件过大上传失败的错误。
+
+MAX\_FILE\_SIZE值不能大于 ini 设置中 upload\_max\_filesize 选项设置的值（默认为 2M 字节）。
+
+\subsection{max\_execution\_time}
+
+
+max\_execution\_time 设置的值太小时，如果脚本运行的时间超过该设置就会自动退出，因此需要保证 max\_execution\_time设置的足够大。
+
+
+
+max\_execution\_time 仅仅只影响脚本本身运行的时间，任何其它花费在脚本运行之外的时间（例如system()函数对系统的调用、sleep() 函数的使用、数据库查询、文件上传等），在计算脚本运行的最大时间时都不包括在内。
+
+
+
+
+httpd可能会丢弃从客户端获得的content-type mime 头信息中第一个空格后所有的内容，因此httpd可能不支持文件上传特性。
+
+
+
+\section{Batch Uploading}
+
+PHP 的 HTML 数组特性支持文件类型，因此用户可以批量上传文件，例如：
+
+\begin{example}
+批量文件上传
+\begin{lstlisting}[language=HTML]
+<form enctype="multipart/form-data" action="__URL__" method="post">
+<p>Pictures:
+<input type="file" name="pictures[]" />
+<input type="file" name="pictures[]" />
+<input type="file" name="pictures[]" />
+<input type="submit" value="Send" />
+</p>
+</form>
+\end{lstlisting}
+\end{example}
+
+服务器端处理批量文件上传的逻辑如下：
+
+\begin{lstlisting}[language=PHP]
+<?php
+foreach ($_FILES["pictures"]["error"] as $key => $error) {
+    if ($error == UPLOAD_ERR_OK) {
+        $tmp_name = $_FILES["pictures"]["tmp_name"][$key];
+        $name = $_FILES["pictures"]["name"][$key];
+        move_uploaded_file($tmp_name, "data/$name");
+    }
+}
+\end{lstlisting}
+
+PHP 支持同时上传多个文件并将它们的信息自动以数组的形式组织，因此可以对 input 域使用不同的 name 来上传多个文件。
+
+为了实现批量上传，需要在 HTML 表单中对文件上传域使用和多选框与复选框相同的数组式提交语法，注意不应该将普通的输入字段和文件上传的字段混用同一个表单变量（例如都用 foo[]）。
+
+\begin{example}
+多文件批量上传
+\begin{lstlisting}[language=HTML]
+<form action="file-upload.php" method="post" enctype="multipart/form-data">
+  Send these files:<br />
+  <input name="userfile[]" type="file" /><br />
+  <input name="userfile[]" type="file" /><br />
+  <input type="submit" value="Send files" />
+</form>
+\end{lstlisting}
+\end{example}
+
+在以上表单被提交后，数组 \texttt{\$\_FILES['userfile']}，\texttt{\$\_FILES['userfile']['name']} 和 \texttt{\$\_FILES['userfile']['size']} 将被初始化，所有这些提交的信息都将被储存到以数字为索引的数组中。
+
+例如，假设名为 /home/me/review.html 和 /home/me/xwp.out 的文件被提交，那么\texttt{\$\_FILES['userfile']['name'][0]}的值将是 review.html，\texttt{\$\_FILES['userfile']['name'][1]}的值将是 xwp.out。类似的，\texttt{\$\_FILES['userfile']['size'][0]}将包含文件 review.html 的大小，依此类推。
+
+此外，也同时设置了 \texttt{\$\_FILES['userfile']['name'][0]}，\texttt{\$\_FILES['userfile']['tmp\_name'][0]}，\texttt{\$\_FILES['userfile']['size'][0]}以及 \texttt{\$\_FILES['userfile']['type'][0]}。
+
+\section{Request Method}
+
+
+\subsection{GET}
+
+
+\subsection{POST}
+
+
+
+
+\subsection{PUT}
+
+PHP4必须使用标准的输入流来读取一个 HTTP PUT 的内容。
+
+\begin{example}
+PHP4使用PUT保存文件
+\begin{lstlisting}[language=PHP]
+<?php
+/* PUT data comes in on the stdin stream */
+$putdata = fopen("php://stdin", "r");
+
+/* Open a file for writing */
+$fp = fopen("myputfile.ext", "w");
+
+/* Read the data 1 KB at a time
+   and write to the file */
+while ($data = fread($putdata, 1024))
+  fwrite($fp, $data);
+
+/* Close the streams */
+fclose($fp);
+fclose($putdata);
+\end{lstlisting}
+\end{example}
+
+PUT 请求比文件上传要简单的多，一般的形式为：
+
+\begin{lstlisting}[language=bash]
+PUT /path/filename.text HTTP/1.1
+\end{lstlisting}
+
+远程客户端会将其中的 /path/filename.text 存储到 web 目录树，让 Apache 或者 PHP 自动允许所有人覆盖 web 目录树下的任何文件显然是很不明智的，因此要处理类似PUT的请求时必须先告诉 web 服务器需要用特定的 PHP 脚本来处理该请求。
+
+在 Apache 下，可以用 Script 选项来设置，通常在 <Directory> 区域或者 <Virtualhost> 区域进行设置。
+
+\begin{lstlisting}[language=bash]
+Script PUT /put.php
+\end{lstlisting}
+
+上述设置指示 Apache 将所有对 URI 的 PUT 请求全部发送到 put.php 脚本，这些 URI 必须和 PUT 命令中的内容相匹配。
+
+在 put.php 文件中，可以作如下操作：
+
+\begin{lstlisting}[language=PHP]
+<?php
+copy($PHP_UPLOADED_FILE_NAME, $DOCUMENT_ROOT . $REQUEST_URI);
+\end{lstlisting}
+
+把文件拷贝到远程客户端请求的位置时，可能希望在文件拷贝之前进行一些检查或者对用户认证之类的操作。
+
+这里唯一的问题是，当 PHP 接受到 PUT 方法的请求时，它将会把上传的文件储存到和其它用 POST 方法处理过的文件相同的临时目录。在请求结束时，临时文件将被删除，因此用来处理 PUT 的 PHP 脚本必须将该文件拷贝到其它的地方。
+
+PUT上传的临时文件的文件名被储存在变量 \$PHP\_PUT\_FILENAME 中，也可以通过 \$REQUEST\_URI 变量获得建议的目标文件名（在非 Apache web 服务器上可能会有较大的变化）。该目标文件名是由远程客户端指定的，也可以不遵循客户端提供的信息，把所有上传的文件存储到一个特殊的上传目录下。
+
+\section{Connection handling}
+
+在 PHP 内部，系统维护着连接状态，有三种可能的状态：
+
+\begin{compactitem}
+\item 0 - NORMAL（正常）
+\item 1 - ABORTED（异常退出）
+\item 2 - TIMEOUT（超时）
+\end{compactitem}
+
+当 PHP 脚本正常地运行 NORMAL 状态时，连接为有效。当远程客户端中断连接时，ABORTED 状态的标记将会被打开。远程客户端连接的中断通常是由用户点击 STOP 按钮导致的。当连接时间超过 PHP 的时限时，TIMEOUT 状态的标记将被打开。
+
+用户可以决定脚本是否需要在客户端中断连接时退出，不过有时候让脚本完整地运行会带来很多方便，即使没有远程浏览器接受脚本的输出。
+
+默认的情况是当远程客户端连接中断时脚本将会退出，该处理过程可由 php.ini 的 ignore\_user\_abort 或由 httpd.conf 设置中对应的“php\_value ignore\_user\_abort”以及 ignore\_user\_abort() 函数来控制。
+
+如果没有告诉 PHP 忽略用户的中断，脚本将会被中断，除非通过 register\_shutdown\_function() 设置了关闭触发函数。
+
+通过该关闭触发函数，当远程用户点击 STOP 按钮后，脚本再次尝试输出数据时，PHP 将会检测到连接已被中断，并调用关闭触发函数。
+
+脚本也有可能被内置的脚本计时器中断，默认的超时限制为 30 秒。同样地，这个值可以通过设置 php.ini 的 max\_execution\_time 或 httpd.conf 设置中对应的“php\_value max\_execution\_time”参数或者 set\_time\_limit() 函数来更改。当计数器超时的时候，脚本将会类似于以上连接中断的情况退出，先前被注册过的关闭触发函数也将在这时被执行。
+
+在关闭触发函数中，可以通过调用 connection\_status() 函数来检查超时是否导致关闭触发函数被调用。如果超时导致了关闭触发函数的调用，该函数将返回 2。
+
+需要注意的一点是，ABORTED 和 TIMEOUT 状态可以同时有效，这样的设置在告诉 PHP 忽略用户的退出操作时是可能的，从而让PHP仍然注意用户已经中断了连接但脚本仍然在运行的情况。如果到了运行的时间限制，脚本将被退出，设置过的关闭触发函数也将被执行。在这时会发现函数 connection\_status() 返回 3。
+
+\section{Persistent connections}
+
+持久的数据库连接是指在脚本结束运行时不关闭的连接。当收到一个持久连接的请求时。PHP 将检查是否已经存在一个（前面已经开启的）相同的持久连接。
+
+\begin{compactitem}
+\item 如果存在，将直接使用这个连接；
+\item 如果不存在，则建立一个新的连接。
+\end{compactitem}
+
+
+
+这里，所谓“相同”的连接是指用相同的用户名和密码到相同主机的连接。
+
+没有完全理解Web服务器的工作原理和分布式负载的用户可能会错误地理解持久连接的作用，持久连接没有在相同的连接上提供建立“用户会话”的能力，也不提供有效建立事务的能力。
+
+实际上，从严格意义上来讲，持久连接不会提供任何非持久连接无法提供的特殊功能，原因和Web服务器工作的方式有关。
+
+Web 服务器可以用三种方法来利用 PHP 生成 web 页面。
+
+第一种方法是将 PHP 用作一个单独运行的语言解释器(CGI Wapper)。以这种方法运行，PHP 会为向 web 服务器提出的每个 PHP 页面请求生成并结束一个 PHP解释器线程。由于该线程会随每个请求的结束而结束，因此任何在这个线程中利用的任何资源（例如指向SQL 数据库服务器的连接）都会随线程的结束而关闭。在这种情况下，使用持久连接和非持久连接没有任何区别——因为PHP脚本本身的执行不是持久的。
+
+第二种方法是把 PHP 用作多进程 web 服务器的一个模块（只适用于 Apache）。对于一个多进程的服务器，其典型特征是有一个父进程和一组子进程协调运行，其中实际生成 web 页面的是子进程。每当客户端向父进程提出请求时，该请求会被传递给还没有被其它的客户端请求占用的子进程。这也就是说当相同的客户端第二次向服务端提出请求时，它将有可能被一个不同的子进程来处理。在开启了一个持久连接后，所有请求 SQL 服务的后继页面都能够重用这个已经建立的 SQL Server 连接。
+
+
+第三种方法是将 PHP 用作多线程 web 服务器的一个插件，PHP对ISAPI、WSAPI 和 NSAPI的支持使得 PHP 可以被用作多线程Web 服务器的插件，持久连接的行为和前面所描述的多过程模型在本质上是相同的。
+
+持久连接所能提供的好处仅仅是效率，当Web Server创建到SQL服务器的连接耗费(Overhead)较高（如耗时较久，消耗临时内存较多）时，持久连接将更加高效。Overhead高低取决于很多因素（例如数据库的种类，数据库服务和web 服务是否在同一台服务器上以及SQL 服务器负载状况等）。当Overhead较高，每次创建数据库连接成本较高时，持久连接将显著的提高效率。
+
+持久连接使得每个子进程在其生命周期中只做一次连接操作，而非每次在处理一个页面时都要向SQL 服务器提出连接请求。这也就是说，每个子进程将对服务器建立各自独立的持久连接。例如，如果有 20 个不同的子进程运行某脚本建立了持久的 SQL 服务器持久连接，那么实际上向该 SQL 服务器建立了 20 个不同的持久连接，每个进程占有一个。
+
+如果持久连接的子进程数目超过了设定的数据库连接数限制，系统将会产生一些问题。如果数据库的同时连接数限制为 16，而在繁忙会话的情况下，有 17 个线程试图连接，那么有一个线程将无法连接。如果这个时候，在脚本中出现了使得连接无法关闭的错误（例如无限循环），则该数据库的 16 个连接将迅速地受到影响，因此需要即时处理已放弃的以及闲置的连接。
+
+在使用持久连接时还有一些特别的问题需要注意。例如，
+
+在持久连接中使用数据表锁时，如果脚本不管什么原因无法释放该数据表锁，其随后使用相同连接的脚本将会被持久的阻塞，这种情况下需要重新启动 httpd 服务或者数据库服务。
+
+在持久连接中使用事务处理时，如果脚本在事务阻塞产生前结束，则该阻塞也会影响到使用相同连接的下一个脚本，这种情况下同样需要重新启动 httpd 服务或者数据库服务。
+
+
+不管在什么情况下，都可以通过使用 register\_shutdown\_function() 函数来注册一个简单的清理函数来打开数据表锁，或者回滚事务，实际上更好的处理方法是不在使用数据表锁或者事务处理的脚本中使用持久连接，这样就可以从根本上解决这个问题（在其它地方仍然可以使用持久连接）。
+
+持久连接与常规的非持久连接应该是可以互相替换的，即将持久连接替换为非持久连接时，脚本的行为也不应该发生改变，持久连接只应该改变脚本的效率而非其行为。
+
+
+
+
+
+
 \section{Thread Safe}
 
 Windows版的PHP从版本5.2.1开始有Thread Safe（线程安全）和None Thread Safe（NTS，非线程安全）之分，这两者不同在于何处\cite{thread_safe}？到底应该用哪种？
@@ -3350,24 +4931,162 @@ CGI模式的不足就是对于每个HTTP请求都需要重新加载和卸载整�
 
 \section{Safe Mode}
 
-php.ini中的safe\_mode设置是否打开安全模式，不过PHP默认不会运行在安全模式下。
+PHP 的安全模式是为了试图解决共享服务器（shared-server）安全问题而设立的，现在已经废弃（强制开启会报告E\_CODE\_ERROR级别的错误）。
+
+
+
+虽然在结构上试图从PHP 层上解决这个问题是不合理的，但是修改 web 服务器层和操作系统层显得非常不现实，因此ISP大量地使用安全模式。
+
+
+
+\begin{longtable}{|m{60pt}|m{40pt}|m{60pt}|m{40pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+名字&默认&可修改范围&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{保安措施和安全模式配置指令}\\
+\hline
+名字&默认&可修改范围&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+safe\_mode						&\texttt{"0"}					&\texttt{PHP\_INI\_SYSTEM}&已废弃\\
+\hline
+safe\_mode\_gid					&\texttt{"0"}					&\texttt{PHP\_INI\_SYSTEM}&已废弃\\
+\hline
+safe\_mode\_include\_dir			&\texttt{NULL}				&\texttt{PHP\_INI\_SYSTEM}&已废弃\\
+\hline
+safe\_mode\_exec\_dir				&\texttt{""}					&\texttt{PHP\_INI\_SYSTEM}&已废弃\\
+\hline	 
+safe\_mode\_allowed\_env\_vars		&\texttt{"PHP\_"}				&\texttt{PHP\_INI\_SYSTEM}&已废弃\\
+\hline	 
+safe\_mode\_protected\_env\_vars	&\texttt{"LD\_LIBRARY\_PATH"}	&\texttt{PHP\_INI\_SYSTEM}&已废弃\\
+\hline
+\end{longtable}
+
+PHP默认不会运行在安全模式下，PHP安全模式设置的限制不适用于可执行文件。
+
+
+
+
+
+
+\subsection{safe\_mode}
+
+
+
+php.ini中的safe\_mode设置是否启用安全模式。
+
+
+
+\subsection{safe\_mode\_gid}
+
+php.ini中的safe\_mode\_gid配置是否把UID比较检查放宽到GID比较检查。
+
+默认情况下，安全模式在打开文件时会进行UID比较检查，打开 safe\_mode\_gid可以放宽到 GID 比较。是否在文件访问时使用 UID（FALSE）或者 GID（TRUE）来做检查。
+
+
+
+
+\subsection{safe\_mode\_exec\_dir}
+
 
 在安全模式下，可以通过safe\_mode\_exec\_dir设置具有系统程序执行功能的目录，而且exec()、system()或popen()等函数只能调用执行该目录下的系统程序。
 
+如果 PHP 使用了安全模式，system() 和其它程序执行函数将拒绝启动不在此目录中的程序，必须使用 / 作为目录分隔符（包括 Windows 中）。
+
+\subsection{safe\_mode\_include\_dir}
+
+
 在安全模式下，safe\_mode\_include\_dir可以设置严格限制进行文件包含的目录，如果一个PHP程序使用include或require包含该目录（及子目录）中的另一个文件时，必须保证彼此具有相同的UID或GID。
 
-无论是否打开安全模式，pen\_basedir都可以设置能够进行的文件操作的目录或文件的前缀，可以使用系统分隔符（“;”或“:”）添加多个列表。
+当从此目录及其子目录（目录必须在 include\_path 中或者用完整路径来包含）包含文件时越过 UID/GID 检查，而且safe\_mode\_include\_dir指令可以接受和 include\_path 指令类似的风格用冒号（Windows 中是分号）隔开的路径，而不只是一个目录。
+
+指定的限制实际上是一个前缀，而非一个目录名。也就是说，“safe\_mode\_include\_dir = /dir/incl”将允许访问“/dir/include”和“/dir/incls”，如果它们存在的话。如果希望将访问控制在一个指定的目录，那么在结尾加上一个斜线（例如“safe\_mode\_include\_dir = /dir/incl/”。 如果本指令的值为空，具有不同 UID/GID 的文件将不能被包含。
+
+\subsection{safe\_mode\_allowed\_env\_vars}
+
+设置某些环境变量可能是潜在的安全缺口。本指令包含有一个逗号分隔的前缀列表。
+
+在安全模式下，用户只能改变那些名字具有在这里提供的前缀的环境变量。默认情况下，用户只能设置以 PHP\_ 开头的环境变量（例如 PHP\_FOO = BAR）。
+
+如果本指令为空，PHP 将使用户可以修改任何环境变量
+
+\subsection{safe\_mode\_protected\_env\_vars}
+
+safe\_mode\_protected\_env\_vars指令包含有一个逗号分隔的环境变量的列表，最终用户不能用 putenv() 来改变这些环境变量，在safe\_mode\_allowed\_env\_vars中设置了允许修改时也不能改变这些变量。
+
+如果safe\_mode 设置为 on，PHP 将通过文件函数或其目录检查当前脚本的拥有者是否和将被操作的文件的拥有者相匹配。
+
+\begin{lstlisting}[language=bash]
+-rw-rw-r--    1 rasmus   rasmus       33 Jul  1 19:20 script.php
+-rw-r--r--    1 root     root       1116 May 26 18:01 /etc/passwd
+\end{lstlisting}
+
+如果安全模式被激活，则执行\texttt{readfile('/etc/passwd');}将会导致以下错误：
+
+
+\begin{lstlisting}[language=bash]
+Warning: SAFE MODE Restriction in effect. The script whose uid is 500 is not
+allowed to access /etc/passwd owned by uid 0 in /docroot/script.php on line 2
+\end{lstlisting}
+
+在某些环境下，宽松的 GID 检查已经足够，严格的 UID 检查反而是不适合的，因此可以用 safe\_mode\_gid 选项来控制这种检查。如果设置为 On 则进行宽松的 GID 检查，设置为 Off（默认值）则进行 UID 检查。
+
+\subsection{disable\_functions}
+
+PHP安全模式允许单独屏蔽某些函数，但是disable\_functions 选项不能在 php.ini 文件外部使用，也就是说无法在 httpd.conf 文件的按不同虚拟主机或不同目录的方式来屏蔽函数。例如，如果将如下内容加入到 php.ini 文件：
+
+\begin{lstlisting}[language=bash]
+disable_functions readfile,system
+\end{lstlisting}
+
+
+如果在设置了disable\_functions选项后运行同样的 script.php，则其结果如下：
+
+
+\begin{lstlisting}[language=bash]
+Warning: readfile() has been disabled for security reasons in
+/docroot/script.php on line 2
+\end{lstlisting}
+
+\subsection{open\_basedir}
+
+除了 safe\_mode 以外，如果设置了 open\_basedir 选项，则所有的文件操作将被限制在指定的目录下。例如：
+
+
+\begin{lstlisting}[language=bash]
+<Directory /docroot>
+  php_admin_value open_basedir /docroot
+</Directory>
+\end{lstlisting}
+
+如果在设置了 open\_basedir 选项后运行同样的 script.php，则其结果如下：
+
+\begin{lstlisting}[language=bash]
+Warning: open_basedir restriction in effect. File is in wrong directory in
+/docroot/script.php on line 2
+\end{lstlisting}
+
+
+无论是否打开安全模式，open\_basedir都可以设置能够进行的文件操作的目录或文件的前缀，可以使用系统分隔符（“;”或“:”）添加多个列表。
 
 当一个脚本试图使用fopen()或gzopen()打开一个文件时，那么该文家的位置将被检查，而且这个限制是前缀，不是目录名。
 
 如果基于安全原因需要禁用某些函数/类时，可以使用disable\_functions/disable\_classes，并且接受逗号分隔的函数/类名列表作为参数，不受安全模式的影响。
-
-
-
-
-
-
-
 
 
 
