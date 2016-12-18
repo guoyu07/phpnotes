@@ -1,0 +1,413 @@
+\part{Network}
+
+
+
+\chapter{Overview}
+
+
+
+PHP核心提供的网络函数族包含一系列联网函数。
+
+\section{Requirement}
+
+checkdnsrr()、getmxrr()和dns\_get\_record()函数需要Linux系统中安装有Bind来提供支持。
+
+\section{Resource Type}
+
+PHP为网络函数族中的fsockopen()和pfsockopen()定义了一个文件指针资源类型。
+
+
+\section{Build-in Module}
+
+联网函数由PHP核心直接支持。
+
+\section{Runtime Configure}
+
+联网函数的行为受到php.ini中的define\_syslog\_variables配置项的影响。
+
+
+
+\begin{longtable}{|m{100pt}|m{30pt}|m{50pt}|m{100pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+名字&默认&可修改范围&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{Network Configuration选项}\\
+\hline
+名字&默认&可修改范围&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+define\_syslog\_variables&\texttt{"0"}&PHP\_INI\_ALL&已移除\\
+\hline
+\end{longtable}
+
+define\_syslog\_variables配置项说明是否定义各种syslog变量（例如\$LOG\_PID和\$LOG\_CRON等），关闭或移除define\_syslog\_variables配置项可以提供性能，推荐用户在运行时通过调用define\_syslog\_variables()定义这些变量。
+
+
+
+\section{Predefined Constants}
+
+PHP为网络函数族预先定义了一些常量，并且这些常量作为PHP核心的一部分总是可用的。
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于openlog()选项的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+LOG\_CONS	&if there is an error while sending data to the system logger, write directly to the system console\\
+\hline
+LOG\_NDELAY	&open the connection to the logger immediately\\
+\hline
+LOG\_ODELAY&(default) delay opening the connection until the first message is logged\\
+\hline
+LOG\_NOWAIT&\\
+\hline
+LOG\_PERROR&print log message also to standard error\\
+\hline
+LOG\_PID	&include PID with each message\\
+\hline
+\end{longtable}
+
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于openlog()设备的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+LOG\_AUTH	&security/authorization messages (use LOG\_AUTHPRIV instead in systems where that constant is defined)\\
+\hline
+LOG\_AUTHPRIV&	security/authorization messages (private)\\
+\hline
+LOG\_CRON	&clock daemon (cron and at)\\
+\hline
+LOG\_DAEMON&other system daemons\\
+\hline
+LOG\_KERN	&kernel messages\\
+\hline
+LOG\_LOCAL0 ... LOG\_LOCAL7&reserved for local use, these are not available in Windows\\
+\hline
+LOG\_LPR	&line printer subsystem\\
+\hline
+LOG\_MAIL	&mail subsystem\\
+\hline
+LOG\_NEWS	&USENET news subsystem\\
+\hline
+LOG\_SYSLOG	&messages generated internally by syslogd\\
+\hline
+LOG\_USER	&generic user-level messages\\
+\hline
+LOG\_UUCP	&UUCP subsystem\\
+\hline
+\end{longtable}
+
+
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于syslog()的优先级（按降序排列）的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+LOG\_EMERG	&system is unusable\\
+\hline
+LOG\_ALERT	&action must be taken immediately\\
+\hline
+LOG\_CRIT	&critical conditions\\
+\hline
+LOG\_ERR	&error conditions\\
+\hline
+LOG\_WARNING&warning conditions\\
+\hline
+LOG\_NOTICE	&normal, but significant, condition\\
+\hline
+LOG\_INFO	&informational message\\
+\hline
+LOG\_DEBUG	&debug-level message\\
+\hline
+\end{longtable}
+
+
+
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于dns\_get\_record()选项的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+DNS\_A	&IPv4 Address Resource\\
+\hline
+DNS\_MX&Mail Exchanger Resource\\
+\hline
+DNS\_CNAME&Alias (Canonical Name) Resource\\
+\hline
+DNS\_NS	&Authoritative Name Server Resource\\
+\hline
+DNS\_PTR&Pointer Resource\\
+\hline
+DNS\_HINFO&Host Info Resource \\
+\hline
+DNS\_SOA&Start of Authority Resource\\
+\hline
+DNS\_TXT&Text Resource\\
+\hline
+DNS\_ANY&Any Resource Record. On most systems this returns all resource records, however it should not be counted upon for critical uses. Try DNS\_ALL instead.\\
+\hline
+DNS\_AAAA&IPv6 Address Resource\\
+\hline
+DNS\_ALL&Iteratively query the name server for each available record type.\\
+\hline
+\end{longtable}
+
+
+\chapter{Functions}
+
+
+\section{checkdnsrr()}
+
+给指定的主机（域名）或者IP地址做DNS通信检查。
+
+\section{closelog()}
+
+关闭系统日志链接。
+
+\section{define\_syslog\_variables()}
+
+初始化所有syslog相关的变量。
+
+\section{dns\_check\_record()}
+
+别名checkdnsrr()。
+
+\section{dns\_get\_mx()}
+
+别名getmxrr()。
+
+\section{dns\_get\_record()}
+
+获取指定主机的DNS记录。
+
+\section{fsockopen()}
+
+打开一个网络连接或者一个UNIX套接字连接。
+
+\section{gethostbyaddr()}
+
+获取指定的IP地址对应的主机名。
+
+\section{gethostbyname()}
+
+获取与给定Internet主机名对应的IPv4地址。
+
+\section{gethostbynamel()}
+
+获取与给定Internet主机名对应的IPv4地址的列表。
+
+\section{gethostname()}
+
+获取主机名。
+
+\section{getmxrr()}
+
+获取与给定Internet主机名对应的MX记录。
+
+\section{getprotobyname()}
+
+获取与协议名称相关的协议号。
+
+\section{getprotobynumber()}
+
+获取和协议号相关的协议名。
+
+\section{getservbyname()}
+
+获取与Internet服务和协议相关联的端口号
+
+\section{getservbyport()}
+
+获取对应端口和协议的Internet服务。
+
+\section{header\_register\_callback()}
+
+注册将在PHP开始发送输出时调用的回调函数。
+
+\section{header\_remove()}
+
+删除以前使用header()设置的旧的HTTP标头。
+
+
+\section{header()}
+
+发送原生HTTP头。
+
+\section{headers\_list()}
+
+返回发送（或准备发送）的响应头的列表。
+
+\section{headers\_sent()}
+
+检查是否已经发送或在何处发送了标头。
+
+\section{http\_response\_code()}
+
+获取或设置HTTP响应代码
+
+\section{inet\_ntop()}
+
+将打包的互联网地址转换为人类可读的表示形式。
+
+\section{inet\_pton()}
+
+将人类可读的IP地址转换为其打包的in\_addr表示形式
+
+
+\section{ip2long()}
+
+将一个IPV4的字符串互联网协议转换成数字格式
+
+\section{long2ip()}
+
+将长整型地址转换为IPv4格式的Internet标准点分隔格式的字符串
+
+\section{openlog()}
+
+打开与系统日志记录器的连接
+
+\section{pfsockopen()}
+
+打开一个持久的网络连接或者Unix套接字连接。
+
+\section{setcookie()}
+
+发送cookie。
+
+\section{setrawcookie()}
+
+发送没有对cookie值进行编码的cookie
+
+
+\section{socket\_get\_status()}
+
+别名stream\_get\_meta\_data()
+
+\section{socket\_set\_blocking()}
+
+别名stream\_set\_blocking()
+
+\section{socket\_set\_timeout()}
+
+别名stream\_set\_timeout()
+
+\section{syslog()}
+
+生成一条系统日志消息。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
