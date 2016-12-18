@@ -1,0 +1,4587 @@
+\part{Class and Objects}
+
+
+
+
+
+
+
+\chapter{Introduction}
+
+
+PHP 5完全重写了对象模型以得到更佳性能和更多特性，从此PHP具备了完整的对象模型，现在PHP应用程序可以不再使用面向过程的方式进行开发，也不再需要按照代码书写的顺序基本一致的方向来从上而下执行。
+
+PHP5对待对象的方式与引用和句柄相同，即每个变量都持有对象的引用，而不是整个对象的拷贝。
+
+另外，PHP已经可以支持访问控制，抽象类和 final 类与方法，附加的魔术方法，接口，对象复制和类型约束等面向对象特性。
+
+
+
+\section{Class Definition}
+
+从结构体更进一步，类是一种封装了类对象的属性和方法的复合数据类型，因此创建一个类就相当于创造了一种新的数据类型。
+
+
+每个类的定义都以关键字 class 开头，后面跟着类名，后面跟着一对花括号，里面包含有类的属性与方法的定义。
+
+类名可以是任何非 PHP 保留字的合法标签。一个合法的类名以字母或下划线开头，后面跟着若干字母，数字或下划线。
+
+以正则表达式表示类名为：\colorbox{lightgray}{\texttt{[a-zA-Z\_\textbackslash x7f-\textbackslash xff][a-zA-Z0-9\_\textbackslash x7f-\textbackslash xff]*}}。
+
+一个类可以包含有属于自己的常量、变量（称为“属性”）以及函数（称为“方法”）。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class SimpleClass
+{
+    // property declaration
+    public $var = 'a default value';
+
+    // method declaration
+    public function displayVar() {
+        echo $this->var;
+    }
+}
+?>
+\end{lstlisting}
+
+当一个方法在类定义内部被调用时，有一个可用的伪变量 \colorbox{lightgray}{\texttt{\$this}}。
+
+\colorbox{lightgray}{\texttt{\$this}}是一个到主叫对象的引用（通常是该方法所从属的对象，但是如果是从第二个对象静态调用时也可能是另一个对象）。
+
+
+下面是伪变量\$this的一个示例。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A
+{
+    function foo()
+    {
+        if (isset($this)) {
+            echo '$this is defined (';
+            echo get_class($this);
+            echo ")\n";
+        } else {
+            echo "\$this is not defined.\n";
+        }
+    }
+}
+
+class B
+{
+    function bar()
+    {
+        // Note: the next line will issue a warning if E_STRICT is enabled.
+        A::foo();
+    }
+}
+
+$a = new A();
+$a->foo();
+
+// Note: the next line will issue a warning if E_STRICT is enabled.
+A::foo();
+$b = new B();
+$b->bar();
+
+// Note: the next line will issue a warning if E_STRICT is enabled.
+B::bar();
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+$this is defined (A)
+$this is not defined.
+$this is defined (B)
+$this is not defined.
+\end{verbatim}
+
+
+\section{Class Instance}
+
+作为一个复杂的数据类型，或者说一个对象的模板，类必须至少进行一次实例化才能使用。
+
+要创建一个类的实例，必须使用 new 关键字。当创建新对象时该对象总是被赋值，除非该对象定义了构造函数并且在出错时抛出了一个异常。类应该在被实例化之前定义（某些情况下则必须这样）。
+
+如果在 new 之后跟着的是一个包含有类名的字符串，则该类的一个实例被创建。如果该类属于一个名字空间，则必须使用其完整名称。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$instance = new SimpleClass();
+
+// 也可以这样做：
+$className = 'Foo';
+$instance = new $className(); // Foo()
+?>
+\end{lstlisting}
+
+在类定义内部，可以用\texttt{new self}和\texttt{new parent}创建新对象。
+
+当把一个对象已经创建的实例赋给一个新变量时，新变量会访问同一个实例，就和用该对象赋值一样。此行为和向函数传递入实例时一样。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+$instance = new SimpleClass();
+
+$assigned   =  $instance;
+$reference  =& $instance;
+
+$instance->var = '$assigned will have this value';
+
+$instance = null; // $instance and $reference become null
+
+var_dump($instance);
+var_dump($reference);
+var_dump($assigned);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+NULL
+NULL
+object(SimpleClass)#1 (1) {
+   ["var"]=>
+     string(30) "$assigned will have this value"
+}
+\end{verbatim}
+
+除了可以用克隆给一个已创建的对象建立一个新实例之外，PHP还引入了两个新方法来创建一个对象的实例，例如：
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Test
+{
+    static public function getNew()
+    {
+        return new static;
+    }
+}
+
+class Child extends Test
+{}
+
+$obj1 = new Test();
+$obj2 = new $obj1;
+var_dump($obj1 !== $obj2);
+
+$obj3 = Test::getNew();
+var_dump($obj3 instanceof Test);
+
+$obj4 = Child::getNew();
+var_dump($obj4 instanceof Child);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+bool(true)
+bool(true)
+bool(true)
+\end{verbatim}
+
+除了使用new关键字来实例化类之外，还可以使用构造函数来进行对象初始化。
+
+\begin{compactitem}
+\item 构造函数和类同名；
+\item 构造函数用于初始化类的对象实例；
+\item 构造函数没有返回值。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Employee
+{
+	var $id;
+	var $name;
+	var $birthday;
+	var $salary;
+	
+	function setId($id){
+		$this->id = $id;
+	}
+	function setName($name){
+		$this->name = strtoupper($name);
+	}
+	function setBirthday($birthday){
+		$this->birthday = $birthday;
+	}
+	function setSalary($salary){
+		$this->salary = $salary;
+	}
+	
+	function getId(){
+		return $this->id;
+	}
+	function getName(){
+		return $this->name;
+	}
+	function getBirthday(){
+		return $this->birthday;
+	}
+	function getSalary(){
+		return $this->salary;
+	}
+	
+	function getEmployeeInfo(){
+		$info = "员工号：" . $this->getId() . " | ";
+		$info .= "姓名：" . $this->getName() . " | ";
+		$info .= "生日：" . $this->getBirthday() . " | ";
+		$info .= "工资：" . $this->getSalary() . "<br />";
+
+		return $info;
+	}
+
+	function Employee($id, $name, $birthday, $salary){
+		$this->setId($id);
+		$this->setName($name);
+		$this->setBirthday($birthday);
+		$this->setSalary($salary);
+	}
+}
+?>
+\end{lstlisting}
+
+
+
+
+
+\section{Class Inheritance}
+
+一个类可以在声明中用 extends 关键字继承另一个类的方法和属性，但是父类不能调用子类的任何方法。
+
+PHP不支持多重继承，一个类只能继承一个基类。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class ProjectManager extends Employee
+{
+	var $project_name;
+	var $sub_employees = array();
+	
+	function ProjectManager($id, $name, $birthday, $salary){
+		$this->Employee($id, $name, $birthday, $salary);
+	}
+	
+	function setProjectName($pjName){
+		$this->project_name = $pjName;
+	}
+	function getProjectName(){
+		return $this->project_name;
+	}
+	
+	function addEmployee(&$employee){
+		$this->sub_employee[] = &$employee;
+	}
+}
+?>
+\end{lstlisting}
+
+被继承的方法和属性可以被同样的名字重新声明来覆盖（overriding）。
+
+如果父类定义方法时使用了 final，则该方法不可被覆盖，可以通过 \texttt{parent::}来访问被覆盖的方法或属性。
+
+当覆盖方法时，参数必须保持一致否则 PHP 将发出 E\_STRICT 级别的错误信息。只有构造函数例外，构造函数可在被覆盖时使用不同的参数。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class ExtendClass extends SimpleClass
+{
+    // Redefine the parent method
+    function displayVar()
+    {
+        echo "Extending class\n";
+        parent::displayVar();
+    }
+}
+
+$extended = new ExtendClass();
+$extended->displayVar();
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Extending class
+a default value
+\end{verbatim}
+
+
+\section{Class Resolution}
+
+PHP的关键词 class 也可用于类名的解析，使用 ClassName::class就可以获取一个包含了类 ClassName 的完全限定名称的字符串，对于使用了命名空间的类尤其有用。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace NS {
+    class ClassName {
+    }
+    
+    echo ClassName::class;
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+NS\ClassName
+\end{verbatim}
+
+\chapter{Class Attributes}
+
+类的成员变量统一叫做“属性”（或者叫“字段”、“特征”），可以是基本的数据类型，也可以是其他对象。
+
+属性声明是由关键字 public，protected 或者 private 开头，然后跟一个普通的变量声明来组成。
+
+属性中的变量可以初始化，但是初始化的值必须是常数，这里的常数是指 PHP 脚本在编译阶段时就可以得到其值，而不依赖于运行时的信息才能求值。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class SimpleClass
+{
+   // 错误的属性声明
+   public $var1 = 'hello ' . 'world';
+   public $var2 = <<<EOD
+hello world
+EOD;
+   public $var3 = 1+2;
+   public $var4 = self::myStaticMethod();
+   public $var5 = $myVar;
+
+   // 正确的属性声明
+   public $var6 = myConstant;
+   public $var7 = array(true, false);
+
+   //在 PHP 5.3.0 及之后，下面的声明也正确
+   public $var8 = <<<'EOD'
+hello world
+EOD;
+}
+?>
+\end{lstlisting}
+
+PHP 5 声明属性依然可以直接使用关键字 var 来替代（或者附加于）public，protected 或 private，只是var不再是必要的。
+
+另外，如果直接使用 var 声明属性，而没有用 public，protected 或 private 之一，PHP 5 会将其视为 public。
+
+跟 heredocs 不同，nowdocs 可在任何静态数据上下文中使用，包括属性声明。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class foo {
+   public $bar = <<<'EOT'
+bar
+EOT;
+}
+?>
+\end{lstlisting}
+
+
+\chapter{Class Methods}
+
+类的方法也称为类的成员方法，其作用相当于函数，方法只能在类的内部定义。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Employee
+{
+	var $id;
+	var $name;
+	var $birthday;
+	var $salary;
+	
+	function setId($id){
+		$this->id = $id;
+	}
+	function setName($name){
+		$this->name = strtoupper($name);
+	}
+	function setBirthday($birthday){
+		$this->birthday = $birthday;
+	}
+	function setSalary($salary){
+		$this->salary = $salary;
+	}
+	
+	function getId(){
+		return $this->id;
+	}
+	function getName(){
+		return $this->name;
+	}
+	function getBirthday(){
+		return $this->birthday;
+	}
+	function getSalary(){
+		return $this->salary;
+	}
+	
+	function getEmployeeInfo(){
+		$info = "员工号：" . $this->getId() . " | ";
+		$info .= "姓名：" . $this->getName() . " | ";
+		$info .= "生日：" . $this->getBirthday() . " | ";
+		$info .= "工资：" . $this->getSalary() . "<br />";
+
+		return $info;
+	}
+}
+?>
+\end{lstlisting}
+
+在类的成员方法里面，可以用 ->（对象运算符）：\$this->property的方式来访问非静态属性，静态属性则使用 ::（类似self::\$property）来访问。
+
+
+
+当一个方法在类定义内部被调用时，都有一个可用的伪变量 \$this。\$this 是一个到主叫对象的引用（通常是该方法所从属的对象，但是如果是从第二个对象静态调用时也可能是另一个对象）。
+
+
+
+
+
+\chapter{Class Constants}
+
+
+可以把在类或接口中始终保持不变的值定义为常量，而且在定义和使用常量的时候不需要使用 \$ 符号。
+
+常量的值必须是一个定值，不能是变量、类属性或数学运算的结果或函数调用。
+
+PHP允许用一个变量来动态调用类，但是该变量的值不能为关键字（如 self，parent 或 static）。
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class MyClass
+{
+    const constant = 'constant value';
+
+    function showConstant() {
+        echo  self::constant . "\n";
+    }
+}
+
+echo MyClass::constant . "\n";
+
+$classname = "MyClass";
+echo $classname::constant . "\n"; // 自 5.3.0 起
+
+$class = new MyClass();
+$class->showConstant();
+
+echo $class::constant."\n"; // 自 PHP 5.3.0 起
+?>
+\end{lstlisting}
+
+和 heredoc 不同，nowdoc 可以用在任何静态数据中。
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class foo {
+    // 自 PHP 5.3.0 起
+    const bar = <<<'EOT'
+bar
+EOT;
+}
+?>
+\end{lstlisting}
+
+
+\chapter{Class Autoload}
+
+在PHP5之前，编写面向对象的应用程序时需要对每个类的定义建立一个 PHP 源文件，而且往往不得不在每个PHP程序脚本开头引入一个长长的包含文件列表（每个类一个文件）。
+
+PHP5取消了上述限制，可以定义一个 \_\_autoload() 函数，它会在试图使用尚未被定义的类时被自动调用。
+
+PHP脚本引擎通过调用\_\_autoload()函数可以实现在PHP出错失败前获得最后一个机会加载所需的类，只是自动加载不可用于 PHP 的 CLI 交互模式。
+
+现在，spl\_autoload\_register() 提供了一种更加灵活的方式来实现类的自动加载，因此\_\_autoload() 函数已经不再建议使用，在以后的版本中可能废弃\_\_autoload()函数。
+
+\begin{compactitem}
+\item 在PHP 5.3.0之前，\_\_autoload 函数抛出的异常不能被 catch 语句块捕获并会导致一个致命错误。
+\item 从PHP 5.3.0+开始，\_\_autoload 函数抛出的异常可以被 catch 语句块捕获，但是需要遵循一个条件。如果抛出的是一个自定义异常，那么必须存在相应的自定义异常类。\_\_autoload 函数可以递归的自动加载自定义异常类。
+\end{compactitem}
+
+如果类名被用于 call\_user\_func()等环境时，它可能包含一些危险的字符（比如\texttt{../}），建议在这样的函数中不要使用用户的输入，起码需要在\_\_autoload() 时对输入进行验证。
+
+本例尝试分别从 MyClass1.php 和 MyClass2.php 文件中加载 MyClass1 和 MyClass2 类。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function __autoload($class_name) {
+    require_once $class_name . '.php';
+}
+
+$obj  = new MyClass1();
+$obj2 = new MyClass2();
+?>
+\end{lstlisting}
+
+
+本例尝试加载接口 ITest。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+function __autoload($name) {
+    var_dump($name);
+}
+
+class Foo implements ITest {
+}
+
+/*
+string(5) "ITest"
+
+Fatal error: Interface 'ITest' not found in ...
+*/
+?>
+\end{lstlisting}
+
+本例抛出一个异常并在 try/catch 语句块中演示。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function __autoload($name) {
+    echo "Want to load $name.\n";
+    throw new Exception("Unable to load $name.");
+}
+
+try {
+    $obj = new NonLoadableClass();
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Want to load NonLoadableClass.
+Unable to load NonLoadableClass.
+\end{verbatim}
+
+本例将一个异常抛给不存在的自定义异常处理函数。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function __autoload($name) {
+    echo "Want to load $name.\n";
+    throw new MissingException("Unable to load $name.");
+}
+
+try {
+    $obj = new NonLoadableClass();
+} catch (Exception $e) {
+    echo $e->getMessage(), "\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Want to load NonLoadableClass.
+Want to load MissingException.
+
+Fatal error: Class 'MissingException' not found in testMissingException.php on line 4
+\end{verbatim}
+
+\chapter{Constructor}
+
+\begin{lstlisting}[language=PHP]
+void __construct ([ mixed $args [, $... ]] )
+\end{lstlisting}
+
+PHP允行用户在一个类中定义一个方法作为构造函数，具有构造函数的类会在每次创建新对象时先调用此方法，所以构造函数非常适合在使用对象之前执行一些初始化操作。
+
+\begin{compactitem}
+\item 如果子类中定义了构造函数，则不会隐式调用其父类的构造函数。
+
+\item 如果需要显式地执行父类的构造函数，需要在子类的构造函数中调用 parent::\_\_construct()。
+
+\item 如果子类没有定义构造函数则会如同一个普通的类方法一样从父类继承构造函数（假如没有被定义为 private 的话）。
+\end{compactitem}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class BaseClass {
+   function __construct() {
+       print "In BaseClass constructor\n";
+   }
+}
+
+class SubClass extends BaseClass {
+   function __construct() {
+       parent::__construct();
+       print "In SubClass constructor\n";
+   }
+}
+
+class OtherSubClass extends BaseClass {
+    // inherits BaseClass's constructor
+}
+
+// In BaseClass constructor
+$obj = new BaseClass();
+
+// In BaseClass constructor
+// In SubClass constructor
+$obj = new SubClass();
+
+// In BaseClass constructor
+$obj = new OtherSubClass();
+?>
+\end{lstlisting}
+
+
+为了实现向后兼容性，如果 PHP 5 在类中找不到 \_\_construct() 函数并且也没有从父类继承一个的话，它就会尝试寻找旧式的构造函数，也就是和类同名的函数，因此唯一会产生兼容性问题的情况就是类中已有一个名为 \_\_construct() 的方法却被用于其它用途。
+
+与其它方法不同，当 \_\_construct() 被与父类 \_\_construct() 具有不同参数的方法覆盖时，PHP 不会产生一个 E\_STRICT 错误信息。
+
+在命名空间中，与类名同名的方法不再作为构造函数，而且这一改变不影响不在命名空间中的类。
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace Foo;
+class Bar {
+    public function Bar() {
+        // treated as constructor in PHP 5.3.0-5.3.2
+        // treated as regular method as of PHP 5.3.3
+    }
+}
+?>
+\end{lstlisting}
+
+
+
+\chapter{Destructor}
+
+
+\begin{lstlisting}[language=PHP]
+void __destruct ( void )
+\end{lstlisting}
+
+PHP的析构函数的概念类似于其它面向对象的语言（例如 C++），析构函数会在到某个对象的所有引用都被删除或者当对象被显式销毁时执行。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class MyDestructableClass {
+   function __construct() {
+       print "In constructor\n";
+       $this->name = "MyDestructableClass";
+   }
+
+   function __destruct() {
+       print "Destroying " . $this->name . "\n";
+   }
+}
+
+$obj = new MyDestructableClass();
+?>
+\end{lstlisting}
+
+
+和构造函数一样，父类的析构函数不会被PHP引擎隐式调用。
+
+如果要显式地执行父类的析构函数，必须在子类的析构函数体中显式调用 parent::\_\_destruct()。
+
+和构造函数一样，子类如果自己没有定义析构函数则默认会继承父类的。
+
+即使在使用 exit() 终止脚本运行时，析构函数也会被调用。在析构函数中调用 exit() 将会中止其余关闭操作的运行。
+
+试图在析构函数（在脚本终止时被调用）中抛出一个异常会导致致命错误。
+
+析构函数在脚本关闭时调用，此时所有的 HTTP 头信息已经发出，而且脚本关闭时的工作目录有可能和在 SAPI（如 apache）中时不同。
+
+
+\chapter{Visibility}
+
+对属性或方法的访问控制是通过关键字 public（公有），protected（受保护）或 private（私有）来实现的。
+
+\begin{compactitem}
+\item 被定义为公有的类成员可以在任何地方被访问。
+\item 被定义为受保护的类成员则可以被其自身以及其子类和父类访问。
+\item 被定义为私有的类成员则只能被其定义所在的类访问。
+\end{compactitem}
+
+
+\section{Property Visibility}
+
+
+类属性必须定义为公有，受保护，私有之一（如果用 var 定义，则被视为公有）。
+
+\begin{lstlisting}[language=PHP]
+<?php
+/**
+ * Define MyClass
+ */
+class MyClass
+{
+    public $public = 'Public';
+    protected $protected = 'Protected';
+    private $private = 'Private';
+
+    function printHello()
+    {
+        echo $this->public;
+        echo $this->protected;
+        echo $this->private;
+    }
+}
+
+$obj = new MyClass();
+echo $obj->public; // 这行能被正常执行
+echo $obj->protected; // 这行会产生一个致命错误
+echo $obj->private; // 这行也会产生一个致命错误
+$obj->printHello(); // 输出 Public、Protected 和 Private
+
+
+/**
+ * Define MyClass2
+ */
+class MyClass2 extends MyClass
+{
+    // 可以对 public 和 protected 进行重定义，但 private 而不能
+    protected $protected = 'Protected2';
+
+    function printHello()
+    {
+        echo $this->public;
+        echo $this->protected;
+        echo $this->private;
+    }
+}
+
+$obj2 = new MyClass2();
+echo $obj2->public; // 这行能被正常执行
+echo $obj2->private; // 未定义 private
+echo $obj2->protected; // 这行会产生一个致命错误
+$obj2->printHello(); // 输出 Public、Protected2 和 Undefined
+
+?>
+\end{lstlisting}
+
+
+为了兼容性考虑，在 PHP 4 中使用 var 关键字对变量进行定义的方法在 PHP 5 中仍然有效，只是已经成为了public关键字的一个别名。
+
+\section{Method Visibility}
+
+类中的方法可以被定义为公有，私有或受保护。如果没有设置这些关键字，则该方法默认为公有。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+/**
+ * Define MyClass
+ */
+class MyClass
+{
+    // 声明一个公有的构造函数
+    public function __construct() { }
+
+    // 声明一个公有的方法
+    public function MyPublic() { }
+
+    // 声明一个受保护的方法
+    protected function MyProtected() { }
+
+    // 声明一个私有的方法
+    private function MyPrivate() { }
+
+    // 此方法为公有
+    function Foo()
+    {
+        $this->MyPublic();
+        $this->MyProtected();
+        $this->MyPrivate();
+    }
+}
+
+$myclass = new MyClass;
+$myclass->MyPublic(); // 这行能被正常执行
+$myclass->MyProtected(); // 这行会产生一个致命错误
+$myclass->MyPrivate(); // 这行会产生一个致命错误
+$myclass->Foo(); // 公有，受保护，私有都可以执行
+
+
+/**
+ * Define MyClass2
+ */
+class MyClass2 extends MyClass
+{
+    // 此方法为公有
+    function Foo2()
+    {
+        $this->MyPublic();
+        $this->MyProtected();
+        $this->MyPrivate(); // 这行会产生一个致命错误
+    }
+}
+
+$myclass2 = new MyClass2;
+$myclass2->MyPublic(); // 这行能被正常执行
+$myclass2->Foo2(); // 公有的和受保护的都可执行，但私有的不行
+
+class Bar 
+{
+    public function test() {
+        $this->testPrivate();
+        $this->testPublic();
+    }
+
+    public function testPublic() {
+        echo "Bar::testPublic\n";
+    }
+    
+    private function testPrivate() {
+        echo "Bar::testPrivate\n";
+    }
+}
+
+class Foo extends Bar 
+{
+    public function testPublic() {
+        echo "Foo::testPublic\n";
+    }
+    
+    private function testPrivate() {
+        echo "Foo::testPrivate\n";
+    }
+}
+
+$myFoo = new foo();
+$myFoo->test(); // Bar::testPrivate 
+                // Foo::testPublic
+?>
+\end{lstlisting}
+
+
+
+\section{Object Visibility}
+
+同一个类的对象即使不是同一个实例也可以互相访问对方的私有与受保护成员。这是由于在这些对象的内部具体实现的细节都是已知的。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Test
+{
+    private $foo;
+
+    public function __construct($foo)
+    {
+        $this->foo = $foo;
+    }
+
+    private function bar()
+    {
+        echo 'Accessed the private method.';
+    }
+
+    public function baz(Test $other)
+    {
+        // We can change the private property:
+        $other->foo = 'hello';
+        var_dump($other->foo);
+
+        // We can also call the private method:
+        $other->bar();
+    }
+}
+
+$test = new Test('test');
+
+$test->baz(new Test('other'));
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+string(5) "hello"
+Accessed the private method.
+\end{verbatim}
+
+
+\chapter{Inheritance}
+
+继承会影响类与类，对象与对象之间的关系。例如，当扩展一个类时，子类就会继承父类所有公有的和受保护的方法。
+
+除非子类覆盖了父类的方法，被继承的方法都会保留其原有功能，因此继承对于功能的设计和抽象是非常有用的，而且类似的对象增加新功能无须重新重复这些公用的功能。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class foo
+{
+    public function printItem($string) 
+    {
+        echo 'Foo: ' . $string . PHP_EOL;
+    }
+    
+    public function printPHP()
+    {
+        echo 'PHP is great.' . PHP_EOL;
+    }
+}
+
+class bar extends foo
+{
+    public function printItem($string)
+    {
+        echo 'Bar: ' . $string . PHP_EOL;
+    }
+}
+
+$foo = new foo();
+$bar = new bar();
+$foo->printItem('baz'); // Output: 'Foo: baz'
+$foo->printPHP();       // Output: 'PHP is great' 
+$bar->printItem('baz'); // Output: 'Bar: baz'
+$bar->printPHP();       // Output: 'PHP is great'
+?>
+\end{lstlisting}
+
+
+除非使用了自动加载，否则一个类必须在使用之前被定义。如果一个类扩展了另一个，则父类必须在子类之前被声明，同样适用于类继承其它类与接口。
+
+
+\chapter{Scope Resolution}
+
+范围解析操作符（也可称作 Paamayim Nekudotayim）可以用于访问静态成员和类常量，还可以用于覆盖类中的属性和方法。
+
+当在类定义之外引用到这些项目时，要使用类名。
+
+PHP允许通过变量来引用类，该变量的值不能是关键字（例如self，parent和static）。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class MyClass {
+    const CONST_VALUE = 'A constant value';
+}
+
+$classname = 'MyClass';
+echo $classname::CONST_VALUE; // 自 PHP 5.3.0 起
+
+echo MyClass::CONST_VALUE;
+?>
+\end{lstlisting}
+
+self，parent 和 static 这三个特殊的关键字是用于在类定义的内部对其属性或方法进行访问的。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class OtherClass extends MyClass
+{
+    public static $my_static = 'static var';
+
+    public static function doubleColon() {
+        echo parent::CONST_VALUE . "\n";
+        echo self::$my_static . "\n";
+    }
+}
+
+$classname = 'OtherClass';
+echo $classname::doubleColon(); // 自 PHP 5.3.0 起
+
+OtherClass::doubleColon();
+?>
+\end{lstlisting}
+
+
+当一个子类覆盖其父类中的方法时，PHP 不会调用父类中已被覆盖的方法，是否调用父类的方法取决于子类。这种机制也适用于构造函数、析构函数、重载以及魔术方法。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class MyClass
+{
+    protected function myFunc() {
+        echo "MyClass::myFunc()\n";
+    }
+}
+
+class OtherClass extends MyClass
+{
+    // 覆盖了父类的定义
+    public function myFunc()
+    {
+        // 但还是可以调用父类中被覆盖的方法
+        parent::myFunc();
+        echo "OtherClass::myFunc()\n";
+    }
+}
+
+$class = new OtherClass();
+$class->myFunc();
+?>
+\end{lstlisting}
+
+
+\chapter{Static Keyword}
+
+static 关键字可以用来定义静态方法和属性，也可用于定义静态变量以及后期静态绑定。
+
+声明类属性或方法为静态，就可以不实例化类而直接访问，不过用静态方式调用一个非静态方法会导致一个 E\_STRICT 级别的错误。
+
+静态属性不能通过一个类已实例化的对象来访问（但是静态方法可以）。
+
+为了兼容 PHP 4，如果没有指定访问控制，属性和方法默认为公有。
+
+\begin{compactitem}
+\item 静态方法不需要通过对象即可调用会导致伪变量 \$this 在静态方法中不可用。
+\item 静态属性不可以由对象通过 -\/> 操作符来访问。
+\end{compactitem}
+
+
+
+
+和所有静态变量一样，静态属性只能被初始化为字符串或常量，不能使用表达式，因此可以把静态属性初始化为整数或数组，但是不能初始化为另一个变量或函数返回值，也不能指向一个对象。
+
+虽然可以用一个变量来动态调用类，但是该变量的值不能为关键字 self，parent 或 static。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Foo
+{
+    public static $my_static = 'foo';
+
+    public function staticValue() {
+        return self::$my_static;
+    }
+}
+
+class Bar extends Foo
+{
+    public function fooStatic() {
+        return parent::$my_static;
+    }
+}
+
+
+print Foo::$my_static . "\n";
+
+$foo = new Foo();
+print $foo->staticValue() . "\n";
+print $foo->my_static . "\n";      // Undefined "Property" my_static 
+
+print $foo::$my_static . "\n";
+$classname = 'Foo';
+print $classname::$my_static . "\n"; // As of PHP 5.3.0
+
+print Bar::$my_static . "\n";
+$bar = new Bar();
+print $bar->fooStatic() . "\n";
+?>
+\end{lstlisting}
+
+
+\chapter{Class Abstraction}
+
+PHP支持抽象类和抽象方法，抽象类不能被直接实例化。
+
+
+\section{Abstract class}
+
+具体来说，抽象类是指在 class 前加了 abstract 关键字且存在抽象方法（在类方法 function 关键字前加了 abstract 关键字）的类。
+
+
+
+\begin{compactitem}
+\item 任何一个类，如果它里面至少有一个方法是被声明为抽象的，那么这个类就必须被声明为抽象的。
+\item 被定义为抽象的方法只是声明了其调用方式（参数），不能定义其具体的功能实现。
+\item 继承一个抽象类的时候，子类必须实现父类中的所有抽象方法，这些方法的访问控制必须和父类中一样（或者更为宽松）。
+\end{compactitem}
+
+例如，某个抽象方法被声明为受保护的，那么子类中实现的方法就应该声明为受保护的或者公有的，而不能定义为私有的。
+
+如果 B 实现了抽象类A的抽象方法 abstract\_func() ，那么 B 中 abstract\_func() 方法的访问控制不能比 A 中 abstract\_func() 的访问控制更严格，也就是说：
+
+\begin{compactenum}
+\item 如果 A 中 abstract\_func() 声明为 public ，那么 B 中 abstract\_func() 的声明只能是 public ，不能是 protected 或 private。
+\item 如果 A 中 abstract\_func() 声明为 protected ，那么 B 中 abstract\_func() 的声明可以是 public 或 protected ，但不能是 private。
+\item 抽象类不能指定abstract\_func()声明为 private，否则产生Fatal error : Abstract function A::abstract\_func() cannot be declared private。
+\end{compactenum}
+
+
+
+抽象类中只定义（或部分实现）子类需要的方法。子类可以通过继承抽象类并通过实现抽象类中的所有抽象方法，使抽象类具体化。
+
+另外，方法的调用方式必须匹配，即类型和所需参数数量必须一致。例如，子类定义了一个可选参数，而父类抽象方法的声明里没有，则两者的声明并无冲突。 
+
+上述规则同样适用于构造函数。
+
+\begin{example}
+抽象类示例
+\begin{lstlisting}[language=PHP]
+<?php
+abstract class AbstractClass
+{
+ // 强制要求子类定义这些方法
+    abstract protected function getValue();
+    abstract protected function prefixValue($prefix);
+
+    // 普通方法（非抽象方法）
+    public function printOut() {
+        print $this->getValue() . "\n";
+    }
+}
+
+class ConcreteClass1 extends AbstractClass
+{
+    protected function getValue() {
+        return "ConcreteClass1";
+    }
+
+    public function prefixValue($prefix) {
+        return "{$prefix}ConcreteClass1";
+    }
+}
+
+class ConcreteClass2 extends AbstractClass
+{
+    public function getValue() {
+        return "ConcreteClass2";
+    }
+
+    public function prefixValue($prefix) {
+        return "{$prefix}ConcreteClass2";
+    }
+}
+
+$class1 = new ConcreteClass1;
+$class1->printOut();
+echo $class1->prefixValue('FOO_') ."\n";
+
+$class2 = new ConcreteClass2;
+$class2->printOut();
+echo $class2->prefixValue('FOO_') ."\n";
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+ConcreteClass1
+FOO_ConcreteClass1
+ConcreteClass2
+FOO_ConcreteClass2
+\end{verbatim}
+
+如果子类需要实例化，前提是它实现了抽象类中的所有抽象方法。如果子类没有全部实现抽象类中的所有抽象方法，那么该子类也是一个抽象类，必须在 class 前面加上 abstract 关键字，并且不能被实例化。
+
+\begin{example}
+子类可以定义父类签名中不存在的可选参数
+\begin{lstlisting}[language=PHP]
+<?php
+abstract class AbstractClass
+{
+    // 抽象方法仅需要定义需要的参数
+    abstract protected function prefixName($name);
+
+}
+
+class ConcreteClass extends AbstractClass
+{
+
+    // 子类可以定义父类签名中不存在的可选参数
+    public function prefixName($name, $separator = ".") {
+        if ($name == "Pacman") {
+            $prefix = "Mr";
+        } elseif ($name == "Pacwoman") {
+            $prefix = "Mrs";
+        } else {
+            $prefix = "";
+        }
+        return "{$prefix}{$separator} {$name}";
+    }
+}
+
+$class = new ConcreteClass;
+echo $class->prefixName("Pacman"), "\n";
+echo $class->prefixName("Pacwoman"), "\n";
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+Mr. Pacman
+Mrs. Pacwoman
+\end{verbatim}
+
+抽象类主要应用在既需要统一的接口，又需要实例变量或缺省的方法的情况中，其具体应用场合包括如下：
+
+\begin{compactenum}
+\item 定义了一组接口，但又不想强迫每个实现类都必须实现所有的接口。可以用 abstract class 定义一组方法体（可以是空方法体），然后由子类选择自己所感兴趣的方法来覆盖。
+\item 某些场合下，只靠纯粹的接口不能满足类与类之间的协调，还必须使用类中表示状态的变量来区别不同的关系。 abstract 的中介作用可以很好地满足这一点。
+\item 规范了一组相互协调的方法，其中一些方法是共同的，与状态无关的，可以共享的，无需子类分别实现，而另一些方法却需要各个子类根据自己特定的状态来实现特 定的功能 。
+\end{compactenum}
+
+旧代码中如果没有自定义类或函数被命名为“abstract”，则可以不加修改地正常运行。
+
+
+\section{Abstract mode}
+
+事实上，对于PHP编程来说，抽象类可以实现的功能，接口也可以实现。
+
+在实际应用中，抽象类和接口的区别，不在于编程实现，而在于程序设计模式的不同。
+
+一般来讲，抽象用于不同的事物，接口则用于事物的行为。例如，水生生物是鲸鱼的抽象概念，但是水生生物并不是鲸鱼的行为，吃东西才是鲸鱼的行为。
+
+对于大型项目来说，对象都是由基本的抽象类继承实现，而这些类的方法通常都由接口来定义。
+
+
+此外，对于事物属性的更改，建议使用接口，而不是直接赋值或者其他的方式。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+interface IAction {
+  public function eat();
+}
+class Whale implements IAction {
+  public function eat() {
+    echo "Whale eat fish.\n";
+  }
+}
+class Carp implements IAction {
+  public function eat() {
+    echo "Carp eat moss.\n";
+  }
+}
+
+class Observer {
+  public function __construct() {
+    $whale = new Whale();
+    $carp = new Carp();
+    $this->observeEat($whale);
+    $this->observeEat($carp);
+  }
+  function observeEat(IAction $animal) {
+    $animal->eat();
+  }
+}
+$observer = new observer();
+?>
+\end{lstlisting}
+
+运行结果如下：
+
+\begin{verbatim}
+$ php Observer.php
+Whale eat fish.
+Carp eat moss.
+\end{verbatim}
+
+好的设计模式是严格对问题进行抽象，虽然抽象类和接口对于编程实现来说是类似的，但是对于程序设计模式是不同的。
+
+
+\chapter{Object Interfaces}
+
+
+接口（interface）可以用于指定某个类必须实现哪些方法，但是不需要定义这些方法的具体内容。
+
+接口是通过 interface 关键字来定义的，就像定义一个标准的类一样。
+
+\begin{compactitem}
+\item 接口中定义的所有的方法必须都是空的。
+\item 接口中定义的所有的方法必须都是公有的，这是接口的特性。
+\item 接口也可以继承，通过使用 extends 操作符。
+\end{compactitem}
+
+和抽象类相比，接口是完全抽象的，只能声明方法，而且只能声明 public 的方法，不能声明 private 及 protected 的方法，不能定义方法体，也不能声明实例变量 。
+
+抽象类提供了具体实现的标准，而接口则是纯粹的模版，在接口中只定义功能，而不包含实现的内容。
+
+虽然接口也可以声明常量变量 ，但是将常量变量放在 interface 中违背了其作为接口的作用而存在的宗旨，也混淆了 interface 与类的不同价值。如果的确需要，可以将其放在相应的 abstract class 或 class 中。
+
+
+\section{Implements}
+
+
+要实现一个接口，使用 implements 操作符。
+
+\begin{compactitem}
+\item 类中必须实现接口中定义的所有方法，否则会报告致命错误。
+\item 类可以实现多个接口，用逗号来分隔多个接口的名称。
+\item 实现多个接口时，接口中的方法不能有重名。
+\end{compactitem}
+
+
+类要实现接口，必须使用和接口中所定义的方法完全一致的方式，否则会导致致命错误。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 声明一个'iTemplate'接口
+interface iTemplate
+{
+    public function setVariable($name, $var);
+    public function getHtml($template);
+}
+
+
+// 实现接口
+// 下面的写法是正确的
+class Template implements iTemplate
+{
+    private $vars = array();
+  
+    public function setVariable($name, $var)
+    {
+        $this->vars[$name] = $var;
+    }
+  
+    public function getHtml($template)
+    {
+        foreach($this->vars as $name => $value) {
+            $template = str_replace('{' . $name . '}', $value, $template);
+        }
+ 
+        return $template;
+    }
+}
+
+// 下面的写法是错误的，因为没有实现 getHtml()：
+// Fatal error: Class BadTemplate contains 1 abstract methods
+// and must therefore be declared abstract (iTemplate::getHtml)
+class BadTemplate implements iTemplate
+{
+    private $vars = array();
+  
+    public function setVariable($name, $var)
+    {
+        $this->vars[$name] = $var;
+    }
+}
+?>
+\end{lstlisting}
+
+实现接口的具体过程和继承一个仅包含抽象方法的抽象类是一样的。一个类可以同时继承一个父类和实现任意多个接口。 extends 子句应该在 implements 子句之前。 
+
+PHP 只支持继承自一个父类，因此 extends 关键字后只能跟一个类名。
+
+\begin{example}
+可扩充的接口
+\begin{lstlisting}[language=PHP]
+<?php
+interface a
+{
+    public function foo();
+}
+
+interface b extends a
+{
+    public function baz(Baz $baz);
+}
+
+// 正确写法
+class c implements b
+{
+    public function foo()
+    {
+    }
+
+    public function baz(Baz $baz)
+    {
+    }
+}
+
+// 错误写法会导致一个致命错误
+class d implements b
+{
+    public function foo()
+    {
+    }
+
+    public function baz(Foo $foo)
+    {
+    }
+}
+?>
+\end{lstlisting}
+\end{example}
+
+接口不可以实现另一个接口，但是可以继承多个接口。
+
+\begin{example}
+继承多个接口
+\begin{lstlisting}[language=PHP]
+<?php
+interface a
+{
+    public function foo();
+}
+
+interface b
+{
+    public function bar();
+}
+
+interface c extends a, b
+{
+    public function baz();
+}
+
+class d implements c
+{
+    public function foo()
+    {
+    }
+
+    public function bar()
+    {
+    }
+
+    public function baz()
+    {
+    }
+}
+?>
+\end{lstlisting}
+\end{example}
+
+接口的应用场合包括如下：
+
+\begin{compactenum}
+\item 类与类之间需要特定的接口进行协调，而不关心其如何实现。
+\item 作为能够实现特定功能的标识存在，也可以是没有接口方法的纯粹标识。
+\item 需要将一组类视为单一的类，而调用者只通过接口来与这组类发生联系。
+\item 需要实现特定的多项功能，而这些功能之间可能完全没有任何联系。
+\end{compactenum}
+
+
+
+
+\section{Constants}
+
+
+接口中也可以定义常量，接口常量和类常量的使用完全相同，但是不能被子类或子接口所覆盖。
+
+
+
+
+
+\begin{example}
+使用接口常量
+\begin{lstlisting}[language=PHP]
+<?php
+interface a
+{
+    const b = 'Interface constant';
+}
+
+// 输出接口常量
+echo a::b;
+
+// 错误写法，因为常量不能被覆盖。接口常量的概念和类常量是一样的。
+class b implements a
+{
+    const b = 'Class constant';
+}
+?>
+\end{lstlisting}
+\end{example}
+
+接口加上类型约束提供了一种良好的方式来确保某个对象包含有某些方法。
+
+
+\section{Abstract}
+
+抽象类提供了具体实现的标准，而接口则是纯粹的模版。
+
+\begin{compactitem}
+\item 接口只定义功能，而不包含实现的内容。
+\item 抽象类只定义（或部分实现）子类需要的方法。
+\end{compactitem}
+
+interface 强调特定功能的实现，而 abstract class 强调所属关系。
+
+尽管 interface 实现类及 abstract class 的子类都必须要实现相应的抽象方法，但实现的形式不同。
+
+\begin{compactitem}
+\item interface 中的每一个方法都是抽象方法，都只是声明的 (没有方法体 ) ，实现类必须要实现。
+\item abstract class 的子类可以有选择地实现，abstract class 中并非所有的方法都是抽象的，只有声明为abstract 的方法才是抽象的，子类必须实现，没有 abstract 的方法在 abstract class 中必须定义方法体。
+\item abstract class 的子类在继承它时，对非抽象方法既可以直接继承，也可以覆盖。对抽象方法，可以选择实现，也可以留给其子类来实现，但是这个类必须也声明为抽象类，因此也不能实例化。
+\end{compactitem}
+
+abstract class 是 interface 与 class 的中介。 abstract class 在 interface 及 class 中起到了承上启下的作用。一方面abstract class 是抽象的，可以声明抽象方法来规范子类必须实现的功能，另一方面abstract class又可以定义缺省的方法体来让子类直接使用或覆盖，最后abstract class还可以定义自己的实例变量来让子类通过继承来使用。
+
+接口中的抽象方法前不用也不能加 abstract 关键字，默认隐式就是抽象方法，也不能加 final 关键字来防止抽象方法的继承，但是抽象类中抽象方法前则必须加上 abstract 表示显示声明为抽象方法。
+
+接口中的抽象方法默认是 public 的，也只能是 public 的，不能用 private ， protected 修饰符修饰。而抽象类中的抽象方法则可以用 public ， protected 来修饰，不允许用 private 。
+
+
+
+
+
+\chapter{Predefined Interfaces}
+
+
+
+\section{Traversable interface}
+
+
+Traversable interface是检测一个类是否可以使用 foreach 进行遍历的接口，该接口是无法被单独实现的基本抽象接口。
+
+这是一个无法在 PHP 脚本中实现的内部引擎接口。IteratorAggregate 或 Iterator 接口可以用来代替它。
+
+
+Traversable interface必须由 IteratorAggregate 或 Iterator 接口实现，但实现此接口的内建类可以使用 foreach 进行遍历而无需实现 IteratorAggregate 或 Iterator 接口。
+
+\begin{lstlisting}[language=PHP]
+Traversable {
+}
+\end{lstlisting}
+
+这个接口没有任何方法，它的作用仅仅是作为所有可遍历类的基本接口。
+
+While you cannot implement this interface, you can use it in your checks to determine if something is usable in for each. Here is what I use if I'm expecting something that must be iterable via foreach.
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+    if( !is_array( $items ) && !$items instanceof Traversable )
+        //Throw exception here
+?>
+\end{lstlisting}
+
+
+\section{Iterator interface}
+
+
+
+Iterator interface是可在内部迭代自己的外部迭代器或类的接口。
+
+
+
+\begin{lstlisting}[language=PHP]
+Iterator extends Traversable {
+  /* 方法 */
+  abstract public mixed current ( void )
+  abstract public scalar key ( void )
+  abstract public void next ( void )
+  abstract public void rewind ( void )
+  abstract public boolean valid ( void )
+}
+\end{lstlisting}
+
+\textbf{Iterator interface方法}
+
+\begin{compactitem}
+\item Iterator::current — 返回当前元素
+\item Iterator::key — 返回当前元素的键
+\item Iterator::next — 向前移动到下一个元素
+\item Iterator::rewind — 返回到迭代器的第一个元素
+\item Iterator::valid — 检查当前位置是否有效
+\end{compactitem}
+
+PHP 已经提供了一些用于日常任务的迭代器。
+
+\begin{example}
+Iterator Interface基本用法
+\begin{lstlisting}[language=PHP]
+<?php
+class myIterator implements Iterator {
+    private $position = 0;
+    private $array = array(
+        "firstelement",
+        "secondelement",
+        "lastelement",
+    );  
+
+    public function __construct() {
+        $this->position = 0;
+    }
+
+    function rewind() {
+        var_dump(__METHOD__);
+        $this->position = 0;
+    }
+
+    function current() {
+        var_dump(__METHOD__);
+        return $this->array[$this->position];
+    }
+
+    function key() {
+        var_dump(__METHOD__);
+        return $this->position;
+    }
+
+    function next() {
+        var_dump(__METHOD__);
+        ++$this->position;
+    }
+
+    function valid() {
+        var_dump(__METHOD__);
+        return isset($this->array[$this->position]);
+    }
+}
+
+$it = new myIterator;
+
+foreach($it as $key => $value) {
+    var_dump($key, $value);
+    echo "\n";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+这个例子展示了使用 foreach 时，迭代器方法的调用顺序。
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+string(18) "myIterator::rewind"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(0)
+string(12) "firstelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(1)
+string(13) "secondelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+string(19) "myIterator::current"
+string(15) "myIterator::key"
+int(2)
+string(11) "lastelement"
+
+string(16) "myIterator::next"
+string(17) "myIterator::valid"
+\end{verbatim}
+
+
+\textbf{Iterator::current}
+
+Iterator::current — 返回当前元素，此函数没有参数，可返回任何类型。
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed Iterator::current ( void )
+\end{lstlisting}
+
+\textbf{Iterator::key}
+
+
+Iterator::key — 返回当前元素的键，此函数没有参数。成功返回标量，失败则返回 NULL并分发 E\_NOTICE 级错误。
+
+\begin{lstlisting}[language=PHP]
+abstract public scalar Iterator::key ( void )
+\end{lstlisting}
+
+
+\textbf{Iterator::next}
+
+Iterator::next — 移动当前位置到下一个元素。此函数没有参数，并且任何值返回都将被忽略。
+
+\begin{lstlisting}[language=PHP]
+abstract public void Iterator::next ( void )
+\end{lstlisting}
+
+此方法在 foreach 循环之后被调用。
+
+\textbf{Iterator::rewind}
+
+Iterator::rewind — 返回到迭代器的第一个元素，此函数没有参数，并且任何值返回都将被忽略。
+
+\begin{lstlisting}[language=PHP]
+abstract public void Iterator::rewind ( void )
+\end{lstlisting}
+
+当开始一个 foreach 循环时，这是第一个被调用的方法。它将不会在 foreach 循环之后被调用。
+
+
+\textbf{Iterator::valid}
+
+Iterator::valid — 检查当前位置是否有效，此函数没有参数。返回至将被转换为布尔类型，成功时返回 TRUE， 或者在失败时返回 FALSE。
+
+\begin{lstlisting}[language=PHP]
+abstract public boolean Iterator::valid ( void )
+\end{lstlisting}
+
+此方法在 Iterator::rewind() 和 Iterator::next() 方法之后被调用以此用来检查当前位置是否有效。
+
+
+\section{IteratorAggregate interface}
+
+IteratorAggregate interface —— 创建外部迭代器的接口。
+
+
+\begin{lstlisting}[language=PHP]
+IteratorAggregate extends Traversable {
+/* 方法 */
+abstract public Traversable getIterator ( void )
+}
+\end{lstlisting}
+
+
+\textbf{IteratorAggregate方法}
+
+\begin{compactitem}
+\item IteratorAggregate::getIterator — 获取一个外部迭代器
+\end{compactitem}
+
+\begin{example}
+基本用法
+\begin{lstlisting}[language=PHP]
+<?php
+class myData implements IteratorAggregate {
+    public $property1 = "Public property one";
+    public $property2 = "Public property two";
+    public $property3 = "Public property three";
+
+    public function __construct() {
+        $this->property4 = "last property";
+    }
+
+    public function getIterator() {
+        return new ArrayIterator($this);
+    }
+}
+
+$obj = new myData;
+
+foreach($obj as $key => $value) {
+    var_dump($key, $value);
+    echo "\n";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+string(9) "property1"
+string(19) "Public property one"
+
+string(9) "property2"
+string(19) "Public property two"
+
+string(9) "property3"
+string(21) "Public property three"
+
+string(9) "property4"
+string(13) "last property"
+\end{verbatim}
+
+
+\textbf{IteratorAggregate::getIterator}
+
+IteratorAggregate::getIterator — 该接口实现了 Iterator 或 Traversable 接口的类的一个实例，可以获取并返回一个外部迭代器，此函数没有参数，失败时抛出 Exception。
+
+
+\section{ArrayAccess interface}
+
+
+ArrayAccess interface提供像访问数组一样访问对象的能力的接口。
+
+
+
+\begin{lstlisting}[language=PHP]
+ArrayAccess {
+  /* 方法 */
+  abstract public boolean offsetExists ( mixed $offset )
+  abstract public mixed offsetGet ( mixed $offset )
+  abstract public void offsetSet ( mixed $offset , mixed $value )
+  abstract public void offsetUnset ( mixed $offset )
+}
+\end{lstlisting}
+
+\textbf{ArrayAccess接口方法}
+
+\begin{compactitem}
+\item ArrayAccess::offsetExists — 检查一个偏移位置是否存在
+\item ArrayAccess::offsetGet — 获取一个偏移位置的值
+\item ArrayAccess::offsetSet — 设置一个偏移位置的值
+\item ArrayAccess::offsetUnset — 复位一个偏移位置的值
+\end{compactitem}
+
+
+\begin{example}
+Basic usage
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements arrayaccess {
+    private $container = array();
+    public function __construct() {
+        $this->container = array(
+            "one"   => 1,
+            "two"   => 2,
+            "three" => 3,
+        );
+    }
+    public function offsetSet($offset, $value) {
+        if (is_null($offset)) {
+            $this->container[] = $value;
+        } else {
+            $this->container[$offset] = $value;
+        }
+    }
+    public function offsetExists($offset) {
+        return isset($this->container[$offset]);
+    }
+    public function offsetUnset($offset) {
+        unset($this->container[$offset]);
+    }
+    public function offsetGet($offset) {
+        return isset($this->container[$offset]) ? $this->container[$offset] : null;
+    }
+}
+
+$obj = new obj;
+
+var_dump(isset($obj["two"]));
+var_dump($obj["two"]);
+unset($obj["two"]);
+var_dump(isset($obj["two"]));
+$obj["two"] = "A value";
+var_dump($obj["two"]);
+$obj[] = 'Append 1';
+$obj[] = 'Append 2';
+$obj[] = 'Append 3';
+print_r($obj);
+?>
+\end{lstlisting}
+\end{example}
+
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+bool(true)
+int(2)
+bool(false)
+string(7) "A value"
+obj Object
+(
+    [container:obj:private] => Array
+        (
+            [one] => 1
+            [three] => 3
+            [two] => A value
+            [0] => Append 1
+            [1] => Append 2
+            [2] => Append 3
+        )
+
+)
+\end{verbatim}
+
+
+
+\textbf{ArrayAccess::offsetExists}
+
+ArrayAccess::offsetExists — 检查一个偏移位置是否存在。
+
+
+\begin{lstlisting}[language=PHP]
+abstract public boolean ArrayAccess::offsetExists ( mixed $offset )
+\end{lstlisting}
+
+\begin{compactitem}
+\item offset
+需要检查的偏移位置。
+\end{compactitem}
+
+对一个实现了 ArrayAccess 接口的对象使用 isset() 或 empty() 时，此方法将执行，成功时返回 TRUE， 或者在失败时返回 FALSE。如果一个非布尔型返回值被返回，将被转换为布尔型。
+
+当使用 empty() 并且仅当 ArrayAccess::offsetExists() 返回 TRUE 时， ArrayAccess::offsetGet() 将被调用以检查是为否空。
+
+
+\begin{example}
+ArrayAccess::offsetExists() 范例
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements arrayaccess {
+    public function offsetSet($offset, $value) {
+        var_dump(__METHOD__);
+    }
+    public function offsetExists($var) {
+        var_dump(__METHOD__);
+        if ($var == "foobar") {
+            return true;
+        }
+        return false;
+    }
+    public function offsetUnset($var) {
+        var_dump(__METHOD__);
+    }
+    public function offsetGet($var) {
+        var_dump(__METHOD__);
+        return "value";
+    }
+}
+
+$obj = new obj;
+
+echo "Runs obj::offsetExists()\n";
+var_dump(isset($obj["foobar"]));
+
+echo "\nRuns obj::offsetExists() and obj::offsetGet()\n";
+var_dump(empty($obj["foobar"]));
+
+echo "\nRuns obj::offsetExists(), *not* obj:offsetGet() as there is nothing to get\n";
+var_dump(empty($obj["foobaz"]));
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+Runs obj::offsetExists()
+string(17) "obj::offsetExists"
+bool(true)
+
+Runs obj::offsetExists() and obj::offsetGet()
+string(17) "obj::offsetExists"
+string(14) "obj::offsetGet"
+bool(false)
+
+Runs obj::offsetExists(), *not* obj:offsetGet() as there is nothing to get
+string(17) "obj::offsetExists"
+bool(true)
+\end{verbatim}
+
+\textbf{ArrayAccess::offsetGet}
+
+ArrayAccess::offsetGet — 获取并返回指定偏移位置的值，可返回任何类型。
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed ArrayAccess::offsetGet ( mixed $offset )
+\end{lstlisting}
+
+\begin{compactitem}
+\item offset
+需要获取的偏移位置。
+\end{compactitem}
+
+当检查一个偏移位置是否为 empty() 时，此方法被执行。
+
+
+Starting with PHP 5.3.4, the prototype checks were relaxed and it's possible for implementations of this method to return by reference. This makes indirect modifications to the overloaded array dimensions of ArrayAccess objects possible.
+
+A direct modification is one that replaces completely the value of the array dimension, as in \$obj[6] = 7. An indirect modification, on the other hand, only changes part of the dimension, or attempts to assign the dimension by reference to another variable, as in \$obj[6][7] = 7 or \$var =\& \$obj[6]. Increments with ++ and decrements with -- are also implemented in a way that requires indirect modification.
+
+While direct modification triggers a call to ArrayAccess::offsetSet(), indirect modification triggers a call to ArrayAccess::offsetGet(). In that case, the implementation of ArrayAccess::offsetGet() must be able to return by reference, otherwise an E\_NOTICE message is raised.
+
+
+\textbf{ArrayAccess::offsetSet}
+
+ArrayAccess::offsetSet — 设置一个偏移位置的值
+
+
+\begin{lstlisting}[language=PHP]
+abstract public void ArrayAccess::offsetSet ( mixed $offset , mixed $value )
+\end{lstlisting}
+
+为指定的偏移位置设置一个值，并且没有返回值。
+
+
+\begin{compactitem}
+\item offset
+待设置的偏移位置。
+\item value
+需要设置的值。
+\end{compactitem}
+
+如果另一个值不可用，那么 offset 参数将被设置为 NULL，就像下面的例子。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arrayaccess[] = "first value";
+$arrayaccess[] = "second value";
+print_r($arrayaccess);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Array
+(
+    [0] => first value
+    [1] => second value
+)
+\end{verbatim}
+
+\textbf{ArrayAccess::offsetUnset}
+
+ArrayAccess::offsetUnset — 复位一个偏移位置的值，执行时没有返回值。
+
+
+
+\begin{lstlisting}[language=PHP]
+abstract public void ArrayAccess::offsetUnset ( mixed $offset )
+\end{lstlisting}
+
+\begin{compactitem}
+\item offset
+待复位的偏移位置。
+\end{compactitem}
+
+当使用 (unset) 进行类型转换时，该方法不会被调用。
+
+
+\section{Serializable interface}
+
+自定义序列化的接口。
+
+实现此接口的类将不再支持 \_\_sleep() 和 \_\_wakeup()。不论何时，只要有实例需要被序列化，serialize 方法都将被调用。它将不会调用 \_\_destruct() 或有其他影响，除非程序化地调用此方法。当数据被反序列化时，类将被感知并且调用合适的 unserialize() 方法而不是调用 \_\_construct()。如果需要执行标准的构造器，你应该在这个方法中进行处理。
+
+
+
+\begin{lstlisting}[language=PHP]
+Serializable {
+  /* 方法 */
+  abstract public string serialize ( void )
+  abstract public mixed unserialize ( string $serialized )
+}
+\end{lstlisting}
+
+\begin{compactitem}
+\item Serializable::serialize — 对象的字符串表示
+\item Serializable::unserialize — 构造对象
+\end{compactitem}
+
+
+\begin{example}
+Basic usage
+\begin{lstlisting}[language=PHP]
+<?php
+class obj implements Serializable {
+    private $data;
+    public function __construct() {
+        $this->data = "My private data";
+    }
+    public function serialize() {
+        return serialize($this->data);
+    }
+    public function unserialize($data) {
+        $this->data = unserialize($data);
+    }
+    public function getData() {
+        return $this->data;
+    }
+}
+
+$obj = new obj;
+$ser = serialize($obj);
+
+$newobj = unserialize($ser);
+
+var_dump($newobj->getData());
+?>
+\end{lstlisting}
+\end{example}
+
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+string(15) "My private data"
+\end{verbatim}
+
+
+\textbf{Serializable::serialize}
+
+Serializable::serialize — 返回对象的字符串表示或者 NULL，此函数没有参数。如果返回除了字符串或 NULL 之外的其他类型，将抛出 Exception。
+
+
+\begin{lstlisting}[language=PHP]
+abstract public string Serializable::serialize ( void )
+\end{lstlisting}
+
+这个方法担当着对象析构器的角色。在此方法之后， \_\_destruct() 方法将不会被调用，返回没有序列化之前的原始值。
+
+
+\textbf{Serializable::unserialize}
+
+Serializable::unserialize — 构造对象，在反序列化对象时被调用。
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed Serializable::unserialize ( string $serialized )
+\end{lstlisting}
+
+\begin{compactitem}
+\item serialized
+对象的字符串表示
+\end{compactitem}
+
+这个方法担当着对象构造器的角色。在此方法之后， \_\_construct() 将不会被调用。
+
+
+\chapter{Predefined Class}
+
+\section{Closure class}
+
+
+Closure 类用于代表匿名函数的类，匿名函数（在 PHP 5.3 中被引入）会产生这个类型的对象。
+
+在过去，这个类被认为是一个实现细节，但现在可以依赖它做一些事情。自 PHP 5.4 起，这个类带有一些方法，允许在匿名函数创建后对其进行更多的控制。
+
+除了此处列出的方法，还有一个 \_\_invoke 方法。这是为了与其他实现了 \_\_invoke()魔术方法 的对象保持一致性，但调用匿名函数的过程与它无关。
+
+\begin{lstlisting}[language=PHP]
+Closure {
+  /* 方法 */
+  __construct ( void )
+  public static Closure bind ( Closure $closure , object $newthis [, mixed $newscope = 'static' ] )
+  public Closure bindTo ( object $newthis [, mixed $newscope = 'static' ] )
+}
+\end{lstlisting}
+
+\begin{compactitem}
+\item Closure::\_\_construct — 用于禁止实例化的构造函数
+\item Closure::bind — 复制一个闭包，绑定指定的\$this对象和类作用域。
+\item Closure::bindTo — 复制当前闭包对象，绑定指定的\$this对象和类作用域。
+\end{compactitem}
+
+
+\textbf{Closure::\_\_construct}
+
+Closure::\_\_construct — 用于禁止实例化的构造函数，此函数没有参数。
+
+\begin{lstlisting}[language=PHP]
+Closure::__construct ( void )
+\end{lstlisting}
+
+这个方法仅用于禁止实例化一个 Closure 类的对象。这个类的对象的创建方法写在匿名函数页。
+
+
+该方法没有返回值，它只是简单的触发一个错误 （类型是 E\_RECOVERABLE\_ERROR）。
+
+\textbf{Closure::bind}
+
+Closure::bind — 复制一个闭包，绑定指定的\$this对象和类作用域。
+
+\begin{lstlisting}[language=PHP]
+public static Closure Closure::bind ( Closure $closure , object $newthis [, mixed $newscope = 'static' ] )
+\end{lstlisting}
+
+这个方法是 Closure::bindTo() 的静态版本，用于返回一个新的 Closure 对象 或者在失败时返回 FALSE。
+
+\begin{compactitem}
+\item closure
+需要绑定的匿名函数。
+\item newthis
+需要绑定到匿名函数的对象，或者 NULL 创建未绑定的闭包。
+\item newscope
+想要绑定给闭包的类作用域，或者 'static' 表示不改变。如果传入一个对象，则使用这个对象的类型名。 类作用域用来决定在闭包中 \$this 对象的 私有、保护方法 的可见性。 
+
+The class scope to which associate the closure is to be associated, or 'static' to keep the current one. If an object is given, the type of the object will be used instead. This determines the visibility of protected and private methods of the bound object.
+
+\end{compactitem}
+
+\begin{example}
+Closure::bind() 实例
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    private static $sfoo = 1;
+    private $ifoo = 2;
+}
+$cl1 = static function() {
+    return A::$sfoo;
+};
+$cl2 = function() {
+    return $this->ifoo;
+};
+
+$bcl1 = Closure::bind($cl1, null, 'A');
+$bcl2 = Closure::bind($cl2, new A(), 'A');
+echo $bcl1(), "\n";
+echo $bcl2(), "\n";
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+1
+2
+\end{verbatim}
+
+\textbf{Closure::bindTo}
+
+Closure::bindTo — 复制当前闭包对象，绑定指定的\$this对象和类作用域，返回新创建的 Closure 对象 或者在失败时返回 FALSE。
+
+\begin{lstlisting}[language=PHP]
+public Closure Closure::bindTo ( object $newthis [, mixed $newscope = 'static' ] )
+\end{lstlisting}
+
+创建并返回一个 匿名函数， 它与当前对象的函数体相同、绑定了同样变量，但可以绑定不同的对象，也可以绑定新的类作用域。
+
+如果你只是想要复制一个匿名函数，可以用 cloning 代替。
+
+“绑定的对象”决定了函数体中的 \$this 的取值，“类作用域”代表一个类型、决定在这个匿名函数中能够调用哪些 私有 和 保护 的方法。 也就是说，此时 \$this 可以调用的方法，与 newscope 类的成员函数是相同的。
+
+静态闭包不能有绑定的对象（ newthis 参数的值应该设为 NULL）不过仍然可以用 bubdTo 方法来改变它们的类作用域。
+
+This function will ensure that for a non-static closure, having a bound instance will imply being scoped and vice-versa. To this end, non-static closures that are given a scope but a NULL instance are made static and non-static non-scoped closures that are given a non-null instance are scoped to an unspecified class.
+
+\begin{compactitem}
+\item newthis
+
+绑定给匿名函数的一个对象，或者 NULL 来取消绑定。
+\item newscope
+
+关联到匿名函数的类作用域，或者 'static' 保持当前状态。如果是一个对象，则使用这个对象的类型为心得类作用域。 这会决定绑定的对象的 保护、私有成员 方法的可见性。
+\end{compactitem}
+
+
+\begin{example}
+Closure::bindTo() 实例
+\begin{lstlisting}[language=PHP]
+<?php
+
+class A {
+    function __construct($val) {
+        $this->val = $val;
+    }
+    function getClosure() {
+        //returns closure bound to this object and scope
+        return function() { return $this->val; };
+    }
+}
+
+$ob1 = new A(1);
+$ob2 = new A(2);
+
+$cl = $ob1->getClosure();
+echo $cl(), "\n";
+$cl = $cl->bindTo($ob2);
+echo $cl(), "\n";
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程的输出类似于：
+
+\begin{verbatim}
+1
+2
+\end{verbatim}
+
+\chapter{Anonymous Class}
+
+匿名类可以用来创建一次性的简单对象。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// PHP 7 之前的代码
+class Logger
+{
+    public function log($msg)
+    {
+        echo $msg;
+    }
+}
+
+$util->setLogger(new Logger());
+
+// 使用了 PHP 7+ 后的代码
+$util->setLogger(new class {
+    public function log($msg)
+    {
+        echo $msg;
+    }
+});
+\end{lstlisting}
+
+可以传递参数到匿名类的构造器，也可以扩展（extend）其他类、实现接口（implement interface），以及普通的类一样使用 trait。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+class SomeClass {}
+interface SomeInterface {}
+trait SomeTrait {}
+
+var_dump(new class(10) extends SomeClass implements SomeInterface {
+    private $num;
+
+    public function __construct($num)
+    {
+        $this->num = $num;
+    }
+
+    use SomeTrait;
+});
+\end{lstlisting}
+
+以上示例会输出：
+
+
+\begin{lstlisting}[language=PHP]
+object(class@anonymous)#1 (1) {
+  ["Command line code0x104c5b612":"class@anonymous":private]=>
+  int(10)
+}
+\end{lstlisting}
+
+匿名类被嵌套进普通 Class 后，不能访问这个外部类（Outer class）的 private（私有）、protected（受保护）方法或者属性。 
+
+\begin{compactitem}
+\item 为了访问外部类（Outer class）protected 属性或方法，匿名类可以 extend（扩展）外部类。 
+\item 为了使用外部类（Outer class）的 private 属性，必须通过构造器传入匿名类。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Outer
+{
+    private $prop = 1;
+    protected $prop2 = 2;
+
+    protected function func1()
+    {
+        return 3;
+    }
+
+    public function func2()
+    {
+        return new class($this->prop) extends Outer {
+            private $prop3;
+
+            public function __construct($prop)
+            {
+                $this->prop3 = $prop;
+            }
+
+            public function func3()
+            {
+                return $this->prop2 + $this->prop3 + $this->func1();
+            }
+        };
+    }
+}
+
+echo (new Outer)->func2()->func3();
+\end{lstlisting}
+
+以上示例会输出：
+
+\begin{lstlisting}[language=PHP]
+6
+\end{lstlisting}
+
+\chapter{Traits}
+
+
+PHP使用trait实现代码复用。
+
+Trait是为单继承语言而准备的一种代码复用机制，可以减少单继承语言的限制来自由地在不同层次结构内的独立的类中复用方法。
+
+Trait和Class组合的语义都是定义了一种方式来减少复杂性，避免传统多继承和Mixin类相关的典型问题。
+
+除了和Class的相似之处之外，Trait仅仅旨在用细粒度和一致的方式来组合功能。
+
+Trait 不能通过它自身来实例化，从而为传统继承增加了水平特性的组合。或者说，应用Trait的Class之间不需要继承，直接注入使用。
+
+\begin{lstlisting}[language=PHP]
+<?php
+trait ezcReflectionReturnInfo {
+    function getReturnType() { /*1*/ }
+    function getReturnDescription() { /*2*/ }
+}
+
+class ezcReflectionMethod extends ReflectionMethod {
+    use ezcReflectionReturnInfo;
+    /* ... */
+}
+
+class ezcReflectionFunction extends ReflectionFunction {
+    use ezcReflectionReturnInfo;
+    /* ... */
+}
+?>
+\end{lstlisting}
+
+
+\section{Precedence}
+
+从基类继承的成员将被 trait 注入的成员所覆盖。优先顺序是来自当前类的成员覆盖了 trait 的方法，trait 则覆盖了被继承的方法。
+
+例如，从基类继承的成员被注入的 SayWorld Trait 中的 MyHelloWorld 方法所覆盖，其行为和MyHelloWorld 类中定义的方法一致。优先顺序是当前类中的方法会覆盖 trait 方法，而 trait 方法则覆盖基类中的方法。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Base {
+    public function sayHello() {
+        echo 'Hello ';
+    }
+}
+
+trait SayWorld {
+    public function sayHello() {
+        parent::sayHello();
+        echo 'World!';
+    }
+}
+
+class MyHelloWorld extends Base {
+    use SayWorld;
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+?>
+\end{lstlisting}
+
+
+以上例程会输出：
+
+\begin{verbatim}
+Hello World!
+\end{verbatim}
+
+\begin{lstlisting}[language=PHP]
+<?php
+trait HelloWorld {
+    public function sayHello() {
+        echo 'Hello World!';
+    }
+}
+
+class TheWorldIsNotEnough {
+    use HelloWorld;
+    public function sayHello() {
+        echo 'Hello Universe!';
+    }
+}
+
+$o = new TheWorldIsNotEnough();
+$o->sayHello();
+?>
+\end{lstlisting}
+
+
+以上例程会输出：
+
+\begin{verbatim}
+Hello Universe!
+\end{verbatim}
+
+\section{Multiple Traits}
+
+
+在 use 声明列出多个 trait，通过逗号分隔就可以都插入到一个类中。
+
+\begin{lstlisting}[language=PHP]
+<?php
+trait Hello {
+    public function sayHello() {
+        echo 'Hello ';
+    }
+}
+
+trait World {
+    public function sayWorld() {
+        echo 'World';
+    }
+}
+
+class MyHelloWorld {
+    use Hello, World;
+    public function sayExclamationMark() {
+        echo '!';
+    }
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+$o->sayWorld();
+$o->sayExclamationMark();
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Hello World!
+\end{verbatim}
+
+
+
+\section{Conflict Resolution}
+
+如果两个 trait 都插入了一个同名的方法，如果没有明确解决冲突将会产生一个致命错误。
+
+为了解决多个 trait 在同一个类中的命名冲突，需要使用 insteadof 操作符来明确指定使用冲突方法中的哪一个。
+
+上述方式仅允许排除掉其它方法，as 操作符则可以将其中一个冲突的方法以另一个名称来引入。
+
+在本例中 Talker 使用了 trait A 和 B，A 和 B 有冲突的方法被指定使用 trait B 中的 smallTalk 以及 trait A 中的 bigTalk。
+
+Aliased\_Talker 使用了 as 操作符来定义了 talk 来作为 B 的 bigTalk 的别名。
+
+\begin{lstlisting}[language=PHP]
+<?php
+trait A {
+    public function smallTalk() {
+        echo 'a';
+    }
+    public function bigTalk() {
+        echo 'A';
+    }
+}
+
+trait B {
+    public function smallTalk() {
+        echo 'b';
+    }
+    public function bigTalk() {
+        echo 'B';
+    }
+}
+
+class Talker {
+    use A, B {
+        B::smallTalk insteadof A;
+        A::bigTalk insteadof B;
+    }
+}
+
+class Aliased_Talker {
+    use A, B {
+        B::smallTalk insteadof A;
+        A::bigTalk insteadof B;
+        B::bigTalk as talk;
+    }
+}
+?>
+\end{lstlisting}
+
+
+
+
+\section{Method Visibility}
+
+as 语法还可以用来调整方法的访问控制。
+
+\begin{lstlisting}[language=PHP]
+<?php
+trait HelloWorld {
+    public function sayHello() {
+        echo 'Hello World!';
+    }
+}
+
+// 修改 sayHello 的访问控制
+class MyClass1 {
+    use HelloWorld { 
+      sayHello as protected;
+    }
+}
+
+// 给方法一个改变了访问控制的别名
+// 原版 sayHello 的访问控制则没有发生变化
+class MyClass2 {
+    use HelloWorld { 
+      sayHello as private myPrivateHello; 
+    }
+}
+?>
+\end{lstlisting}
+
+
+
+
+\section{Traits Compose}
+
+除了在Class中可以使用Trait，其它 trait 也能够使用 trait。
+
+在 trait 定义时通过使用一个或多个 trait能够组合其它 trait 中的部分或全部成员。
+
+\begin{lstlisting}[language=PHP]
+<?php
+trait Hello {
+    public function sayHello() {
+        echo 'Hello ';
+    }
+}
+
+trait World {
+    public function sayWorld() {
+        echo 'World!';
+    }
+}
+
+trait HelloWorld {
+    use Hello, World;
+}
+
+class MyHelloWorld {
+    use HelloWorld;
+}
+
+$o = new MyHelloWorld();
+$o->sayHello();
+$o->sayWorld();
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Hello World!
+\end{verbatim}
+
+
+
+
+\section{Abstract Trait Members}
+
+
+
+为了对使用的类施加强制要求，trait 支持抽象方法的使用。
+
+
+
+\begin{lstlisting}[language=PHP]
+通过抽象方法来进行强制要求
+<?php
+trait Hello {
+    public function sayHelloWorld() {
+        echo 'Hello'.$this->getWorld();
+    }
+    abstract public function getWorld();
+}
+
+class MyHelloWorld {
+    private $world;
+    use Hello;
+    public function getWorld() {
+        return $this->world;
+    }
+    public function setWorld($val) {
+        $this->world = $val;
+    }
+}
+?>
+\end{lstlisting}
+
+
+
+
+
+
+\section{Static Trait Members}
+
+静态变量可以被 trait 的方法引用，但不能被 trait 定义。但是 trait 能够为使用的类定义静态方法。
+
+\begin{example}
+静态变量
+\begin{lstlisting}[language=PHP]
+<?php
+trait Counter {
+    public function inc() {
+        static $c = 0;
+        $c = $c + 1;
+        echo "$c\n";
+    }
+}
+
+class C1 {
+    use Counter;
+}
+
+class C2 {
+    use Counter;
+}
+
+$o = new C1(); $o->inc(); // echo 1
+$p = new C2(); $p->inc(); // echo 1
+?>
+\end{lstlisting}
+\end{example}
+
+\begin{example}
+静态方法
+\begin{lstlisting}[language=PHP]
+<?php
+trait StaticExample {
+    public static function doSomething() {
+        return 'Doing something';
+    }
+}
+
+class Example {
+    use StaticExample;
+}
+
+Example::doSomething();
+?>
+\end{lstlisting}
+\end{example}
+
+
+
+
+\section{Trait Properties}
+
+Trait 同样可以定义属性。
+
+\begin{lstlisting}[language=PHP]
+定义属性
+<?php
+trait PropertiesTrait {
+    public $x = 1;
+}
+
+class PropertiesExample {
+    use PropertiesTrait;
+}
+
+$example = new PropertiesExample;
+$example->x;
+?>
+\end{lstlisting}
+
+\begin{compactitem}
+\item 如果 trait 定义了一个属性，那么类将不能定义同样名称的属性，否则会产生一个错误。
+\item 如果该属性在类中的定义与在 trait 中的定义兼容（同样的可见性和初始值）则错误的级别是 E\_STRICT，否则是一个致命错误。
+\end{compactitem}
+
+\begin{example}
+解决冲突
+\begin{lstlisting}[language=PHP]
+<?php
+trait PropertiesTrait {
+    public $same = true;
+    public $different = false;
+}
+
+class PropertiesExample {
+    use PropertiesTrait;
+    public $same = true; // Strict Standards
+    public $different = true; // 致命错误
+}
+?>
+\end{lstlisting}
+\end{example}
+
+
+\chapter{Overloading}
+
+
+
+PHP支持的"重载"（overloading）是通过魔术方法实现动态地"创建"类属性和方法，而且魔术方法的参数不能通过引用传递。
+
+PHP的"重载"与其它绝大多数面向对象语言不同，传统的"重载"是用于提供多个同名的类方法，而且各个方法的参数类型和个数不同。
+
+
+
+PHP中的"不可访问属性（inaccessible properties）"和"不可访问方法（inaccessible methods）"是未定义或不可见的类属性或方法。当调用当前环境下未定义或不可见的类属性或方法时，重载方法会被调用。
+
+所有的重载方法都必须被声明为 public，可见性未设置为 public 或未声明为 static 的时候可能会产生一个警告。
+
+\section{Property Overloading}
+
+
+属性重载只能在对象中进行。
+
+\begin{lstlisting}[language=PHP]
+public void __set ( string $name , mixed $value )
+public mixed __get ( string $name )
+public bool __isset ( string $name )
+public void __unset ( string $name )
+\end{lstlisting}
+
+\begin{compactitem}
+\item 向不可访问属性赋值时，\_\_set() 会被调用。
+\item 读取不可访问属性的值时，\_\_get() 会被调用。
+\item 对不可访问属性调用 isset() 或 empty() 时，\_\_isset()会被调用。
+\item 对不可访问属性调用 unset() 时，\_\_unset()会被调用。
+\end{compactitem}
+
+其中，参数 \$name 是指要操作的变量名称，\_\_set() 方法的 \$value 参数指定了 \$name 变量的值。
+
+
+在静态方法中，上述这些魔术方法将不会被调用，因此这些魔术方法都不能被声明为 static，而且将这些魔术方法定义为static时会产生一个警告。
+
+根据PHP处理赋值运算的方式，\_\_set() 的返回值将被忽略。例如，在下面这样的链式赋值中，\_\_get() 不会被调用。
+
+\begin{lstlisting}[language=PHP]
+$a = $obj->b = 8;
+\end{lstlisting}
+
+
+在除 isset() 之外的其它语言结构中无法使用重载的属性，因此对一个重载的属性使用 empty() 时，重载魔术方法将不会被调用。为了避开此限制，必须将重载属性赋值到本地变量后再使用 empty()。
+
+\begin{example}
+使用\_\_get()，\_\_set()，\_\_isset() 和\_\_unset() 进行属性重载
+\begin{lstlisting}[language=PHP]
+<?php
+class PropertyTest {
+     /**  被重载的数据保存在此  */
+    private $data = array();
+
+ 
+     /**  重载不能被用在已经定义的属性  */
+    public $declared = 1;
+
+     /**  只有从类外部访问这个属性时，重载才会发生 */
+    private $hidden = 2;
+
+    public function __set($name, $value) 
+    {
+        echo "Setting '$name' to '$value'\n";
+        $this->data[$name] = $value;
+    }
+
+    public function __get($name) 
+    {
+        echo "Getting '$name'\n";
+        if (array_key_exists($name, $this->data)) {
+            return $this->data[$name];
+        }
+
+        $trace = debug_backtrace();
+        trigger_error(
+            'Undefined property via __get(): ' . $name .
+            ' in ' . $trace[0]['file'] .
+            ' on line ' . $trace[0]['line'],
+            E_USER_NOTICE);
+        return null;
+    }
+
+    /**  PHP 5.1.0之后版本 */
+    public function __isset($name) 
+    {
+        echo "Is '$name' set?\n";
+        return isset($this->data[$name]);
+    }
+
+    /**  PHP 5.1.0之后版本 */
+    public function __unset($name) 
+    {
+        echo "Unsetting '$name'\n";
+        unset($this->data[$name]);
+    }
+
+    /**  非魔术方法  */
+    public function getHidden() 
+    {
+        return $this->hidden;
+    }
+}
+
+
+echo "<pre>\n";
+
+$obj = new PropertyTest;
+
+$obj->a = 1;
+echo $obj->a . "\n\n";
+
+var_dump(isset($obj->a));
+unset($obj->a);
+var_dump(isset($obj->a));
+echo "\n";
+
+echo $obj->declared . "\n\n";
+
+echo "Let's experiment with the private property named 'hidden':\n";
+echo "Privates are visible inside the class, so __get() not used...\n";
+echo $obj->getHidden() . "\n";
+echo "Privates not visible outside of class, so __get() is used...\n";
+echo $obj->hidden . "\n";
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+Setting 'a' to '1'
+Getting 'a'
+1
+
+Is 'a' set?
+bool(true)
+Unsetting 'a'
+Is 'a' set?
+bool(false)
+
+1
+
+Let's experiment with the private property named 'hidden':
+Privates are visible inside the class, so __get() not used...
+2
+Privates not visible outside of class, so __get() is used...
+Getting 'hidden'
+
+
+Notice:  Undefined property via __get(): hidden in <file> on line 70 in <file> on line 29
+\end{verbatim}
+
+
+
+\section{Method Overloading}
+
+
+\begin{lstlisting}[language=PHP]
+public mixed __call ( string $name , array $arguments )
+public static mixed __callStatic ( string $name , array $arguments )
+\end{lstlisting}
+
+
+\begin{compactitem}
+\item 在对象中调用一个不可访问方法时，\_\_call() 会被调用。
+\item 在静态上下文中调用一个不可访问方法时，\_\_callStatic()会被调用。
+\end{compactitem}
+
+\_\_callStatic()魔术方法的可见性未设置为 public 或未声明为 static 的时候会产生一个警告。
+
+其中，\$name 参数是要调用的方法名称，\$arguments 参数是一个枚举数组，包含着要传递给方法 \$name 的参数。
+
+\begin{example}
+使用\_\_call()和\_\_callStatic() 对方法重载
+\begin{lstlisting}[language=PHP]
+<?php
+class MethodTest 
+{
+    public function __call($name, $arguments) 
+    {
+        // 注意: $name 的值区分大小写
+        echo "Calling object method '$name' "
+             . implode(', ', $arguments). "\n";
+    }
+
+    /**  PHP 5.3.0之后版本  */
+    public static function __callStatic($name, $arguments) 
+    {
+        // 注意: $name 的值区分大小写
+        echo "Calling static method '$name' "
+             . implode(', ', $arguments). "\n";
+    }
+}
+
+$obj = new MethodTest;
+$obj->runTest('in object context');
+
+MethodTest::runTest('in static context');  // PHP 5.3.0之后版本
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+Calling object method 'runTest' in object context
+Calling static method 'runTest' in static context
+\end{verbatim}
+
+
+\chapter{Object Iteration}
+
+
+\section{Iterations}
+
+
+PHP提供了一种定义对象的方法使其可以通过单元列表来遍历（例如用 foreach 语句）。
+
+默认情况下，所有可见属性都将被用于遍历。
+
+\begin{example}
+foreach遍历对象的所有能够访问的可见属性
+\begin{lstlisting}[language=PHP]
+<?php
+class MyClass
+{
+    public $var1 = 'value 1';
+    public $var2 = 'value 2';
+    public $var3 = 'value 3';
+
+    protected $protected = 'protected var';
+    private   $private   = 'private var';
+
+    function iterateVisible() {
+       echo "MyClass::iterateVisible:\n";
+       foreach($this as $key => $value) {
+           print "$key => $value\n";
+       }
+    }
+}
+
+$class = new MyClass();
+
+foreach($class as $key => $value) {
+    print "$key => $value\n";
+}
+echo "\n";
+
+
+$class->iterateVisible();
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+var1 => value 1
+var2 => value 2
+var3 => value 3
+
+MyClass::iterateVisible:
+var1 => value 1
+var2 => value 2
+var3 => value 3
+protected => protected var
+private => private var
+\end{verbatim}
+
+
+更进一步，可以实现 Iterator 接口来让对象自行决定如何遍历以及每次遍历时那些值可用。
+
+\begin{example}
+实现 Iterator 接口的对象遍历
+\begin{lstlisting}[language=PHP]
+<?php
+class MyIterator implements Iterator
+{
+    private $var = array();
+
+    public function __construct($array)
+    {
+        if (is_array($array)) {
+            $this->var = $array;
+        }
+    }
+
+    public function rewind() {
+        echo "rewinding\n";
+        reset($this->var);
+    }
+
+    public function current() {
+        $var = current($this->var);
+        echo "current: $var\n";
+        return $var;
+    }
+
+    public function key() {
+        $var = key($this->var);
+        echo "key: $var\n";
+        return $var;
+    }
+
+    public function next() {
+        $var = next($this->var);
+        echo "next: $var\n";
+        return $var;
+    }
+
+    public function valid() {
+        $var = $this->current() !== false;
+        echo "valid: {$var}\n";
+        return $var;
+    }
+}
+
+$values = array(1,2,3);
+$it = new MyIterator($values);
+
+foreach ($it as $a => $b) {
+    print "$a: $b\n";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+
+以上例程会输出：
+
+\begin{verbatim}
+rewinding
+current: 1
+valid: 1
+current: 1
+key: 0
+0: 1
+next: 2
+current: 2
+valid: 1
+current: 2
+key: 1
+1: 2
+next: 3
+current: 3
+valid: 1
+current: 3
+key: 2
+2: 3
+next:
+current:
+valid:
+\end{verbatim}
+
+IteratorAggregate 接口可以替代实现所有的 Iterator 方法，IteratorAggregate 只需要实现一个方法 IteratorAggregate::getIterator()就可以返回一个实现了 Iterator 的类的实例。
+
+\begin{example}
+实现 IteratorAggregate 来遍历对象
+\begin{lstlisting}[language=PHP]
+<?php
+class MyCollection implements IteratorAggregate
+{
+    private $items = array();
+    private $count = 0;
+
+    // Required definition of interface IteratorAggregate
+    public function getIterator() {
+        return new MyIterator($this->items);
+    }
+
+    public function add($value) {
+        $this->items[$this->count++] = $value;
+    }
+}
+
+$coll = new MyCollection();
+$coll->add('value 1');
+$coll->add('value 2');
+$coll->add('value 3');
+
+foreach ($coll as $key => $val) {
+    echo "key/value: [$key -> $val]\n\n";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+rewinding
+current: value 1
+valid: 1
+current: value 1
+key: 0
+key/value: [0 -> value 1]
+
+next: value 2
+current: value 2
+valid: 1
+current: value 2
+key: 1
+key/value: [1 -> value 2]
+
+next: value 3
+current: value 3
+valid: 1
+current: value 3
+key: 2
+key/value: [2 -> value 3]
+
+next:
+current:
+valid:
+\end{verbatim}
+
+另外，还可以通过生成器提供的方法来定义 Iterators。
+
+
+
+
+\section{Generators}
+
+
+
+生成器提供了一种更容易的方法来实现简单的对象迭代，同时没有实现一个具有 Iterator 接口的类所带来的性能开销和复杂性。
+
+生成器允许在 foreach 代码块中写代码来迭代一组数据而不需要在内存中创建一个数组，否则会使内存达到上限，或者会占据可观的处理时间。
+
+相反，用户可以写一个生成器函数，就像一个普通的自定义函数一样，不过和普通函数只返回一次不同的是生成器可以根据需要 yield 多次来生成需要迭代的值。
+
+一个简单的例子就是使用生成器来重新实现 range() 函数。标准的 range() 函数需要为其中的每一个返回值在内存中生成一个数组，结果就是生成一个很大的数组。 例如，调用 range(0, 1000000) 将导致内存占用超过 100 MB。
+
+做为一种替代方法, 我们可以实现一个 xrange() 生成器, 只需要足够的内存来创建 Iterator 对象并在内部跟踪生成器的当前状态，这样只需要不到1K字节的内存。
+
+\begin{example}
+将 range() 实现为生成器
+\begin{lstlisting}[language=PHP]
+<?php
+function xrange($start, $limit, $step = 1) {
+    if ($start < $limit) {
+        if ($step <= 0) {
+            throw new LogicException('Step must be +ve');
+        }
+
+        for ($i = $start; $i <= $limit; $i += $step) {
+            yield $i;
+        }
+    } else {
+        if ($step >= 0) {
+            throw new LogicException('Step must be -ve');
+        }
+
+        for ($i = $start; $i >= $limit; $i += $step) {
+            yield $i;
+        }
+    }
+}
+
+/* Note that both range() and xrange() result in the same
+ * output below. */
+
+echo 'Single digit odd numbers from range():  ';
+foreach (range(1, 9, 2) as $number) {
+    echo "$number ";
+}
+echo "\n";
+
+echo 'Single digit odd numbers from xrange(): ';
+foreach (xrange(1, 9, 2) as $number) {
+    echo "$number ";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+Single digit odd numbers from range():  1 3 5 7 9 
+Single digit odd numbers from xrange(): 1 3 5 7 9 
+\end{verbatim}
+
+
+\section{Generator syntax}
+
+A generator function looks just like a normal function, except that instead of returning a value, a generator yields as many values as it needs to.
+
+When a generator function is called, it returns an object that can be iterated over. When you iterate over that object (for instance, via a foreach loop), PHP will call the generator function each time it needs a value, then saves the state of the generator when the generator yields a value so that it can be resumed when the next value is required.
+
+Once there are no more values to be yielded, then the generator function can simply exit, and the calling code continues just as if an array has run out of values.
+
+A generator cannot return a value: doing so will result in a compile error. An empty return statement is valid syntax within a generator and it will terminate the generator.
+
+
+\section{yield keyword}
+
+
+The heart of a generator function is the yield keyword. In its simplest form, a yield statement looks much like a return statement, except that instead of stopping execution of the function and returning, yield instead provides a value to the code looping over the generator and pauses execution of the generator function.
+
+
+\begin{example}
+A simple example of yielding values
+\begin{lstlisting}[language=PHP]
+<?php
+function gen_one_to_three() {
+    for ($i = 1; $i <= 3; $i++) {
+        // Note that $i is preserved between yields.
+        yield $i;
+    }
+}
+
+$generator = gen_one_to_three();
+foreach ($generator as $value) {
+    echo "$value\n";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+
+以上例程会输出：
+
+\begin{verbatim}
+1
+2
+3
+\end{verbatim}
+
+Internally, sequential integer keys will be paired with the yielded values, just as with a non-associative array.
+
+If you use yield in an expression context (for example, on the right hand side of an assignment), you must surround the yield statement with parentheses. For example, this is valid:
+
+\begin{lstlisting}[language=PHP]
+$data = (yield $value);
+\end{lstlisting}
+
+But this is not, and will result in a parse error:
+
+\begin{lstlisting}[language=PHP]
+$data = yield $value;
+\end{lstlisting}
+
+This syntax may be used in conjunction with the send() method on Generator objects.
+
+
+\section{Yielding values with keys}
+
+
+PHP also supports associative arrays, and generators are no different. In addition to yielding simple values, as shown above, you can also yield a key at the same time.
+
+The syntax for yielding a key/value pair is very similar to that used to define an associative array, as shown below.
+
+
+
+\begin{example}
+Yielding a key/value pair
+\begin{lstlisting}[language=PHP]
+<?php
+/* The input is semi-colon separated fields, with the first
+ * field being an ID to use as a key. */
+
+$input = <<<'EOF'
+1;PHP;Likes dollar signs
+2;Python;Likes whitespace
+3;Ruby;Likes blocks
+EOF;
+
+function input_parser($input) {
+    foreach (explode("\n", $input) as $line) {
+        $fields = explode(';', $line);
+        $id = array_shift($fields);
+
+        yield $id => $fields;
+    }
+}
+
+foreach (input_parser($input) as $id => $fields) {
+    echo "$id:\n";
+    echo "    $fields[0]\n";
+    echo "    $fields[1]\n";
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+1:
+    PHP
+    Likes dollar signs
+2:
+    Python
+    Likes whitespace
+3:
+    Ruby
+    Likes blocks
+\end{verbatim}
+
+As with the simple value yields shown earlier, yielding a key/value pair in an expression context requires the yield statement to be parenthesised:
+
+\begin{lstlisting}[language=PHP]
+$data = (yield $key => $value);
+\end{lstlisting}
+
+
+\section{Yielding null values}
+
+Yield can be called without an argument to yield a NULL value with an automatic key.
+
+
+\begin{example}
+Yielding NULLs
+\begin{lstlisting}[language=PHP]
+<?php
+function gen_three_nulls() {
+    foreach (range(1, 3) as $i) {
+        yield;
+    }
+}
+
+var_dump(iterator_to_array(gen_three_nulls()));
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+array(3) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+  [2]=>
+  NULL
+}
+\end{verbatim}
+
+
+\section{Yielding by reference}
+
+Generator functions are able to yield values by reference as well as by value. This is done in the same way as returning references from functions: by prepending an ampersand to the function name.
+
+\begin{example}
+Yielding values by reference
+\begin{lstlisting}[language=PHP]
+<?php
+function &gen_reference() {
+    $value = 3;
+
+    while ($value > 0) {
+        yield $value;
+    }
+}
+
+/* Note that we can change $number within the loop, and
+ * because the generator is yielding references, $value
+ * within gen_reference() changes. */
+foreach (gen_reference() as &$number) {
+    echo (--$number).'... ';
+}
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+2... 1... 0... 
+\end{verbatim}
+
+
+\section{Generator objects}
+
+
+When a generator function is called for the first time, an object of the internal Generator class is returned. This object implements the Iterator interface in much the same way as a forward-only iterator object would.
+
+Most methods in the Generator class have the same semantics as the methods in the Iterator interface, but generator objects also have one additional method: send().
+
+Generator objects cannot be instantiated via new.
+
+
+
+\begin{example}
+The Generator class
+\begin{lstlisting}[language=PHP]
+<?php
+class Generator implements Iterator {
+    public function rewind();          // Rewinds the iterator. If
+                                       // iteration has already begun,
+                                       // this will throw an exception.
+
+    public function valid();           // Returns false if the
+                                       // iterator has been closed.
+                                       // Otherwise returns true.
+
+    public function current();         // Returns the yielded value.
+
+    public function key();             // Returns the yielded key.
+
+    public function next();            // Resumes execution of the
+                                       // generator.
+    
+    public function send($value);      // Sends the given value to the
+                                       // generator as the result of
+                                       // the yield expression and
+                                       // resumes execution of the
+                                       // generator.
+}
+?>
+\end{lstlisting}
+\end{example}
+
+
+\section{Generator::send()}
+
+Generator::send() allows values to be injected into generator functions while iterating over them. The injected value will be returned from the yield statement and can then be used like any other variable within the generator function.
+
+
+\begin{example}
+Using Generator::send() to inject values
+\begin{lstlisting}[language=PHP]
+<?php
+function printer() {
+    while (true) {
+        $string = yield;
+        echo $string;
+    }
+}
+
+$printer = printer();
+$printer->send('Hello world!');
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+Hello world!
+\end{verbatim}
+
+
+\section{Generators \& Iterator objects}
+
+The primary advantage of generators is their simplicity. Much less boilerplate code has to be written compared to implementing an Iterator class, and the code is generally much more readable. For example, the following function and class are equivalent:
+
+
+\begin{example}
+Comparing generators with Iterator objects
+\begin{lstlisting}[language=PHP]
+<?php
+function getLinesFromFile($fileName) {
+    if (!$fileHandle = fopen($fileName, 'r')) {
+        return;
+    }
+ 
+    while (false !== $line = fgets($fileHandle)) {
+        yield $line;
+    }
+ 
+    fclose($fileHandle);
+}
+
+// versus...
+
+class LineIterator implements Iterator {
+    protected $fileHandle;
+ 
+    protected $line;
+    protected $i;
+ 
+    public function __construct($fileName) {
+        if (!$this->fileHandle = fopen($fileName, 'r')) {
+            throw new RuntimeException('Couldn\'t open file "' . $fileName . '"');
+        }
+    }
+ 
+    public function rewind() {
+        fseek($this->fileHandle, 0);
+        $this->line = fgets($this->fileHandle);
+        $this->i = 0;
+    }
+ 
+    public function valid() {
+        return false !== $this->line;
+    }
+ 
+    public function current() {
+        return $this->line;
+    }
+ 
+    public function key() {
+        return $this->i;
+    }
+ 
+    public function next() {
+        if (false !== $this->line) {
+            $this->line = fgets($this->fileHandle);
+            $this->i++;
+        }
+    }
+ 
+    public function __destruct() {
+        fclose($this->fileHandle);
+    }
+}
+?>
+\end{lstlisting}
+\end{example}
+
+This flexibility does come at a cost, however: generators are forward-only iterators, and cannot be rewound once iteration has started. This also means that the same generator can't be iterated over multiple times: the generator will need to either be rebuilt by calling the generator function again, or cloned via the \textcolor{Blue}{\texttt{clone}} keyword.
+
+
+\begin{example}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+\end{example}
+
+
+
+
+
+\chapter{Magic Methods}
+
+PHP的``魔术方法"（Magic methods）包括\_\_construct()、\_\_destruct()、\_\_call()、\_\_callStatic()、\_\_get()、\_\_set()、\_\_isset()、\_\_unset()、\_\_sleep()、\_\_wakeup()、\_\_toString()、\_\_invoke()、\_\_set\_state() 、\_\_clone()和\_\_debugInfo()等。
+
+
+所有以 \_\_（两个下划线）开头的类方法都被保留为魔术方法，实践中除了上述魔术方法之外建议不要以 \_\_ 为前缀。
+
+在命名自己的类方法时不能使用魔术方法名，除非是需要使用其魔术功能。
+
+
+\section{\_\_sleep()}
+
+
+\begin{lstlisting}[language=PHP]
+public array __sleep ( void )
+void __wakeup ( void )
+\end{lstlisting}
+
+serialize() 函数会检查类中是否存在一个魔术方法\_\_sleep()。如果存在，该方法会先被调用，然后才执行序列化操作。
+
+上述功能可以用于清理对象，并返回一个包含对象中所有应被序列化的变量名称的数组。如果该方法未返回任何内容，则 NULL 被序列化，并产生一个 E\_NOTICE 级别的错误。
+
+\_\_sleep() 不能返回父类的私有成员的名字，否则产生一个 E\_NOTICE 级别的错误，可以用 Serializable 接口来替代。
+
+\_\_sleep() 方法通常用于提交未提交的数据或类似的清理操作，同时如果有一些很大的对象，但是不需要全部保存，这个功能可以用来进行清理。
+
+
+\section{\_\_wakeup()}
+
+
+与\_\_sleep()相反， unserialize() 会检查是否存在一个 \_\_wakeup() 方法。如果存在，则会先调用 \_\_wakeup 方法，预先准备对象需要的资源。
+
+\_\_wakeup() 经常用在反序列化操作中，例如重新建立数据库连接，或执行其它初始化操作。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Connection 
+{
+    protected $link;
+    private $server, $username, $password, $db;
+    
+    public function __construct($server, $username, $password, $db)
+    {
+        $this->server = $server;
+        $this->username = $username;
+        $this->password = $password;
+        $this->db = $db;
+        $this->connect();
+    }
+    
+    private function connect()
+    {
+        $this->link = mysql_connect($this->server, $this->username, $this->password);
+        mysql_select_db($this->db, $this->link);
+    }
+    
+    public function __sleep()
+    {
+        return array('server', 'username', 'password', 'db');
+    }
+    
+    public function __wakeup()
+    {
+        $this->connect();
+    }
+}
+?>
+\end{lstlisting}
+
+\section{\_\_toString()}
+
+
+\begin{lstlisting}[language=PHP]
+public string __toString ( void )
+\end{lstlisting}
+
+\_\_toString() 方法用于一个类被当成字符串时应怎样回应。例如，\texttt{echo \$obj;} 应该显示些什么。
+
+\_\_toString()方法必须返回一个字符串，否则将产生一条 E\_RECOVERABLE\_ERROR 级别的致命错误。
+
+不能在 \_\_toString() 方法中抛出异常，否则会导致致命错误。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// Declare a simple class
+class TestClass
+{
+    public $foo;
+
+    public function __construct($foo) 
+    {
+        $this->foo = $foo;
+    }
+
+    public function __toString() {
+        return $this->foo;
+    }
+}
+
+$class = new TestClass('Hello');
+echo $class;
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Hello
+\end{verbatim}
+
+
+\begin{compactitem}
+\item 在PHP 5.2.0 之前，\_\_toString() 方法只有在直接使用于 echo 或 print 时才能生效。
+\item 在PHP 5.2.0 之后，则可以在任何字符串环境生效（例如通过 printf()，使用 \%s 修饰符），但是不能用于非字符串环境（例如使用 \%d 修饰符）。
+\end{compactitem}
+
+
+如果将一个未定义 \_\_toString() 方法的对象转换为字符串，则会产生 E\_RECOVERABLE\_ERROR 级别的错误。
+
+\section{\_\_invoke()}
+
+
+\begin{lstlisting}[language=PHP]
+mixed __invoke ([ $... ] )
+\end{lstlisting}
+
+当尝试以调用函数的方式调用一个对象时，\_\_invoke() 方法会被自动调用。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class CallableClass 
+{
+    function __invoke($x) {
+        var_dump($x);
+    }
+}
+$obj = new CallableClass;
+$obj(5);
+var_dump(is_callable($obj));
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+int(5)
+bool(true)
+\end{verbatim}
+
+\section{\_\_set\_state()}
+
+
+\begin{lstlisting}[language=PHP]
+static object __set_state ( array $properties )
+\end{lstlisting}
+
+当调用 var\_export() 导出类时，\_\_set\_state()就会被调用。
+
+
+\_\_set\_state()方法的唯一参数是一个数组，其中包含按 \texttt{array('property' => value, ...)} 格式排列的类属性。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A
+{
+    public $var1;
+    public $var2;
+
+    public static function __set_state($an_array) // As of PHP 5.1.0
+    {
+        $obj = new A;
+        $obj->var1 = $an_array['var1'];
+        $obj->var2 = $an_array['var2'];
+        return $obj;
+    }
+}
+
+$a = new A;
+$a->var1 = 5;
+$a->var2 = 'foo';
+
+eval('$b = ' . var_export($a, true) . ';'); // $b = A::__set_state(array(
+                                            //    'var1' => 5,
+                                            //    'var2' => 'foo',
+                                            // ));
+var_dump($b);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+object(A)#2 (2) {
+  ["var1"]=>
+  int(5)
+  ["var2"]=>
+  string(3) "foo"
+}
+\end{verbatim}
+
+\section{\_\_debugInfo()}
+
+
+
+\begin{lstlisting}[language=PHP]
+array __debugInfo ( void )
+\end{lstlisting}
+
+在使用var\_dump()导出对象信息时，就会调用\_\_debugInfo()方法。
+
+如果对象内部没有定义\_\_debugInfo()方法，那么所有的public、protected和private属性都会被输出。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class C {
+    private $prop;
+
+    public function __construct($val) {
+        $this->prop = $val;
+    }
+
+    public function __debugInfo() {
+        return [
+            'propSquared' => $this->prop ** 2,
+        ];
+    }
+}
+
+var_dump(new C(42));
+?>
+\end{lstlisting}
+
+
+\chapter{Final Keyword}
+
+\begin{compactitem}
+\item 如果父类中的一个方法被声明为 final，则子类无法覆盖该方法。
+\item 如果一个类被声明为 final，则这个不能被继承。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class BaseClass {
+   public function test() {
+       echo "BaseClass::test() called\n";
+   }
+   
+   final public function moreTesting() {
+       echo "BaseClass::moreTesting() called\n";
+   }
+}
+
+class ChildClass extends BaseClass {
+   public function moreTesting() {
+       echo "ChildClass::moreTesting() called\n";
+   }
+}
+// Results in Fatal error: Cannot override final method BaseClass::moreTesting()
+?>
+\end{lstlisting}
+
+
+属性不能被定义为 final，只有类和方法才能被定义为 final。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+final class BaseClass {
+   public function test() {
+       echo "BaseClass::test() called\n";
+   }
+   
+   // 这里无论你是否将方法声明为final，都没有关系
+   final public function moreTesting() {
+       echo "BaseClass::moreTesting() called\n";
+   }
+}
+
+class ChildClass extends BaseClass {
+}
+// 产生 Fatal error: Class ChildClass may not inherit from final class (BaseClass)
+?>
+\end{lstlisting}
+
+\chapter{Object Cloning}
+
+在多数情况下，实际上并不需要完全复制一个对象来获得其中属性，但是有一个情况下确实需要：如果有一个 GTK 窗口对象，该对象持有窗口相关的资源，如果需要复制一个新的窗口并保持所有属性与原来的窗口相同，但是必须是一个新的对象（因为如果不是新的对象，那么一个窗口中的改变就会影响到另一个窗口）。
+
+还有一种情况就是，如果对象 A 中保存着对象 B 的引用，当复制对象 A 时需要让其中使用的对象不再是对象 B 而是 B 的一个副本，那么就必须得到对象 A 的一个副本。
+
+对象复制可以通过 clone 关键字来完成（如果可能就会调用对象的 \_\_clone() 方法），而且对象中的 \_\_clone() 方法不能被直接调用。
+
+\begin{lstlisting}[language=PHP]
+$copy_of_object = clone $object;
+\end{lstlisting}
+
+当对象被复制后，PHP会对对象的所有属性执行一个浅复制（shallow copy），所有的引用属性仍然会是一个指向原来的变量的引用。
+
+
+\begin{lstlisting}[language=PHP]
+void __clone ( void )
+\end{lstlisting}
+
+当对象复制完成时，如果定义了 \_\_clone() 方法，则新创建的对象（复制生成的对象）中的 \_\_clone() 方法会被调用，可以用来修改属性的值（如果有必要的话）。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class SubObject
+{
+    static $instances = 0;
+    public $instance;
+
+    public function __construct() {
+        $this->instance = ++self::$instances;
+    }
+
+    public function __clone() {
+        $this->instance = ++self::$instances;
+    }
+}
+
+class MyCloneable
+{
+    public $object1;
+    public $object2;
+
+    function __clone()
+    {
+      
+        // 强制复制一份this->object， 否则仍然指向同一个对象
+        $this->object1 = clone $this->object1;
+    }
+}
+
+$obj = new MyCloneable();
+
+$obj->object1 = new SubObject();
+$obj->object2 = new SubObject();
+
+$obj2 = clone $obj;
+
+
+print("Original Object:\n");
+print_r($obj);
+
+print("Cloned Object:\n");
+print_r($obj2);
+
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Original Object:
+MyCloneable Object
+(
+    [object1] => SubObject Object
+        (
+            [instance] => 1
+        )
+
+    [object2] => SubObject Object
+        (
+            [instance] => 2
+        )
+
+)
+Cloned Object:
+MyCloneable Object
+(
+    [object1] => SubObject Object
+        (
+            [instance] => 3
+        )
+
+    [object2] => SubObject Object
+        (
+            [instance] => 2
+        )
+
+)
+\end{verbatim}
+
+
+\chapter{Objects Comparison}
+
+PHP 5中的对象比较要比 PHP 4 中复杂，而且所能预期的结果更符合一个面向对象语言。
+
+\begin{compactitem}
+\item 如果使用比较运算符（=\/=）比较两个对象变量，比较的原则是：如果两个对象的属性和属性值都相等，而且两个对象是同一个类的实例，那么这两个对象变量相等。
+\item 如果使用全等运算符（===），那么这两个对象变量一定要指向某个类的同一个实例（即同一个对象）。
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function bool2str($bool)
+{
+    if ($bool === false) {
+        return 'FALSE';
+    } else {
+        return 'TRUE';
+    }
+}
+
+function compareObjects(&$o1, &$o2)
+{
+    echo 'o1 == o2 : ' . bool2str($o1 == $o2) . "\n";
+    echo 'o1 != o2 : ' . bool2str($o1 != $o2) . "\n";
+    echo 'o1 === o2 : ' . bool2str($o1 === $o2) . "\n";
+    echo 'o1 !== o2 : ' . bool2str($o1 !== $o2) . "\n";
+}
+
+class Flag
+{
+    public $flag;
+
+    function Flag($flag = true) {
+        $this->flag = $flag;
+    }
+}
+
+class OtherFlag
+{
+    public $flag;
+
+    function OtherFlag($flag = true) {
+        $this->flag = $flag;
+    }
+}
+
+$o = new Flag();
+$p = new Flag();
+$q = $o;
+$r = new OtherFlag();
+
+echo "Two instances of the same class\n";
+compareObjects($o, $p);
+
+echo "\nTwo references to the same instance\n";
+compareObjects($o, $q);
+
+echo "\nInstances of two different classes\n";
+compareObjects($o, $r);
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Two instances of the same class
+o1 == o2 : TRUE
+o1 != o2 : FALSE
+o1 === o2 : FALSE
+o1 !== o2 : TRUE
+
+Two references to the same instance
+o1 == o2 : TRUE
+o1 != o2 : FALSE
+o1 === o2 : TRUE
+o1 !== o2 : FALSE
+
+Instances of two different classes
+o1 == o2 : FALSE
+o1 != o2 : TRUE
+o1 === o2 : FALSE
+o1 !== o2 : TRUE
+\end{verbatim}
+
+
+PHP 扩展中可以自行定义对象比较的原则。
+
+
+
+
+\chapter{Type Hinting}
+
+PHP可以使用类型约束。例如，函数的参数可以指定必须为对象（在函数原型里面指定类的名字），接口、数组或者 callable。不过，如果使用 NULL 作为参数的默认值，那么在调用函数的时候依然可以使用 NULL 作为实参。
+
+如果一个类或接口指定了类型约束，则其所有的子类或实现也都必须如此。
+
+类型约束不能用于标量类型（例如int 或 string），Traits 也不允许。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class MyClass
+{
+    /**
+     * 测试函数
+     * 第一个参数必须为 OtherClass 类的一个对象
+     */
+    public function test(OtherClass $otherclass) {
+        echo $otherclass->var;
+    }
+
+
+    /**
+     * 另一个测试函数
+     * 第一个参数必须为数组 
+     */
+    public function test_array(array $input_array) {
+        print_r($input_array);
+    }
+}
+
+    /**
+     * 第一个参数必须为递归类型
+     */
+    public function test_interface(Traversable $iterator) {
+        echo get_class($iterator);
+    }
+    
+    /**
+     * 第一个参数必须为回调类型
+     */
+    public function test_callable(callable $callback, $data) {
+        call_user_func($callback, $data);
+    }
+}
+
+// OtherClass 类定义
+class OtherClass {
+    public $var = 'Hello World';
+}
+?>
+\end{lstlisting}
+
+如果函数调用的参数与定义的参数类型不一致，就会抛出一个可捕获的致命错误。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 两个类的对象
+$myclass = new MyClass;
+$otherclass = new OtherClass;
+
+// 致命错误：第一个参数必须是 OtherClass 类的一个对象
+$myclass->test('hello');
+
+// 致命错误：第一个参数必须为 OtherClass 类的一个实例
+$foo = new stdClass;
+$myclass->test($foo);
+
+// 致命错误：第一个参数不能为 null
+$myclass->test(null);
+
+// 正确：输出 Hello World 
+$myclass->test($otherclass);
+
+// 致命错误：第一个参数必须为数组
+$myclass->test_array('a string');
+
+// 正确：输出数组
+$myclass->test_array(array('a', 'b', 'c'));
+
+// 正确：输出 ArrayObject
+$myclass->test_interface(new ArrayObject(array()));
+
+// 正确：输出 int(1)
+$myclass->test_callable('var_dump', 1);
+?>
+\end{lstlisting}
+
+类型约束不只是用在类的成员函数里，也可以使用在函数里。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 如下面的类
+class MyClass {
+    public $var = 'Hello World';
+}
+
+/**
+ * 测试函数
+ * 第一个参数必须是 MyClass 类的一个对象
+ */
+function MyFunction (MyClass $foo) {
+    echo $foo->var;
+}
+
+// 正确
+$myclass = new MyClass;
+MyFunction($myclass);
+?>
+\end{lstlisting}
+
+类型约束允许 NULL 值，例如：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* 接受 NULL 值 */
+function test(stdClass $obj = NULL) {
+
+}
+
+test(NULL);
+test(new stdClass);
+?>
+\end{lstlisting}
+
+
+\chapter{Late Static Bindings}
+
+
+后期静态绑定（late static binding）功能用于在继承范围内引用静态调用的类。
+
+在引入后期静态绑定之前，测试代码如下：
+
+
+
+
+\begin{lstlisting}[language=PHP]
+class A{
+	static $word = "hello";
+	static function hello(){
+		print self::$word;
+	}
+}
+class B extends A{
+	static $word = "bye"; 
+}
+B::hello(); // hello
+\end{lstlisting}
+
+在引入静态绑定之后，测试代码如下：
+
+
+\begin{lstlisting}[language=PHP]
+class A{
+	static $word = "hello";
+	static function hello(){
+		print static::$word;
+	}
+}
+class B extends A{
+	static $word = "bye";
+}
+B::hello(); // bye
+\end{lstlisting}
+
+
+准确地说，后期静态绑定的工作原理是存储了在上一个“非转发调用”（non-forwarding call）的类名。
+
+\begin{compactitem}
+\item 当进行静态方法调用时，该类名即为明确指定的那个（通常在 :: 运算符左侧部分）；
+\item 当进行非静态方法调用时，即为该对象所属的类。
+\end{compactitem}
+
+
+所谓的“转发调用”（forwarding call）指的是通过\texttt{self::}、\texttt{parent::}、\texttt{static::}以及\texttt{forward\_static\_call()}等方式进行的静态调用，而且可以用 get\_called\_class() 函数来得到被调用的方法所在的类名，\texttt{static::}则指出了其范围。
+
+上述功能从语言内部角度考虑被命名为“后期静态绑定”，这里的“后期绑定”的意思是说\texttt{static::} 不再被解析为定义当前方法所在的类，而是在实际运行时计算的，因此也可以称之为“静态绑定”，因为它可以用于（但不限于）静态方法的调用。
+
+使用\texttt{self::}或者\texttt{\_\_CLASS\_\_} 对当前类的静态引用，取决于定义当前方法所在的类。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    public static function who() {
+        echo __CLASS__;
+    }
+    public static function test() {
+        self::who();
+    }
+}
+
+class B extends A {
+    public static function who() {
+        echo __CLASS__;
+    }
+}
+
+B::test();
+?>
+\end{lstlisting}
+
+以上例程会输出：\verb|A|
+
+
+
+后期静态绑定原本的想法是通过引入一个新的关键字表示运行时最初调用的类来绕过限制。简单地说，这个关键字能够在上述例子中调用 test() 时引用的类是 B 而不是 A，最终还是决定不引入新的关键字，而是使用已经预留的\texttt{static::}关键字。
+
+\texttt{static::}只能用于静态属性。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    public static function who() {
+        echo __CLASS__;
+    }
+    public static function test() {
+        static::who(); // 后期静态绑定从这里开始
+    }
+}
+
+class B extends A {
+    public static function who() {
+        echo __CLASS__;
+    }
+}
+
+B::test();
+?>
+\end{lstlisting}
+
+
+以上例程会输出：\verb|B|
+
+在非静态环境下，所调用的类即为该对象实例所属的类，而且\texttt{\$this->}会在同一作用范围内尝试调用私有方法，\texttt{static::}则可能给出不同结果。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    private function foo() {
+        echo "success!\n";
+    }
+    public function test() {
+        $this->foo();
+        static::foo();
+    }
+}
+
+class B extends A {
+   /* foo() will be copied to B, hence its scope will still be A and
+    * the call be successful */
+}
+
+class C extends A {
+    private function foo() {
+        /* original method is replaced; the scope of the new one is C */
+    }
+}
+
+$b = new B();
+$b->test();
+$c = new C();
+$c->test();   //fails
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+success!
+success!
+success!
+
+Fatal error:  Call to private method C::foo() from context 'A' in /tmp/test.php on line 9
+\end{verbatim}
+
+
+后期静态绑定的解析会一直到取得一个完全解析了的静态调用为止，如果静态调用使用\texttt{parent::}或者\texttt{self::}将转发调用信息。
+
+
+\begin{example}
+转发和非转发调用
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    public static function foo() {
+        static::who();
+    }
+
+    public static function who() {
+        echo __CLASS__."\n";
+    }
+}
+
+class B extends A {
+    public static function test() {
+        A::foo();
+        parent::foo();
+        self::foo();
+    }
+
+    public static function who() {
+        echo __CLASS__."\n";
+    }
+}
+class C extends B {
+    public static function who() {
+        echo __CLASS__."\n";
+    }
+}
+
+C::test();
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+A
+C
+C
+\end{verbatim}
+
+
+\chapter{References Passing}
+
+虽然默认情况下对象是通过引用传递的，但是其实这不是完全正确的。
+
+PHP的引用是别名，就是两个不同的变量名字指向相同的内容。
+
+一个对象变量已经不再保存整个对象的值，只是保存一个标识符来访问真正的对象内容。 
+
+当对象作为参数传递、作为结果返回或者赋值给另外一个变量时，另外一个变量跟原来的不是引用的关系，只是它们都保存着同一个标识符的拷贝，这个标识符指向同一个对象的真正内容。
+
+\begin{example}
+引用和对象
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+    public $foo = 1;
+}  
+
+$a = new A;
+$b = $a;     // $a ,$b都是同一个标识符的拷贝
+             // ($a) = ($b) = <id>
+$b->foo = 2;
+echo $a->foo."\n";
+
+
+$c = new A;
+$d = &$c;    // $c ,$d是引用
+             // ($c,$d) = <id>
+
+$d->foo = 2;
+echo $c->foo."\n";
+
+
+$e = new A;
+
+function foo($obj) {
+    // ($obj) = ($e) = <id>
+    $obj->foo = 2;
+}
+
+foo($e);
+echo $e->foo."\n";
+
+?>
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{verbatim}
+2
+2
+2
+\end{verbatim}
+
+
+\chapter{Object Serialization}
+
+
+\section{Sessions Serialization}
+
+\begin{compactitem}
+\item serialize()函数能够将PHP中的所有的值转换成一个包含字节流的字符串。
+\item unserialize()函数能够重新把字符串变回PHP原来的值。
+\end{compactitem}
+
+
+这里序列化一个对象将会保存对象的所有变量，但是不会保存对象的方法，只会保存类的名字。
+
+
+
+\begin{compactitem}
+\item 如果序列化类A的一个对象，将会返回一个跟类A相关，而且包含了对象所有变量值的字符串。
+\item 如果要想在另外一个文件中解序列化一个对象，这个对象的类必须在解序列化之前定义，可以通过包含一个定义该类的文件或使用函数 spl\_autoload\_register()来实现。
+\end{compactitem}
+
+为了能够 unserialize()一个对象，这个对象的类必须已经定义过。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// classa.inc:
+  
+  class A {
+      public $one = 1;
+    
+      public function show_one() {
+          echo $this->one;
+      }
+  }
+  
+// page1.php:
+
+  include("classa.inc");
+  
+  $a = new A;
+  $s = serialize($a);
+  // 把变量$s保存起来以便文件page2.php能够读到
+  file_put_contents('store', $s);
+
+// page2.php:
+  
+  // 要正确了解序列化，必须包含下面一个文件
+  include("classa.inc");
+
+  $s = file_get_contents('store');
+  $a = unserialize($s);
+
+  // 现在可以使用对象$a里面的函数 show_one()
+  $a->show_one();
+?>
+\end{lstlisting}
+
+当一个应用程序使用函数 session\_register()\footnote{session\_register()函数已废弃，不要依赖这个函数。}来保存对象到会话中时，在每个页面结束的时候这些对象都会自动序列化，并且在每个页面开始的时候又自动解序列化，这样将对象被保存在会话中以后，整个应用程序的页面就都能使用这些对象。
+
+
+
+在应用程序中序列化对象以便在之后使用，需要在整个应用程序都包含对象的类的定义，否则有可能出现在解序列化对象的时候，没有找到该对象的类的定义，从而把没有方法的类\_\_PHP\_Incomplete\_Class\_Name作为该对象的类，就会返回一个没有用的对象。
+
+当运行\texttt{session\_register("a")}来把变量\$a放在会话里之后，需要在每个页面都包含文件classa.inc，而不是只有文件page1.php和page2.php。
+
+
+\bibliographystyle{plainnat}
+\bibliography{phpnotes}
+\clearpage

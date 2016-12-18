@@ -1,0 +1,674 @@
+\part{Errors}
+
+
+\chapter{Overview}
+
+PHP使用内部错误号来报告错误，而且每个PHP错误都带有一个类型，PHP可以根据需要显示和/或记录错误。
+
+如果没有设置错误处理器（error handler），PHP会根据配置文件来处理错误。例如，php.ini中的errror\_reporting配置项说明了哪些错误需要报告，哪些错误需要忽略。
+
+另外，用户还可以使用error\_reporting()在运行时设置错误报告级别和处理，推荐在php.ini中设置错误报告选项，因为有些错误可能发生在PHP脚本执行之前，遮掩就可以脚本开始执行之前报告错误。
+
+\begin{compactitem}
+\item 开发阶段建议配置：\texttt{E\_ALL}
+\item 生产环境建议配置：\texttt{E\_ALL \& \~{}E\_NOTICE \& \~{}E\_STRICT \& \~{}E\_DEPRECATED}
+\end{compactitem}
+
+实际上，E\_ALL在很多情况下都是推荐的设置，这样就可以提供某些问题的早期预警。
+
+php.ini中的两个配置选项可以指示如何进一步处理错误：
+
+\begin{compactitem}
+\item display\_errors控制是否把错误显示为PHP脚本的输出（在生产环境中应该始终关闭）
+
+\item log\_errors控制是否记录错误到日志文件或syslog（通过error\_log指令）
+\end{compactitem}
+
+如果PHP默认的错误处理器不满足需求，用户还可以定制自己的错误处理器来针对不同类型的错误进行处理。例如，在生产环境中可以记录错误并生成错误报告来定位错误。
+
+PHP7改变了大多数错误的报告方式，不同于传统的错误报告机制，现在大多数错误都被作为 Error 异常抛出，而且Error 异常可以像 Exception 异常一样被第一个匹配的 try / catch 块所捕获。
+
+\begin{compactitem}
+\item 如果没有匹配的 catch 块，则调用异常处理函数（事先通过 set\_exception\_handler() 注册）进行处理。 
+\item 如果尚未注册异常处理函数，则按照传统方式处理（即被报告为一个致命错误）。
+\end{compactitem}
+
+
+Error 类并非继承自 Exception 类，所以不能用 \texttt{catch (Exception \$e) \{ ... \}} 来捕获 Error，而是用\texttt{catch (Error \$e) \{ ... \}}，或者通过注册异常处理函数（ set\_exception\_handler()）来捕获 Error。
+
+\section{Error Handling}
+
+在许多「重异常」(exception-heavy) 的编程语言中，一旦发生错误就会抛出异常，而且这也确实是一个可行的方式，不过PHP是一个 「轻异常」(exception-light) 的语言。
+
+PHP在处理对象时，其异常机制的核心也会处理问题，只是 PHP 会尽可能的执行而无视发生的事情（除非是一个严重错误）。
+
+PHP可以忽略notice级别的错误并继续执行的特点通常对有「重异常」编程经验的人带来困惑，例如在 Python 中引用一个不存在的变量会抛出异常：
+
+\begin{lstlisting}[language=bash]
+$ php -a
+php > echo $foo;
+Notice: Undefined variable: foo in php shell code on line 1
+$ python
+>>> print foo
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'foo' is not defined
+\end{lstlisting}
+
+上述本质上的差异在于 Python 会对任何小错误进行抛错，因此开发人员可以确信任何潜在的问题或者边缘的案例都可以被捕捉到，与此同时 PHP 仍然会保持执行，除非极端的问题发生才会抛出异常。
+
+PHP 定义的错误严重性等级中的三个最常见的的信息类型是错误（error）、通知（notice）和警告（warning），它们有不同的严重性——E\_ERROR 、E\_NOTICE和 E\_WARNING。
+
+\begin{compactitem}
+\item 错误是运行期间的严重问题，通常是因为代码出错而造成，必须要修正它，否则会使 PHP 停止执行。
+\item 通知是建议性质的信息，是因为程序代码在执行期有可能造成问题，但程序不会停止。
+\item 警告是非致命错误，程序执行也不会因此而中止。
+\end{compactitem}
+
+另一个在编译期间会报错的信息类型是「E\_STRICT」。这个信息用來建议修改程序代码以维持最佳的互通性并能与今后的 PHP 版本兼容。
+
+
+错误报告可以被PHP配置及函数调用改变。其中，使用 PHP 内置的函数 error\_reporting()可以设定程序执行期间的错误等级，方法是传入预定义的错误等级常量，意味着如果只想看到警告和错误（而非通知）时可以这样设定：
+
+\begin{lstlisting}[language=PHP]
+<?php
+error_reporting(E_ERROR | E_WARNING);
+\end{lstlisting}
+
+也可以控制错误是否在屏幕上显示 （开发阶段）或隐藏后记录日志 （生产环境）。
+
+PHP提供了错误控制操作符 @ 来抑制特定的错误，只要将这个操作符放置在表达式之前，其后的任何错误都不会出现。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo @$foo['bar'];
+\end{lstlisting}
+
+\begin{compactitem}
+\item 如果\texttt{\$foo['bar']}存在，程序会将结果输出；
+\item 如果变量\texttt{\$foo}或是\texttt{'bar'}键值不存在，则会返回 null 并且不输出任何东西。
+\end{compactitem}
+
+
+如果不使用错误控制操作符，这个表达式会产生一个错误信息 PHP Notice: Undefined variable: foo 或 PHP Notice: Undefined index: bar 。
+
+使用@操作符需要付出的代价就是PHP处理使用 @ 的表达式效率会低一些。过早的性能优化在所有程序语言中也许都是争论点，不过如果性能在应用程序/类库中占有重要地位，那么了解错误控制操作符的性能影响就比较重要。
+
+实际上，错误控制操作符会 完全 吃掉错误。不但没有显示而且也不会记录在错误日志中。
+
+在正式环境中 PHP 也没有办法关闭错误控制操作符。也许你认为那些错误是无害的，不过那些较具伤害性的错误同时也会被隐藏。
+
+如果有方法可以避免错误抑制符，应该考虑使用。例如，上面的程序代码可以这样重写：
+
+\begin{lstlisting}[language=PHP]
+<?php
+echo isset($foo['bar'] ? $foo['bar'] : '';
+\end{lstlisting}
+
+当 fopen() 载入文件失败时，也许就是一个使用错误抑制符的合理例子。
+
+在尝试载入文件前检查可以是否文件存在，但是如果这个文件在检查后被删除了，此时 fopen() 还未执行 （听起来有点不太可能，但是确实会发生），这时 fopen() 会返回 false 并且 抛出异常。
+
+虽然上述这种情况也许应该由 PHP 本身来解决，不过这就是使用一个错误抑制符才能有效解决的例子。
+
+虽然在正式的 PHP 环境中没有办法关闭错误控制操作符，但是 Xdebug 有一个 xdebug.scream 的 ini 配置项可以关闭错误控制操作符。例如，可以按照下面的方式修改 php.ini：
+
+
+\begin{lstlisting}[language=PHP]
+xdebug.scream = On
+\end{lstlisting}
+
+也可以在执行期间通过 ini\_set 函数来设置这个值：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+ini_set('xdebug.scream', '1');
+\end{lstlisting}
+
+另外，「Scream」这个 PHP 扩展提供了和 xDebug 类似的功能，只是 Scream 的 ini 设置项叫做 scream.enabled 。
+
+在调试代码而错误信息被隐藏时，这是最有用的方法，不过需要务必小心使用 scream ，应该仅仅是把它当作暂时性的调试工具，例如在许多的 PHP 函数类库代码无法在错误抑制操作符停用时正常使用。
+
+
+实际上，PHP本身可以完美化身为「重异常」的程序语言，基本上用户可以利用 ErrorException 类抛出「错误」来当做「异常」，这个类是继承自 Exception 类。
+
+Error/Exception是大量的现代框架（比如 Symfony 和 Laravel）中的一个常见的做法。例如，Laravel 默认使用 \texttt{Whoops!}扩展包来处理错误，如果 app.debug 启动的话，就会将错误当成异常显示出来，而关闭则会隐藏。
+
+在开发过程中将错误当作异常抛出可以更好的处理它，如果在开发时发生异常，可以将它包在一个 catch 语句中具体说明这种情况如何处理。每捕捉一个异常，都会使应用程序越来越健壮。
+
+
+以前，PHP 处理异常/错误的问题则比较随意，例如调用 file\_get\_contents() 函数通常只会给出 FALSE 值和警告，而且许多较早的 PHP 框架（比如 CodeIgniter）只是返回 false，然后将信息写入专有的日志，或者让用户使用类似\texttt{\$this->upload->get\_error()}的方法来查看错误原因。这里的问题在于用户必须自己找出错误所在，并且通过翻阅文档查看这个类使用了什么样的错误的方法，而不是明确的暴露错误。
+
+另一个问题发生在当类自动抛出错误到屏幕时会结束程序，这样做阻碍了其他开发者动态处理错误的机会，因此应该抛出异常让开发人员意识到错误的存在，让他们可以选择处理的方式，例如：
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$email = new Fuel\Email;
+$email->subject('My Subject');
+$email->body('How the heck are you?');
+$email->to('guy@example.com' , 'Some guy');
+
+try 
+{
+  $email->send();
+}
+catch (Fuel\Email\ValidationFailedException $e)
+{
+  // 验证失败
+}
+catch (Fuel\Email\SendingFailedException $e) 
+{
+  // 驱动问题导致无法发送email
+}
+finally
+{
+  // 无论抛出什么样的异常都会执行，并且在正常程序继续之前执行
+}
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{error\_reporting()}
+
+
+\subsection{set\_error\_handler()}
+
+
+虽然某些错误类型无法被处理，不过PHP允许定制错误处理的方式。例如，可以向用户显示一个自定义错误页面，也可以通过发送电子邮件而不是日志的方式来报告错误。
+
+
+
+
+
+\section{Error Hierarchy}
+
+
+
+
+\begin{compactitem}
+\item Throwable
+
+\begin{compactitem}
+\item Error
+
+\begin{compactitem}
+\item ArithmeticError
+\begin{compactitem}
+\item DivisionByZeroError
+\end{compactitem}
+\item AssertionError
+\item ParseError
+\item TypeError
+\end{compactitem}
+
+\item Exception
+
+\end{compactitem}
+\end{compactitem}
+
+
+
+
+\chapter{Error}
+
+
+Error类是PHP中的所有的内部错误类的基类，无法克隆。
+
+\section{Class synopsis}
+
+\begin{lstlisting}[language=PHP]
+Error implements Throwable {
+   /* Properties */
+   protected string $message ;
+   protected int $code ;
+   protected string $file ;
+   protected int $line ;
+   /* Methods */
+   public __construct ([ string $message = "" [, int $code = 0 [, Throwable $previous = NULL ]]] )
+   final public string getMessage ( void )
+   final public Throwable getPrevious ( void )
+   final public mixed getCode ( void )
+   final public string getFile ( void )
+   final public int getLine ( void )
+   final public array getTrace ( void )
+   final public string getTraceAsString ( void )
+   public string __toString ( void )
+   final private void __clone ( void )
+}
+\end{lstlisting}
+
+\section{Class property}
+
+
+\subsection{message}
+
+错误信息
+
+\subsection{code}
+
+错误代码
+
+\subsection{file}
+
+
+错误发生的文件
+
+
+\subsection{line}
+
+错误发生的行数
+
+
+\section{Class method}
+
+
+\subsection{Error::\_\_construct()}
+
+
+\begin{lstlisting}[language=PHP]
+public Error::__construct ([ string $message = "" [, int $code = 0 [, Throwable $previous = NULL ]]] )
+\end{lstlisting}
+
+构造函数
+
+
+\begin{compactitem}
+\item \$message 错误信息
+\item \$code 错误代码
+\item \$previous 异常链上的上一个可抛出错误
+\end{compactitem}
+
+\$message不是二进制安全的。
+
+\subsection{Error::getMessage()}
+
+\begin{lstlisting}[language=PHP]
+final public string Error::getMessage ( void )
+\end{lstlisting}
+
+获取错误信息
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Error("Some error message");
+} catch(Error $e) {
+    echo $e->getMessage();
+}
+\end{lstlisting}
+
+
+\subsection{Error::getPrivious()}
+
+\begin{lstlisting}[language=PHP]
+final public Throwable Error::getPrevious ( void )
+\end{lstlisting}
+
+获取上一个可抛出（Throwable）的的错误（或NULL）
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class MyCustomError extends Error {}
+
+function doStuff() {
+    try {
+        throw new InvalidArgumentError("You are doing it wrong!", 112);
+    } catch(Error $e) {
+        throw new MyCustomError("Something happened", 911, $e);
+    }
+}
+
+
+try {
+    doStuff();
+} catch(Error $e) {
+    do {
+        printf("%s:%d %s (%d) [%s]\n", $e->getFile(), $e->getLine(), $e->getMessage(), $e->getCode(), get_class($e));
+    } while($e = $e->getPrevious());
+}
+?>
+\end{lstlisting}
+
+上述示例的结果如下：
+
+
+\begin{lstlisting}[language=PHP]
+/home/me/test.php:8 Something happened (911) [MyCustomError]
+/home/me/test.php:6 You are doing it wrong! (112) [InvalidArgumentError]
+\end{lstlisting}
+
+\subsection{Error::getCode()}
+
+\begin{lstlisting}[language=PHP]
+final public mixed Error::getCode ( void )
+\end{lstlisting}
+
+获取错误代码
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Error("Some error message", 30);
+} catch(Error $e) {
+    echo "The Error code is: " . $e->getCode();
+}
+\end{lstlisting}
+
+上述示例的结果如下：
+
+
+\begin{lstlisting}[language=PHP]
+The Error code is: 30
+\end{lstlisting}
+
+\subsection{Error::getFile()}
+
+\begin{lstlisting}[language=PHP]
+final public string Error::getFile ( void )
+\end{lstlisting}
+
+获取错误脚本文件名
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Error;
+} catch(Error $e) {
+    echo $e->getFile();
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+/home/me/test.php
+\end{lstlisting}
+
+
+\subsection{Error::getLine()}
+
+\begin{lstlisting}[language=PHP]
+final public int Error::getLine ( void )
+\end{lstlisting}
+
+获取错误行号
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Error("Some error message");
+} catch(Error $e) {
+    echo "The error was created on line: " . $e->getLine();
+}
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+The error was created on line: 3
+\end{lstlisting}
+
+
+\subsection{Error::getTrace()}
+
+\begin{lstlisting}[language=PHP]
+final public array Error::getTrace ( void )
+\end{lstlisting}
+
+获取堆栈追踪数组信息
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function test() {
+ throw new Error;
+}
+
+try {
+ test();
+} catch(Error $e) {
+ var_dump($e->getTrace());
+}
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+array(1) {
+  [0]=>
+  array(4) {
+    ["file"]=>
+    string(22) "/home/me/test.php"
+    ["line"]=>
+    int(7)
+    ["function"]=>
+    string(4) "test"
+    ["args"]=>
+    array(0) {
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Error::getTraceAsString()}
+
+\begin{lstlisting}[language=PHP]
+final public string Error::getTraceAsString ( void )
+\end{lstlisting}
+
+获取字符串表示的堆栈追踪信息
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function test() {
+    throw new Error;
+}
+
+try {
+    test();
+} catch(Error $e) {
+    echo $e->getTraceAsString();
+}
+\end{lstlisting}
+
+
+
+
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+#0 /home/me/test.php(7): test()
+#1 {main}
+\end{lstlisting}
+
+\subsection{Error::\_\_toString()}
+
+\begin{lstlisting}[language=PHP]
+public string Error::__toString ( void )
+\end{lstlisting}
+
+
+错误的字符串表示
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    throw new Error("Some error message");
+} catch(Error $e) {
+    echo $e;
+}
+\end{lstlisting}
+
+上述示例的结果如下：
+
+\begin{lstlisting}[language=PHP]
+Error: Some error message in /home/me/test.php:3
+Stack trace:
+#0 {main}
+\end{lstlisting}
+
+\subsection{Error::\_\_clone()}
+
+\begin{lstlisting}[language=PHP]
+final private void Error::__clone ( void )
+\end{lstlisting}
+
+克隆错误（Error无法被克隆，因此该方法会导致致命错误）
+
+
+\section{Class Interface}
+
+
+\subsection{Throwable}
+
+\section{Class extends}
+
+
+\subsection{ArithmeticError}
+
+In PHP 7.0, these errors include attempting to perform a bitshift by a negative amount, and any call to intdiv() that would result in a value outside the possible bounds of an integer.
+
+\begin{lstlisting}[language=PHP]
+ArithmeticError extends Error {
+/* Inherited methods */
+final public string Error::getMessage ( void )
+final public Throwable Error::getPrevious ( void )
+final public mixed Error::getCode ( void )
+final public string Error::getFile ( void )
+final public int Error::getLine ( void )
+final public array Error::getTrace ( void )
+final public string Error::getTraceAsString ( void )
+public string Error::__toString ( void )
+final private void Error::__clone ( void )
+}
+\end{lstlisting}
+
+算术运算时发生错误会抛出ArithmeticError。
+
+\subsection{DivisionByZeroError}
+
+\begin{lstlisting}[language=PHP]
+DivisionByZeroError extends ArithmeticError {
+/* Inherited methods */
+final public string Error::getMessage ( void )
+final public Throwable Error::getPrevious ( void )
+final public mixed Error::getCode ( void )
+final public string Error::getFile ( void )
+final public int Error::getLine ( void )
+final public array Error::getTrace ( void )
+final public string Error::getTraceAsString ( void )
+public string Error::__toString ( void )
+final private void Error::__clone ( void )
+}
+\end{lstlisting}
+
+试图进行除0操作时会抛出除0错误。
+
+
+\subsection{AssertionError}
+
+\begin{lstlisting}[language=PHP]
+AssertionError extends Error {
+/* Inherited methods */
+final public string Error::getMessage ( void )
+final public Throwable Error::getPrevious ( void )
+final public mixed Error::getCode ( void )
+final public string Error::getFile ( void )
+final public int Error::getLine ( void )
+final public array Error::getTrace ( void )
+final public string Error::getTraceAsString ( void )
+public string Error::__toString ( void )
+final private void Error::__clone ( void )
+}
+\end{lstlisting}
+
+执行assert()发生断言错误时会抛出AssertionError。
+
+\subsection{ParseError}
+
+\begin{lstlisting}[language=PHP]
+ParseError extends Error {
+/* Inherited methods */
+final public string Error::getMessage ( void )
+final public Throwable Error::getPrevious ( void )
+final public mixed Error::getCode ( void )
+final public string Error::getFile ( void )
+final public int Error::getLine ( void )
+final public array Error::getTrace ( void )
+final public string Error::getTraceAsString ( void )
+public string Error::__toString ( void )
+final private void Error::__clone ( void )
+}
+\end{lstlisting}
+
+在解析PHP代码（例如执行eval()）出错会抛出ParseError。
+
+\subsection{TypeError}
+
+\begin{lstlisting}[language=PHP]
+TypeError extends Error {
+/* Inherited methods */
+final public string Error::getMessage ( void )
+final public Throwable Error::getPrevious ( void )
+final public mixed Error::getCode ( void )
+final public string Error::getFile ( void )
+final public int Error::getLine ( void )
+final public array Error::getTrace ( void )
+final public string Error::getTraceAsString ( void )
+public string Error::__toString ( void )
+final private void Error::__clone ( void )
+}
+\end{lstlisting}
+
+有三种情况会抛出TypeError，分别是：
+
+\begin{compactitem}
+\item 传递给函数的参数与其对应的声明参数类型不匹配
+\item 从函数返回的值与声明的函数返回类型不匹配
+\item 将无效数量的参数传递给PHP内置函数（仅限严格模式）
+\end{compactitem}

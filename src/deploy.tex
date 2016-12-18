@@ -1,0 +1,258 @@
+\part{Deployment}
+
+
+
+\chapter{Overview}
+
+
+
+\section{Platform}
+
+
+部署 PHP 应用程序到生产环境中有多种方式。例如，PaaS（例如Heroku、Openshift、Beanstalk、Azure和Google App Engine等） 提供了运行 PHP 应用程序所必须的系统环境和网络架构，只需做少量配置就可以运行 PHP 应用程序或者 PHP 框架。
+
+
+
+
+
+
+\section{FastCGI}
+
+
+PHP 通过内置的 FastCGI 进程管理器（FPM），可以很好的与轻量级的高性能 web 服务器 nginx 协作使用。nginx 比 Apache 占用更少内存而且可以更好的处理并发请求，这对于并没有太多内存的虚拟服务器尤其重要。
+
+PHP 和 Apache 有很长的合作历史。Apache 有很强的可配置性和大量的 扩展模块，完美支持各种 PHP 框架和开源应用(如 WordPress )。
+
+默认情况下，mod\_php5必须使用 prefork MPM，因此Apache 会比 nginx 消耗更多的资源，而且并发处理能力不强。
+
+Apache 有多种方式运行 PHP，最常见的方式就是使用 mod\_php5 的 prefork MPM 方式，但是它对内存的利用效率并不高，如果并不想深入服务器管理方面，那么可以部署为prefork MPM方式。
+
+如果追求高性能和高稳定性，可以为 Apache 选择与 nginx 类似的的 FPM 系统 worker MPM 或者 event MPM，它们分别使用 mod\_fastcgi 和 mod\_fcgid，可以更高效的利用内存，运行速度也更快，同时配置也相对复杂一些。
+
+在共享主机上部署PHP应用程序时，需要注意服务器上的 PHP 是否是最新稳定版本。共享主机允许多个开发者把自己的网站部署在上面，这样的好处是费用非常便宜，坏处是无法知道将和哪些网站共享主机，因此需要仔细考虑机器负载和安全问题。如果项目预算允许的话，避免使用共享主机是上策。
+
+实际上，只有虚拟服务器或者专用服务器才允许开发者完全控制自己的生产环境。如果在手动进行数据库结构的修改或者在更新文件前手动运行测试，每一个额外的手动任务的添加都需要去部署一个新的版本到应用程序，这些更改会增加程序潜在的致命错误。即便只是处理一个简单的更新，全面的构建处理或者持续集成策略来实现构建自动化都会带来好处。
+
+\section{Cache}
+
+PHP 本身来说是非常快的，但是在发起远程连接、加载文件等操作时也会遇到瓶颈，不过已经有各种各样的工具可以用来加速PHP应用程序的某些耗时的部分，或者说减少某些耗时任务所需要运行的次数。
+
+\subsection{Opcode}
+
+
+当一个 PHP 文件被解释执行的时候，首先是被编译成名为 opcode 的中间代码，然后才被底层的虚拟机执行。 如果PHP文件没有被修改过，opcode 始终是一样的，因此每次从头编译PHP到opcode就意味着编译步骤白白浪费了 CPU 的资源。
+
+PHP的opcode缓存工具可以把opcode缓存在内存中，它能防止冗余的编译步骤，并且在下次调用执行时得到重用，结果就是让PHP应用程序大大加速。
+
+\subsection{Object}
+
+有时缓存代码中的单个对象会很有用，比如有些需要很大开销获取的数据或者一些结果集不怎么变化的数据库查询，可以使用一些缓存软件将这些数据存放在内存中以便下次高速获取。如果获得数据后把它们储存到对象缓存服务器中，下次请求直接从缓存里面获取数据，在减少数据库负载的同时能极大提高性能。
+
+另外，许多流行的字节码缓存方案也能缓存定制化的数据，例如APCu、XCache 以及 WinCache 都提供了 API来将数据缓存到内存中。
+
+在实际应用环境中，最常用的内存对象缓存系统是 APCu 和 Memcached 。APCu 对于对象缓存来说是个很好的选择，它提供了简单的 API来将数据缓存到内存，并且很容易设置和使用。APCu 的局限性表现在它依赖于所在的服务器。另一方面，Memcached和Redis等可以以独立的服务的形式安装，可以通过网络交互，这意味着可以将数据集中存在一个高速存取的地方，而且许多不同的系统能从中获取数据。
+
+值得注意的是，当用户以CGI（FastCGI）的形式使用 PHP 时，每个进程将会有各自的缓存，比如说APCu 缓存数据无法在多个工作进程中共享。在这种情况下，可能就必须考虑 Memcached或Redis，因为它们可以独立于 PHP 进程。
+
+通常情况下，APCu 在存取速度上比 Memcached 更快，但是 Memcached 在扩展上更有优势。如果不希望应用程序涉及多个服务器，或者不需要 Memcached 提供的其他特性，那么 APCu 可能是最好的选择。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// check if there is data saved as 'expensive_data' in cache
+$data = apc_fetch('expensive_data');
+if($data === false) {
+  // data is not in cache
+  // save result of expensive call for later use
+  apc_add('expensive_data',$data = get_expensive_data());
+}
+print_r($data);
+\end{lstlisting}
+
+APC 同时提供了对象缓存与字节码缓存，APCu 是为了将 APC 的对象缓存移植到 PHP 5.5+ 的一个项目，因为现在 PHP 有了内建的字节码缓存方案 (OPcache)。
+
+
+
+
+
+\chapter{Deployment}
+
+
+在部署和维护PHP应用程序时，可能需要实现自动化的任务包括依赖管理（Composer）、静态资源编译和压缩、执行测试、文档生成（PHPDoc）、打包（Phar）和部署等。
+
+
+
+
+构建工具可以认为是一系列的脚本来完成应用部署的通用任务。构建工具并不属于应用的一部分，它独立于应用层 ‘之外’。
+
+现在已有很多开源的工具来帮助你完成构建自动化，一些是用 PHP 编写，有一些不是。应该根据实际项目来选择最适合的工具，不要让语言阻碍了这些工具的使用。
+
+\begin{compactitem}
+\item Phing
+\item Capistrano
+\item Chef
+\item Deployer
+\end{compactitem}
+
+
+\section{Chef}
+
+
+Chef 不仅仅只是一个部署框架， 它是一个基于 Ruby 的强大的系统集成框架，除了部署应用之外，还可以构建整个服务环境或者虚拟机。
+
+\section{PHPCI}
+
+
+\section{Phing}
+
+
+Phing 是一种在 PHP 领域中最简单的开始自动化部署的方式。通过 Phing可以控制打包、部署或者测试，只需要一个简单的 XML 构建文件。
+
+Phing (基于Apache Ant) 提供了在安装或者升级 web 应用时的一套丰富的任务脚本，并且可以通过 PHP 编写额外的任务脚本来扩展。
+
+\section{Travis}
+
+
+持续集成是一种软件开发实践，团队的成员经常用来集成他们的工作， 通常每一个成员至少每天都会进行集成 — 因此每天都会有许多的集成。许多团队发现这种方式会显著地降低集成问题， 并允许一个团队更快的开发软件。
+
+PHP有许多方式可以来实现持续集成。例如，近来 Travis CI 在持续集成上做的很棒，对于小项目来说也可以很好的使用。
+
+Travis CI 是一个托管的持续集成服务用于开源社区，而且Travis CI可以和 Github 很好的集成，并且提供了很多语言的支持（包括 PHP）。
+
+\section{Jenkins}
+
+
+
+\section{Deployer}
+
+
+Deployer 是一个用 PHP 编写的部署工具，它很简单且实用，可以并行执行任务，原子化部署，以及在多台服务器之间保持一致性。
+
+Deployer为 Symfony、Laravel、Zend Framework 和 Yii 提供了通用的任务脚本。
+
+
+
+
+
+\section{Capistrano}
+
+Capistrano 以一种结构化、可复用的方式在一台或多台远程机器上执行命令。对于部署 Ruby on Rails 的应用，它提供了预定义的配置，不过也可以用它来 部署 PHP 应用 。如果要成功的使用 Capistrano ，需要一定的 Ruby 和 Rake 的知识。
+
+
+
+
+\chapter{Environment}
+
+在开发和线上阶段使用不同的系统运行环境可能会遇到各种各样的 BUG，并且在团队开发时让所有成员都保持使用最新版本的软件和类库也是一件很让人头痛的事情.
+
+如果在 Windows下开发并部署到Linux环境中，或者团队协同开发时，建议使用虚拟机。
+
+
+
+除了VMware 和 VirtualBox 外, 还可以使用Vagrant和Docker等实现快速切换到虚拟环境。
+
+
+\section{Vagrant}
+
+Vagrant 可以使用单一的配置信息来部署一套虚拟环境，最后打包为一个所谓的 box (就是已经部署好环境的虚拟机器)，而且可以手动安装和配置 box或者使用自动部署工具（例如Puppet 或者 Chef）。
+
+自动部署工具的好处就是可以快速部署一套一模一样的环境，避免了一大堆的手动的命令输入，并且允许用户随时删除和重建一个全新的 box，从而简化虚拟机的管理。
+
+Vagrant 还可以在虚拟机和主机上分享文件夹，这样就可以在主机里面编辑代码，然后在虚拟机里面运行。
+
+下面的一些工具可以用来更好地使用Vagrant：
+
+\begin{compactitem}
+\item Rove使用 Chef 自动化安装一些常用的软件（包括PHP）。
+\item Puphpet使用Web图形界面来生成部署 PHP 环境的 Puppet 脚本。
+\item Protobox是一个基于 vagrant 的一个层，同时还有 Web 图形界面，而且允许使用YAML文件来安装和配置虚拟机里面的软件。
+\item Phansible提供了一个简单的 Web 图形界面来创建 Ansible 自动化部署脚本，专门为 PHP 项目定制。
+\end{compactitem}
+
+
+
+
+\section{Container}
+
+
+Docker 为各种应用程序提供了 Linux 容器，因此Docker是除了 Vagrant之外另一个实现生产和开发环境统一的虚拟化方案。
+
+用户可以安装 Docker 镜像（例如MySQL 和 PostgreSQL 等），并且不会污染到本地机器。例如，下面的命令会下载一个功能齐全的 Apache 和 最新版本的 PHP，并且设置 WEB 目录 /path/to/your/php/files 运行在 http://localhost:8080。
+
+\begin{lstlisting}[language=bash]
+$ docker run -d --name my-php-webserver -p 8080:80 -v /path/to/your/php/files:/var/www/html/ php:apache
+\end{lstlisting}
+
+在使用 docker run 命令以后停止或者再次开启容器，只需要执行以下命令：
+
+
+\begin{lstlisting}[language=bash]
+$ docker stop my-php-server
+$ docker start my-php-server
+\end{lstlisting}
+
+
+
+\chapter{Documentation}
+
+
+PHPDoc 是注释 PHP 代码的非正式标准，PHPDoc提供了许多不同的标记可以使用。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+/**
+ * @author A Name <a.name@example.com>
+ * @link http://www.phpdoc.org/docs/latest/index.html
+ */
+class DateTimeHelper
+{
+    /**
+     * @param mixed $anything Anything that we can convert to a \DateTime object
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return \DateTime
+     */
+    public function dateTimeFromAnything($anything)
+    {
+        $type = gettype($anything);
+
+        switch ($type) {
+            // Some code that tries to return a \DateTime object
+        }
+
+        throw new \InvalidArgumentException(
+            "Failed Converting param of type '{$type}' to DateTime object"
+        );
+    }
+
+    /**
+     * @param mixed $date Anything that we can convert to a \DateTime object
+     *
+     * @return void
+     */
+    public function printISO8601Date($date)
+    {
+        echo $this->dateTimeFromAnything($date)->format('c');
+    }
+
+    /**
+     * @param mixed $date Anything that we can convert to a \DateTime object
+     */
+    public function printRFC2822Date($date)
+    {
+        echo $this->dateTimeFromAnything($date)->format('r');
+    }
+}
+\end{lstlisting}
+
+上述这个类的说明中使用了 @author 和 @link标记， 其中@author 标记是用來说明代码的作者，在多位开发者的情况下可以同时列出好几位，其次 @link 标记用来提供网站链接来进一步说明代码和网站之间的关系。
+
+在这个类中，第一个方法的 @param 标记，说明类型、名字和传入方法的参数。
+
+此外，@return 和 @throws 标记说明返回类型以及可能抛出的异常。
+
+
+第二、第三个方法非常类似，和第一个方法一样使用一个 @param 标记。第二、和第三个方法之间关键差別在注释区块使用/排除 @return 标记。@return void 标记明确告诉我们没有返回值，而过去省略 @return void 声明也具有相同效果（沒有返回任何值）。
+
+

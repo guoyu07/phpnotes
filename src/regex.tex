@@ -1,0 +1,1179 @@
+\part{Regular Expression}
+
+
+\chapter{Overview}
+
+
+正则表达式是一种用于描述字符排列模式的语法规则，可以用于字符串的模式分割、匹配、查找和替换等操作。
+
+正则表达式的主要的模式匹配思想来自SNOBOL语言，而且形成了自己的完整语法体系，从而可以对字符串进行灵活且直观的处理。
+
+在实践中，正则表达式可以通过构建具有特定规则的模式来和输入信息进行比较，并实现字符串的匹配操作。
+
+模式可以理解为具有某种共通特征的字符串表达式，主要由原子（普通字符）、元字符（有特殊功能地字符）以及模式修正字符等组成。
+
+在分析正则表达式时，应该将其作为一个整体。例如，下面是一个检测数字表示合法性的正则表达式，可以匹配所有二进制、八进制、十进制和十六进制的正负整数。
+
+\begin{lstlisting}[language=PHP]
+/^-?\d+$|^-?0[xX][\da-fA-F]+$/
+\end{lstlisting}
+
+类似地，下面的示例是一个匹配Email地址格式地正则表达式。
+
+\begin{lstlisting}[language=PHP]
+/^[0-9a-zA-Z_-]+@[0-9a-zA-Z_-]+(\.[0-9a-zA-Z_-]+){0,3}$/
+\end{lstlisting}
+
+\begin{compactitem}
+\item Email地址必须包含@字符；
+\item URL必须包含http或https；
+\item 相同类型的文件具有共同的后缀。
+\end{compactitem}
+
+默认情况下，正则表达式的模式包含在两个反斜杠“/”之间。
+
+PHP提供了PCRE和POSIX提供的正则表达式函数库，二者的功能相似，差异在于执行效率。
+
+一般情况下，PCRE正则表达式函数库在实现相同的功能时的效率占优。
+
+\begin{compactitem}
+\item PCRE正则表达式函数使用“preg\_”前缀，并且与语法和Perl相同；
+\item POSIX正则表达式函数使用“ereg\_”前缀。
+\end{compactitem}
+
+正则表达式的局限在于，在典型的搜索和替换操作中只能对确切字符进行匹配，很难对动态文本进行匹配搜索。
+
+\section{Atom}
+
+
+原子是组成正则表达式地基本单位，每个正则表达式中至少包含一个原子。
+
+
+具体来说，原子字符由所有未显式指定为元字符地打印和非打印字符组成，其中包括所有的英文字母、数字、标点符号以及其他符号。
+
+原子包括单个字符、数字、模式单元、原子表、重新使用的模式单元和转义元字符等。
+
+\begin{compactitem}
+\item \textbackslash d匹配一个数字，等价于[0-9]
+\item \textbackslash D匹配除了数字之外的所有字符，等价于[\^{}0-9]
+\item \textbackslash w匹配一个英文字母、数字或下划线，等价于[0-9a-zA-Z\_]
+\item \textbackslash W匹配除英文字母、数字或下划线之外的任何一个字符，等价于[\^{}0-9a-zA-Z\_]
+\item \textbackslash s匹配一个空白字符，等价于[\textbackslash f\textbackslash n\textbackslash r \textbackslash r\textbackslash v]
+\item \textbackslash S匹配除了空白字符之外的任何一个字符，等价于[\^{}\textbackslash f\textbackslash n\textbackslash r \textbackslash r\textbackslash v]
+\item \textbackslash f匹配一个换页符，等价于\textbackslash x0c或\textbackslash cL
+\item \textbackslash n匹配一个换行符，等价于\textbackslash x0a或\textbackslash cJ
+\item \textbackslash r匹配一个回车符，等价于\textbackslash x0d或\textbackslash cM
+\item \textbackslash t匹配一个制表符，等价于\textbackslash x09或\textbackslash cI
+\item \textbackslash v匹配一个垂直制表符，等价于\textbackslash x0b或\textbackslash cK
+\item \textbackslash oNN匹配一个八进制数字
+\item \textbackslash xNN匹配一个十六进制数字
+\item \textbackslash cC匹配一个控制字符
+\end{compactitem}
+
+
+\section{Meta}
+
+元字符是用于构造正则表达式的具有特殊含义的字符，如果需要在正则表达式中包含元字符本身，必须在其前面加上“\textbackslash ”进行转义。
+
+
+
+\begin{table}
+\centering
+\caption{元字符（Meta Character）}
+\begin{tabular}{|l|l|}
+\hline
+* & 0次、1次或任意多次匹配其前面的原子\\
+\hline
++ & 1次或任意多次匹配其前面的原子\\
+\hline
+？ & 0次或1次匹配其前面的原子\\
+\hline
+. & 匹配任何一个字符\\
+\hline
+| & 匹配两个或多个选择\\
+\hline
+\^或\textbackslash A& 匹配字符串串首的原子\\
+\hline
+\$或\textbackslash Z&匹配字符串串尾的原子\\
+\hline
+\textbackslash b&匹配单词的边界\\
+\hline
+\textbackslash B & 匹配除单词边界以外的部分\\
+\hline
+[] & 匹配方括号中的任一原子\\
+\hline
+[\^] & 匹配除方括号中的原子外的任何字符\\
+\hline
+() & 其整体表示一个原子\\
+\hline
+\{m\}& 表示其前原子恰好出现m次\\
+\hline
+\{m,n\} & 表示其前原子至少出现m次，至多出现n次（n>m）\\
+\hline
+\{m,\}& 表示其前原子出现不少于m次\\
+\hline
+\end{tabular}
+
+\end{table}
+
+
+\section{Sequence}
+
+默认情况下，正则表达式按照从左到右的顺序依次匹配。
+
+\begin{table}
+\centering
+\caption{模式匹配的顺序}
+\begin{tabular}{|l|l|l|}
+\hline
+顺序 & 元字符 & 备注\\
+\hline
+1 & () & 模式单元\\
+\hline
+2 & ? * + \{ \} & 重复匹配\\
+\hline
+3 & \^{} \$ \textbackslash b \textbackslash B \textbackslash A \textbackslash Z & 边界限制\\
+\hline
+4 & | & 模式选择\\
+\hline
+\end{tabular}
+\end{table}
+
+
+\section{Modifier}
+
+模式修正符（Pattern Modifier）扩展了正则表达式在字符匹配、替换操作时的某些功能，从而增强正则表达式的处理能力。
+
+模式修正符一般标记于整个模式之外，并且可以组合使用。
+
+\begin{table}
+\centering
+\caption{模式修正符}
+\begin{tabular}{|l|l|}
+\hline
+模式修正符 & 备注\\
+\hline
+i & 同时匹配大小写字母\\
+\hline
+m & 将字符串视为多行\\
+\hline
+s & 将字符串视为单行，将换行符视为普通字符\\
+\hline
+x & 忽略模式中的空白\\
+\hline
+S & 当一个模式将被使用多次时，为加速匹配而首先对其进行分析\\
+\hlinle
+U & 匹配到最近的字符串\\
+\hline
+e & 将替换的字符串作为表达式使用\\
+\hline
+\end{tabular}
+\end{table}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\chapter{Match}
+
+\section{preg\_match()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{ereg()}
+
+ereg()和eregi()的功能和preg\_match()类似，而且POSIX扩展库函数的第一个ie参数接受的是正则表达式字符串，不需要使用分界符。
+
+在下面的示例中，使用ereg()来实现文件名和用户名的安全检查和过滤。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$filename = $_GET['file'];
+$username = $_SERVER['REMOTE_USER'];
+
+// 文件名过滤
+if(!ereg('^[^./][^/]*$',$userfile)){
+	die("非法文件名");
+}
+
+// 用户名过滤
+if(!ereg('^[^./][^/]*$,$username)){
+	die("用户名无效");
+}
+
+// 在通过安全过滤后，输出合法的文件路径
+$thefile = "/home/$username/$filename;
+?>
+\end{lstlisting}
+
+\begin{compactitem}
+\item 在过滤文件名或用户名等字符串时，preg\_match()的速度比ereg()和eregi()快；
+\item 在检查字符串中是否包含某个子串时，strstr()或strpos()比正则表达式函数更有效。
+\end{compactitem}
+
+
+在对整个文件（尤其是多行文本）进行匹配查找时，ereg()函数可以通过分行处理来将文件内容赋值到数组中。
+
+下面的示例说明使用ereg()函数来解析ini文件，实践中的最佳方案是使用parse\_ini\_file()函数来将ini文件解析到一个大数组中。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 将php.ini读入到数组中
+$rows = file('php.ini');
+
+// 循环遍历
+foreach($rows as $line){
+	if(trim($line)){
+		// 将匹配成功的参数写入数组
+		if(eregi("^([a-z0-9_.]*) *=(.*)", $line, $matches)){
+			$options[$matches[1]] = trim($matches[2]);
+		}
+		unset($matches);
+	}
+}
+?>
+\end{lstlisting}
+
+
+
+\section{eregi()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{preg\_grep()}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{preg\_match\_all()}
+
+
+preg\_match\_all()函数可以用于全局正则表达式匹配，这样在使用了第三个参数时，就可以把所有可能的匹配结果存入。
+
+在下面的示例中，preg\_match\_all()函数将文本中的URL链接地址转换为HTML代码。
+
+\begin{lstlisting}[language=PHP]
+<?php
+/*
+功能：将文本中的URL地址转换为HTML
+输入：字符串
+输出：字符串
+*/
+function url2html($text){
+	// 匹配一个URL，直到出现空白为止
+	preg_match_all("/http:\/\/?[^\s]+/i",$text,$linker);
+	
+	// 设置页面显示URL地址的长度
+	$max_size = 40;
+	foreach($links[0] as $link_url){
+		// 计算URL的长度，如果超过$max_size，则缩短
+		$len = strlen($link_url);
+		if($len > $max_size){
+			$link_text = substr($linkurl,0,$max_size) . "...";
+		}else{
+			$link_text = $link_url;
+		}
+		
+		// 生成HTML文字
+		$text = str_replace($link_url, "<a href='$link_url'>$link_text</a>",$text);
+	}
+	return $text;
+}
+
+
+?>
+\end{lstlisting}
+
+
+\chapter{Replace}
+
+
+\section{ereg\_replace()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+在实践中将源代码发布到生产环境中时，需要进行简单的清理工作，例如去掉注释和空白等。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 将源代码文件读入数组中
+$lines = file('src.php');
+
+for($i=0; $i<count($lines); $i++){
+	// 将以“\\”或“#”开头的注释去掉
+	$lines[$i] = eregi\_replace("(\/\/|#).*$","",$lines[$i]);
+	// 将行末的空白消除
+	$lines[$i]=eregi_replace("[\n\r\t\v\f]*$","\r\n",$lines[$i]);
+}
+
+// 整理后输出到页面
+echo htmlspecialchars(join("",$lines));
+?>
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{eregi\_replace()}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{preg\_replace()}
+
+preg\_replace()函数使用Perl兼容正则表达式语法，因此比ereg\_replace()有更快的替代速度。
+
+\begin{compactitem}
+\item preg\_replace()的功能比ereg\_replace()更强大；
+\item str\_replace()适用于仅对字符串进行简单替换的情况。
+\end{compactitem}
+
+在preg\_replace()的正则表达式中可以使用模式修正符“e”，可以将匹配结果用作表达式，并且可以进行重新计算。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$html_body = "<HTML><Body><H1>TEST</H1></Body></HTML>";
+
+echo preg_replace(
+	"/(<\/?)(\w+)([^>]*>)/e",
+	"'\\1'.strtolower('\\2').'\\3'",
+	$html_body);
+?>
+\end{lstlisting}
+
+\chapter{Split}
+
+\section{split()}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{spliti()}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{preg\_split()}
+
+preg\_split()使用Perl兼容正则表达式语法，因此运行速度比split()更快，并且可以使用更广泛的分隔字符。
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+如果仅用某个特定的字符进行分隔，建议使用explode()函数。
+
+和preg\_split()函数相比，explode()函数不会调用正则表达式引擎，因此执行速度最快。
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\chapter{Email}
+
+Email地址是表单验证中最常用也最重要的一种数据格式，@将Email地址划分为用户名和邮件服务器域名两部分，并且可以使用“.”分隔为多个片段。
+
+在下面的示例中，使用正则表达式函数来校验电子邮件地址。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function chackMail($email){
+	// 用户名由"\w"格式字符、"-"或"."组成
+	$email_name ="\w|(\w[-.\w]*\w)";
+	
+	// @
+	$code_at = "@";
+
+	// 邮件服务器域名
+	$pre_domain = "\w|(\w[-\w]*\w)";
+	$mid_domain = "(\.". $per_domain . "){0,2}";
+	$end_domain = "(\.(com|net|org))";
+	
+	$rs = preg_match(
+		"/^{$email_name}@{$pre_domain}{$mid_domain}{$end_domain}$/",
+		$email);
+	return (bool)$rs;
+}
+?>
+\end{lstlisting}
+
+\chapter{Username}
+
+在Web应用程序中可以通过用户系统来让用户提供用户名和密码来实现访问权限控制。
+
+通常情况下，用户帐号可以简单地规定由有限地英文字母或数字等字符组成，要求第一个字符是字母，因此可以使用下面的正则表达式来实现用户名校验。
+
+
+\begin{lstlisting}[language=PHP]
+/^[a-z][0-9a-zA-Z_-]{5,15}$/
+\end{lstlisting}
+
+另外，某些系统还可以接受以中文、日文假名等多字节字符构成的用户名，但是正则表达式主要是基于字节匹配的，因此不能只能直接用于处理中文字符、双字节或多字节字符。
+
+如果多字节字符可以分解为多个单字节字符（或称为ASCII码字符）组成的字符串，那么正则表达式就可以进行后续的模式匹配等工作，实际上PHP就是利用上述机制来实现对汉字等多字节字符的处理。
+
+下面的正则表达式可以校验以中文作为用户帐号的情况，其中\textbackslash x7f-\textbackslash xff指ASCII码在127～255之间的字符，它们经常作为中文字符的首字节出现，因此可以用来作为中文匹配的标志。
+
+\begin{lstlisting}[language=PHP]
+/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-xff]{7,31}$/
+\end{lstlisting}
+
+PHP变量的命名规则可以接受多字节字符，和PHP变量名匹配的正则表达式如下：
+
+\begin{lstlisting}[language=PHP]
+/[a-zA-Z_\x7f-\xff][a-zA-AZ0-9_\x7f-xff]*/
+\end{lstlisting}
+
+
+\chapter{URL}
+
+标准的URL由URL协议名称、分界符“://”和域名组成，因此校验URL的正则表达式可以写成：
+
+\begin{lstlisting}[language=PHP]
+(www\.)?.+(com|net|org)$
+\end{lstlisting}
+
+\begin{compactitem}
+\item 匹配URL的协议可以写成“\^(http|ftp)s?”；
+\item 域名部分可以选择是否以“www.”开头，并且必须以“.com”、“.net”或“.org”等结束
+\end{compactitem}
+
+下面的示例可以实现URL地址的校验。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function checkDomain($domain){
+	return ereg("^(http|ftp)s?://(www\.)?.+(com|net|org)$",$domain);
+}
+?>
+\end{lstlisting}
+
+\chapter{Telephone Number}
+
+
+在用户提交的注册信息中通常包含电话号码或邮编号码，它们主要由数字组成，也可以包含其他字符。
+
+一般情况下，电话号码中的括号中包含国家地区号，接着是分区号，最后是6到8位的电话号码。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function checkTelNo($tel){
+	// 去掉多余的分隔符
+	$tel = ereg_replace("[\(\)\.-","",$tel);
+	
+	// 仅包含数字，至少是一个6位的电话号码（即没有区号）
+	if(ereg("^\d+$",$tel){
+		return true;
+	}else{
+		return false;
+	}
+}
+?>
+\end{lstlisting}
+
+
+\chapter{Zip Code}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function checkZipcode($code){
+	// 去掉多余的分隔符
+	$code = preg_replace("/[\.-]/","",$code);
+	// 包含一个6位的邮政编码
+	if(preg_match("/^\d{6}$/",$code)){
+		return true;
+	}else{
+		return false;
+	}
+}
+?>
+\end{lstlisting}
+
+
+与电话号码不同，邮政编码只有简单分隔符号（“-”或空格等），其他国家的邮政编码可能有不同的位数。
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\chapter{Format}
+
+字符串处理的本质是对以文字为载体的信息进行处理，将计算机记录的可读性差的信息转换为符合人类阅读习惯的格式。
+
+在Apache服务器中的日志文件由程序自动生成，可以使用PHP的正则表达式函数进行格式化，从而提高可读性。
+
+
+Apache的配置文件中的LogFormat命令规定了access.log日志文件的存储格式。
+
+
+
+\begin{lstlisting}[language=PHP]
+LogLevel warn
+
+<IfModule log_config_module>
+    #
+    # The following directives define some format nicknames for use with
+    # a CustomLog directive (see below).
+    #
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    LogFormat "%h %l %u %t \"%r\" %>s %b" common
+
+    <IfModule logio_module>
+      # You need to enable mod_logio.c to use %I and %O
+      LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\" %I %O" combinedio
+    </IfModule>
+
+    #
+    # The location and format of the access logfile (Common Logfile Format).
+    # If you do not define any access logfiles within a <VirtualHost>
+    # container, they will be logged here.  Contrariwise, if you *do*
+    # define per-<VirtualHost> access logfiles, transactions will be
+    # logged therein and *not* in this file.
+    #
+    #CustomLog "logs/access_log" common
+
+    #
+    # If you prefer a logfile with access, agent, and referer information
+    # (Combined Logfile Format) you can use the following directive.
+    #
+    CustomLog "logs/access_log" combined
+</IfModule>
+\end{lstlisting}
+
+在转换日志格式时，需要排除无用的记录，然后对文件名依次进行匹配。
+
+\begin{lstlisting}[language=PHP]
+<?php
+	//被请求文件名的匹配
+	$filename = "\/[^\/]+\.(php|html|htm)\??";
+
+	//将文件名放在引号之内，“.*”表示文件名两端的其余信息
+	$pattern  = "/\".*"  . $filename.  ".*\"/i";
+	preg_match($pattern, $logline);
+?>
+\end{lstlisting}
+
+对于符合条件的记录，可以使用空白“\textbackslash s”进行分隔，并依次进行匹配。
+
+\begin{compactitem}
+\item “[\textbackslash d.]+”表示使用数字和“.”组成的IP地址；
+\item “\textbackslash [.+?\textbackslash ]”表示时间；
+\end{compactitem}
+
+access.log中记录的客户端请求信息可以被分为三部分。
+
+\begin{compactitem}
+\item 第一部分是请求方法，例如GET或POST；
+\item 中间部分是被请求的文件资源，也可以看作一个非空白的连续字符串，可以简化为“[\^{}\textbackslash s]”；
+\item 末尾是客户端协议，可以使用“HTTP\/1\.[0123]”进行匹配。
+\end{compactitem}
+
+下面的示例用于对Apache服务器日志进行格式化。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<html> 
+<head>
+<title>格式化Apache服务器日志文件</title>
+</head>
+<body>
+<?php
+  //将access.log日志读入一个数组
+  $loginfo = file('usr/apache2/logs/access.log');
+  $i=0;
+
+  echo "<table border=1><tr>\n";
+  echo "  <th>客户端IP</th>\n";
+  echo "  <th>时间</th>\n";
+  echo "  <th>发送方式</th>\n";
+  echo "  <th>客户端协议</th>\n";
+  echo "  <th>请求文件</th>\n";
+  echo "<tr>";	
+
+  //遍历日志信息数组
+  foreach($loginfo as $logline)
+  {
+	//被请求文件名的匹配。只接受后缀为“.php”、“.html”、“.htm”的文件
+	if(preg_match("/\".*\/[^\/]+\.(php|html|htm)\??.*\"/i", $logline))
+	{
+		echo "<tr>\n";
+
+		//进行匹配
+		$pattern =
+			 "([\d.]+)\s"										//IP地址
+			. "([-\w]+)\s	([-\w]+)\s"							//身份表识
+			. "\[(.+?)\]\s" 									//匹配时间
+			. "\"(POST|GET)\s([^\s]+)\s(HTTP\/1\.[0123])\"\s"	//请求查询信息
+			. "(\d+)\s(\d+)";
+
+		preg_match("/$pattern/ix", $logline, $m);				//使用“x”表示忽略空白
+
+		echo "  <td>{$m[1]}</td>\n";							//显示IP地址
+
+		//重新格式化时间，通过“/”，“:”进行分隔
+		$dt = split("[\/\: ]", $m[4]);
+		$newtime = strtotime ("{$dt[0]} {$dt[1]} {$dt[2]} {$dt[3]}:{$dt[4]}:{$dt[5]} {$dt[6]}");
+		$newtime    = date("[O] Y-m-d H:i:s", $newtime);
+
+		echo "  <td align=left>{$newtime}</td>\n";				//显示时间
+		echo "  <td align=center>{$m[5]}</td>\n";				//显示发送方式
+		echo "  <td align=center>{$m[7]}</td>\n";				//显示客户端协议
+		echo "  <td align=left>{$m[6]}</td>\n";					//显示请求文件
+		echo "</td>\n";
+	}
+  }
+  echo "</table>";
+?>
+</body>
+</html>
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}

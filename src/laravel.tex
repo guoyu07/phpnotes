@@ -1,0 +1,1529 @@
+\part{Laravel}
+
+
+
+\chapter{Overview}
+
+
+
+
+
+
+\section{Framework}
+
+
+框架可以避免重新造轮子来构建 Web 应用，而且框架通常都抽象了许多底层常用的逻辑，并提供了简便的方法来完成常见的任务。
+
+虽然并不一定要在每个项目中都使用框架，因为有时候原生的 PHP 才是正确的选择，但是如果需要一个框架，那么有如下三种主要类型：
+
+\begin{compactitem}
+\item 微型框架
+\item 全栈框架
+\item 组件框架
+\end{compactitem}
+
+微型框架基本上是一个封装的路由，用来转发 HTTP 请求至一个闭包、控制器或方法等，尽可能地加快开发的速度，有时还会使用一些类库来帮助开发（例如基本的数据库封装等），因此微型框架适合用来构建HTTP的服务。
+
+在微型框架的功能齐备后往往演化为全栈框架，这些全栈框架通常会提供 ORMs和身份认证扩展包等。
+
+组件框架是多个独立的类库所结合起来的，而且不同的组件框架可以一起使用在微型或是全栈框架上。
+
+实际上，「组件」是另一种建立、发布及推动开源的方式，现在存在的组件库主要包括Packagist和PEAR，而且它们都有用来安装和升级的命令行工具。
+
+此外，还有基于组件的构成的框架的提供商提供不包含框架的组件，这些项目通常和其他的组件或者特定的框架没有依赖关系。例如，可以使用 FuelPHP 验证类库而不使用 FuelPHP 整个框架，或者使用Illuminate组件来实现Laravel框架解耦。
+
+
+\section{Namespace}
+
+Laravel框架把已有的技术（例如架构思想、设计模式和PHP新语法）组合到了一定的告诉，其中PHP新语法解决了一些棘手的问题。
+
+PHP的命名空间、匿名函数、反射机制和后期静态绑定等新语法使得Laravel框架简洁而且容易扩展。
+
+命名空间最初是一种被设计用来解决命名冲突的包装类、函数和常量的方法，同时命名空间为组件化开发提供了的可能。
+
+命名空间组织文件时使用某个组件的文件的路径关联到命名空间，最终可以直接通过命名空间找到相应的文件，这样借助Composer就可以方便地管理组件包的文件关系，同时依据PSR规范就可以把不同的组件包组合到一起。
+
+如果需要使用命名空间来封装代码，那么命名空间需要使用namespace关键字声明并放在文件开头，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace App\Http;
+
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
+class Kernel extends HttpKernel {
+    // class definition
+}
+\end{lstlisting}
+
+上述的示例定义了命名空间App\textbackslash Http，并且在命名空间下定义Kernel类，因此Kernel类的完整名称就是App\textbackslash Http\textbackslash Kernel。
+
+从本质上来说，Kernel类文件的文件路径和命名空间是独立的，在任何目录下都可以定义App\textbackslash Http命名空间。
+
+PSR命名规范提出为了后期文件包含的方便可以把命名空间和文件路径定义为相同的名称，文件名和类名定义为相同的名称，这样通过一个类的完整名称就可以确定这个类所在文件相对于根目录的位置，同时也方便了后期文件包含。
+
+PHP支持使用\_\_NAMESPACE\_\_魔术常量和namespace关键字来获取和使用当前命名空间。
+
+\_\_NAMESPACE\_\_魔术常量可以直接获取当前命名空间名称的字符串，namespace关键字可以显式访问当前命名空间。
+
+全局代码（不包含任何命名空间）的命名空间是一个空字符串，没有定义命名空间就是全局空间，相当于根空间（使用“/”表示根空间）。
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace App\Http;
+echo __NAMESPACE__."\n";
+class Kernel {}
+$a = new namespace\Kernel();
+var_dump($a);
+\end{lstlisting}
+
+上述示例的输出如下：
+
+\begin{lstlisting}[language=PHP]
+App\Http
+class App\Http\Kernel#1 (0) {
+}
+\end{lstlisting}
+
+
+用户可以使用use关键字并通过相对路径、限定的相对路径和绝对路径三种方式来使用命名空间
+
+\begin{compactitem}
+\item 非限定名称或不包含前缀的类名称。例如，\texttt{\$a=new Kernel();}
+
+\begin{compactenum}
+\item 如果当前命名空间为App\textbackslash Http，那么Kernel被解析为App\textbackslash Http\textbackslash Kernel。
+
+\begin{lstlisting}[language=PHP]
+class App\Http\Kernel#1 (0) {
+}
+\end{lstlisting}
+
+\item 如果当前命名空间为根空间（全局的），那么Kernel被解析为\textbackslash Kernel。
+
+\begin{lstlisting}[language=PHP]
+class Kernel#1 (0) {
+}
+\end{lstlisting}
+
+\end{compactenum}
+
+\item 限定名称或包含前缀的类名称。例如，\texttt{\$a=new App\textbackslash Http\textbackslash Kernel();}
+
+\begin{compactenum}
+\item 如果当前命名空间为\textbackslash Illiminate，那么Kernel被解析为\textbackslash Illiminate\textbackslash App\textbackslash Http\textbackslash Kernel。
+
+\begin{lstlisting}[language=PHP]
+class Illiminate\App\Http\Kernel#1 (0) {
+}
+\end{lstlisting}
+
+\item 如果当前命名空间为根空间（全局的），那么Kernel被解析为\textbackslash App\textbackslash Http\textbackslash Kernel。
+
+\begin{lstlisting}[language=PHP]
+class App\Http\Kernel#1 (0) {
+}
+\end{lstlisting}
+
+\end{compactenum}
+
+\item 完全限定名称或包含全局前缀操作符（“\textbackslash ”）的名称。例如，\texttt{\$a=new \textbackslash App\textbackslash Http\textbackslash Kernel();}
+
+
+\begin{lstlisting}[language=PHP]
+class App\Http\Kernel#1 (0) {
+}
+\end{lstlisting}
+
+\end{compactitem}
+
+
+如果命名空间的名字过长，PHP还允许通过导入外部引用或别名引用的方式来指定相应的类和命名空间，即可以为类名称使用别名，也可以为命名空间使用别名。
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+namespace App\Http\Controller\Auth;
+
+use App\Http\Controller\Controller;
+use App\Model\Category as DataCategory;
+use App\Model;
+
+class AuthController extends Controller{
+    
+}
+//实例化App\Http\Controller\Controller对象
+$obj1=new Controller();
+
+//实例化App\Http\Controller\Auth\AuthController对象
+$obj2=new AuthController();
+
+//实例化App\Model\Category对象
+$obj3=new DataCategory();
+
+//实例化App\Model\Records对象
+$obj4=new Model\Records();
+
+//实例化Model\Records对象
+$obj5=new \Model\Records();
+\end{lstlisting}
+
+PHP的命名空间只支持导入类，不支持导入函数或常量，而且对于命名空间中的类来说，其最前面是不允许有反斜杠的。
+
+导入的名称都是完全限定的，不会根据命名空间进行相对解析，只有在实例化一个对象时可以通过完全限定名称来指定一个类，而且也不会进行相对解析，仅仅针对最前面没有反斜杠的实例化类名进行相对解析。
+
+\begin{compactitem}
+\item 完全限定名称的类、函数和常量可以直接直接解析。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$a = new \A\B();
+\end{lstlisting}
+
+\item 所有非限定名称和非完全限定名称的类、函数和常量根据当前导入的命名空间进行转换。
+
+\begin{lstlisting}[language=PHP]
+<?php
+use A\B\C;
+$a = new C\D\E();// 等同于$a = A\B\C\D\E();
+\end{lstlisting}
+
+\item 命名空间内部的所有的没有根据导入规则转换的非限定名称和非完全限定名称都会其前面加上当前的命名空间名称。
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace A\B;
+
+$a = new C\D\E();// 等同于$a = new A\B\C\D\E();
+\end{lstlisting}
+
+\item 命名空间内部对非限定名称和非完全限定名称的函数进行调用时，首先在当前命名空间下解析，入股查找不到就在全局空间下查找。
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace A\B;
+
+$a = new A\B();
+$a->foo();
+\end{lstlisting}
+
+\begin{compactenum}
+\item 在当前命名空间中查找A\textbackslash B\textbackslash foo()函数；
+\item 尝试查找并调用全局空间（“\textbackslash ”）中的foo()函数。
+\end{compactenum}
+
+\item 命名空间内部对非限定名称和非完全限定名称的类进行调用时，只会在当前命名空间下解析。
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace A\B;
+
+$a = new C();// 等同于$a = new A\B\C();
+$b = new \C();// 实例化全局命名空间中的全局类C。
+\end{lstlisting}
+
+\end{compactitem}
+
+
+
+
+
+
+\section{Autoloading}
+
+include和require关键字都用于包含并运行指定文件，只是处理失败的方式不同。
+
+\begin{compactitem}
+\item require在出错时产生E\_COMPILE\_ERROR级别的错误并导致脚本运行中止。
+\item include在出错时产生E\_WARNING级别的错误，仅发出警告并不会中止脚本运行。
+\end{compactitem}
+
+在包含文件时如果只包含一个文件名，那么PHP首先在php.ini的include\_path指定的目录下查找文件，如果没有找到就会到脚本文件所在的工作目录下查找文件，最后如果找不到就产生上述的错误之一。
+
+默认情况下，include\_path的配置如下：
+
+
+\begin{lstlisting}[language=bash]
+include_path=".;/usr/share/php"
+\end{lstlisting}
+
+如果在包含文件时指定的文件名包含路径，则系统就只根据其中指定的相对路径或绝对路径去查找文件。例如，如果文件名以“../”开头，那么PHP只在当前目录的父目录下查找文件。
+
+如果包含的文件被找到，那么包含文件继承被包含文件定义的变量，并且从包含文件的地方开始，被包含文件可用的任何变量在包含的文件中都可用，同时在被包含文件中定义的类、函数或常量都具有全局作用域。
+
+除了使用include和require以手动方式来包含文件之外，PHP还支持对类进行自动加载。
+
+类的自动加载可以通过魔术方法\_\_autoload(\$class)实现，也可以通过spl\_autoload\_register注册一个自动加载方法。
+
+
+
+\subsection{\_\_autoload()}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function __autoload($class) {
+    require_once($class.".php'');
+}
+\end{lstlisting}
+
+如果在使用一个类时，PHP发现这个类没有被当前文件包含，就会自动调用\_\_autoload(\$class)魔术方法（其中的\$class就是要使用的类名）。
+
+
+
+\subsection{spl\_autoload\_register()}
+
+\_\_autoload()只能定义一次，因此用户实际应用中往往使用spl\_autoload\_register()注册自定义的函数作为自动加载类的实现。
+
+spl\_autoload\_register()允许把多个类自动加载函数注册到队列中，也就是说它创建了\_\_autoload()函数的队列，并且在调用时按照定义时的顺序逐个执行。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+bool spl_autoload_register ([ callable $autoload_function [, bool $throw = true [, bool $prepend = false ]]] )
+\end{lstlisting}
+
+向\_\_autoload队列注册给定的函数。 如果该队列中的函数尚未激活，则激活它们。
+
+对于代码中已经实现了\_\_autoload()函数，必须显式注册到\_\_autoload队列中，否则spl\_autoload\_register()将使用spl\_autoload()或spl\_autoload\_call()取代\_\_autoload()函数。
+
+
+\begin{longtable}{|m{60pt}|m{200pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+参数名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{spl\_autoload\_register()参数}\\
+\hline
+参数名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+autoload\_function&要注册的自动加载函数，没有提供时将自动注册spl\_autoload()作为默认实现\\
+\hline
+throw&自动加载函数无法注册时，spl\_autoload\_register()是否抛出异常\\
+\hline
+prepend&是否把自动加载函数注册到自动加载函数队列的头部（默认注册到队列的尾部）\\
+\hline
+\end{longtable}
+
+\begin{example}
+使用spl\_autoload\_register()代替\_\_autoload()
+\begin{lstlisting}[language=PHP]
+<?php
+// function __autoload($class) {
+//     include 'classes/'.$class.'.class.php';
+// }
+function my_autoloader($class) {
+   include 'classes/'.$class.'.class.php';
+}
+spl_autoload_register('my_autoloader');
+\end{lstlisting}
+\end{example}
+
+PHP支持使用匿名函数来实现注册自动加载函数，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+spl_autoload_register(function($class){
+    include 'classes/'.$class.'.class.php';
+});
+\end{lstlisting}
+
+
+\begin{example}
+使用spl\_autoload\_register()注册未加载的类
+\begin{lstlisting}[language=PHP]
+<?php
+namespace Foobar;
+
+class Foo {
+   static public function test($name) {
+      print '[['.$name.']]';
+   }
+}
+spl_autoload_register(__NAMESPACE__.'\Foo::test');
+
+new InexistentClass;
+\end{lstlisting}
+\end{example}
+
+上述示例的输出如下：
+
+\begin{lstlisting}[language=PHP]
+[[Foobar\InexistentClass]]
+Fatal error: Class 'Foobar\InexistentClass' not found in ...
+\end{lstlisting}
+
+spl\_autoload\_register()函数加载的自动加载函数可以是全局函数，也可以是某个类实例对象的函数，即通过\texttt{array("对象名","函数名")}的方式进行注册。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class ClassLoader{
+    public function register($prepend = false){
+        spl_autoload_register(array($this,'loadClass'),true,$prepend);
+    }
+}
+\end{lstlisting}
+
+
+Laravel框架通过spl\_autoload\_register()实现类自动加载函数的注册时，类的自动加载函数队列中包含了两个类的自动加载函数，分别是Composer生成的基于PSR规范的自动加载函数和Laravel框架核心别名的自动加载函数。
+
+在public/index.php中包含了Composer生成的自动加载函数，例如：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+require __DIR__.'/../bootstrap/autoload.php';
+
+$app = require_once __DIR__.'/../bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+
+$response = $kernel->handle($request=Illuminate\Http\Request::capture());
+$response->send();
+$kernel->terminate($request,$response);
+\end{lstlisting}
+
+在bootstrap/autoload.php中包含了Composer自动加载器，例如：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+define('LARAVEL_START',microtime(true));
+
+require __DIR__.'/../vendor/autoload.php';
+
+$compiledPath = __DIR__.'/cache/compiled.php';
+if(file_exists($compiledPath)){
+    require $compiledPath;
+}
+\end{lstlisting}
+
+public/index.php是Laravel框架的请求入口文件，因此首先会包含bootstrap目录下的自动加载文件——autoload.php。
+
+bootstrap/autoload.php继续加载vendor目录下的自动加载文件，并且在依赖文件加载完毕后进入HTTP请求捕获、处理和响应，最终清理HTTP请求数据。
+
+
+\section{Magic Method}
+
+PHP提供的魔术方法和魔术常量常用来提供对PHP运行环境和过程的控制和检测。
+
+和普通方法根据用户的实现方式进行调用的方式不同，魔术方法通常并不会由用户主动调用，而是在特定的时机并PHP自动调用。
+
+魔术方法可以通俗地理解为系统监听方法，在事件发生时才触发执行，类似于嵌入式系统中的中断函数。
+
+用户不能定义以“\_\_”开头的方法，只有魔术方法可以以“\_\_”开头。例如，\_\_construct()方法就是在创建实例完成后自动调用的一个魔术方法。
+
+
+\begin{longtable}{|m{60pt}|m{200pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+方法名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{魔术方法}\\
+\hline
+方法名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+\_\_construct()&在每次实例化对象时先调用该方法，可以在调用对象之前进行对象初始化\\
+\hline
+\_\_destruct()&在对象的所有引用都被删除或对象被显式销毁时执行\\
+\hline
+\_\_set()&在给不可访问的属性赋值时，\_\_set()方法被调用来进行属性重载\\
+\hline
+\_\_get()&在读取不可访问的属性时调用\\
+\hline
+\_\_isset()&对不可访问的属性调用isset()或empty()时调用\_\_isset()\\
+\hline
+\_\_unset()&对不可访问的属性调用unset()时调用\_\_unset()\\
+\hline
+\_\_sleep()&serialize()方法检查类中是否有\_\_sleep()。如果\_\_sleep()方法存在，那么该方法就会在任何序列化操作之前运行，可以清除对象并返回一个包含有该对象中应该被序列化的所有变量名的数组。\\
+\hline
+\_\_wakeup()&unserialize()方法检查类中是否有\_\_wakeup()。如果\_\_wakeup()方法存在，那么该方法可以被用来执行对象重建。\\
+\hline
+\_\_toString()&用于一个类被当做字符串时的输出操作。例如，执行\texttt{echo \$obj;}就会调用\_\_toString()方法。\\
+\hline
+\_\_invoke()&尝试以调用函数的方式来调用一个对象时就会自动调用\_\_invoke()方法。例如，执行\texttt{\$obj();}就会调用\_\_invoke()方法。\\
+\hline
+\_\_clone()&在新创建对象（复制生成对象）时会尝试调用\_\_clone()方法（如果定义了\_\_clone()方法），而且可以用来修改属性的值。\\
+\hline
+\_\_call()&在对象中调用一个不可访问的方法时会调用\_\_call()方法。\\
+\hline
+\_\_callStatic()&在静态方法中调用一个不可访问的方法时会调用\_\_callStatic()方法。\\
+\hline
+\_\_autoload()&在试图使用尚未被定义的类时自动调用\_\_autoload()方法。\\
+\hline
+\end{longtable}
+
+Laravel框架中的Illuminate\textbackslash Database\textbackslash Eloquent\textbackslash Model类使用魔术方法来实现对ORM对象的属性和方法的操作。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace Illuminate\Database\Eloquent;
+
+abstract class Model implements ArrayAccess, Arrayable, Jsonable, JsonSerializable, QueueableEntity, UrlRoutable
+{
+    /**
+     * 实例化一个新的Eloquent模型实例
+     */
+    public function __construct(array $attributes = [])
+    {
+        $this->bootIfNotBooted();
+        $this->syncOriginal();
+        $this->fill($attributes);
+    }
+
+    /**
+     * 在模型实例中索引不存在的属性
+     */
+    public function __get($key)
+    {
+        return $this->getAttribute($key);
+    }
+
+    /**
+     * 在模型实例中设置不存在的属性
+     */
+    public function __set($key, $value)
+    {
+        $this->setAttribute($key, $value);
+    }
+
+    /**
+     * 判断模型实例中是否存在该属性
+     */
+    public function __isset($key)
+    {
+        return ! is_null($this->getAttribute($key));
+    }
+
+    /**
+     * 注销模型实例中的一个属性
+     */
+    public function __unset($key)
+    {
+        unset($this->attributes[$key], $this->relations[$key]);
+    }
+
+    /**
+     * 处理模型实例中不存在的函数调用
+     */
+    public function __call($method, $parameters)
+    {
+        if (in_array($method, ['increment', 'decrement'])) {
+            return call_user_func_array([$this, $method], $parameters);
+        }
+
+        $query = $this->newQuery();
+
+        return call_user_func_array([$query, $method], $parameters);
+    }
+
+    /**
+     * 处理模型示例中不存在的静态函数调用
+     */
+    public static function __callStatic($method, $parameters)
+    {
+        $instance = new static;
+
+        return call_user_func_array([$instance, $method], $parameters);
+    }
+
+    /**
+     * 把模型实例转换为JSON字符串
+     */
+    public function __toString()
+    {
+        return $this->toJson();
+    }
+
+    /**
+     * 反序列化模型时判断是否需要启动
+     */
+    public function __wakeup()
+    {
+        $this->bootIfNotBooted();
+    }
+}
+\end{lstlisting}
+
+修改Laravel框架的入口文件来测试魔术方法的使用时，可以引入Model类并扩展出一个User类，然后实例化User类就可以触发相应的魔术方法调用。
+
+\begin{lstlisting}[language=PHP]
+<?php
+require __DIR__.'/../bootstrap/autoload.php';
+$app = require_once __DIR__.'/../bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+
+use Illuminate\Database\Eloquent\Model;
+
+class User extends Model
+{
+   protected $table = 'users';
+}
+
+$user = new User();//__construct()初始化对象
+$user->name = 'test';//__set($key,$value)设置属性
+echo $user->name;//__get($key)获取属性
+isset($user->name);//__isset($key)判断属性是否存在
+unset($user->name);//__unset($key)删除属性
+$user->find(1);//__call($method,$parameters)调用方法
+User::find(1);//__callStatic($method,$parameters)调用静态方法
+echo $user;//调用__toString()方法
+$us = serialize($user);//调用__sleep()
+$us1 = unserialize($us);//调用__wakeup()方法
+\end{lstlisting}
+
+\section{Magic Constant}
+
+PHP为其脚本提供了一些预定义常量，而且不同的扩展库本身也提供了一些常量（只有加载了对应的扩展库才会生效）。
+
+PHP扩展可以使用dl()函数动态加载，也可以编译进PHP核心成为内置模块。
+
+PHP为运行环境提供了8个魔术常量，而且这些魔术常量的值会随着代码中的位置而改变。例如，\_\_LINE\_\_依赖于其在PHP脚本中所处的行来决定。
+
+
+
+\begin{longtable}{|m{60pt}|m{200pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{魔术常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+\_\_LINE\_\_&当前行号\\
+\hline
+\_\_FILE\_\_&当前文件的完整路径和文件名。如果被用在被包含文件中，则返回被包含的文件名。\\
+\hline
+\_\_DIR\_\_&当前文件所在目录。如果被用在被包含文件中，则返回被包含的文件所在的目录，等价于\texttt{dirname(\_\_FILE\_\_);}，而且除非是根目录，否则目录名中不包括末尾的斜杠。\\
+\hline
+\_\_FUNCTION\_\_&当前所处的函数名并区分大小写。\\
+\hline
+\_\_CLASS\_\_&当前所处的类名或Trait名并区分大小写（包括其被声明的命名空间），如果用在Trait方法中，返回调用Trait方法的类名。\\
+\hline
+\_\_TRAIT\_\_&当前所处的Trait名并区分大小写（包括其被声明的命名空间）。\\
+\hline
+\_\_METHOD\_\_&当前所处的方法名（并区分大小写）。\\
+\hline
+\_\_NAMESPACE\_\_&当前命名空间并区分大小写。\\
+\hline
+\end{longtable}
+
+Laravel框架使用魔术常量来确定文件所在的目录，这样就可以通过严格对应的目录结构找到其他文件的位置实现类的自动加载等。
+
+在Laravel框架的入口文件public/index.php中根据\_\_DIR\_\_获取当前文件的目录，接下来再根据目录的相对位置启动其他文件代码。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+require __DIR__.'/../bootstrap/autoload.php';
+
+$app = require_once __DIR__.'/../bootstrap/app.php';
+$kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
+$response = $kernel->handle($request=Illuminate\Http\Request::capture());
+$response->send();
+$kernel->terminate($request,$response);
+\end{lstlisting}
+
+\section{Late Static Binding}
+
+后期静态绑定（Late Static Binding）可以用于在继承范围内引用静态调用的类，也就是在类的继承过程中使用的类不再是当前类，而是调用的类。
+
+后期静态绑定使用static关键字来实现，后期静态绑定中的“\texttt{static::}”不再被解析为定义当前方法所在的类，而是在实际运行时计算得到的（也就是在运行时最初调用的类）。
+
+后期静态绑定不只在静态方法的调用中，同样适用于非静态方法的调用，而且调用的方式和静态方法相同，都是在调用时动态确定的。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+   public static function call() {
+      echo 'class A';
+   }
+   public static function test() {
+      self::call();
+      static::call();
+   }
+}
+
+class B extends A {
+   public static function call() {
+      echo 'class B';
+   }
+}
+B::test()
+//输出结果：
+// class A
+// class B
+\end{lstlisting}
+
+在调用test()方法时，\texttt{self::}直接调用本类中的方法，\texttt{static::}则可以根据调用test()方法的类来决定\texttt{static::}的值。
+
+static的值只有在调用时才能确定下来，self则是在定义时就确定下来。
+
+
+
+\begin{lstlisting}[language=PHP]
+class A {
+   public function call() {
+      echo 'instance from A';
+   }
+   public function test() {
+      self::call();
+      static::call();
+   }
+}
+class B extends A {
+   public function call() {
+     echo 'instance from B';
+   }
+}
+$b = new B();
+$b->test();
+// 输出结果：
+// instance from A
+// instance from B
+\end{lstlisting}
+
+除了可以用于静态方法和普通方法，后期静态绑定还可以用于对象实例化中。
+
+\begin{compactitem}
+\item static根据运行时调用的类来决定实例化对象；
+\item self根据所在位置的类来决定实例化对象。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+   public static function create() {
+      $self = new self();
+      $static = new static();
+      return array($self,$static);
+   }
+}
+class B extends A {
+   
+}
+$arr = B::create();
+foreach ($arr as $value) {
+   var_dump($value);
+}
+// 输出结果如下：
+// object(A) [1]
+// object(B) [2]
+\end{lstlisting}
+
+Laravel框架大量使用了静态方法、普通方法和对象实例化的后期静态绑定。例如，Illuminate\textbackslash Database\textbackslash Eloquent\textbackslash Model类中的\texttt{\$model = new static(\$attributes);}和\texttt{return static::(\$attributes);}。
+
+Illuminate\textbackslash Database\textbackslash Eloquent\textbackslash Model类是一个抽象类，因此其实现类在调用这些方法时，最终动态绑定的都是这个类的实现类（而非Model抽象类）。
+
+
+\begin{lstlisting}[language=PHP]
+// 保存模型类实例中的数据并返回该模型类实例
+public static function create(array $attributes = [])
+{
+    $model = new static($attributes);
+    $model->save();
+    return $model;
+}
+// 获取第一个符合条件的数据或创建一个新的
+public function firstOrCreate(array $attributes) 
+{
+   if(!is_null($instance = static::where($attributes)->first())){
+      return $instance;
+   }
+   return static::create($attributes);
+}
+\end{lstlisting}
+
+
+\chapter{Composer}
+
+Laravel框架下的vendor目录本身是Composer生成的依赖包目录，其内部的自动加载文件也是Composer文件生成的，用来自动加载依赖包中的所有文件。
+
+
+\section{ClassLoader}
+
+
+Composer在创建依赖管理时会在vendor目录下创建一个autoload.php和一个composer目录，其中composer目录包含了类自动加载函数注册的相关实现，这个autoload.php就是其对外提供的接口，通过包含该文件来完成类自动加载函数的注册。
+
+实际上，vendor/autoload.php会进一步包含vendor/composer目录中的autoload\_real.php文件。
+
+\begin{lstlisting}[language=PHP]
+require_once __DIR__ . '/composer/autoload_real.php';
+
+return ComposerAutoloaderInitca049c87f29a6ff5956132f96c58718a::getLoader();
+\end{lstlisting}
+
+
+vendor/composer/autoload\_real.php定义了一个类，这个类中定义了getLoader()函数。
+
+\begin{lstlisting}[language=PHP]
+class ComposerAutoloaderInitca049c87f29a6ff5956132f96c58718a
+{
+    private static $loader;
+
+    public static function loadClassLoader($class)
+    {
+        if ('Composer\Autoload\ClassLoader' === $class) {
+            require __DIR__ . '/ClassLoader.php';
+        }
+    }
+
+    public static function getLoader()
+    {
+        if (null !== self::$loader) {
+            return self::$loader;
+        }
+
+        spl_autoload_register(array('ComposerAutoloaderInitca049c87f29a6ff5956132f96c58718a', 'loadClassLoader'), true, true);
+        self::$loader = $loader = new \Composer\Autoload\ClassLoader();
+        spl_autoload_unregister(array('ComposerAutoloaderInitca049c87f29a6ff5956132f96c58718a', 'loadClassLoader'));
+
+        $useStaticLoader = PHP_VERSION_ID >= 50600 && !defined('HHVM_VERSION');
+        if ($useStaticLoader) {
+            require_once __DIR__ . '/autoload_static.php';
+
+            call_user_func(\Composer\Autoload\ComposerStaticInitca049c87f29a6ff5956132f96c58718a::getInitializer($loader));
+        } else {
+            $map = require __DIR__ . '/autoload_namespaces.php';
+            foreach ($map as $namespace => $path) {
+                $loader->set($namespace, $path);
+            }
+
+            $map = require __DIR__ . '/autoload_psr4.php';
+            foreach ($map as $namespace => $path) {
+                $loader->setPsr4($namespace, $path);
+            }
+
+            $classMap = require __DIR__ . '/autoload_classmap.php';
+            if ($classMap) {
+                $loader->addClassMap($classMap);
+            }
+        }
+
+        $loader->register(true);
+
+        if ($useStaticLoader) {
+            $includeFiles = Composer\Autoload\ComposerStaticInitca049c87f29a6ff5956132f96c58718a::$files;
+        } else {
+            $includeFiles = require __DIR__ . '/autoload_files.php';
+        }
+        foreach ($includeFiles as $fileIdentifier => $file) {
+            composerRequireca049c87f29a6ff5956132f96c58718a($fileIdentifier, $file);
+        }
+
+        return $loader;
+    }
+}
+
+function composerRequireca049c87f29a6ff5956132f96c58718a($fileIdentifier, $file)
+{
+    if (empty($GLOBALS['__composer_autoload_files'][$fileIdentifier])) {
+        require $file;
+
+        $GLOBALS['__composer_autoload_files'][$fileIdentifier] = true;
+    }
+}
+\end{lstlisting}
+
+getLoader()函数首先实例化Composer\textbackslash Autoload\textbackslash ClassLoader类，然后通过这个类实例添加相关的文件路径配置，包括命名空间的配置、PSR-4规范配置、类映射配置。
+
+\begin{compactitem}
+\item 命名空间配置：autoload\_namespace.php
+\item PSR-4规范配置：autoload\_psr4.php
+\item 类映射配置：autoload\_classmap.php
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+/...
+self::$loader = $loader = new \Composer\Autoload\ClassLoader();
+//...
+$useStaticLoader = PHP_VERSION_ID >= 50600 && !defined('HHVM_VERSION');
+if ($useStaticLoader) {
+    require_once __DIR__ . '/autoload_static.php';
+
+    call_user_func(\Composer\Autoload\ComposerStaticInitca049c87f29a6ff5956132f96c58718a::getInitializer($loader));
+} else {
+    $map = require __DIR__ . '/autoload_namespaces.php';
+    foreach ($map as $namespace => $path) {
+        $loader->set($namespace, $path);
+    }
+
+    $map = require __DIR__ . '/autoload_psr4.php';
+    foreach ($map as $namespace => $path) {
+        $loader->setPsr4($namespace, $path);
+    }
+
+    $classMap = require __DIR__ . '/autoload_classmap.php';
+    if ($classMap) {
+        $loader->addClassMap($classMap);
+    }
+}
+
+$loader->register(true);
+\end{lstlisting}
+
+\texttt{\$loader->register(true)}执行注册类自动加载函数到队列，最后则加载全局文件（即autoload\_files.php配置的内容）。
+
+类的自动加载函数在Composer\textbackslash Autoload\textbackslash ClassLoader类中实现，实例化ClassLoader类并将类的命名空间与文件路径的对应关系注册到相应属性中，然后再通过实例方法\texttt{register(\$prepend=false)}来注册一个类自动加载函数，也就是ClassLoader类实例的loadClass()方法，并且将其注册在类自动加载函数队列的末尾。
+
+当使用一个未包含的类名时，就会自动调用loadClass()方法并通过参数获取包含命名空间的类名信息，接着根据类的命名空间与文件路径的对应关系查找文件路径，最后通过includeFile()函数包含该文件，这样就实现了类的自动加载。
+
+\begin{lstlisting}[language=PHP]
+<?php
+public function loadClass($class)
+{
+    if ($file = $this->findFile($class)) {
+        includeFile($file);
+
+        return true;
+    }
+}
+
+\end{lstlisting}
+
+
+\section{RegisterFacades}
+
+
+
+默认情况下，Laravel框架包含两个类的自动加载函数，其中一个就是上面所说的Composer类自动加载函数，另一个则是在外观注册过程中实现的，也就是在Illuminate\textbackslash Foundation\textbackslash Bootstrap\textbackslash RegisterFacades类中实现的，其最终结果是把一个类自动加载函数注册到堆栈中，并且在请求到响应的生命周期中进行调用。
+
+RegisterFacades类的自动加载函数的注册过程也是先实例化Illuminate\textbackslash Foundation\textbackslash Bootstrap\textbackslash RegisterFacades类。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+namespace Illuminate\Foundation\Bootstrap;
+
+use Illuminate\Support\Facades\Facade;
+use Illuminate\Foundation\AliasLoader;
+use Illuminate\Contracts\Foundation\Application;
+
+class RegisterFacades
+{
+    /**
+     * Bootstrap the given application.
+     *
+     * @param  \Illuminate\Contracts\Foundation\Application  $app
+     * @return void
+     */
+    public function bootstrap(Application $app)
+    {
+        Facade::clearResolvedInstances();
+
+        Facade::setFacadeApplication($app);
+
+        AliasLoader::getInstance($app->make('config')->get('app.aliases'))->register();
+    }
+}
+\end{lstlisting}
+
+接下来调用register()函数，并在其内部调用prependToLoaderStack()方法，最后把\texttt{load(\$alias)}函数注册为类的自动加载函数，这个函数的作用主要是将外观别名和外观名（Facades）对应起来，从而实现对应外观类的静态方法调用。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace Illuminate\Foundation;
+
+class AliasLoader
+{
+    protected $aliases;
+    protected $registered = false;
+    protected static $instance;
+    
+    private function __construct($aliases) {
+        $this->aliases = $aliases;
+    }
+
+    public static function getInstance(array $aliases = []) {
+        if (is_null(static::$instance)) {
+            return static::$instance = new static($aliases);
+        }
+
+        $aliases = array_merge(static::$instance->getAliases(), $aliases);
+        static::$instance->setAliases($aliases);
+        return static::$instance;
+    }
+    
+    /*
+     * 加载一个类别名(给外观类起一个别名,二者对应一个类)
+    public function load($alias) {
+        if (isset($this->aliases[$alias])) {
+            return class_alias($this->aliases[$alias], $alias);
+        }
+    }
+    
+    /*
+    * 添加别名到自动加载函数中
+    */
+    public function alias($class, $alias) {
+        $this->aliases[$class] = $alias;
+    }
+    
+    /*
+     * 注册自动加载函数到自动加载堆栈中
+     */
+    public function register() {
+        if (! $this->registered) {
+            $this->prependToLoaderStack();
+
+            $this->registered = true;
+        }
+    }
+    
+    /*
+     * 把类的自动加载函数添加到自动加载堆栈头部
+     */
+    protected function prependToLoaderStack() {
+        spl_autoload_register([$this, 'load'], true, true);
+    }
+}
+\end{lstlisting}
+
+\chapter{Anonymous}
+
+匿名函数（anonymous或closure）是一个没有指定名称的函数，可以用作回调函数的参数。
+
+匿名函数本身是闭包类（Closure）的一个实现，用户可以匿名函数（即闭包对象）创建后对其进行更多的控制，而且匿名函数可以使得框架更加紧凑和灵活。
+
+在匿名函数出现之前，通常调用函数时传入的参数就是数据，只能通过参数对函数的结果进行控制，但是无法控制过程。
+
+匿名函数作为参数传递给函数后，可以作为变量赋值来控制函数的执行过程，因此可以实现更加高效的设计方案。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = array(1,2,3,4);
+array_walk($array,function($value){echo $value;});
+// 输出：1  2  3  4
+\end{lstlisting}
+
+匿名函数还可以从父作用域中继承变量，即匿名函数在定义时如果需要使用作用域外的变量，可以使用use关键字来继承作用域外部的变量。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function getCounter(){
+   $i = 0;
+   return function() use ($i) {
+      echo ++$i;
+   }
+}
+$counter = getCounter();
+$counter(); // 1
+$counter(); // 1
+\end{lstlisting}
+
+匿名函数在每次执行时都可以访问到上层作用域内部的变量，这些变量在匿名函数被销毁之前始终保存着自己的状态。
+
+上述的示例中，两次函数调用都没有使变量\$i变量自增，PHP默认通过复制的方式传入上层变量进入匿名函数，如果需要改变上层变量的值，则需要通过引用的方式传递（即\texttt{use(\&\$i)}）。
+
+Laravel框架使用匿名函数完成服务提供者注册等操作。具体来说，Laravel框架在服务提供者的注册过程中，通过将服务名称和提供服务的匿名函数进行绑定，在使用时可以实现动态服务解析。
+
+这里，可以把所有的服务理解为对一种资源的提供，这个资源可以是一个类的实例、一个路径或一个文件等，因此提供服务就是提供一种资源。
+
+在Illuminate\textbackslash Routing\textbackslash ControllerServiceProvider.php中，使用\texttt{\$this->app->singleton()}把服务名illuminate.route.dispatcher和后面的提供服务的匿名函数进行绑定来提供服务解析，这里的服务就是通过匿名函数实现的。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+namespace Illuminate\Routing;
+use Illuminate\Support\ServiceProvider;
+class ControllerServiceProvider extends ServiceProvider {
+    public function register(){
+        $this->app->singleton('illuminate.route.dispatcher',function(){
+            return new ControllerDispatcher($app['router'],$app);
+        });
+    }
+}
+\end{lstlisting}
+
+
+\chapter{Reflection}
+
+PHP提供了完整的反射API来对类、接口、函数、方法和扩展进行反向工程，从而实现动态获取类、对象和方法等语言构件的信息，而且反射API还提供方法来取出类、函数和方法中的文档注释。
+
+反射API支持对类、对象和方法等语言构件信息的动态获取和动态修改，从而可以使代码更加高效。例如，可以事先不知道需要实例化哪个类，在运行时根据动态信息进行确定，反射机制可以获取实例化类的构造函数信息并完成相应的实例化。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class A {
+   public function call() {
+      echo 'Hello,world';
+   }
+}
+
+$ref = new ReflectionClass('A');
+$inst = $ref->newInstanceArgs();
+$inst->call();
+\end{lstlisting}
+
+如果内置的PHP类丢失了反射属性的数据，那么这种情况应该被认为是错误，需要进行修复。
+
+Laravel框架的服务容器在解析服务的过程中使用反射机制实现依赖注入等操作。例如，Illuminate\textbackslash Container\textbackslash Container类提供的build()方法可以根据指定的类来初始化一个具体实例来实现解析服务。
+
+\begin{lstlisting}[language=PHP]
+public function build($concrete, array $parameters = [])
+{
+    if ($concrete instanceof Closure) {
+        return $concrete($this, $parameters);
+    }
+    $reflector = new ReflectionClass($concrete);
+    if (! $reflector->isInstantiable()) {
+        if (! empty($this->buildStack)) {
+            $previous = implode(', ', $this->buildStack);
+            $message = "Target [$concrete] is not instantiable while building [$previous].";
+        } else {
+            $message = "Target [$concrete] is not instantiable.";
+        }
+        throw new BindingResolutionException($message);
+    }
+    $this->buildStack[] = $concrete;
+    $constructor = $reflector->getConstructor();
+
+    if (is_null($constructor)) {
+        array_pop($this->buildStack);
+        return new $concrete;
+    }
+    $dependencies = $constructor->getParameters();
+    $parameters = $this->keyParametersByArgument(
+        $dependencies, $parameters
+    );
+    $instances = $this->getDependencies(
+        $dependencies, $parameters
+    );
+    array_pop($this->buildStack);
+    return $reflector->newInstanceArgs($instances);
+}
+\end{lstlisting}
+
+build()方法实现解析服务的情况一般分为两种，第一种是查找对应服务是否被服务提供者注册为实例或者提供服务的匿名函数，如果是则直接进行服务解析，第二种是服务名称没有相应的服务绑定，需要通过反射机制来动态创建服务。
+
+反射机制动态创建服务的过程可以分为两个步骤，第一步是通过反射机制获取服务类构造函数的信息，第二步是解决服务类构造函数的依赖问题。
+
+\begin{compactitem}
+\item 通过\texttt{\$reflector = new ReflectionClass(\$concrete);}来创建一个反射类实例，其中\$concrete是类的名称。
+\item 通过\texttt{\$reflector->isInstantiable();}判断这个类是否可以实例化，如果不可以则抛出异常。
+\item 通过\texttt{\$constructor=\$reflector->getConstructor();}来获取类的构造函数，如果这个类存在构造函数则返回一个ReflectionMethod对象（相当于获取构造函数的反射类），如果不存在则返回NULL。
+\item 通过\texttt{is\_null(\$constructor)}判断是否存在构造函数，如果不存在就直接实例化该类，如果存在则通过\texttt{\$dependencies = \$constructor->getParameters();}来获取构造函数依赖的输入参数。
+\end{compactitem}
+
+
+Illuminate\textbackslash Container\textbackslash Container的getDependencies()方法可以解决构造函数中依赖参数的问题并实现依赖注入，具体来说就是根据反射参数解决所有的参数依赖，同时解决无法获取类名的依赖。
+
+
+
+\begin{lstlisting}[language=PHP]
+//根据反射参数解决所有的参数依赖
+protected function getDependencies(array $parameters, array $primitives = [])
+{
+    $dependencies = [];
+    foreach ($parameters as $parameter) {
+        $dependency = $parameter->getClass();
+        if (array_key_exists($parameter->name, $primitives)) {
+            $dependencies[] = $primitives[$parameter->name];
+        } elseif (is_null($dependency)) {
+            $dependencies[] = $this->resolveNonClass($parameter);
+        } else {
+            $dependencies[] = $this->resolveClass($parameter);
+        }
+    }
+    return $dependencies;
+}
+//解决无法获取类名的依赖
+protected function resolveNonClass(ReflectionParameter $parameter)
+{
+    if (! is_null($concrete = $this->getContextualConcrete('$'.$parameter->name))) {
+        if ($concrete instanceof Closure) {
+            return call_user_func($concrete, $this);
+        } else {
+            return $concrete;
+        }
+    }
+    if ($parameter->isDefaultValueAvailable()) {
+        return $parameter->getDefaultValue();
+    }
+    $message = "Unresolvable dependency resolving [$parameter] in class {$parameter->getDeclaringClass()->getName()}";
+    throw new BindingResolutionException($message);
+}
+//通过服务容器解决一个具有类名的依赖
+protected function resolveClass(ReflectionParameter $parameter)
+{
+    try {
+        return $this->make($parameter->getClass()->name);
+    } catch (BindingResolutionException $e) {
+        if ($parameter->isOptional()) {
+            return $parameter->getDefaultValue();
+        }
+        throw $e;
+    }
+}
+\end{lstlisting}
+
+依赖和依赖注入可以理解为获取类构造函数中的参数并完成类的实例化的过程。
+
+\begin{compactitem}
+\item 通过\texttt{\$parameters=\$this->keyParametersByArgument(\$dependencies,\$parameters);}获取直接提供的实参，未直接提供的通过\texttt{\$instances = \$this->getDependencies(\$dependencies,\$parameters);}根据形参的类型获取实参。
+
+
+\item 在getDependencies()函数中需要调用resolveNonClass()函数或resolveClass()函数解决参数依赖问题。
+
+对于构造函数的参数，如果无法获取该参数的类型，则通过resolveNonClass(0函数获取默认的参数值，如果可以获取类的名称，则通过resolveClass(0函数进行实例化。
+
+\item 实例化过程是通过服务容器进行解析的，即通过\texttt{\$parameter->getClass()->name}获取参数的类名，然后通过\texttt{\$this->make(\$parameter->getClass()->name;}来解析服务。
+
+\item make()函数接下来还会调用build()函数完成类的实例化过程，其实质相当于一个递归调用的过程，并最终由\texttt{\$reflector->newInstanceArgs(\$instance);}实例化服务类，进而完成服务的解析。
+\end{compactitem}
+
+\chapter{Trait}
+
+PHP和Ruby只支持单一继承，因此相对于夺继承语言（例如C++）来说需要通过其他办法来解决代码复用问题。
+
+\begin{compactitem}
+\item PHP的Trait以水平特性的组合来实现代码复用
+\item Ruby的混入类（Mixin）可以实现代码复用。
+\end{compactitem}
+
+trait和类相似，只是trait无法被实例化，需要通过关键词use添加到其他类的内部来发挥作用，因此trait使用的是不同于传统继承方法的水平特性组合。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Base {
+   public function hello() {
+      echo 'method hello from base class';
+   }
+}
+trait Hello {
+   public function hello() {
+       echo 'method hello from trait Hello.';
+   }
+   public function hi() {
+      echo 'method hi from trait Hello';
+   }
+   abstract public function getValue();
+   static public function staticMethod() {
+      echo 'static method staticMethod from trait Hello';
+   }
+   public function staticValue() {
+      static $value;
+      $value++;
+      echo $value;
+   }
+}
+trait Hi {
+   public function hello() {
+       parent::hello();
+       echo 'method hello from trait Hi';
+   }
+   public function hi() {
+      echo 'method hi from trait Hi';
+   }
+}
+trait HelloHi {
+   use Hello,Hi {
+      Hello::hello insteadof Hi;
+      Hi::hi insteadof Hello;
+   }
+}
+class MyNew extends Base {
+   use HelloHi;
+   private $value = 'class MyNew';
+   public function hi() {
+       echo 'method hi from class MyNew';
+   }
+   public function getValue() {
+       return $this->value;
+   }
+}
+$obj = new MyNew();
+// trait的方法可以覆盖基类的方法
+$obj->hello();// method hello from trait Hello
+
+// 当前类中的方法可以覆盖trait的方法
+$obj->hi();// method hi from class MyNew
+
+// trait可以定义静态方法
+MyNew::staticMethod();//static method staticMethod from trait Hello
+
+//trait可以使用抽象方法
+echo $obj->getValue();// class MyNew
+
+//trait可以使用静态成员
+$objOther = new MyNew();
+$obj->staticValue();// 1
+$objOther->staticValue();// 2
+\end{lstlisting}
+
+\begin{compactitem}
+\item 当前类的方法会覆盖trait中的方法，trait中的方法会覆盖基类的方法。
+\item 多个trait使用逗号分隔并通过use关键字列出多个trait。
+\item 如果两个trait都插入了一个同名的方法，如果没有明确解决冲突就会产生一个致命错误。
+
+\item 使用as语法调整方法的访问控制。
+
+\item 在trait中可以使用抽象成员来强制类中必须实现这个抽象方法。
+
+\item 在trait中可以使用静态方法和静态变量。
+
+\item 在trait中可以定义属性。
+
+\end{compactitem}
+
+为了解决多个trait在同一个类中的命名冲突，需要使用insteadof操作符来明确指定使用冲突方法中的哪一个。或者，可以使用as操作符将其中一个冲突的方法以另一个名字来引入。
+
+Laravel使用trait来实现代码复用（例如身份认证）。
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}

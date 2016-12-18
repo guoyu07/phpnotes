@@ -1,0 +1,672 @@
+\part{Database}
+
+
+
+\chapter{Overview}
+
+
+
+
+\section{Native driver}
+
+
+MySQL不仅是事实上的标准数据库（比如 Friendster, Yahoo, Google），还可以进行缩减来支持嵌入的数据库应用程序。
+
+绝大多数的PHP应用都需要使用数据库来进行数据持久化，PHP支持使用mysqli、pgsql和mssql等原生驱动来连接数据库进行交互。
+
+原生驱动是在只使用 一个 数据库的情况下的不错的方式，而且MySQLi模块还提供了更加有效的方法和实用工具来处理数据库操作，这些方法大都是以面向对象的方式实现。
+
+除了mysqli之外，PHP还内置了一个数据库连接抽象类库——PDO来提供了一个通用的接口来与不同的数据库进行交互。例如，可以使用相同的简单代码来连接 MySQL 或是 SQLite：
+
+\begin{lstlisting}[language=PHP]
+<?php
+// PDO + MySQL
+$pdo = new PDO('mysql:host=example.com;dbname=database', 'user', 'password');
+$statement = $pdo->query("SELECT some_field FROM some_table");
+$row = $statement->fetch(PDO::FETCH_ASSOC);
+echo htmlentities($row['some_field']);
+
+// PDO + SQLite
+$pdo = new PDO('sqlite:/path/db/foo.sqlite');
+$statement = $pdo->query("SELECT some_field FROM some_table");
+$row = $statement->fetch(PDO::FETCH_ASSOC);
+echo htmlentities($row['some_field']);
+\end{lstlisting}
+
+PDO 并不会对 SQL 请求进行转换或者模拟实现并不存在的功能特性，它只是单纯地使用相同的 API 连接不同种类的数据库。
+
+更重要的是，PDO 使用户能够安全的插入外部输入（例如 ID）到SQL请求中而不必担心SQL注入的问题，可以通过使用 PDO 语句和限定参数来实现。
+
+假设一个 PHP 脚本接收一个数字 ID 作为一个请求参数。这个 ID 应该被用来从数据库中取出一条用户记录。
+
+首先，下面是一个错误的做法：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$pdo = new PDO('sqlite:/path/db/users.db');
+$pdo->query("SELECT name FROM users WHERE id = " . $_GET['id']); // <-- NO!
+\end{lstlisting}
+
+插入一个原始的请求参数到 SQL 请求中可以让被黑客轻松地利用SQL 注入方式进行攻击。例如，如果黑客将一个构造的 id 参数通过类似\texttt{http://domain.com/?id=1\%3BDELETE+FROM+users}的URL传入，就会使 \texttt{\$\_GET['id']}变量的值被设置为\texttt{1;DELETE FROM users}然后被执行从而删除所有的 user 记录，因此，必须使用 PDO 限制参数来过滤 ID 输入。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$pdo = new PDO('sqlite:/path/db/users.db');
+$stmt = $pdo->prepare('SELECT name FROM users WHERE id = :id');
+$id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT); 
+// <-- filter your data first (see [Data Filtering](#data_filtering)), especially important for INSERT, UPDATE, etc.
+$stmt->bindParam(':id', $id, PDO::PARAM_INT); // <-- Automatically sanitized for SQL by PDO
+$stmt->execute();
+\end{lstlisting}
+
+上述代码在一条 PDO 语句中使用了一个限制参数，并对外部 ID 输入在发送给数据库之前进行转义来防止潜在的 SQL 注入攻击。
+
+对于写入操作（例如 INSERT 或者 UPDATE）进行数据过滤并对其他内容进行清理（去除 HTML 标签和Javascript 等）是尤其重要的，因为PDO 只会为 SQL 进行清理，并不会为PHP代码进行任何处理。
+
+如果数据库连接没有被隐式地关闭，那么数据库连接有可能会耗尽全部资源，有可能会造成可用资源枯竭的情况。
+
+用户使用PDO可以销毁（destroy）对象（也就是将值设为 NULL）来隐式地关闭这些连接，以确保所有剩余的引用对象的连接都被删除。如果用户没有亲自清理数据库连接，PHP在脚本结束的时候自动清理 —— 除非用户使用的是持久链接。
+
+\section{Abstract layer}
+
+当原始的PHP应用开发中，通常会将数据库的交互与表示层逻辑混在一起，例如：
+
+\begin{lstlisting}[language=PHP]
+<ul>
+<?php 
+foreach ($db->query('SELECT * FROM table') as $row) {
+   echo "<li>".$row['field1']." - ".$row['field2']."</li>";
+}
+?>
+</ul>
+\end{lstlisting}
+
+很多方面现在来看都是错误的做法，主要是由于代码不易阅读又难以测试和调试，而且如果不加以限制，实际上会输出非常多的字段。
+
+其实还有许多不同的解决方案来完成这项工作 — 取决于用户倾向于 面向对象编程还是函数式编程 — 但是必须有一些分离的元素。例如，将两个元素放入了两个不同的文件来得到一些干净的分离，但是仍然是糟糕的做法。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function getAllFoos($db) {
+   return $db->query('SELECT * FROM table');
+}
+foreach (getAllFoos($db) as $row) {
+   echo "<li>".$row['field1']." - ".$row['field2']."</li>"
+}
+?>
+\end{lstlisting}
+
+接下来通过进一步改进来创建一个类来放置上面的函数，于是得到一个「Model」，同时创建一个简单的.php文件来存放表示逻辑，这样就得到了一个「View」，整个过程已经很接近MVC架构。
+
+\begin{compactitem}
+\item foo.php
+
+\begin{lstlisting}[language=PHP]
+<?php
+$db = new PDO('mysql:host=localhost;dbname=testdb;charset=utf8', 'username', 'password');
+
+// Make your model available
+include 'models/FooModel.php';
+
+// Create an instance
+$fooModel = new FooModel($db);
+// Get the list of Foos
+$fooList = $fooModel->getAllFoos();
+
+// Show the view
+include 'views/foo-list.php';
+\end{lstlisting}
+
+\item models/FooModel.php
+
+\begin{lstlisting}[language=PHP]
+<?php
+class FooModel
+{
+    protected $db;
+
+    public function __construct(PDO $db)
+    {
+        $this->db = $db;
+    }
+
+    public function getAllFoos() {
+        return $this->db->query('SELECT * FROM table');
+    }
+}
+\end{lstlisting}
+
+\item views/foo-list.php
+
+\begin{lstlisting}[language=PHP]
+<?php foreach ($fooList as $row): ?>
+    <?= $row['field1'] ?> - <?= $row['field1'] ?>
+<?php endforeach ?>
+\end{lstlisting}
+
+\end{compactitem}
+
+向大多数现代框架的做法学习是很有必要的，尽管多了一些手动的工作，这样就不需要每一次都完全这么做，但是将太多的表示逻辑层代码和数据库交互掺杂在一些将会对程序进行单元测试时带来真正的麻烦，于是PHPBridge提供了一类资源叫做数据类，其中包含了非常相似的适合开发使用的数据库操作逻辑。
+
+许多框架都提供了自己的数据库抽象层，其中一些是设计在 PDO 的上层的。
+
+数据库抽象层通常将请求在 PHP 方法中包装起来，通过模拟的方式来使数据库拥有一些之前不支持的功能，因此这种抽象是真正的数据库抽象，而不单单只是 PDO 提供的数据库连接抽象。
+
+数据库抽象的确会增加一定程度的性能开销，但是如果应用程序需要同时使用 MySQL，PostgreSQL 和 SQLite 时，这些额外的性能开销对于代码整洁度的提高来说还是很值得的。
+
+数据库抽象层通常使用的是PSR-0 或 PSR-4 命名空间标准，所以可以把它们安装在任何应用程序中。
+
+\begin{compactitem}
+\item Aura SQL(\url{https://github.com/auraphp/Aura.Sql})
+\item Doctrine2 DBAL(\url{https://github.com/doctrine/dbal})
+\item Propel(\url{https://github.com/propelorm/Propel2})
+\item ZF2 Db(\url{https://github.com/zendframework/zend-db})
+\end{compactitem}
+
+
+
+
+
+
+
+
+\section{mysql\_connect()}
+
+
+在能够访问并处理数据库中的数据之前，必须创建到达数据库的连接。在 PHP 中，这个任务通过 mysql\_connect() 函数完成。
+
+
+\begin{lstlisting}[language=PHP]
+mysql_connect(servername,username,password);
+\end{lstlisting}
+
+\begin{compactitem}
+\item servername
+
+可选，规定要连接的服务器，默认是``localhost:3306"。
+\item username
+
+可选，规定登录所使用的用户名，默认值是拥有服务器进程的用户的名称。
+\item password
+
+可选，规定登录所用的密码，默认是``"。
+\end{compactitem}
+
+下面的脚本中使用变量\$con存放数据库连接。如果连接失败，将执行``die" 部分：
+
+\begin{example}
+mysql\_connect()
+\begin{lstlisting}[language=PHP]
+<?php
+  $con = mysql_connect("localhost","admin","testtest");
+  if(!$con){
+    die('Could not connect: ' . mysql_error() );
+  }
+  //some code
+?>
+\end{lstlisting}
+\end{example}
+
+\section{mysql\_pconnect()}
+
+PHP的MySQL持久化连接，美好的目标，却拥有糟糕的口碑。
+
+作为Apache模块运行的PHP来说，要实现MySQL持久化连接，首先得取决于Apache是否支持Keep-Alive。
+
+从客户在浏览器输入一个有效url地址开始，浏览器就会利用socket向url对应的web服务器发送一条TCP请求，这个请求成功一次就得需要来回握三次手才能确定，成功以后，浏览器利用socket TCP连接资源向web服务器请求http协议，发送以后就等着web服务器把http返回头和body发送回来，发回来后浏览器关闭socket连接，然后做http返回头和body的解析工作，最后呈现在浏览器上的就是页面。
+
+
+TCP连接需要三次握手，也就是来回请求三次方能确定一个TCP请求是否成功，TCP关闭来回需要4次请求才能完成。
+
+如果Web服务器没有开启Keep-Alive，那么每次http请求都需要3次握手和4次通信，很多时间和资源消耗在在socket连接关闭上，从HTTP 1.0开始引入的Keep-Alive允许一次socket TCP连接来发送多次http请求，不过http/1.0里需要客户端自己在请求头加入Connection:Keep-alive参数。
+
+Apache从1.2版本开始支持Keep-Alive，可以在httpd.conf中设置KeepAlive配置项为On，MaxKeepAliveRequests为0。
+
+MaxKeepAliveRequests指定一个持久TCP最多允许的请求数，如果过小就很容易在TCP未过期的情况下到达最大连接，那么下次连接就已经是新的TCP连接，这里设置为0表示不限制，并且在mysql\_pconnect()中设置KeepAliveTimeout为15秒。
+
+\begin{example}
+获取当前PHP执行者(Apache)的进程号
+\begin{lstlisting}[language=PHP]
+<?php
+echo "Apache进程号:". getmypid();
+\end{lstlisting}
+\end{example}
+
+如果在15秒内连续刷新页面就发现进程号不变，但是超过15秒则进程号会变化。
+
+在Apache里设置KeepAliveTimeout为15秒，那么在Web服务器默认打开KeepAlive的情况下，客户端第一次http成功请求后，Apache不会立刻断开socket，而是一直监听来自这一客户端的请求，并且根据KeepAliveTimeout选项配置的时间决定是否端口连接。
+
+Apache在socket连接超时后就会关闭socket，下次同一客户端如果再次请求，Apache就会新开一个进程来响应，所以在15秒内刷新页面时看到的进程号是一致的，表明是浏览器请求被转发给了同一个Apache进程。
+
+http返回头里带上Connection:keep-alive和Keep-alive:15就会让客户端浏览器知道本次socket连接并未关闭，而且可以在15秒内继续使用当前这个socket连接来发送http请求。
+
+mysql\_pconnect根据当前Apache的进程号来生成hash key，并查找hash表内有无对应的连接资源，如果没有则压入hash表，否则就直接使用。
+
+
+
+\begin{example}
+ext/mysql/PHP\_mysql.c中的PHP\_mysql\_do\_connect()函数
+\begin{lstlisting}[language=C]
+#1.生成hash key
+user=php_get_current_user();//获取当前PHP执行者(Apache)的进程唯一标识号
+//hashed_details就是hash key
+hashed_details_length = spprintf(&hashed_details, 0, "MySQL__%s_", user);
+   #2.如果未找到已有资源，就推入hash表，名字叫persistent_list，如果找到就直接使用
+/* try to find if we already have this link in our persistent list */
+if (zend_hash_find(&EG(persistent_list), hashed_details, hashed_details_length+1, (void **) &le)==FAILURE) {  
+	/* we don't */
+	...
+	...
+	/* hash it up(推入hash表) */
+	Z_TYPE(new_le) = le_plink;
+	new_le.ptr = mysql;
+	if (zend_hash_update(&EG(persistent_list), hashed_details, hashed_details_length+1, (void *) &new_le, sizeof(zend_rsrc_list_entry), NULL)==FAILURE) {
+		...
+    		...      
+		}
+  		}
+	else
+	{/* The link is in our list of persistent connections(连接已在hash表里)*/
+           ...
+           ...
+           mysql = (PHP_mysql_conn *) le->ptr;//直接使用对应的sql连接资源
+           ...
+           ...
+	}
+\end{lstlisting}
+\end{example}
+
+影响mysql\_pconnect最重要的两个参数是wait\_timeout和interactive\_timeout，如果在页面上打印MySQL线程号和Apache进程号，就会发现在连接超时后二者都变成新的了，原因就是现在已经是新的Apache进程在处理请求，进程id是新的，hash key随之变化，这种情况下PHP只能重新连接MySQL，并把连接资源压入persistent list。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$conn = mysql_pconnect("localhost","root","123456") or die("Can not connect to MySQL");
+echo "MySQL线程号:". MySQL_thread_id($conn). "<br />";
+echo "Apache进程号". getmypid();
+\end{lstlisting}
+
+MySQL\_thread\_id是MySQL中正在执行的线程的号码，每个线程都有固定的wait\_timeout和interactive\_timeout，默认都是8小时，因此很容易导致processlist堆积并报出Too many connections错误，即使max\_connections设置的再大也无济于事。
+
+\begin{verbatim}
+mysql> show processlist;
++-----+------+-----------+------+--------+-----+------+-----------------+
+| Id  | User | Host      | db   | Command| Time| State| Info            |
++-----+------+-----------+------+--------+-----+------+-----------------+
+| 348 | root | localhost | NULL | Query  |    0| NULL | show processlist|
+| 349 | root | localhost | NULL | Sleep  |    2|      | NULL            |
++-----+------+-----------+------+--------+-----+------+-----------------+
+\end{verbatim}
+
+在my.cnf中调整wait\_timeout和interactive\_timeout的配置值，其中interactive\_timeout只对MySQL的交互式Shell有效。
+
+如果设置了mysql\_pconnect()的第四个参数MYSQL\_CLIENT\_INTERACTIVE，那么MySQL就会将其视作interactive connection，这样即使PHP页面没有活动，MySQL也会根据超时时间及时断开超时线程持有的连接。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$conn = mysql_pconnect('localhost','root','123456',MySQL_CLIENT_INTERACTIVE);
+echo "MySQL线程号:".MySQL_thread_id($conn)."<br />";
+echo "Apache进程号:".getmypid();
+\end{lstlisting}
+
+在使用PHP的mysql\_pconnect()函数时，首先必须保证Apache是支持keep-alive的，其次KeepAliveTimeOut应该设置多久要根据自身站点的访问情况做调整，时间太短则keep alive没有意义，时间太长就很可能为一个闲客户端连接牺牲过多的服务器资源，毕竟保持socket监听进程是要消耗CPU和内存的。
+
+Apache的KeepAliveTimeOut配置需要和MySQL的timeout配置进行平衡，假设mysql\_pconnect未带上第4个参数，如果Apache的KeepAliveTimeOut设置的秒数比wait\_timeout小，那么真正对mysql\_pconnect起作用的是Apache而不是MySQL的配置。
+
+如果MySQL的wait\_timeout偏大，在并发量大的情况下很可能开启过多的connection，而且MySQL无法及时回收就会导致Too many connections错误。
+
+如果KeepAliveTimeOut设置的太大同样会导致无效连接过多，因此Apache的KeepAliveTimeOu设置不能太大，只要比MySQL的wait\_timeout 稍大或者相等就是比较好的方案，这样可以保证keep alive过期后，废弃的MySQL连接可以及时被回收。
+
+
+\section{mysql\_close()}
+
+脚本执行结束，就会关闭数据库连接。若要提前关闭连接，使用 mysql\_close() 函数。
+
+
+\begin{example}
+mysql\_close()
+\begin{lstlisting}[language=PHP]
+<?php
+  $con = mysql_connect("localhost","admin","testtest");
+  if(!$con){
+    die('Could not connect: ' . mysql_error() );
+  }
+  //some code
+  
+  mysql_close($con);
+?>
+\end{lstlisting}
+\end{example}
+
+
+\section{mysql\_query()}
+
+为了让 PHP 执行MySQL数据库操作语句，必须使用 mysql\_query() 函数，此函数用于向 MySQL 连接发送查询或命令。
+
+CREATE DATABASE 语句用于在 MySQL 中创建数据库。
+
+\begin{lstlisting}[language=SQL]
+CREATE DATABASE database_name
+\end{lstlisting}
+
+
+
+SQL 语句对大小写不敏感，创建MySQL数据库时必须使用mysql\_query()函数。在下面的示例创建了一个名为``my\_db" 的数据库：
+
+\begin{example}
+创建数据库
+\begin{lstlisting}[language=PHP]
+<?php
+  $con = mysql_connect("localhost","admin","testtest");
+  if(!$con){
+    die('Could not connect ' . mysql_error() );
+  }
+  //Create database
+  if(mysql_query("CREATE DATABASE my_db",$con) ){
+    echo "Database created.";
+  }else{
+    echo "Error creating database: " . mysql_error();
+  }
+  
+  mysql_close($con);
+?>
+\end{lstlisting}
+\end{example}
+
+CREATE TABLE 用于在 MySQL 中创建数据库表。
+
+\begin{lstlisting}[language=SQL]
+CREATE TABLE table_name
+(
+  column_name1 data_type,
+  column_name2 data_type,
+  column_name3 data_type,
+  ... ...
+)
+\end{lstlisting}
+
+为了创建表，必须向 mysql\_query() 函数添加 CREATE TABLE 语句。下面的示例创建了一个名为``Persons" 的表，而且该表中有三列，列名分别是``FirstName", ``LastName" 以及``Age"：
+
+
+
+
+\begin{example}
+创建表
+\begin{lstlisting}[language=PHP]
+<?php
+  $con = mysql_connect("localhost","admin","testtest");
+  if(!$con){
+    die('Could not connect: ' . mysql_error() );
+  }
+  //Create database
+  if(mysql_query("CREATE DATABASE my_db"),$con){
+    echo "Database created.";
+  }else{
+    echo "Error creating database: " . mysql_error();
+  }
+  //Create table in my_db database
+  mysql_select_db("my_db",$con);
+  $sql = "CREATE TABLE Persons
+  (
+    FirstName varchar(15),
+    LastName varchar(15),
+    Age int
+  )";
+  mysql_query($sql,$con);
+  
+  mysql_close($con);
+?>
+\end{lstlisting}
+\end{example}
+
+
+在创建表之前，必须首先选择MySQL数据库，通过 mysql\_select\_db() 函数完成选取数据库操作。当创建 varchar 类型的数据库字段时，必须规定该字段的最大长度，例如varchar(15)。
+
+\zihao{6}
+
+\begin{longtable}{|m{110pt}|m{280pt}|}
+%%
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+数据类型 &描述
+\endhead
+%%
+
+%%
+\caption{MySQL 数据类型}\\
+\hline
+数据类型 &描述
+\endfirsthead
+%%
+
+%%
+\multicolumn{2}{r}{}
+\endfoot
+%%
+
+%%
+\endlastfoot
+%%
+\hline
+int(size) \newline 
+smallint(size) \newline 
+tinyint(size) \newline 
+mediumint(size) \newline 
+bigint(size) 					&仅支持整数。在 size 参数中规定数字的最大值。\\
+\hline
+decimal(size,d) \newline 
+double(size,d) \newline 
+float(size,d) 				& 支持带有小数的数字。
+							\newline 在 size 参数中规定数字的最大值。在 d 参数中规定小数点右侧的数字的最大值。\\
+\hline
+char(size)					&支持固定长度的字符串。（可包含字母、数字以及特殊符号）。
+							\newline 在 size 参数中规定固定长度。\\
+\hline
+varchar(size)				& 支持可变长度的字符串。（可包含字母、数字以及特殊符号）。
+							\newline 在 size 参数中规定最大长度。\\
+\hline
+tinytext						&支持可变长度的字符串，最大长度是 255 个字符。\\
+\hline
+text \newline 
+blob						&支持可变长度的字符串，最大长度是 65535 个字符。\\
+\hline
+mediumtext \newline 
+mediumblob					&支持可变长度的字符串，最大长度是 16777215 个字符。\\
+\hline
+longtext \newline 
+longblob					&支持可变长度的字符串，最大长度是 4294967295 个字符。\\
+\hline
+date(yyyy-mm-dd) \newline
+datetime(yyyy-mm-dd hh:mm:ss) \newline 
+timestamp(yyyymmddhhmmss) \newline 
+time(hh:mm:ss) 				&支持日期或时间\\
+\hline
+enum(value1,value2,ect)		&ENUM 是 ENUMERATED列表的缩写。可以在括号中存放最多 65535 个值。\\
+\hline
+set							&SET与ENUM相似。但是SET可拥有最多64个列表项目，并可存放不止一个choice\\
+\hline
+\end{longtable}
+
+\zihao{5}
+
+主键用于对表中的行进行唯一标识，每个表都应有一个主键字段。
+
+
+每个主键值在表中必须是唯一的，而且主键字段不能为空，这是由于数据库引擎需要一个值来对记录进行定位。
+
+下面的例子把 personID 字段设置为主键字段。主键字段通常是 ID 号，且通常使用 AUTO\_INCREMENT规定。AUTO\_INCREMENT 会在新记录被添加时逐一增加该字段的值。
+
+要确保主键字段不为空，就必须向该字段添加 NOT NULL 设置。
+
+\begin{example}
+主键
+\begin{lstlisting}[language=PHP]
+$sql = "CREATE TABLE Persons
+(
+  personID int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY(personID),
+  FirstName varchar(15),
+  LastName varchar(15),
+  Age int
+)";
+
+mysql_query($sql,$con);
+\end{lstlisting}
+\end{example}
+
+
+主键字段永远要被编入索引，这条规则没有例外。
+
+对主键字段进行索引才能使数据库引擎快速定位给予该键值的行。
+
+INSERT INTO 语句用于向数据库表添加新记录。
+
+
+\begin{lstlisting}[language=PHP]
+INSERT INTO table_name
+VALUES (value1, value2,....)
+\end{lstlisting}
+
+还可以规定希望在其中插入数据的列：
+
+\begin{lstlisting}[language=PHP]
+INSERT INTO table_name (column1, column2,...)
+VALUES (value1, value2,....)
+\end{lstlisting}
+
+为了向MySQL数据库表插入数据，必须使用 mysql\_query() 函数。下面的例子向``Persons" 表添加了两个新记录：
+
+\begin{example}
+插入数据
+\begin{lstlisting}[language=PHP]
+<?php
+  $con = mysql_connect("localhost","admin","testtest");
+  if(!$con){
+    die('Could not connect: ' . mysql_error() );
+  }
+  mysql_select("my_db",$con);
+  mysql_query("INSERT INTO Persons(FirstName,LastName,Age)
+  VALUES('Peter','Griffin','34')
+  ");
+  mysql_query("INSERT INTO Persons(FirstName,LastName,Age)
+  VALUES('Green','Jim','30')
+  ");
+  
+  mysql_close($con);
+?>
+\end{lstlisting}
+\end{example}
+
+
+把来自表单的数据插入数据库时，首先通过 \$\_POST 变量从表单取回值，然后mysql\_query() 函数执行 INSERT INTO 语句，这样一条新的记录才会添加到数据库表中。
+
+
+
+\begin{example}
+HTML表单
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html>
+<title>HTML Form Example</title>
+<body>
+
+<form action="insert.php" method="post">
+Firstname: <input type="text" name="firstname" />
+Lastname: <input type="text" name="lastname" />
+Age: <input type="text" name="age" />
+<input type="submit" />
+</form>
+
+</body>
+</html>
+\end{lstlisting}
+\end{example}
+
+当用户点击示例中 HTML 表单中的提交按钮时，表单数据被发送到``insert.php"，insert.php中的脚本完成新数据插入操作。
+
+
+\begin{example}
+将HTML表单插入数据库
+\begin{lstlisting}[language=PHP]
+<?php
+  $con = mysql_connect("localhost","admin","testtest");
+  if(!$con){
+    die('Could not connect: ' . mysql_error() );
+  }
+  mysql_select_db("my_db",$con);
+  $sql = "INSERT INTO Persons(FirstName,LastName,Age)
+  VALUES
+  ('$_POST['firstname']','$_POST['lastname]','$_POST['age']')";
+  if(!mysql_query($sql,$con)){
+    die('Error: ' . mysql_error() );
+  }
+  echo "1 record added.";
+  
+  mysql_close($con);
+?>
+\end{lstlisting}
+\end{example}
+
+
+
+
+
+
+
+
+\begin{example}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+\end{example}
+
+
+
+
+
+
+
+
+
+
+
+\begin{example}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+\end{example}
+
+
+
+
+
+
+
+
+
+
+\begin{example}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+\end{example}
+
+
+
+
+
+
+
+
+
+
+
+\begin{example}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+\end{example}

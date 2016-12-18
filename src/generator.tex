@@ -1,0 +1,409 @@
+\part{Generator}
+
+
+\chapter{Overview}
+
+生成器提供了一种更容易的方法来实现简单的对象迭代，而且相比定义类实现 Iterator 接口的方式，性能开销和复杂性大大降低。
+
+生成器允许用户在 foreach 代码块中编写代码来迭代一组数据而不需要在内存中创建一个数组，否则会使内存达到上限，或者占据可观的处理时间。相反，生成器允许写一个生成器函数，就像一个普通的自定义函数一样，不过和普通函数只返回一次不同的是生成器可以根据需要 yield 多次来生成需要迭代的值。
+
+
+一个简单的例子就是使用生成器来重新实现 range() 函数。 
+
+以前标准的 range() 函数需要在内存中生成一个数组包含每一个在它范围内的值，然后返回该数组，结果就是会产生多个很大的数组，例如调用 range(0, 1000000) 将导致内存占用超过 100 MB。
+
+现在做为一种替代方法，通过生成器可以实现一个 xrange() 生成器，只需要足够的内存来创建 Iterator 对象并在内部跟踪生成器的当前状态，结果就是只需要不到1K字节的内存。
+
+
+
+
+\begin{example}
+使用生成器实现range()
+\begin{lstlisting}[language=PHP]
+<?php
+function xrange($start, $limit, $step = 1) {
+    if ($start < $limit) {
+        if ($step <= 0) {
+            throw new LogicException('Step must be +ve');
+        }
+        for ($i = $start; $i <= $limit; $i += $step) {
+            yield $i;
+        }
+    } else {
+        if ($step >= 0) {
+            throw new LogicException('Step must be -ve');
+        }
+        for ($i = $start; $i >= $limit; $i += $step) {
+            yield $i;
+        }
+    }
+}
+
+echo 'Single digit odd numbers from range():  ';
+foreach (range(1, 9, 2) as $number) {
+    echo "$number ";
+}
+echo "\n";
+
+echo 'Single digit odd numbers from xrange(): ';
+foreach (xrange(1, 9, 2) as $number) {
+    echo "$number ";
+}
+\end{lstlisting}
+\end{example}
+
+当第一次调用一个生成器函数时会返回一个内部生成器类的对象，这个对象实现了Iterator接口。
+
+生成器类的对象一般是作为一个向前迭代的对象，并且提供可以调用的方法来修改生成器的状态（包括向其发送值或从其中获取返回值）。
+
+和Iterator对象相比，生成器的主要优势在于简单，这样相比实现一个Iterator类就可以使用更少的代码，而且生成器代码可读性更好。例如，下面的生成器函数和Iterator类是等价的。
+
+\begin{lstlisting}[language=PHP]
+<?php
+function getLinesFromFile($fileName) {
+    if (!$fileHandle = fopen($fileName, 'r')) {
+        return;
+    }
+ 
+    while (false !== $line = fgets($fileHandle)) {
+        yield $line;
+    }
+ 
+    fclose($fileHandle);
+}
+
+// versus...
+
+class LineIterator implements Iterator {
+    protected $fileHandle;
+ 
+    protected $line;
+    protected $i;
+ 
+    public function __construct($fileName) {
+        if (!$this->fileHandle = fopen($fileName, 'r')) {
+            throw new RuntimeException('Couldn\'t open file "' . $fileName . '"');
+        }
+    }
+ 
+    public function rewind() {
+        fseek($this->fileHandle, 0);
+        $this->line = fgets($this->fileHandle);
+        $this->i = 0;
+    }
+ 
+    public function valid() {
+        return false !== $this->line;
+    }
+ 
+    public function current() {
+        return $this->line;
+    }
+ 
+    public function key() {
+        return $this->i;
+    }
+ 
+    public function next() {
+        if (false !== $this->line) {
+            $this->line = fgets($this->fileHandle);
+            $this->i++;
+        }
+    }
+ 
+    public function __destruct() {
+        fclose($this->fileHandle);
+    }
+}
+\end{lstlisting}
+
+生成器提供的灵活性是有代价的，即生成器仅支持前向迭代，并且迭代一旦开始就无法倒回，这就意味着同一个生成器不能被迭代多次，而且生成器除非通过调用生成器函数来重新生成，或者通过clone关键字进行复制。
+
+
+\section{Syntax}
+
+
+一个生成器函数看起来就是一个普通的函数，二者的区别如下：
+
+\begin{compactitem}
+\item 一个普通的函数往往只返回一个值；
+\item 一个生成器可以yield生成许多个它所需要的值。
+\end{compactitem}
+
+当一个生成器被调用的时候，它返回的是一个可以被遍历的对象，这样当遍历这个对象时（例如通过foreach循环），PHP将会在每次需要值的时候调用生成器函数，并在产生一个值之后保存生成器的状态，于是生成器就可以在需要产生下一个值的时候恢复调用状态。
+
+一旦不再需要产生更多的值，生成器函数可以简单退出，但是调用生成器的代码还可以继续执行，就像一个数组已经被遍历完了。
+
+注意，一个生成器不可以返回值，否则会产生一个编译错误，不过return空是一个有效的语法并且它将会终止生成器继续执行。
+
+\section{Yield}
+
+生成器函数的核心是yield关键字。
+
+生成器函数的最简单的调用形式看起来像一个return申明，不同之处在于普通return会返回值并终止函数的执行，而yield会返回一个值给循环调用此生成器的代码并且只是暂停执行生成器函数。
+
+\begin{lstlisting}[language=PHP]
+function gen_one_to_three() {
+    for ($i = 1; $i <= 3; $i++) {
+        //注意变量$i的值在不同的yield之间是保持传递的。
+        yield $i;
+    }
+}
+
+$generator = gen_one_to_three();
+foreach ($generator as $value) {
+    echo "$value\n";
+}
+?>
+\end{lstlisting}
+
+上述示例的输出如下：
+
+\begin{lstlisting}[language=PHP]
+1
+2
+3
+\end{lstlisting}
+
+生成器对象在内部会为生成的值配备连续的整型索引（就像一个非关联的数组）。
+
+如果在一个表达式上下文（例如在一个赋值表达式的右侧）中使用yield，必须使用圆括号把yield申明包围起来。
+
+\begin{example}
+在表达式上下文中使用yield
+\begin{lstlisting}[language=PHP]
+$data = (yield $value);
+\end{lstlisting}
+\end{example}
+
+如果没有括号就是不合法的，而且会产生一个编译错误（PHP7除外），例如：
+
+\begin{example}
+不合法的yield用法
+\begin{lstlisting}[language=PHP]
+$data = yield $value;
+\end{lstlisting}
+\end{example}
+
+使用把圆括号把yield声明括起来的语法可以和生成器对象的Generator::send()方法配合使用。
+
+
+\section{Array}
+
+
+生成器同样支持PHP的关联键值对数组，所以除了生成简单的值，也可以使用生成器在生成值的时候指定键名。
+
+在下面的示例中可以看到，生成一个键值对与定义一个关联数组十分相似。
+
+\begin{example}
+生成一个键值对
+\begin{lstlisting}[language=PHP]
+<?php
+/* 
+ * 下面每一行是用分号分割的字段组合，第一个字段将被用作键名。
+ */
+
+$input = <<<'EOF'
+1;PHP;Likes dollar signs
+2;Python;Likes whitespace
+3;Ruby;Likes blocks
+EOF;
+
+function input_parser($input) {
+    foreach (explode("\n", $input) as $line) {
+        $fields = explode(';', $line);
+        $id = array_shift($fields);
+
+        yield $id => $fields;
+    }
+}
+
+foreach (input_parser($input) as $id => $fields) {
+    echo "$id:\n";
+    echo "    $fields[0]\n";
+    echo "    $fields[1]\n";
+}
+\end{lstlisting}
+\end{example}
+
+上述示例的输出如下：
+
+\begin{lstlisting}[language=PHP]
+1:
+    PHP
+    Likes dollar signs
+2:
+    Python
+    Likes whitespace
+3:
+    Ruby
+    Likes blocks
+\end{lstlisting}
+
+
+和之前生成简单值类型一样，在一个表达式上下文中生成键值对也需要使用圆括号进行包围。
+
+
+\begin{lstlisting}[language=PHP]
+$data = (yield $key => $value);
+\end{lstlisting}
+
+
+\section{NULL}
+
+
+Yield可以在没有参数传入的情况下被调用来生成一个 NULL值并配对一个自动的键名。
+
+
+
+\begin{example}
+生成NULLs
+\begin{lstlisting}[language=PHP]
+<?php
+function gen_three_nulls() {
+    foreach (range(1, 3) as $i) {
+        yield;
+    }
+}
+
+var_dump(iterator_to_array(gen_three_nulls()));
+?>
+\end{lstlisting}
+\end{example}
+
+上述示例的结果如下：
+
+
+\begin{lstlisting}[language=PHP]
+array(3) {
+  [0]=>
+  NULL
+  [1]=>
+  NULL
+  [2]=>
+  NULL
+}
+\end{lstlisting}
+
+除了生成NULL值之外，生成函数可以像使用值一样来使用引用生成，这个和从函数返回一个引用一样，也就是通过在函数名前面加一个引用符号。
+
+
+
+
+\begin{example}
+使用引用来生成值
+\begin{lstlisting}[language=PHP]
+<?php
+function &gen_reference() {
+    $value = 3;
+
+    while ($value > 0) {
+        yield $value;
+    }
+}
+
+/* 
+ * 可以在循环中修改$number的值，而生成器是使用的引用值来生成，
+ * 所以gen_reference()内部的$value值也会跟着变化。
+ */
+foreach (gen_reference() as &$number) {
+    echo (--$number).'... ';
+}
+\end{lstlisting}
+\end{example}
+
+以上示例会输出：
+
+\begin{lstlisting}[language=PHP]
+2... 1... 0... 
+\end{lstlisting}
+
+
+\section{From}
+
+yield from可以用来实现生成器委托（generator delegation），或者说从其他的生成器、Traversable对象或数组中通过yield from关键字来执行遍历取值。
+
+
+
+外部生成器可以从内部生成器中、对象或数组中遍历取值直到它不再有效，然后在外部生成器中继续执行。
+
+如果生成器被用于yield from，那么yield from表达式将会返回内部生成器返回的任何值。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function count_to_ten() {
+    yield 1;
+    yield 2;
+    yield from [3, 4];
+    yield from new ArrayIterator([5, 6]);
+    yield from seven_eight();
+    yield 9;
+    yield 10;
+}
+
+function seven_eight() {
+    yield 7;
+    yield from eight();
+}
+
+function eight() {
+    yield 8;
+}
+
+foreach (count_to_ten() as $num) {
+    echo "$num ";
+}
+\end{lstlisting}
+
+上述示例的输出如下：
+
+\begin{lstlisting}[language=PHP]
+1 2 3 4 5 6 7 8 9 10
+\end{lstlisting}
+
+
+
+\begin{example}
+使用yield from获取返回值
+\begin{lstlisting}[language=PHP]
+<?php
+function count_to_ten() {
+    yield 1;
+    yield 2;
+    yield from [3, 4];
+    yield from new ArrayIterator([5, 6]);
+    yield from seven_eight();
+    return yield from nine_ten();
+}
+
+function seven_eight() {
+    yield 7;
+    yield from eight();
+}
+
+function eight() {
+    yield 8;
+}
+
+function nine_ten() {
+    yield 9;
+    return 10;
+}
+
+$gen = count_to_ten();
+foreach ($gen as $num) {
+    echo "$num ";
+}
+echo $gen->getReturn();
+?>
+\end{lstlisting}
+\end{example}
+
+上述示例的输出如下：
+
+
+\begin{lstlisting}[language=PHP]
+1 2 3 4 5 6 7 8 9 10
+\end{lstlisting}
+

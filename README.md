@@ -1,3 +1,4 @@
-# phpnotes
+phpnotes
+========
 
-phpnotes use latex
+php notes
