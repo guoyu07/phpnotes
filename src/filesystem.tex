@@ -1,0 +1,610 @@
+\part{Filesystem}
+
+
+\chapter{Overview}
+
+
+\section{Requirement}
+
+默认情况下，文件系统函数不需要额外的库支持，除非需要支持Linux的LFS（Large File System）文件系统，那么需要以最新的glibc库并指定如下参数来编译PHP：
+
+\begin{lstlisting}[language=bash]
+-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+\end{lstlisting}
+
+\section{Resource Type}
+
+文件系统函数使用流（stream）作为其资源类型。
+
+
+\section{Build-in Module}
+
+文件系统函数是PHP核心的一部分，由PHP核心直接支持。
+
+\section{Runtime Configure}
+
+文件系统函数的行为受到php.ini中的相关配置项的影响。
+
+
+
+\begin{longtable}{|m{100pt}|m{30pt}|m{50pt}|m{100pt}|}
+%head
+\multicolumn{4}{r}{}
+\tabularnewline\hline
+名字&默认&可修改范围&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{Network Configuration选项}\\
+\hline
+名字&默认&可修改范围&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{4}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+allow\_url\_fopen			&\texttt{"1"}	&PHP\_INI\_SYSTEM&可用\\
+\hline
+user\_agent				&NULL		&PHP\_INI\_ALL	&可用\\
+\hline
+default\_socket\_timeout	&\texttt{"60"}	&PHP\_INI\_ALL	&可用\\
+\hline
+from					&\texttt{""}	&PHP\_INI\_ALL	& \\
+\hline
+auto\_detect\_line\_endings	&\texttt{"0"}	&PHP\_INI\_ALL	&可用\\
+\hline
+\end{longtable}
+
+
+\subsection{allow\_url\_fopen}
+
+
+allow\_url\_fopen选项激活URL形式的 fopen 封装协议，使得PHP可以访问 URL 对象（例如文件）。
+
+默认的封装协议提供用 ftp 和 http 协议来访问远程文件，一些扩展库（例如 zlib）可能会注册更多的封装协议。
+
+allow\_url\_fopen选项只能在 php.ini 中设置（出于安全考虑）。
+
+\subsection{allow\_url\_include}
+
+allow\_url\_include选项配置是否允许使用具有以下函数的URL感知的fopen包装器：
+
+\begin{compactitem}
+\item include
+\item include\_once
+\item require
+\item require\_once
+\end{compactitem}
+
+allow\_url\_include选项要求allow\_url\_open选项配置为on。
+
+\subsection{user\_agent}
+
+
+user\_agent定义 PHP 发送的 User-Agent。
+
+\subsection{default\_socket\_timeout}
+
+default\_socket\_timeout定义基于 socket 的流的默认超时时间（秒）。
+
+\subsection{from}
+
+from选项定义匿名 ftp 的密码（email 地址）。
+
+\subsection{auto\_detect\_line\_endings}
+
+auto\_detect\_line\_endings默认值为off，如果设置为on，那么PHP 将检查通过 fgets() 和 file() 取得的数据中的行结束符号是符合 Unix、MS-DOS还是 Macintosh 的习惯。
+
+
+auto\_detect\_line\_endings设置为on时使得 PHP 可以和 Macintosh 系统交互操作。
+
+默认auto\_detect\_line\_endings的值是 Off的原因是在检测第一行的 EOL 习惯时会有很小的性能损失，而且在 Unix 系统下使用回车符号作为项目分隔符的用户会遇到向下不兼容的行为。
+
+
+\section{Predefined Constants}
+
+PHP为文件系统函数族预先定义了一些常量，并且这些常量可以作为PHP核心的一部分或者在运行时动态载入时总是可用的。
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于openlog()选项的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+SEEK\_SET (integer)&\\
+\hline
+SEEK\_CUR (integer)&\\
+\hline
+SEEK\_END (integer)&\\
+\hline
+LOCK\_SH (integer)&\\
+\hline
+LOCK\_EX (integer)&\\
+\hline
+LOCK\_UN (integer)&\\
+\hline
+LOCK\_NB (integer)&\\
+\hline
+GLOB\_BRACE (integer)&\\
+\hline
+GLOB\_ONLYDIR (integer)&\\
+\hline
+GLOB\_MARK (integer)&\\
+\hline
+GLOB\_NOSORT (integer)&\\
+\hline
+GLOB\_NOCHECK (integer)&\\
+\hline
+GLOB\_NOESCAPE (integer)&\\
+\hline
+GLOB\_AVAILABLE\_FLAGS (integer)&\\
+\hline
+PATHINFO\_DIRNAME (integer)&\\
+\hline
+PATHINFO\_BASENAME (integer)&\\
+\hline
+PATHINFO\_EXTENSION (integer)&\\
+\hline
+PATHINFO\_FILENAME (integer)&\\
+\hline
+FILE\_USE\_INCLUDE\_PATH (integer)&Search for filename in include\_path\\
+\hline
+FILE\_NO\_DEFAULT\_CONTEXT (integer)&\\
+\hline
+FILE\_APPEND (integer)&Append content to existing file.\\
+\hline
+FILE\_IGNORE\_NEW\_LINES (integer)&Strip EOL characters.\\
+\hline
+FILE\_SKIP\_EMPTY\_LINES (integer)&Skip empty lines.\\
+\hline
+FILE\_BINARY (integer)&Binary mode，仅用于向前兼容\\
+\hline
+FILE\_TEXT (integer)&Text mode，仅用于向前兼容\\
+\hline
+INI\_SCANNER\_NORMAL (integer)&Normal INI scanner mode\\
+\hline
+INI\_SCANNER\_RAW (integer)&Raw INI scanner mode\\
+\hline
+INI\_SCANNER\_TYPED (integer)&Typed INI scanner mode\\
+\hline
+FNM\_NOESCAPE (integer)&Disable backslash escaping.\\
+\hline
+FNM\_PATHNAME (integer)&Slash in string only matches slash in the given pattern.\\
+\hline
+FNM\_PERIOD (integer)&Leading period in string must be exactly matched by period in the given pattern.\\
+\hline
+FNM\_CASEFOLD (integer)&Caseless match. Part of the GNU extension.\\
+\hline
+\end{longtable}
+
+
+
+\chapter{Functions}
+
+\section{basename()}
+
+返回路径中的文件名部分
+
+\section{chgrp()}
+
+改变文件所属的组
+
+\section{chmod()}
+
+改变文件模式
+
+\section{chown()}
+
+改变文件的所有者
+
+\section{clearstatcache()}
+
+清除文件状态缓存
+
+\section{copy()}
+
+拷贝文件
+
+\section{delete()}
+
+参见 unlink 或 unset
+
+\section{dirname()}
+
+返回路径中的目录部分
+
+\section{disk\_free\_space()}
+
+返回目录中的可用空间
+
+\section{disk\_total\_space()}
+
+返回一个目录的磁盘总大小
+
+\section{diskfreespace()}
+
+disk\_free\_space 的别名
+
+\section{fclose()}
+
+关闭一个已打开的文件指针
+
+\section{feof()}
+
+测试文件指针是否到了文件结束的位置
+
+\section{fflush()}
+
+将缓冲内容输出到文件
+
+\section{fgetc()}
+
+从文件指针中读取字符
+
+\section{fgetcsv()}
+
+从文件指针中读入一行并解析 CSV 字段
+
+\section{fgets()}
+
+从文件指针中读取一行
+
+\section{fgetss()}
+
+从文件指针中读取一行并过滤掉 HTML 标记
+
+\section{file\_exists()}
+
+检查文件或目录是否存在
+
+\section{file\_get\_contents()}
+
+将整个文件读入一个字符串
+
+\section{file\_put\_contents()}
+
+将一个字符串写入文件
+
+\section{file()}
+
+把整个文件读入一个数组中
+
+\section{fileatime()}
+
+取得文件的上次访问时间
+
+\section{filectime()}
+
+取得文件的 inode 修改时间
+
+\section{filegroup()}
+
+取得文件的组
+
+\section{fileinode()}
+
+取得文件的 inode
+
+\section{filemtime()}
+
+取得文件修改时间
+
+\section{fileowner()}
+
+取得文件的所有者
+
+\section{fileperms()}
+
+取得文件的权限
+
+\section{filesize()}
+
+取得文件大小
+
+\section{filetype()}
+
+取得文件类型
+
+\section{flock()}
+
+轻便的咨询文件锁定
+
+\section{fnmatch()}
+
+用模式匹配文件名
+
+\section{fopen()}
+
+打开文件或者 URL
+
+\section{fpassthru()}
+
+输出文件指针处的所有剩余数据
+
+\section{fputcsv()}
+
+将行格式化为 CSV 并写入文件指针
+
+\section{fputs()}
+
+fwrite 的别名
+
+\section{fread()}
+
+读取文件（可安全用于二进制文件）
+
+\section{fscanf()}
+
+从文件中格式化输入
+
+\section{fseek()}
+
+在文件指针中定位
+
+\section{fstat()}
+
+
+通过已打开的文件指针取得文件信息
+
+\section{ftell()}
+
+返回文件指针读/写的位置
+
+\section{ftruncate()}
+
+将文件截断到给定的长度
+
+\section{fwrite()}
+
+写入文件（可安全用于二进制文件）
+
+\section{glob()}
+
+寻找与模式匹配的文件路径
+
+\section{is\_dir()}
+
+判断给定文件名是否是一个目录
+
+\section{is\_executable()}
+
+判断给定文件名是否可执行
+
+\section{is\_file()}
+
+判断给定文件名是否为一个正常的文件
+
+\section{is\_link()}
+
+判断给定文件名是否为一个符号连接
+
+\section{is\_readable()}
+
+判断给定文件名是否可读
+
+\section{is\_uploaded\_file()}
+
+判断文件是否是通过 HTTP POST 上传的
+
+\section{is\_writable()}
+
+
+判断给定的文件名是否可写
+
+\section{is\_writeable()}
+
+is\_writable 的别名
+
+\section{lchgrp()}
+
+修改符号链接的所有组
+
+\section{lchown()}
+
+修改符号链接的所有者
+
+\section{link()}
+
+建立一个硬连接
+
+\section{linkinfo()}
+
+获取一个连接的信息
+
+\section{lstat()}
+
+给出一个文件或符号连接的信息
+
+\section{mkdir()}
+
+新建目录
+
+\section{move\_uploaded\_file()}
+
+将上传的文件移动到新位置
+
+\section{parse\_ini\_file()}
+
+解析一个配置文件
+
+\section{parse\_ini\_string()}
+
+解析配置字符串
+
+\section{pathinfo()}
+
+返回文件路径的信息
+
+\section{pclose()}
+
+关闭进程文件指针
+
+\section{popen()}
+
+打开进程文件指针
+
+\section{readfile()}
+
+输出文件
+
+\section{readlink()}
+
+返回符号连接指向的目标
+
+\section{realpath\_cache\_get()}
+
+获取真实目录缓存的详情
+
+\section{realpath\_cache\_size()}
+
+获取真实路径缓冲区的大小
+
+\section{realpath()}
+
+返回规范化的绝对路径名
+
+\section{rename()}
+
+重命名一个文件或目录
+
+\section{rewind()}
+
+倒回文件指针的位置
+
+\section{rmdir()}
+
+删除目录
+
+\section{set\_file\_buffer()}
+
+stream\_set\_write\_buffer 的别名
+
+\section{stat()}
+
+给出文件的信息
+
+\section{symlink()}
+
+建立符号连接
+
+\section{tempnam()}
+
+ 建立一个具有唯一文件名的文件
+ 
+\section{tmpfile()}
+
+建立一个临时文件
+
+\section{touch()}
+
+设定文件的访问和修改时间
+
+\section{umask()}
+
+改变当前的 umask
+
+\section{unlink()}
+
+删除文件
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

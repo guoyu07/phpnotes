@@ -1,0 +1,375 @@
+\part{Soap}
+
+
+\chapter{Overview}
+
+PHP的SOAP扩展支持SOAP1.1、SOAP1.2和WSDL1.1协议的子集，开发者可以使用SOAP扩展提供的功能来编写SOAP服务器和SOAP客户端代码。
+
+
+\section{Requirement}
+
+SOAP扩展需要libxml扩展的支持，因此在编译PHP时需要指定\texttt{-\/-enable-libxml}，不过实际上libxml默认是开启的。
+
+\begin{lstlisting}[language=bash]
+$ php --ri libxml
+libxml
+
+libXML support => active
+libXML Compiled Version => 2.9.1
+libXML Loaded Version => 20901
+libXML streams => enabled
+\end{lstlisting}
+
+在编译PHP时需要打开\texttt{-\/-enable-soap}才能把SOAP扩展编译进PHP。
+
+
+\section{Resource Type}
+
+SOAP没有定义资源类型。
+
+
+\section{Runtime Configure}
+
+
+SOAP扩展提供的函数的行为受到php.ini的配置项的影响。
+
+
+\begin{longtable}{|m{150pt}|m{40pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+配置项&默认&可修改范围
+\endhead
+%endhead
+
+%firsthead
+\caption{SOAP配置项}\\
+\hline
+配置项&默认&可修改范围
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+soap.wsdl\_cache\_enabled	&1		&PHP\_INI\_ALL	\\
+\hline
+soap.wsdl\_cache\_dir		&/tmp	&PHP\_INI\_ALL	\\
+\hline
+soap.wsdl\_cache\_ttl		&86400	&PHP\_INI\_ALL	\\
+\hline
+soap.wsdl\_cache			&1		&PHP\_INI\_ALL	\\
+\hline
+soap.wsdl\_cache\_limit		&5		&PHP\_INI\_ALL\\
+\hline
+\end{longtable}
+
+\subsection{soap.wsdl\_cache\_enabled}
+
+soap.wsdl\_cache\_enabled(integer) - 启用/禁用WSDL缓存特性
+
+\subsection{soap.wsdl\_cache\_dir}
+
+soap.wsdl\_cache\_dir(string) - 设置SOAP扩展存储缓存文件的目录名
+
+\subsection{soap.wsdl\_cache\_ttl}
+
+soap.wsdl\_cache\_ttl(integer) - 设置SOAP的缓存文件的生命期限（time to live）
+
+\subsection{soap.wsdl\_cache}
+
+soap.wsdl\_cache(integer) - 如果soap.wsdl\_cache\_enabled为on，那么soap.wsdl\_cache设置确定缓存的类型，它可以是以下任何一个：
+
+\begin{compactitem}
+\item WSDL\_CACHE\_NONE（0）
+\item WSDL\_CACHE\_DISK（1）
+\item WSDL\_CACHE\_MEMORY（2）
+\item WSDL\_CACHE\_BOTH（3）。
+\end{compactitem}
+
+这也可以通过SoapClient或SoapServer构造函数中的options数组设置。
+
+\subsection{soap.wsdl\_cache\_limit}
+
+soap.wsdl\_cache\_limit(integer) - 设置在内存中缓存WSDL文件的最大数目，如果继续向已经满了的内存缓存中添加新的缓存文件，将会删除其中旧的缓存文件。
+
+
+
+
+
+
+
+\section{Predefined Constants}
+
+SOAP提供了自己的预定义常量，并且仅在SOAP扩展编译入PHP或者在运行时动态载入SOAP展时可用。
+
+
+\zihao{6}
+\begin{longtable}{|m{150pt}|m{100pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&常量值
+\endhead
+%endhead
+
+%firsthead
+\caption{SOAP扩展的预定义常量}\\
+\hline
+常量名&常量值
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+SOAP\_1\_1 (integer)	&1	 \\
+\hline
+SOAP\_1\_2 (integer)	&2	 \\
+\hline
+SOAP\_PERSISTENCE\_SESSION (integer)	&1 \\
+\hline
+SOAP\_PERSISTENCE\_REQUEST (integer)	&2\\
+\hline	 
+SOAP\_FUNCTIONS\_ALL (integer)	&999	\\
+\hline 
+SOAP\_ENCODED (integer)	&1	 \\
+\hline
+SOAP\_LITERAL (integer)	&2	 \\
+\hline
+SOAP\_RPC (integer)	&1	 \\
+\hline
+SOAP\_DOCUMENT (integer)	&2	 \\
+\hline
+SOAP\_ACTOR\_NEXT (integer)	&1	 \\
+\hline
+SOAP\_ACTOR\_NONE (integer)	&2	 \\
+\hline
+SOAP\_ACTOR\_UNLIMATERECEIVER (integer)	&3	 \\
+\hline
+SOAP\_COMPRESSION\_ACCEPT (integer)	&32	 \\
+\hline
+SOAP\_COMPRESSION\_GZIP (integer)	&0	 \\
+\hline
+SOAP\_COMPRESSION\_DEFLATE (integer)	&16	 \\
+\hline
+SOAP\_AUTHENTICATION\_BASIC (integer)	&0	 \\
+\hline
+SOAP\_AUTHENTICATION\_DIGEST (integer)&1	 \\
+\hline
+SOAP\_SSL\_METHOD\_TLS (integer)	&0	\\
+\hline
+SOAP\_SSL\_METHOD\_SSLv2 (integer)	&1	\\
+\hline
+SOAP\_SSL\_METHOD\_SSLv3 (integer)	&2\\
+\hline
+SOAP\_SSL\_METHOD\_SSLv23 (integer)	&3\\
+\hline
+UNKNOWN\_TYPE (integer)	&999998	 \\
+\hline
+XSD\_STRING (integer)	&101	 \\
+\hline
+XSD\_BOOLEAN (integer)	&102	 \\
+\hline
+XSD\_DECIMAL (integer)	&103	 \\
+\hline
+XSD\_FLOAT (integer)	&104	 \\
+\hline
+XSD\_DOUBLE (integer)	&105	 \\
+\hline
+XSD\_DURATION (integer)	&106	 \\
+\hline
+XSD\_DATETIME (integer)	&107	 \\
+\hline
+XSD\_TIME (integer)	&108	 \\
+\hline
+XSD\_DATE (integer)	&109	 \\
+\hline
+XSD\_GYEARMONTH (integer)	&110	 \\
+\hline
+XSD\_GYEAR (integer)	&111	 \\
+\hline
+XSD\_GMONTHDAY (integer)	&112	 \\
+\hline
+XSD\_GDAY (integer)	&113	 \\
+\hline
+XSD\_GMONTH (integer)	&114	 \\
+\hline
+XSD\_HEXBINARY (integer)	&115	 \\
+\hline
+XSD\_BASE64BINARY (integer)	&116	 \\
+\hline
+XSD\_ANYURI (integer)	&117	 \\
+\hline
+XSD\_QNAME (integer)	&118	 \\
+\hline
+XSD\_NOTATION (integer)	&119	 \\
+\hline
+XSD\_NORMALIZEDSTRING (integer)	&120	 \\
+\hline
+XSD\_TOKEN (integer)	&121	 \\
+\hline
+XSD\_LANGUAGE (integer)	&122	 \\
+\hline
+XSD\_NMTOKEN (integer)	&123	 \\
+\hline
+XSD\_NAME (integer)	&124	 \\
+\hline
+XSD\_NCNAME (integer)	&125	 \\
+\hline
+XSD\_ID (integer)	&126	 \\
+\hline
+XSD\_IDREF (integer)	&127	 \\
+\hline
+XSD\_IDREFS (integer)	&128	 \\
+\hline
+XSD\_ENTITY (integer)	&129	 \\
+\hline
+XSD\_ENTITIES (integer)	&130	 \\
+\hline
+XSD\_INTEGER (integer)	&131	 \\
+\hline
+XSD\_NONPOSITIVEINTEGER (integer)	&132	 \\
+\hline
+XSD\_NEGATIVEINTEGER (integer)	&133	 \\
+\hline
+XSD\_LONG (integer)	&134	 \\
+\hline
+XSD\_INT (integer)	&135	 \\
+\hline
+XSD\_SHORT (integer)	&136	 \\
+\hline
+XSD\_BYTE (integer)	&137	 \\
+\hline
+XSD\_NONNEGATIVEINTEGER (integer)	&138	 \\
+\hline
+XSD\_UNSIGNEDLONG (integer)	&139	 \\
+\hline
+XSD\_UNSIGNEDINT (integer)	&140	 \\
+\hline
+XSD\_UNSIGNEDSHORT (integer)	&141	 \\
+\hline
+XSD\_UNSIGNEDBYTE (integer)	&142	 \\
+\hline
+XSD\_POSITIVEINTEGER (integer)	&143	 \\
+\hline
+XSD\_NMTOKENS (integer)	&144	 \\
+\hline
+XSD\_ANYTYPE (integer)	&145	 \\
+\hline
+XSD\_ANYXML (integer)	&147	 \\
+\hline
+APACHE\_MAP (integer)	&200	 \\
+\hline
+SOAP\_ENC\_OBJECT (integer)	&301	 \\
+\hline
+SOAP\_ENC\_ARRAY (integer)	&300	 \\
+\hline
+XSD\_1999\_TIMEINSTANT (integer)	&401	 \\
+\hline
+XSD\_NAMESPACE (integer)	&http://www.w3.org/2001/XMLSchema	 \\
+\hline
+XSD\_1999\_NAMESPACE (integer)	&http://www.w3.org/1999/XMLSchema	 \\
+\hline
+SOAP\_SINGLE\_ELEMENT\_ARRAYS (integer)	&1	 \\
+\hline
+SOAP\_WAIT\_ONE\_WAY\_CALLS (integer)	&2	 \\
+\hline
+SOAP\_USE\_XSI\_ARRAY\_TYPE (integer)	&4	 \\
+\hline
+WSDL\_CACHE\_NONE (integer)	&0	 \\
+\hline
+WSDL\_CACHE\_DISK (integer)	&1	 \\
+\hline
+WSDL\_CACHE\_MEMORY (integer)	&2	 \\
+\hline
+WSDL\_CACHE\_BOTH (integer)	&3\\
+\hline
+\end{longtable}
+
+\section{Functions}
+
+
+\subsection{is\_soap\_fault()}
+
+
+is\_soap\_fault() - 检查一个SOAP调用是否失败。
+
+\begin{lstlisting}[language=PHP]
+bool is_soap_fault ( mixed $object )
+\end{lstlisting}
+
+
+\subsection{use\_soap\_error\_handler()}
+
+use\_soap\_error\_handler() - 设置是否使用SOAP错误处理器。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+bool use_soap_error_handler ([ bool $handler = true ] )
+\end{lstlisting}
+
+
+
+\chapter{SoapClient}
+
+SoapClient类提供一个SOAP1.1，SOAP1.2服务器的客户端类，而且SoapClient可以被用于WSDL模式或非WSDL模式。
+
+\begin{lstlisting}[language=PHP]
+SoapClient {
+     /* 方法 */
+     public mixed __call ( string $function_name , string $arguments )
+     public SoapClient ( mixed $wsdl [, array $options ] )
+     public string __doRequest ( string $request , string $location , string $action , int $version [, int $one_way = 0 ] )
+     public array __getFunctions ( void )
+     public string __getLastRequest ( void )
+     public string __getLastRequestHeaders ( void )
+     public string __getLastResponse ( void )
+     public string __getLastResponseHeaders ( void )
+     public array __getTypes ( void )
+     public void __setCookie ( string $name [, string $value ] )
+     public string __setLocation ([ string $new_location ] )
+     public bool __setSoapHeaders ([ mixed $soapheaders ] )
+     public mixed __soapCall ( string $function_name , array $arguments [, array $options [, mixed $input_headers [, array &$output_headers ]]] )
+     public SoapClient ( mixed $wsdl [, array $options ] )
+}
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\chapter{SoapServer}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\chapter{SoapFault}
+
+
+\chapter{SoapHeader}
+
+
+\chapter{SoapParam}
+
+
+\chapter{SoapVar}

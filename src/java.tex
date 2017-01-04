@@ -1,0 +1,259 @@
+\part{Java}
+
+
+\chapter{Overview}
+
+除了可以使用Zend Server提供的Java Bridge功能之外，还可以使用开源的PHP Java Bridge
+
+安装基础安装包（例如php5-dev，sun java和automake等）
+
+\begin{lstlisting}[language=bash]
+# apt-get install build-essential php5-dev sun-java6-jre \
+    sun-java6-jdk sun-java6-source automake
+\end{lstlisting}
+
+
+下载PHP/Java Bridge源代码
+
+\begin{lstlisting}[language=PHP]
+# cd /usr/src
+# wget http://internap.dl.sourceforge.net/sourceforge/php-java-bridge/php-java-bridge_5.2.0.tar.gz
+# tar xzfv php-java-bridge_5.2.0.tar.gz
+\end{lstlisting}
+
+安装PHP/Java Bridge
+
+
+\begin{lstlisting}[language=PHP]
+# cd /usr/src/php-java-bridge-5.2.0
+# phpize
+# ./configure --with-java=/usr/lib/jvm/java-6-sun-1.6.0.03,/usr/lib/jvm/java-6-sun-1.6.0.03
+# make
+# chmod +x install.sh
+# ./install.sh
+\end{lstlisting}
+
+拷贝相关*.inc到对应的目录下
+
+\begin{lstlisting}[language=PHP]
+# mkdir /usr/share/php/java
+# cp *.inc /usr/share/php/java
+\end{lstlisting}
+
+
+
+禁用java.hosts和java.servlet并执行测试：
+
+
+
+
+\begin{lstlisting}[language=PHP]
+# php test.php
+\end{lstlisting}
+
+默认情况下，Java仅仅在PHP的命令行模式下可用，如果需要在全局使用Java，那么可以在php.ini修改如下配置：
+
+\begin{lstlisting}[language=PHP]
+;; java.ini: Activate the PHP/Java extension
+
+;; zend_extension = "/path/to/java.so"
+extension = java.so
+
+;; If you have installed the java-servlet.ini leave this file alone,
+;; edit the servlet or standalone ini file.  Otherwise uncomment the
+;; following java section and one of the following options:
+[java]
+\end{lstlisting}
+
+Zend的Java Bridge已经有一个名为java\_require的函数，开源的PHP/Java Bridge需要包括这个文件，而且PHP/Java Bridge需要java\_cast()函数，Zend的Java Bridge不需要这个文件和函数。
+
+根据上述两个差异，开发者需要在bootstrap文件（或对应代码）覆盖它们，这样应用程序就可以与这两个Java/Bridge一起工作。
+
+\begin{lstlisting}[language=PHP]
+/* no java_require() include the java.inc for PHP/Java Bridge */
+if ( ! function_exists('java_require') ) {
+    include "java/Java.inc";
+}
+
+/* declare this, it doesn't exist with Zend Java, but is needed for PHP/Java Bridge */
+if ( ! function_exists('java_cast')) {
+    function java_cast($whatever) {
+        return $whatever;
+    }
+}
+\end{lstlisting}
+
+上述解决并非完美，在实际情况中需要根据需求进行相应的配置。
+
+\begin{lstlisting}[language=Java]
+// Get a reference to a container-managed resource from WebLogic Server
+function getWebLogicResource($jndiName) {
+  // Set WebLogic-specific parameters for creation of jndi naming context:
+  // (weblogic.jar must be on the PHP-Java Bridge classpath)
+  $envt = array(
+     "java.naming.factory.initial" => "weblogic.jndi.WLInitialContextFactory",
+     "java.naming.provider.url" => "t3://localhost:7001"   // replace with your target server URL
+  );  
+
+  // The bridge creates the naming context object in the local JVM.
+  $ctx = new Java('javax.naming.InitialContext', $envt);
+
+  // Now JNDI crosses the network, to obtain the resource.
+  return $ctx->lookup($jndiName);
+}
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}

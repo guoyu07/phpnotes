@@ -1,0 +1,681 @@
+\part{String}
+
+
+\chapter{Overview}
+
+
+\section{Requirement}
+
+
+PHP提供了专门的函数来分别处理字符串、正则表达式和URL。
+
+\section{Resource Type}
+
+字符串处理函数没有定义资源类型。
+
+
+\section{Build-in Module}
+
+字符串处理函数由PHP核心直接支持。
+
+\section{Runtime Configure}
+
+字符串处理函数没有在php.ini中定义配置指令。
+
+
+
+
+\section{Predefined Constants}
+
+PHP为字符串处理函数预先定义了一些常量，并且这些常量在此扩展编译入 PHP 或在运行时动态载入时可用。
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于字符串处理函数的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CRYPT\_SALT\_LENGTH integer &\\
+\hline
+CRYPT\_STD\_DES integer&\\
+\hline
+CRYPT\_EXT\_DES integer&\\
+\hline
+CRYPT\_MD5 integer&\\
+\hline
+CRYPT\_BLOWFISH integer&\\
+\hline
+HTML\_SPECIALCHARS (integer)&\\
+\hline
+HTML\_ENTITIES (integer)&\\
+\hline
+ENT\_COMPAT (integer)&\\
+\hline
+ENT\_QUOTES (integer)&\\
+\hline
+ENT\_NOQUOTES (integer)&\\
+\hline
+ENT\_IGNORE (integer)&\\
+\hline
+ENT\_SUBSTITUTE (integer)&\\
+\hline
+ENT\_DISALLOWED (integer)&\\
+\hline
+ENT\_HTML401 (integer)&\\
+\hline
+ENT\_XML1 (integer)&\\
+\hline
+ENT\_XHTML (integer)&\\
+\hline
+ENT\_HTML5 (integer)&\\
+\hline
+CHAR\_MAX (integer)&\\
+\hline
+LC\_CTYPE (integer)&\\
+\hline
+LC\_NUMERIC (integer)&\\
+\hline
+LC\_TIME (integer)&\\
+\hline
+LC\_COLLATE (integer)&\\
+\hline
+LC\_MONETARY (integer)&\\
+\hline
+LC\_ALL (integer)&\\
+\hline
+LC\_MESSAGES (integer)&\\
+\hline
+STR\_PAD\_LEFT (integer)&\\
+\hline
+STR\_PAD\_RIGHT (integer)&\\
+\hline
+STR\_PAD\_BOTH (integer)&\\
+\hline
+\end{longtable}
+
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于openlog()设备的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+LOG\_AUTH	&security/authorization messages (use LOG\_AUTHPRIV instead in systems where that constant is defined)\\
+\hline
+LOG\_AUTHPRIV&	security/authorization messages (private)\\
+\hline
+LOG\_CRON	&clock daemon (cron and at)\\
+\hline
+LOG\_DAEMON&other system daemons\\
+\hline
+LOG\_KERN	&kernel messages\\
+\hline
+LOG\_LOCAL0 ... LOG\_LOCAL7&reserved for local use, these are not available in Windows\\
+\hline
+LOG\_LPR	&line printer subsystem\\
+\hline
+LOG\_MAIL	&mail subsystem\\
+\hline
+LOG\_NEWS	&USENET news subsystem\\
+\hline
+LOG\_SYSLOG	&messages generated internally by syslogd\\
+\hline
+LOG\_USER	&generic user-level messages\\
+\hline
+LOG\_UUCP	&UUCP subsystem\\
+\hline
+\end{longtable}
+
+
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于syslog()的优先级（按降序排列）的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+LOG\_EMERG	&system is unusable\\
+\hline
+LOG\_ALERT	&action must be taken immediately\\
+\hline
+LOG\_CRIT	&critical conditions\\
+\hline
+LOG\_ERR	&error conditions\\
+\hline
+LOG\_WARNING&warning conditions\\
+\hline
+LOG\_NOTICE	&normal, but significant, condition\\
+\hline
+LOG\_INFO	&informational message\\
+\hline
+LOG\_DEBUG	&debug-level message\\
+\hline
+\end{longtable}
+
+
+
+
+
+\begin{longtable}{|m{100pt}|m{300pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于dns\_get\_record()选项的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+DNS\_A	&IPv4 Address Resource\\
+\hline
+DNS\_MX&Mail Exchanger Resource\\
+\hline
+DNS\_CNAME&Alias (Canonical Name) Resource\\
+\hline
+DNS\_NS	&Authoritative Name Server Resource\\
+\hline
+DNS\_PTR&Pointer Resource\\
+\hline
+DNS\_HINFO&Host Info Resource \\
+\hline
+DNS\_SOA&Start of Authority Resource\\
+\hline
+DNS\_TXT&Text Resource\\
+\hline
+DNS\_ANY&Any Resource Record. On most systems this returns all resource records, however it should not be counted upon for critical uses. Try DNS\_ALL instead.\\
+\hline
+DNS\_AAAA&IPv6 Address Resource\\
+\hline
+DNS\_ALL&Iteratively query the name server for each available record type.\\
+\hline
+\end{longtable}
+
+
+\chapter{Functions}
+
+
+
+\section{addcslashes()}
+
+以 C 语言风格使用反斜线转义字符串中的字符
+
+\section{addslashes()}
+
+使用反斜线引用字符串
+
+\section{bin2hex()}
+
+把包含数据的二进制字符串转换为十六进制值
+
+\section{chop()}
+
+rtrim 的别名
+
+\section{chr()}
+
+返回指定的字符
+
+\section{chunk\_split()}
+
+将字符串分割成小块
+
+\section{convert\_cyr\_string()}
+
+将字符由一种 Cyrillic 字符转换成另一种
+
+
+\section{convert\_uudecode()}
+
+解码一个 uuencode 编码的字符串
+
+\section{convert\_uuencode()}
+
+使用 uuencode 编码一个字符串
+
+\section{count\_chars()}
+
+返回字符串所用字符的信息
+
+\section{crc32()}
+
+计算一个字符串的 crc32 多项式
+
+\section{crypt()}
+
+单向字符串散列
+
+\section{echo()}
+
+输出一个或多个字符串
+
+\section{explode()}
+
+使用一个字符串分割另一个字符串
+
+\section{fprintf()}
+
+将格式化后的字符串写入到流
+
+\section{get\_html\_translation\_table()}
+
+返回使用 htmlspecialchars 和 htmlentities 后的转换表
+
+\section{hebrev()}
+
+将逻辑顺序希伯来文（logical-Hebrew）转换为视觉顺序希伯来文（visual-Hebrew）
+
+\section{hebrevc()}
+
+将逻辑顺序希伯来文（logical-Hebrew）转换为视觉顺序希伯来文（visual-Hebrew），并且转换换行符
+
+\section{hex2bin()}
+
+转换十六进制字符串为二进制字符串
+
+\section{html\_entity\_decode()}
+
+将所有HTML实体转换为其对应的字符
+
+\section{htmlentities()}
+
+将所有对应的字符转换为HTML实体
+
+\section{htmlspacialchars\_decode()}
+
+将特殊的 HTML 实体转换回普通字符
+
+\section{htmlspecialchars()}
+
+将特殊字符转换为HTML实体
+\section{implode()}
+
+将一个一维数组的值转化为字符串
+\section{join()}
+
+别名 implode
+\section{lcfirst()}
+
+使一个字符串的第一个字符小写
+\section{levenshtein()}
+
+计算两个字符串之间的编辑距离
+\section{localeconv()}
+
+获取数字格式信息
+\section{ltrim()}
+
+删除字符串开头的空白字符（或其他字符）
+\section{md5\_file()}
+
+计算指定文件的 MD5 散列值
+
+\section{md5()}
+
+计算字符串的 MD5 散列值
+\section{metaphone()}
+
+计算字符串的metaphone键
+\section{money\_format()}
+将数字格式化成货币字符串
+
+\section{nl\_langinfo()}
+
+查询语言和区域设置信息
+\section{nl2br()}
+
+在字符串所有新行之前插入 HTML 换行标记
+\section{number\_format()}
+
+以千位分隔符方式格式化一个数字
+\section{ord()}
+
+返回字符的 ASCII 码值
+\section{parse\_str()}
+
+将字符串解析成多个变量
+\section{print()}
+
+输出字符串
+\section{printf()}
+
+输出格式化字符串
+\section{quoted\_printable\_decode()}
+
+将 quoted-printable 字符串转换为 8-bit 字符串
+\section{quoted\_printable\_encode()}
+
+将 8-bit 字符串转换成 quoted-printable 字符串
+\section{quotemeta()}
+转义元字符集
+
+\section{rtrim()}
+
+删除字符串末端的空白字符（或者其他字符）
+\section{setlocale()}
+
+设置地区信息
+\section{sha1\_file()}
+
+计算文件的 sha1 散列值
+\section{sha1()}
+
+计算字符串的 sha1 散列值
+\section{similar\_text()}
+
+计算两个字符串的相似度
+\section{soundex()}
+
+计算字符串的soundex键
+\section{sprintf()}
+
+返回格式化后的字符串
+
+\section{sscanf()}
+
+根据指定格式解析输入的字符
+\section{str\_getcsv()}
+
+解析 CSV 字符串为一个数组
+\section{str\_ireplace()}
+
+str\_replace()的忽略大小写版本
+\section{str\_pad()}
+
+使用另一个字符串填充字符串为指定长度
+\section{str\_repeat()}
+
+重复一个字符串
+\section{str\_replace()}
+
+子字符串替换
+\section{str\_rot13()}
+
+对字符串执行 ROT13 转换
+\section{str\_shuffle()}
+
+随机打乱一个字符串
+\section{str\_split()}
+将字符串转换为数组
+
+\section{str\_word\_count()}
+
+
+返回字符串中单词的使用情况
+\section{strcasecmp()}
+
+二进制安全比较字符串（不区分大小写）
+\section{strchr()}
+
+别名 strstr
+\section{strcmp()}
+
+二进制安全字符串比较
+\section{strcoll()}
+
+基于区域设置的字符串比较
+\section{strcspn()}
+获取不匹配遮罩的起始子字符串的长度
+
+\section{strip\_tags()}
+
+从字符串中去除 HTML 和 PHP 标记
+\section{stripcslashes()}
+反引用一个使用 addcslashes 转义的字符串
+
+\section{stripos()}
+
+查找字符串首次出现的位置（不区分大小写）
+\section{stripslashes()}
+
+反引用一个引用字符串
+\section{stristr()}
+
+strstr 函数的忽略大小写版本
+\section{strlen()}
+
+获取字符串长度
+\section{strnatcasecmp()}
+
+使用“自然顺序”算法比较字符串（不区分大小写）
+\section{strcasecmp()}
+
+使用自然排序算法比较字符串
+
+
+\section{strncmp}
+
+
+二进制安全比较字符串开头的若干个字符（不区分大小写）
+
+\section{strpbrk()}
+
+在字符串中查找一组字符的任何一个字符
+
+
+\section{strpos()}
+查找字符串首次出现的位置
+
+\section{strrchr()}
+
+查找指定字符在字符串中的最后一次出现
+\section{strrev()}
+
+反转字符串
+\section{strripos()}
+
+计算指定字符串在目标字符串中最后一次出现的位置（不区分大小写）
+\section{strrpos()}
+计算指定字符串在目标字符串中最后一次出现的位置
+
+\section{strspn()}
+计算字符串中全部字符都存在于指定字符集合中的第一段子串的长度。
+
+\section{strstr()}
+查找字符串的首次出现
+
+\section{strok()}
+
+标记分割字符串
+\section{strtolower()}
+
+将字符串转化为小写
+\section{strtoupper()}
+
+将字符串转化为大写
+\section{strtr()}
+
+转换指定字符
+\section{substr\_compare()}
+
+二进制安全比较字符串（从偏移位置比较指定长度）
+\section{substr\_count()}
+计算字串出现的次数
+
+\section{substr\_replace()}
+
+替换字符串的子串
+\section{substr()}
+返回字符串的子串
+
+\section{trim()}
+
+去除字符串首尾处的空白字符（或者其他字符）
+\section{ucfirst()}
+
+将字符串的首字母转换为大写
+\section{ucwords()}
+
+将字符串中每个单词的首字母转换为大写
+\section{vfprintf()}
+
+将格式化字符串写入流
+\section{vprintf()}
+
+输出格式化字符串
+
+\section{vsprintf()}
+
+返回格式化字符串
+
+\section{wordwrap()}
+
+
+打断字符串为指定数量的字串
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

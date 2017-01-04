@@ -4,6 +4,15 @@
 \chapter{Overview}
 
 
+\section{MySQL}
+
+PHP在向MySQL插入时间时，除了可以使用MySQL的NOW()函数之外，还可以使用\texttt{date('Y-m-d H:i:s')}，这两种方式都是MySQL的datetime类型字段可以理解的日期/时间格式。
+
+
+\section{DateTime}
+
+
+
 DateTime 类的作用是在读、写、比较或者计算日期和时间时提供帮助。除了 DateTime 类之外，PHP 还有很多与日期和时间相关的函数，不过DateTime类为大多数常规使用提供了优秀的面向对象接口，而且DateTime类还可以处理时区。
 
 在使用 DateTime 之前，通过 createFromFormat() 工厂方法将原始的日期与时间字符串转换为对象或使用 new DateTime 来取得当前的日期和时间。使用 format() 将 DateTime 转换回字符串用于输出。

@@ -1,0 +1,385 @@
+\part{XML-RPC}
+
+
+\chapter{Overview}
+
+\section{XML-RPC Extension}
+
+
+\section{XML-RPC Library}
+
+
+\section{XML-RPC.NET}
+
+XML-RPC.NET是一个使用.NET技术环境（支持.NET 2.0及以上）实现的客户端和服务器端代码库
+
+\begin{compactitem}
+\item 基于接口的XML-RPC服务器和客户端定义
+\item 类型安全客户端代理的代码生成
+\item Silverlight和Windows Phone 7支持
+\item 支持XML-RPC和SOAP的ASP.NET Web Service
+\item 客户端支持异步调用
+\item 客户端支持各种XML编码和XML缩进样式（一些其他XML-RPC服务器实现只接受某些缩进样式）
+\item 内置对服务器上XML-RPC Introspection API的支持
+\item 根据XML-RPC end-point的URL动态生成文档页面
+\item 支持将XML-RPC方法和struct成员名称映射到与.NET兼容的名称
+\item 支持客户端和服务器中的Unicode XML-RPC字符串
+\item 在.NET和XML-RPC类型之间映射时支持可选的struct成员
+\item 支持XML-RPC的<i8>和<nil>扩展
+\item 在客户端和服务器上支持.NET Remoting
+\end{compactitem}
+
+\subsection{XML-RPC Clients}
+
+用户使用XML-RPC.NET定义一个XML-RPC接口并使用XMLRpcProxyGen类来自动生成代码。
+
+\begin{lstlisting}
+[XmlRpcUrl("http://www.cookcomputing.com/xmlrpcsamples/RPC2.ashx")]
+public interface IStateName : IXmlRpcProxy
+{
+    [XmlRpcMethod("examples.getStateName")]
+    string GetStateName(int stateNumber); 
+}
+\end{lstlisting}
+
+XMLRpcProxyGen类的静态方法生成XMLRpcProxy实例。
+
+\begin{lstlisting}
+IStateName proxy = XmlRpcProxyGen.Create<IStateName>();
+\end{lstlisting}
+
+XMLRpcProxy实例的方法可以创建XML-RPC请求来调用远程XML-RPC服务器。
+
+\begin{lstlisting}
+string stateName = proxy.GetStateName(41);
+\end{lstlisting}
+
+
+
+\subsection{XML-RPC Services}
+
+XML-RPC.NET将XML-RPC服务实现为在Microsoft IIS Web服务器环境中运行的服务。 
+
+XML-RPC服务的模型是作为ASP.Net的一部分实现的基于SOAP的Web服务。 通过创建从XmlRpcService基类派生的类以及通过带有XmlRpcMethod属性的XML-RPC装饰要公开的方法，实现XML-RPC服务（在任何CLS兼容的语言中，例如C＃，VB.Net等） 。
+
+
+\begin{lstlisting}
+public class StateNameService : XmlRpcService 
+{
+  [XmlRpcMethod("examples.getStateName",
+    Description="Return name of state given its number")] 
+  public string getStateName(int stateNum)
+  {
+    if (stateNum == 41)
+      return "South Dakota";
+    else
+      return "Don't know";
+  }
+}
+\end{lstlisting}
+
+除了指定XML-RPC方法之外，XmlRpcMethod属性还用于指定该方法使用XML-RPC协议作为“examples.getStateName”调用，而不是在Service类中使用的方法的名称。 当分配给描述的字符串用于通过HTTP GET请求调用服务时如下所述的自动文档生成。
+
+或者，服务类也可以从定义XML-RPC方法的接口派生，而且接口然后还可以用于生成如上所述的代理类。 
+
+\begin{lstlisting}
+public interface IStateName
+{
+    [XmlRpcMethod("examples.getStateName")]
+    string GetStateName(int stateNumber); 
+}
+
+public interface IStateNameProxy : IStateName, IXmlRpcProxy
+{
+}
+
+public class StateNameService : XmlRpcService, IStateName
+{
+  public string getStateName(int stateNum)
+  {
+    if (stateNum == 41)
+        return "South Dakota";
+    else
+      return "Don't know";
+  }
+}
+\end{lstlisting}
+
+类可以实现许多XML-RPC方法，而不仅仅是这些示例中的单个方法。
+
+将生成的程序集DLL放置在IIS虚拟目录的bin目录中，并使用web.config文件将HTTP请求分发到由XmlRpcService类实现的自定义处理程序。 例如，如果cookcomputing.com有一个名为xmlrpc的虚拟目录，并且以下配置文件放在xmlrpc的根目录中：
+
+
+\begin{lstlisting}
+<configuration>
+  <system.web>
+    <httpHandlers>
+      <add verb="*" path="statename.rem" 
+        type="CookComputing.StateNameService, StateNameService" />
+    </httpHandlers>
+  </system.web> 
+</configuration>
+\end{lstlisting}
+
+
+上述示例中的XML-RPC Serive提供的功能可以通过类似\url{http://localhost/xmlrpc/statename.rem}的XML-RPC请求来调用。
+
+注意，类型是装配限定的，类的名称是在AssemblyName StateService（即StateNameService.dll）中的CookComputing.StateNameService。
+
+如果调用者不通过HTTP POST请求发出XML-RPC请求，而是向同一个URL发出HTTP GET请求，则服务会返回一个自动生成的描述其自身的页面。 对于上面的示例服务，返回此页面。
+
+或者，服务可以通过XMLRPC.NET的.NET Remoting支持来实现，然后可以由XML-RPC或SOAP协议访问相同的服务。
+
+\chapter{XML-RPC Extension}
+
+XML-RPC提供的函数可以用来编写XML-RPC的服务器和客户端代码。
+
+XML-RPC扩展需要libxml扩展到的支持，不过libxml默认是开启的。
+
+默认情况下，在 PHP 中是不能使用 XML-RPC 支持的，需要使用\texttt{-\/-with-xmlrpc[=DIR]}配置选项编译 PHP 才能够使用 XML-RPC 支持。
+
+
+
+\section{Runtime Configuration}
+
+
+XML-RPC扩展没有在php.ini中定义配置指令。
+
+
+\section{Resource Type}
+
+
+XML-RPC扩展通过xmlrpc\_server\_create()定义了一个XML-RPC服务器数据类型。
+
+
+\section{Predefined Constant}
+
+XML-RPC扩展没有定义常量。
+
+\section{XML-RPC Client}
+
+
+下面是一个XML-RPC PHP Client的示例，在HTML代码中嵌入了XML-RPC调用。
+
+\begin{lstlisting}[language=HTML]
+<html>
+<head>
+<title>XML-RPC PHP Demo</title>
+</head>
+<body>
+<h1>XML-RPC PHP Demo</h1>
+
+<?php
+include 'xmlrpc.inc';
+
+// Make an object to represent our server.
+$server = new xmlrpc_client('/api/sample.php',
+                            'xmlrpc-c.sourceforge.net', 80);
+
+// Send a message to the server.
+$message = new xmlrpcmsg('sample.sumAndDifference',
+                         array(new xmlrpcval(5, 'int'),
+                               new xmlrpcval(3, 'int')));
+$result = $server->send($message);
+
+// Process the response.
+if (!$result) {
+    print "<p>Could not connect to HTTP server.</p>";
+} elseif ($result->faultCode()) {
+    print "<p>XML-RPC Fault #" . $result->faultCode() . ": " .
+        $result->faultString();
+} else {
+    $struct = $result->value();
+    $sumval = $struct->structmem('sum');
+    $sum = $sumval->scalarval();
+    $differenceval = $struct->structmem('difference');
+    $difference = $differenceval->scalarval();
+    print "<p>Sum: " . htmlentities($sum) .
+        ", Difference: " . htmlentities($difference) . "</p>";
+}
+?>
+</body></html>
+\end{lstlisting}
+
+\section{XML-RPC Server}
+
+下面的示例使用PHP实现了一个XML-RPC服务器，远程客户端可以通过类似\url{http://localhost/path/sumAndDifference.php}的方式来调用XML-RPC Web服务。
+
+
+\begin{lstlisting}[language=HTML]
+<?php
+include 'xmlrpc.inc';
+include 'xmlrpcs.inc';
+
+function sumAndDifference ($params) {
+
+    // Parse our parameters.
+    $xval = $params->getParam(0);
+    $x = $xval->scalarval();
+    $yval = $params->getParam(1);
+    $y = $yval->scalarval();
+
+    // Build our response.
+    $struct = array('sum' => new xmlrpcval($x + $y, 'int'),
+                    'difference' => new xmlrpcval($x - $y, 'int'));
+    return new xmlrpcresp(new xmlrpcval($struct, 'struct'));
+}
+
+// Declare our signature and provide some documentation.
+// (The PHP server supports remote introspection. Nifty!)
+$sumAndDifference_sig = array(array('struct', 'int', 'int'));
+$sumAndDifference_doc = 'Add and subtract two numbers';
+
+new xmlrpc_server(array('sample.sumAndDifference' =>
+                        array('function' => 'sumAndDifference',
+                              'signature' => $sumAndDifference_sig,
+                              'docstring' => $sumAndDifference_doc)));
+\end{lstlisting}
+
+\section{Functions}
+
+
+\subsection{xmlrpc\_decode\_request()}
+
+将 XML 译码为 PHP 本身的类型
+
+\subsection{xmlrpc\_decode()}
+
+将 XML 译码为 PHP 本身的类型
+
+\subsection{xmlrpc\_encode\_request()}
+
+为 PHP 的值生成 XML
+
+\subsection{xmlrpc\_encode()}
+
+为 PHP 的值生成 XML
+
+\subsection{xmlrpc\_get\_type()}
+
+为 PHP 的值获取 xmlrpc 的类型
+
+\subsection{xmlrpc\_is\_fault()}
+
+Determines if an array value represents an XMLRPC fault
+
+\subsection{xmlrpc\_parse\_method\_description()}
+
+将 XML 译码成方法描述的列表
+
+\subsection{xmlrpc\_server\_add\_introspection\_data()}
+
+添加自我描述的文档
+
+\subsection{xmlrpc\_server\_call\_method()}
+
+解析 XML 请求同时调用方法
+
+
+\subsection{xmlrpc\_server\_create()}
+
+创建一个 xmlrpc 服务端
+
+\subsection{xmlrpc\_server\_destroy()}
+
+销毁服务端资源
+
+\subsection{xmlrpc\_server\_register\_introspection\_callback()}
+
+注册一个 PHP 函数用于生成文档
+
+\subsection{xmlrpc\_server\_register\_method()}
+
+注册一个 PHP 函数用于匹配 xmlrpc 方法名
+
+\subsection{xmlrpc\_set\_type}
+
+
+为一个 PHP 字符串值设置 xmlrpc 的类型、base64 或日期时间
+
+
+
+
+\chapter{XML-RPC Library}
+
+
+XML-RPC库（\url{https://github.com/gggeek/phpxmlrpc}）是一个实现了XML-RPC协议的PHP库，可以用来构建XML-RPC客户端和XML-RPC服务器。
+
+XML-RPC库不需要PHP内置的xmlrpc扩展，即使已经安装了xmlrpc扩展，也不会影响到XML-RPC库的使用，推荐使用Composer来安装phpxmlrpc库，例如：
+
+\begin{lstlisting}[language=bash]
+$ composer require phpxmlrpc/phpxmlrpc:4.0
+\end{lstlisting}
+
+或者，可以在composer.json中添加如下依赖：
+
+\begin{lstlisting}[language=JavaScript]
+"require": {
+    ...,
+    "phpxmlrpc/phpxmlrpc": "~4.0"
+},
+\end{lstlisting}
+
+如果不使用Composer来管理依赖，可以在src/Atuloader.php中找到该库的自动加载器，设置自动加载器的示例代码如下：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// File example: src/script.php
+
+// update this to the path to the "vendor/" directory, relative to this file
+require_once __DIR__.'/../vendor/autoload.php';
+
+use PhpXmlRpc\Value;
+use PhpXmlRpc\Request;
+use PhpXmlRpc\Client;
+
+$client = new Client('http://some/server');
+$response = $client->send(new Request('method', array(new Value('parameter'))));
+\end{lstlisting}
+
+
+
+
+XML-RPC的4.0版本相比3.0版本的改动包括所有类都使用命名空间，并遵循CamelCase命名约定，现有的类方法和成员被保留，所有新方法名称遵循camelCase。
+
+\section{xmlrpc\_client}
+
+
+
+\section{PhpXmlRpc\textbackslash Client}
+
+
+\section{xmlrpc\_server}
+
+
+
+\section{PhpXmlRpc\textbackslash Server}
+
+
+\section{xmlrpcmsg}
+
+
+
+\section{PhpXmlRpc\textbackslash Request}
+
+
+\section{xmlrpcresp}
+
+
+\section{PhpXmlRpc\textbackslash Response}
+
+
+
+\section{xmlrpcval}
+
+
+
+\section{PhpXmlRpc\textbackslash Value}
+
+
+
+\chapter{XML-RPC.NET}
+
+
+

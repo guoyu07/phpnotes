@@ -1,0 +1,177 @@
+\part{URL}
+
+
+\chapter{Overview}
+
+
+PHP的URL函数可以处理URL字符串的编码、解码和解析。
+
+
+\section{Requirement}
+
+默认情况下，URL函数不需要额外的库支持，它们是 PHP 核心的一部分。
+
+\section{Resource Type}
+
+URL函数没有定义资源类型。
+
+
+\section{Build-in Module}
+
+文件系统函数是PHP核心的一部分，由PHP核心直接支持。
+
+\section{Runtime Configure}
+
+URL函数没有在 php.ini 中定义配置指令。
+
+
+
+
+\subsection{allow\_url\_fopen}
+
+
+allow\_url\_fopen选项激活URL形式的 fopen 封装协议，使得PHP可以访问 URL 对象（例如文件）。
+
+默认的封装协议提供用 ftp 和 http 协议来访问远程文件，一些扩展库（例如 zlib）可能会注册更多的封装协议。
+
+allow\_url\_fopen选项只能在 php.ini 中设置（出于安全考虑）。
+
+\subsection{allow\_url\_include}
+
+allow\_url\_include选项配置是否允许使用具有以下函数的URL感知的fopen包装器：
+
+\begin{compactitem}
+\item include
+\item include\_once
+\item require
+\item require\_once
+\end{compactitem}
+
+allow\_url\_include选项要求allow\_url\_open选项配置为on。
+
+\subsection{user\_agent}
+
+
+user\_agent定义 PHP 发送的 User-Agent。
+
+\subsection{default\_socket\_timeout}
+
+default\_socket\_timeout定义基于 socket 的流的默认超时时间（秒）。
+
+\subsection{from}
+
+from选项定义匿名 ftp 的密码（email 地址）。
+
+\subsection{auto\_detect\_line\_endings}
+
+auto\_detect\_line\_endings默认值为off，如果设置为on，那么PHP 将检查通过 fgets() 和 file() 取得的数据中的行结束符号是符合 Unix、MS-DOS还是 Macintosh 的习惯。
+
+
+auto\_detect\_line\_endings设置为on时使得 PHP 可以和 Macintosh 系统交互操作。
+
+默认auto\_detect\_line\_endings的值是 Off的原因是在检测第一行的 EOL 习惯时会有很小的性能损失，而且在 Unix 系统下使用回车符号作为项目分隔符的用户会遇到向下不兼容的行为。
+
+
+\section{Predefined Constants}
+
+PHP为URL函数族预先定义了一些常量，并且这些常量可以作为PHP核心的一部分或者在运行时动态载入时总是可用的。
+
+
+\begin{longtable}{|m{100pt}|m{200pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+常量名&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{用于parse\_url()的常量}\\
+\hline
+常量名&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+PHP\_URL\_SCHEME (integer)&\\
+\hline
+PHP\_URL\_HOST (integer)\\
+\hline
+PHP\_URL\_PORT (integer)\\
+\hline
+PHP\_URL\_USER (integer)\\
+\hline
+PHP\_URL\_PASS (integer)\\
+\hline
+PHP\_URL\_PATH (integer)\\
+\hline
+PHP\_URL\_QUERY (integer)\\
+\hline
+PHP\_URL\_FRAGMENT (integer)\\
+\hline
+PHP\_QUERY\_RFC1738 (integer)\\
+\hline
+PHP\_QUERY\_RFC3986 (integer)\\
+\hline
+\end{longtable}
+
+
+
+\chapter{Functions}
+
+
+\section{base64\_decode()}
+
+对使用 MIME base64 编码的数据进行解码
+
+\section{base64\_encode()}
+
+使用 MIME base64 对数据进行编码
+
+\section{get\_headers()}
+
+取得服务器响应一个 HTTP 请求所发送的所有标头
+
+\section{get\_meta\_tags()}
+
+从一个文件中提取所有的 meta 标签 content 属性，返回一个数组
+
+\section{http\_build\_query()}
+
+生成 URL-encode 之后的请求字符串
+
+\section{parse\_url()}
+
+解析 URL，返回其组成部分
+
+\section{rawurldecode()}
+
+对已编码的 URL 字符串进行解码
+
+\section{rawurlencode()}
+
+按照 RFC 3986 对 URL 进行编码
+
+\section{urldecode()}
+
+解码已编码的 URL 字符串
+
+\section{urlencode()}
+
+编码 URL 字符串
+
+
+
+
+
+
+
+

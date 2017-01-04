@@ -1,0 +1,435 @@
+\part{JSON}
+
+\chapter{Overview}
+
+
+
+
+\chapter{JSON}
+
+
+PHP的json扩展实现了对JSON（JavaScript Object Notation）的数据转换，其中解码分析器基于 Douglas Crockford 的 JSON\_checker。
+
+PHP实现了JSON的RFC 7159标准中指定的JSON规范的超集。
+
+
+JSON扩展是PHP核心的一部分，而且该扩展没有在 php.ini 中定义配置指令，也没有定义自己的资源类型。
+
+JSON扩展引入了如下的预定义常量，并且仅在此扩展编译入 PHP 或在运行时动态载入时可用。
+
+
+
+\begin{longtable}{|m{130pt}|m{20pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量名字&常量值&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{json\_last\_error()返回的错误类型}\\
+\hline
+常量名字&常量值&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+JSON\_ERROR\_NONE (integer)&0&没有错误发生。\\
+\hline
+JSON\_ERROR\_DEPTH (integer)&1&到达了最大堆栈深度。\\
+\hline
+JSON\_ERROR\_STATE\_MISMATCH (integer)&2&出现了下溢（underflow）或者模式不匹配。\\
+\hline
+JSON\_ERROR\_CTRL\_CHAR (integer)&3&控制字符错误，可能是编码不对。\\
+\hline
+JSON\_ERROR\_SYNTAX (integer)&4&语法错误。\\
+\hline
+JSON\_ERROR\_UTF8 (integer)&5&异常的 UTF-8 字符，也许是因为不正确的编码。\\
+\hline
+JSON\_ERROR\_RECURSION (integer)&6&The object or array passed to json\_encode() include recursive references and cannot be encoded. If the JSON\_PARTIAL\_OUTPUT\_ON\_ERROR option was given, NULL will be encoded in the place of the recursive reference.\\
+\hline
+JSON\_ERROR\_INF\_OR\_NAN (integer)&7&The value passed to json\_encode() includes either NAN or INF. If the JSON\_PARTIAL\_OUTPUT\_ON\_ERROR option was given, 0 will be encoded in the place of these special numbers.\\
+\hline
+JSON\_ERROR\_UNSUPPORTED\_TYPE (integer)&8&A value of an unsupported type was given to json\_encode(), such as a resource. If the JSON\_PARTIAL\_OUTPUT\_ON\_ERROR option was given, NULL will be encoded in the place of the unsupported value.\\
+JSON\_ERROR\_INVALID\_PROPERTY\_NAME&9&\\
+\hline
+JSON\_ERROR\_UTF16&19&\\
+\hline
+\end{longtable}
+
+
+
+\begin{longtable}{|m{130pt}|m{20pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量名字&常量值&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{ json\_encode() 的 form 选项常量}\\
+\hline
+常量名字&常量值&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+JSON\_HEX\_TAG (integer)				&1	&所有的 < 和 > 转换成 \textbackslash u003C 和 \textbackslash u003E。\\
+\hline
+JSON\_HEX\_AMP (integer)				&2	所有的 \& 转换成 \textbackslash u0026。 \\
+\hline
+JSON\_HEX\_APOS (integer)				&4	&所有的\texttt{'}转换成 \textbackslash u0027。\\
+\hline
+JSON\_HEX\_QUOT (integer)			&8	&所有的\texttt{"}转换成 \textbackslash u0022。\\
+\hline
+JSON\_FORCE\_OBJECT (integer)		&16	&使一个非关联数组输出一个类（Object）而非数组。 在数组为空而接受者需要一个类（Object）的时候尤其有用。 \\
+\hline
+JSON\_NUMERIC\_CHECK (integer)		&32	&将所有数字字符串编码成数字（numbers）。\\
+\hline
+JSON\_UNESCAPED\_SLASHES (integer)	&64	&不要编码 /。\\
+\hline
+JSON\_PRETTY\_PRINT (integer)			&128&用空白字符格式化返回的数据。 \\
+\hline
+JSON\_UNESCAPED\_UNICODE (integer)	&256&以字面编码多字节 Unicode 字符（默认是编码成 \textbackslash uXXXX）。 \\
+\hline
+JSON\_PARTIAL\_OUTPUT\_ON\_ERROR (integer)	&512&\\
+\hline
+JSON\_PRESERVE\_ZERO\_FRACTION (integer)		&1024&\\
+\hline
+JSON\_BIGINT\_AS\_STRING (integer)		&2	&将大数字编码成原始字符原来的值。\\
+\hline
+\end{longtable}
+
+
+\section{json\_decode()}
+
+对 JSON 格式的字符串进行解码
+
+\section{json\_encode()}
+
+对变量进行 JSON 编码
+
+\section{json\_last\_error\_msg()}
+
+Returns the error string of the last json\_encode() or json\_decode() call
+
+\section{json\_last\_error()}
+
+返回最后发生的错误
+
+\chapter{JSONP}
+
+JSONP将JSON数据包装在一个回调函数中。
+
+\begin{lstlisting}[language=PHP]
+callback({/*.. JSON data .. */});
+\end{lstlisting}
+
+具体来说，JSONP（JSON with Padding）是JSON的一种“使用模式”，可以让网页从别的网域请求数据，另一个解决这个问题的新方法是跨来源资源共享。
+
+
+由于浏览器的同源策略的限制，一般来说位于server1.example.com的网页无法与不是 server1.example.com的服务器沟通，而HTML的 <script>元素是一个例外。
+
+利用 <script>元素的这个开放策略，网页可以得到从其他来源动态产生的JSON数据，而这种使用模式就是所谓的 JSONP。用JSONP抓到的数据并不是JSON，而是任意的JavaScript，用 JavaScript解释器运行而不是用JSON解析器解析。
+
+为了理解这种模式的原理，首先想象有一个回传JSON文件的URL，而JavaScript 程序可以用XMLHttpRequest向这个URL请求数据。假设我们的URL是\url{http://server2.example.com/RetrieveUser?UserId=xxx}，如果UserId 是1823，且当浏览器通过URL传输UserId，也就是抓取\url{http://server2.example.com/RetrieveUser?UserId=1823}，得到：
+
+\begin{lstlisting}[language=PHP]
+{"Name": "小明", "Id" : 1823, "Rank": 7}
+\end{lstlisting}
+
+上述这个JSON数据可能是依据传过去URL的查询参数动态产生的。
+
+这个时候，把 <script>元素的src属性设成一个回传JSON的URL是可以想像的，这也代表从HTML页面通过script元素抓取 JSON是可能的。
+
+然而，一份JSON文件并不是一个JavaScript程序。为了让浏览器可以在 <script>元素运行，从src里URL 回传的必须是可运行的JavaScript。在JSONP的使用模式里，该URL回传的是由函数调用包起来的动态生成JSON，这就是JSONP的“填充（padding）”或是“前辍（prefix）”的由来。
+
+惯例上浏览器提供回调函数的名称当作送至服务器的请求中命名查询参数的一部分，例如：
+
+\begin{lstlisting}[language=HTML]
+<script type="text/javascript" src="http://server2.example.com/RetrieveUser?UserId=1823&jsonp=parseResponse">
+</script>
+\end{lstlisting}
+
+服务器会在传给浏览器前将JSON数据填充到回调函数（parseResponse）中。浏览器得到的回应已不是单纯的数据叙述而是一个脚本。在本例中，浏览器得到的是：
+
+\begin{lstlisting}[language=JavaScript]
+parseResponse({"Name": "小明", "Id" : 1823, "Rank": 7})
+\end{lstlisting}
+
+虽然这个填充（前辍）“通常”是浏览器运行背景中定义的某个回调函数，它也可以是变量赋值、if叙述或者是其他JavaScript叙述。JSONP要求（也就是使用JSONP模式的请求）的回应不是JSON也不被当作JSON解析——回传内容可以是任意的表达式，甚至不需要有任何的JSON，不过惯例上填充部分还是会触发函数调用的一小段JavaScript片段，而这个函数调用是作用在JSON格式的数据上的。
+
+
+另一种说法—典型的JSONP就是把既有的JSON API用函数调用包起来以达到跨域访问的解决方案。
+
+为了要引导一个JSONP调用（或者说，使用这个模式），你需要一个script 元素。因此，浏览器必须为每一个JSONP要求加（或是重用）一个新的、有所需 src值的 <script>元素到HTML DOM里—或者说是“注入”这个元素。浏览器运行该元素，抓取src里的URL，并运行回传的 JavaScript。
+
+
+上述的原理使得JSONP被称作是一种“让用户利用script元素注入的方式绕开同源策略”的方法。
+
+使用远程网站的script标签会让远程网站得以注入任何的内容至网站里。如果远程的网站有JavaScript注入漏洞，原来的网站也会受到影响。
+
+
+现在有一个正在进行项目在定义所谓的JSON-P严格安全子集，使浏览器可以对MIME类别是“application/json-p”请求做强制处理。如果回应不能被解析为严格的JSON-P，浏览器可以丢出一个错误或忽略整个回应。
+
+粗糙的JSONP部署很容易受到跨站请求伪造（CSRF/XSRF）的攻击。因为HTML <script>标签在浏览器里不遵守同源策略，恶意网页可以要求并获取属于其他网站的JSON数据。当用户正登录那个其他网站时，上述状况使得该恶意网站得以在恶意网站的环境下操作该JSON数据，可能泄漏用户的密码或是其他敏感数据。
+
+只有在该JSON数据含有不该泄漏给第三方的隐密数据，且服务器仅靠浏览器的同源策略阻挡不正常要求的时候这才会是问题。若服务器自己决定要求的专有性，并只在要求正常的情况下输出数据则没有问题。只靠Cookie并不足以决定要求是合法的，这很容易受到跨站请求伪造攻击。
+
+乔治·詹姆提（George Jempty）在2005年夏天建议在JSON前面选择性的加上变量赋值，鲍勃·伊波利托（Bob Ippolito）于2005年12月提出了JSONP最原始的提案，其中填充部分已经是回调函数，现在已经有很多Web 2.0应用程序开始使用JSONP提案，例如Dojo Toolkit、Google Web Toolki与Web服务等。
+
+\begin{lstlisting}[language=PHP]
+<?php
+header("content-type: text/javascript");
+
+if(isset($_GET['name']) && isset($_GET['callback'])) {
+    $obj->name = $_GET['name'];
+    $obj->message = "Hello " . $obj->name;
+
+    echo $_GET['callback']. '(' . json_encode($obj) . ');';
+}
+\end{lstlisting}
+
+下面的示例说明如何使用jQuery来请求JSONP数据：
+
+
+\begin{lstlisting}[language=HTML]
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>JQuery JSONP</title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+    <script>
+    $(document).ready(function(){
+ 
+        $("#useJSONP").click(function(){
+            $.ajax({
+                url: 'http://domain.com/jsonp-demo.php',
+                data: {name: 'Chad'},
+                dataType: 'jsonp',
+                jsonp: 'callback',
+                jsonpCallback: 'jsonpCallback',
+                success: function(){
+                    alert("success");
+                }
+            });
+        });
+ 
+    });
+     
+    function jsonpCallback(data){
+        $('#jsonpResult').text(data.message);
+    }
+    </script>
+  </head> 
+  
+  <body>
+    <input type="button" id="useJSONP" value="Use JSONP"></input><br /><br />
+    <span id="jsonpResult"></span>
+  </body>
+</html>
+\end{lstlisting}
+
+为了使用jQuery发送JSONP数据，需要设置dataType为jsonp，并且为jsonp设置回调函数，因此请求JSONP数据的的URL类似于\url{http://domain.com/jsonp-demo.php?callback=jsonpCallback\&name=Chad}。
+
+对应的对PHP的请求产生的结果如下：
+
+
+
+\begin{lstlisting}[language=PHP]
+jsonpCallback({"name":"Chad","message":"Hello Chad"});
+\end{lstlisting}
+
+为了严格防止跨站请求伪造攻击，需要在PHP返回的结果的返回头中设置：
+
+
+\begin{lstlisting}[language=PHP]
+header("content-type: Access-Control-Allow-Origin: *");
+header("content-type: Access-Control-Allow-Methods: GET");
+\end{lstlisting}
+
+如果使用托管服务或不能完全控制服务器端逻辑，可能服务器主机会阻止JSONP请求，因此需要在Web服务器（例如Apache）进行如下配置 ：
+
+\begin{lstlisting}[language=PHP]
+Header set Access-Control-Allow-Origin "mydomain.com"
+\end{lstlisting}
+
+除了可以使用字符串函数移除JSON数据包头之外，也可以定义jsonp\_decode()和jsonp\_encode()来处理JSONP。
+
+\section{jsonp\_decode()}
+
+\begin{lstlisting}[language=PHP]
+/**
+ * Decodes a JSONP string and falls back to JSON decoding in case
+ * the value passed is not JSONP.
+ * 
+ * Provides the same interface as the built-in json_decode function
+ *
+ * @param string $jsonp
+ * @param bool $assoc
+ *
+ * @return mixed
+ */
+function jsonp_decode($jsonp, $assoc = false) { 
+    // PHP 5.3 adds depth as third parameter to json_decode
+    $jsonLiterals = array('true' => 1, 'false' => 1, 'null');
+    if(preg_match('/^[^[{"\d]/', $jsonp) && !isset($jsonLiterals[$jsonp])) { // we have JSONP
+       $jsonp = substr($jsonp, strpos($jsonp, '('));
+    }
+    return json_decode(trim($jsonp,'();'), $assoc);
+}
+\end{lstlisting}
+
+
+\section{jsonp\_encode()}
+
+\begin{lstlisting}[language=PHP]
+/**
+ * Encodes the value as JSONP with the given function name.
+ *
+ * @param mixed $value
+ * @param string $function_name
+ *
+ * @return string
+ */
+function jsonp_encode($value, $function_name = 'cb') { 
+    // 5.3 adds options as second parameter to json_encode
+    return sprintf('%s(%s);', $function_name, json_encode($value));;
+}
+\end{lstlisting}
+
+
+\chapter{JSONSerializable}
+
+
+实现 JsonSerializable 的类可以 在 json\_encode() 时定制自己的 JSON 表示法。
+
+\begin{lstlisting}[language=PHP]
+JsonSerializable {
+    /* 方法 */
+    abstract public mixed jsonSerialize ( void )
+}
+\end{lstlisting}
+
+\section{JSONSerializable::jsonSerialize()}
+
+指定需要被序列化成 JSON 的数据
+
+
+\begin{lstlisting}[language=PHP]
+abstract public mixed JsonSerializable::jsonSerialize ( void )
+\end{lstlisting}
+
+把对象（Object）序列化成能被 json\_encode() 原生地序列化的值，因此返回值是能被 json\_encode() 序列化的数据， 这个值可以是除了 resource 外的任意类型。
+
+\begin{example}
+使用JSONSerializable::jsonSerialize()返回数组
+\begin{lstlisting}[language=PHP]
+<?php
+class ArrayValue implements JsonSerializable {
+    public function __construct(array $array) {
+        $this->array = $array;
+    }
+
+    public function jsonSerialize() {
+        return $this->array;
+    }
+}
+
+$array = [1, 2, 3];
+echo json_encode(new ArrayValue($array), JSON_PRETTY_PRINT);
+// 以上例程会输出：
+[
+    1,
+    2,
+    3
+]
+\end{lstlisting}
+\end{example}
+
+
+\begin{example}
+使用JSONSerializable::jsonSerialize()返回关联数组
+\begin{lstlisting}[language=PHP]
+<?php
+class ArrayValue implements JsonSerializable {
+    public function __construct(array $array) {
+        $this->array = $array;
+    }
+
+    public function jsonSerialize() {
+        return $this->array;
+    }
+}
+
+$array = ['foo' => 'bar', 'quux' => 'baz'];
+echo json_encode(new ArrayValue($array), JSON_PRETTY_PRINT);
+// 以上例程会输出：
+{
+    "foo": "bar",
+    "quux": "baz"
+}
+\end{lstlisting}
+\end{example}
+
+
+\begin{example}
+使用JSONSerializable::jsonSerialize()返回整型值
+\begin{lstlisting}[language=PHP]
+<?php
+class IntegerValue implements JsonSerializable {
+    public function __construct($number) {
+        $this->number = (integer) $number;
+    }
+
+    public function jsonSerialize() {
+        return $this->number;
+    }
+}
+
+echo json_encode(new IntegerValue(1), JSON_PRETTY_PRINT);
+// 以上例程会输出：
+1
+\end{lstlisting}
+\end{example}
+
+
+
+
+\begin{example}
+使用JSONSerializable::jsonSerialize()返回字符串值
+\begin{lstlisting}[language=PHP]
+<?php
+class StringValue implements JsonSerializable {
+    public function __construct($string) {
+        $this->string = (string) $string;
+    }
+
+    public function jsonSerialize() {
+        return $this->string;
+    }
+}
+
+echo json_encode(new StringValue('Hello!'), JSON_PRETTY_PRINT);
+// 以上例程会输出：
+"Hello!"
+\end{lstlisting}
+\end{example}
