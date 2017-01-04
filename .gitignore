@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 *.acn
 *.acr
 *.alg
@@ -12,8 +11,6 @@
 *.glg
 *.glo
 *.gls
-=======
-# ---> TeX
 ## Core latex/pdflatex auxiliary files:
 *.aux
 *.lof
@@ -29,7 +26,7 @@
 # these rules might exclude image files for figures etc.
 # *.ps
 # *.eps
-# *.pdf
+*.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
@@ -102,12 +99,10 @@ acs-*.bib
 *.lol
 
 # makeidx
->>>>>>> 1bc4d67697b84ede850239726150b10467497224
 *.idx
 *.ilg
 *.ind
 *.ist
-<<<<<<< HEAD
 *.loe
 *.lof
 *.log
@@ -129,7 +124,6 @@ acs-*.bib
 *.xdy
 *.tdo
 test/
-=======
 
 # minitoc
 *.maf
@@ -174,5 +168,3 @@ sympy-plots-for-*.tex/
 # WinEdt
 *.bak
 *.sav
-
->>>>>>> 1bc4d67697b84ede850239726150b10467497224
