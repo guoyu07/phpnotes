@@ -1,0 +1,2914 @@
+\part{CURL}
+
+
+\chapter{Overview}
+
+curl（Client URL）是一个利用URL语法在命令行下工作的文件传输工具，支持文件上传和下载。
+
+cURL还包含了用于程序开发的libcurl（由Daniel Stenberg 创建），libcurl库能够连接各种服务器、使用各种协议。
+
+libcurl 目前支持的协议有 http、https、ftp、gopher、telnet、dict、file、ldap，而且libcurl同时还支持 HTTPS 证书、HTTP POST、HTTP PUT、 FTP 上传（也能通过 PHP 的 FTP 扩展完成）、HTTP 基于表单的上传、代理、cookies、用户名+密码的认证。
+
+作为一个综合传输工具，cURL支持的通信协议有FTP、FTPS、HTTP、HTTPS、TFTP、SFTP、Gopher、SCP、Telnet、DICT、FILE、LDAP、LDAPS、IMAP、POP3、SMTP和RTSP。
+
+
+使用 cURL 函数的基本思想是先使用 curl\_init() 初始化 cURL会话，接着可以通过 curl\_setopt() 设置需要的全部选项，然后使用 curl\_exec() 来执行会话，当执行完会话后使用 curl\_close() 关闭会话。
+
+下面是一个使用 cURL 函数获取 example.com 主页保存到文件的例子：
+
+\begin{example}
+使用 PHP cURL 模块获取 example.com 的主页
+\begin{lstlisting}[language=PHP]
+<?php
+$ch = curl_init('http://www.example.com/');
+$fp = fopen('example_homepage.txt','w');
+
+curl_setopt($ch,CURLOPT_FILE,$fp);
+curl_setopt($ch,CURLOPT_HEADER,0);
+
+curl_exec($ch);
+curl_close($ch);
+fclose($fp);
+\end{lstlisting}
+\end{example}
+
+需要注意的是，如果设置CURL使用POST方法发送Form数据，并且设置了CURLOPT\_POSTFIELDS选项，实际的Form数据是以multipart的格式发送的。
+
+
+\begin{example}
+设置PHP cURL模块使用POST方法发送数据
+\begin{lstlisting}[language=PHP]
+<?php
+$params=['name'=>'John', 'surname'=>'Doe', 'age'=>36];
+
+$defaults = [
+  CURLOPT_URL => 'http://myremoteservice/', 
+  CURLOPT_POST => true,
+  CURLOPT_POSTFIELDS => $params,
+];
+
+$ch = curl_init();
+curl_setopt_array($ch, ($options + $defaults));
+\end{lstlisting}
+\end{example}
+
+上述的示例产生如下的POST头：
+
+\begin{lstlisting}
+--------------------------fd1c4191862e3566
+Content-Disposition: form-data; name="name"
+
+Jhon
+--------------------------fd1c4191862e3566
+Content-Disposition: form-data; name="surnname"
+
+Doe
+--------------------------fd1c4191862e3566
+Content-Disposition: form-data; name="age"
+
+36
+--------------------------fd1c4191862e3566--
+\end{lstlisting}
+
+如果使用http\_build\_query()则可以产生标准的POST头（例如\texttt{name=John\&surname=Doe\&age=36}）。
+
+\begin{example}
+使用POST方法发送数据时使用http\_build\_query()
+\begin{lstlisting}[language=PHP]
+<?php
+$params=['name'=>'John', 'surname'=>'Doe', 'age'=>36];
+
+$defaults = [
+  CURLOPT_URL => 'http://myremoteservice/', 
+  CURLOPT_POST => true,
+  CURLOPT_POSTFIELDS => http_build_query($params),
+];
+
+$ch = curl_init();
+curl_setopt_array($ch, ($options + $defaults));
+\end{lstlisting}
+\end{example}
+
+
+\begin{compactitem}
+\item 传递一个数组到CURLOPT\_POSTFIELDS，cURL会把数据编码成 multipart/form-data；
+\item 传递一个URL-encoded字符串时，数据会被编码成 application/x-www-form-urlencoded。
+\end{compactitem}
+
+
+\section{Requirement}
+
+PHP的CURL扩展需要安装libcurl包才能使用 PHP 的 cURL 函数。
+
+要 PHP 支持 cURL，必须在编译 PHP 时加上\texttt{-\/-with-curl[=DIR]}选项，DIR 为包含 lib 和 include 的目录路径。
+
+\begin{compactitem}
+\item 在 include 目录中必须有一个名为curl，包含了easy.h 和curl.h 的文件夹。
+\item 在lib目录里应该有一个名为libcurl.a的文件。
+\end{compactitem}
+
+
+另外，还可以配置\texttt{-\/-with-curlwrappers}来使 cURL 使用 URL 流。
+
+在 Windows32 环境下使用CURL模块时，libeay32.dll 和 ssleay32.dll 必须位于PATH环境变量包含的目录下，不要用 cURL 网站上的libcurl.dll。
+
+
+\section{Resource Type}
+
+CURL扩展定义了2种资源类型：cURL句柄和cURL批处理句柄。
+
+
+
+
+\section{Runtime Configure}
+
+
+
+\begin{longtable}{|m{110pt}|m{40pt}|m{150pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+配置项&默认值&可修改范围
+\endhead
+%endhead
+
+%firsthead
+\caption{cURL 配置选项}\\
+\hline
+配置项&默认值&可修改范围
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+curl.cainfo&NULL&PHP\_INI\_SYSTEM\\
+\hline
+\end{longtable}
+
+\subsection{curl.cainfo}
+
+curl.cainfo是CURLOPT\_CAINFO 选项的一个默认值，而且这个值必须是一个绝对路径。
+
+
+\section{Predefined Constants}
+
+
+下列常量由CURL扩展定义用于curl\_setopt()、curl\_multi\_setopt()和curl\_getinfo()函数中，且仅在此扩展编译入 PHP 或在运行时动态载入时可用。
+
+
+\zihao{6}
+\begin{longtable}{|m{150pt}|m{40pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量名&默认值&说明
+\endhead
+%endhead
+
+%firsthead
+\caption{cURL预定义常量}\\
+\hline
+常量名&默认值&说明
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLOPT\_AUTOREFERER&integer&\\
+\hline
+CURLOPT\_COOKIESESSION&integer&\\
+\hline
+CURLOPT\_DNS\_USE\_GLOBAL\_CACHE&integer&\\
+\hline
+CURLOPT\_DNS\_CACHE\_TIMEOUT&integer&\\
+\hline
+CURLOPT\_FTP\_SSL&integer&\\
+\hline
+CURLFTPSSL\_TRY&integer&\\
+\hline
+CURLFTPSSL\_ALL&integer&\\
+\hline
+CURLFTPSSL\_CONTROL&integer&\\
+\hline
+CURLFTPSSL\_NONE&integer&\\
+\hline
+CURLOPT\_PRIVATE&integer&\\
+\hline
+CURLOPT\_FTPSSLAUTH&integer&\\
+\hline
+CURLOPT\_PORT&integer&\\
+\hline
+CURLOPT\_FILE&integer&\\
+\hline
+CURLOPT\_INFILE&integer&\\
+\hline
+CURLOPT\_INFILESIZE&integer&\\
+\hline
+CURLOPT\_URL&integer&\\
+\hline
+CURLOPT\_PROXY&integer&\\
+\hline
+CURLOPT\_VERBOSE&integer&\\
+\hline
+CURLOPT\_HEADER&integer&\\
+\hline
+CURLOPT\_HTTPHEADER&integer&\\
+\hline
+CURLOPT\_NOPROGRESS&integer&\\
+\hline
+CURLOPT\_NOBODY&integer&\\
+\hline
+CURLOPT\_FAILONERROR&integer&\\
+\hline
+CURLOPT\_UPLOAD&integer&\\
+\hline
+CURLOPT\_POST&integer&\\
+\hline
+CURLOPT\_FTPLISTONLY&integer&\\
+\hline
+CURLOPT\_FTPAPPEND&integer&\\
+\hline
+CURLOPT\_FTP\_CREATE\_MISSING\_DIRS&integer&\\
+\hline
+CURLOPT\_NETRC&integer&\\
+\hline
+CURLOPT\_FOLLOWLOCATION&integer&当open\_basedir或safe\_mode启用时，该常量无效\\
+\hline
+CURLOPT\_FTPASCII&integer&\\
+\hline
+CURLOPT\_PUT&integer&\\
+\hline
+CURLOPT\_MUTE&integer&\\
+\hline
+CURLOPT\_USERPWD&integer&\\
+\hline
+CURLOPT\_PROXYUSERPWD&integer&\\
+\hline
+CURLOPT\_RANGE&integer&\\
+\hline
+CURLOPT\_TIMEOUT&integer&\\
+\hline
+CURLOPT\_TIMEOUT\_MS&integer&\\
+\hline
+CURLOPT\_TCP\_NODELAY&integer&\\
+\hline
+CURLOPT\_POSTFIELDS&integer&\\
+\hline
+CURLOPT\_PROGRESSFUNCTION&integer&\\
+\hline
+CURLOPT\_REFERER&integer&\\
+\hline
+CURLOPT\_USERAGENT&integer&\\
+\hline
+CURLOPT\_FTPPORT&integer&\\
+\hline
+CURLOPT\_FTP\_USE\_EPSV&integer&\\
+\hline
+CURLOPT\_LOW\_SPEED\_LIMIT&integer&\\
+\hline
+CURLOPT\_LOW\_SPEED\_TIME&integer&\\
+\hline
+CURLOPT\_RESUME\_FROM&integer&\\
+\hline
+CURLOPT\_COOKIE&integer&\\
+\hline
+CURLOPT\_SSLCERT&integer&\\
+\hline
+CURLOPT\_SSLCERTPASSWD&integer&\\
+\hline
+CURLOPT\_WRITEHEADER&integer&\\
+\hline
+CURLOPT\_SSL\_VERIFYHOST&integer&\\
+\hline
+CURLOPT\_COOKIEFILE&integer&\\
+\hline
+CURLOPT\_SSLVERSION&integer&\\
+\hline
+CURL\_SSLVERSION\_DEFAULT&integer&\\
+\hline
+CURL\_SSLVERSION\_TLSv1&integer&\\
+\hline
+CURL\_SSLVERSION\_SSLv2&integer&\\
+\hline
+CURL\_SSLVERSION\_SSLv3&integer&\\
+\hline
+CURL\_SSLVERSION\_TLSv1\_0&integer&\\
+\hline
+CURL\_SSLVERSION\_TLSv1\_1&integer&\\
+\hline
+CURL\_SSLVERSION\_TLSv1\_2&integer&\\
+\hline
+CURLOPT\_TIMECONDITION&integer&\\
+\hline
+CURLOPT\_TIMEVALUE&integer&\\
+\hline
+CURLOPT\_CUSTOMREQUEST&integer&\\
+\hline
+CURLOPT\_STDERR&integer&\\
+\hline
+CURLOPT\_TRANSFERTEXT&integer&\\
+\hline
+CURLOPT\_RETURNTRANSFER&integer&\\
+\hline
+CURLOPT\_QUOTE&integer&\\
+\hline
+CURLOPT\_POSTQUOTE&integer&\\
+\hline
+CURLOPT\_INTERFACE&integer&\\
+\hline
+CURLOPT\_KRB4LEVEL&integer&\\
+\hline
+CURLOPT\_HTTPPROXYTUNNEL&integer&\\
+\hline
+CURLOPT\_FILETIME&integer&\\
+\hline
+CURLOPT\_WRITEFUNCTION&integer&\\
+\hline
+CURLOPT\_READFUNCTION&integer&\\
+\hline
+CURLOPT\_PASSWDFUNCTION&integer&\\
+\hline
+CURLOPT\_HEADERFUNCTION&integer&\\
+\hline
+CURLOPT\_MAXREDIRS&integer&\\
+\hline
+CURLOPT\_MAXCONNECTS&integer&\\
+\hline
+CURLOPT\_CLOSEPOLICY&integer&\\
+\hline
+CURLOPT\_FRESH\_CONNECT&integer&\\
+\hline
+CURLOPT\_FORBID\_REUSE&integer&\\
+\hline
+CURLOPT\_RANDOM\_FILE&integer&\\
+\hline
+CURLOPT\_EGDSOCKET&integer&\\
+\hline
+CURLOPT\_CONNECTTIMEOUT&integer&\\
+\hline
+CURLOPT\_CONNECTTIMEOUT\_MS&integer&\\
+\hline
+CURLOPT\_SSL\_VERIFYPEER&integer&\\
+\hline
+CURLOPT\_CAINFO&integer&\\
+\hline
+CURLOPT\_CAPATH&integer&\\
+\hline
+CURLOPT\_COOKIEJAR&integer&\\
+\hline
+CURLOPT\_SSL\_CIPHER\_LIST&integer&\\
+\hline
+CURLOPT\_BINARYTRANSFER&integer&\\
+\hline
+CURLOPT\_NOSIGNAL&integer&\\
+\hline
+CURLOPT\_PROXYTYPE&integer&\\
+\hline
+CURLOPT\_BUFFERSIZE&integer&\\
+\hline
+CURLOPT\_HTTPGET&integer&\\
+\hline
+CURLOPT\_HTTP\_VERSION&integer&\\
+\hline
+CURLOPT\_SSLKEY&integer&\\
+\hline
+CURLOPT\_SSLKEYTYPE&integer&\\
+\hline
+CURLOPT\_SSLKEYPASSWD&integer&\\
+\hline
+CURLOPT\_SSLENGINE&integer&\\
+\hline
+CURLOPT\_SSLENGINE\_DEFAULT&integer&\\
+\hline
+CURLOPT\_SSLCERTTYPE&integer&\\
+\hline
+CURLOPT\_CRLF&integer&\\
+\hline
+CURLOPT\_ENCODING&integer&\\
+\hline
+CURLOPT\_PROXYPORT&integer&\\
+\hline
+CURLOPT\_UNRESTRICTED\_AUTH&integer&\\
+\hline
+CURLOPT\_FTP\_USE\_EPRT&integer&\\
+\hline
+CURLOPT\_HTTP200ALIASES&integer&\\
+\hline
+CURLOPT\_HTTPAUTH&integer&\\
+\hline
+CURLAUTH\_BASIC&integer&\\
+\hline
+CURLAUTH\_DIGEST&integer&\\
+\hline
+CURLAUTH\_GSSNEGOTIATE&integer&\\
+\hline
+CURLAUTH\_NTLM&integer&\\
+\hline
+CURLAUTH\_ANY&integer&\\
+\hline
+CURLAUTH\_ANYSAFE&integer&\\
+\hline
+CURLOPT\_PROXYAUTH&integer&\\
+\hline
+CURLOPT\_MAX\_RECV\_SPEED\_LARGE&integer&\\
+\hline
+CURLOPT\_MAX\_SEND\_SPEED\_LARGE&integer&\\
+\hline
+CURLOPT\_HEADEROPT&integer&\\
+\hline
+CURLOPT\_PROXYHEADER&integer&\\
+\hline
+CURLCLOSEPOLICY\_LEAST\_RECENTLY\_USED&integer&\\
+\hline
+CURLCLOSEPOLICY\_LEAST\_TRAFFIC&integer&\\
+\hline
+CURLCLOSEPOLICY\_SLOWEST&integer&\\
+\hline
+CURLCLOSEPOLICY\_CALLBACK&integer&\\
+\hline
+CURLCLOSEPOLICY\_OLDEST&integer&\\
+\hline
+CURLINFO\_PRIVATE&integer&\\
+\hline
+CURLINFO\_EFFECTIVE\_URL&integer&\\
+\hline
+CURLINFO\_HTTP\_CODE&integer&\\
+\hline
+CURLINFO\_HEADER\_OUT&integer&\\
+\hline
+CURLINFO\_HEADER\_SIZE&integer&\\
+\hline
+CURLINFO\_REQUEST\_SIZE&integer&\\
+\hline
+CURLINFO\_TOTAL\_TIME&integer&\\
+\hline
+CURLINFO\_NAMELOOKUP\_TIME&integer&\\
+\hline
+CURLINFO\_CONNECT\_TIME&integer&\\
+\hline
+CURLINFO\_PRETRANSFER\_TIME&integer&\\
+\hline
+CURLINFO\_SIZE\_UPLOAD&integer&\\
+\hline
+CURLINFO\_SIZE\_DOWNLOAD&integer&\\
+\hline
+CURLINFO\_SPEED\_DOWNLOAD&integer&\\
+\hline
+CURLINFO\_SPEED\_UPLOAD&integer&\\
+\hline
+CURLINFO\_FILETIME&integer&\\
+\hline
+CURLINFO\_SSL\_VERIFYRESULT&integer&\\
+\hline
+CURLINFO\_CONTENT\_LENGTH\_DOWNLOAD&integer&\\
+\hline
+CURLINFO\_CONTENT\_LENGTH\_UPLOAD&integer&\\
+\hline
+CURLINFO\_STARTTRANSFER\_TIME&integer&\\
+\hline
+CURLINFO\_CONTENT\_TYPE&integer&\\
+\hline
+CURLINFO\_REDIRECT\_TIME&integer&\\
+\hline
+CURLINFO\_REDIRECT\_COUNT&integer&\\
+\hline
+CURLINFO\_REDIRECT\_URL&string&\\
+\hline
+CURLINFO\_PRIMARY\_IP&string&\\
+\hline
+CURLINFO\_PRIMARY\_PORT&integer&\\
+\hline
+CURLINFO\_LOCAL\_IP&string&\\
+\hline
+CURLINFO\_LOCAL\_PORT&integer&\\
+\hline
+CURL\_TIMECOND\_IFMODSINCE&integer&\\
+\hline
+CURL\_TIMECOND\_IFUNMODSINCE&integer&\\
+\hline
+CURL\_TIMECOND\_LASTMOD&integer&\\
+\hline
+CURL\_VERSION\_IPV6&integer&\\
+\hline
+CURL\_VERSION\_KERBEROS4&integer&\\
+\hline
+CURL\_VERSION\_SSL&integer&\\
+\hline
+CURL\_VERSION\_LIBZ&integer&\\
+\hline
+CURLVERSION\_NOW&integer&\\
+\hline
+CURLE\_OK&integer&\\
+\hline
+CURLE\_UNSUPPORTED\_PROTOCOL&integer&\\
+\hline
+CURLE\_FAILED\_INIT&integer&\\
+\hline
+CURLE\_URL\_MALFORMAT&integer&\\
+\hline
+CURLE\_URL\_MALFORMAT\_USER&integer&\\
+\hline
+CURLE\_COULDNT\_RESOLVE\_PROXY&integer&\\
+\hline
+CURLE\_COULDNT\_RESOLVE\_HOST&integer&\\
+\hline
+CURLE\_COULDNT\_CONNECT&integer&\\
+\hline
+CURLE\_FTP\_WEIRD\_SERVER\_REPLY&integer&\\
+\hline
+CURLE\_FTP\_ACCESS\_DENIED&integer&\\
+\hline
+CURLE\_FTP\_USER\_PASSWORD\_INCORRECT&integer&\\
+\hline
+CURLE\_FTP\_WEIRD\_PASS\_REPLY&integer&\\
+\hline
+CURLE\_FTP\_WEIRD\_USER\_REPLY&integer&\\
+\hline
+CURLE\_FTP\_WEIRD\_PASV\_REPLY&integer&\\
+\hline
+CURLE\_FTP\_WEIRD\_227\_FORMAT&integer&\\
+\hline
+CURLE\_FTP\_CANT\_GET\_HOST&integer&\\
+\hline
+CURLE\_FTP\_CANT\_RECONNECT&integer&\\
+\hline
+CURLE\_FTP\_COULDNT\_SET\_BINARY&integer&\\
+\hline
+CURLE\_PARTIAL\_FILE&integer&\\
+\hline
+CURLE\_FTP\_COULDNT\_RETR\_FILE&integer&\\
+\hline
+CURLE\_FTP\_WRITE\_ERROR&integer&\\
+\hline
+CURLE\_FTP\_QUOTE\_ERROR&integer&\\
+\hline
+CURLE\_HTTP\_NOT\_FOUND&integer&\\
+\hline
+CURLE\_WRITE\_ERROR&integer&\\
+\hline
+CURLE\_MALFORMAT\_USER&integer&\\
+\hline
+CURLE\_FTP\_COULDNT\_STOR\_FILE&integer&\\
+\hline
+CURLE\_READ\_ERROR&integer&\\
+\hline
+CURLE\_OUT\_OF\_MEMORY&integer&\\
+\hline
+CURLE\_OPERATION\_TIMEOUTED&integer&\\
+\hline
+CURLE\_FTP\_COULDNT\_SET\_ASCII&integer&\\
+\hline
+CURLE\_FTP\_PORT\_FAILED&integer&\\
+\hline
+CURLE\_FTP\_COULDNT\_USE\_REST&integer&\\
+\hline
+CURLE\_FTP\_COULDNT\_GET\_SIZE&integer&\\
+\hline
+CURLE\_HTTP\_RANGE\_ERROR&integer&\\
+\hline
+CURLE\_HTTP\_POST\_ERROR&integer&\\
+\hline
+CURLE\_SSL\_CONNECT\_ERROR&integer&\\
+\hline
+CURLE\_FTP\_BAD\_DOWNLOAD\_RESUME&integer&\\
+\hline
+CURLE\_FILE\_COULDNT\_READ\_FILE&integer&\\
+\hline
+CURLE\_LDAP\_CANNOT\_BIND&integer&\\
+\hline
+CURLE\_LDAP\_SEARCH\_FAILED&integer&\\
+\hline
+CURLE\_LIBRARY\_NOT\_FOUND&integer&\\
+\hline
+CURLE\_FUNCTION\_NOT\_FOUND&integer&\\
+\hline
+CURLE\_ABORTED\_BY\_CALLBACK&integer&\\
+\hline
+CURLE\_BAD\_FUNCTION\_ARGUMENT&integer&\\
+\hline
+CURLE\_BAD\_CALLING\_ORDER&integer&\\
+\hline
+CURLE\_HTTP\_PORT\_FAILED&integer&\\
+\hline
+CURLE\_BAD\_PASSWORD\_ENTERED&integer&\\
+\hline
+CURLE\_TOO\_MANY\_REDIRECTS&integer&\\
+\hline
+CURLE\_UNKNOWN\_TELNET\_OPTION&integer&\\
+\hline
+CURLE\_TELNET\_OPTION\_SYNTAX&integer&\\
+\hline
+CURLE\_OBSOLETE&integer&\\
+\hline
+CURLE\_SSL\_PEER\_CERTIFICATE&integer&\\
+\hline
+CURLE\_GOT\_NOTHING&integer&\\
+\hline
+CURLE\_SSL\_ENGINE\_NOTFOUND&integer&\\
+\hline
+CURLE\_SSL\_ENGINE\_SETFAILED&integer&\\
+\hline
+CURLE\_SEND\_ERROR&integer&\\
+\hline
+CURLE\_RECV\_ERROR&integer&\\
+\hline
+CURLE\_SHARE\_IN\_USE&integer&\\
+\hline
+CURLE\_SSL\_CERTPROBLEM&integer&\\
+\hline
+CURLE\_SSL\_CIPHER&integer&\\
+\hline
+CURLE\_SSL\_CACERT&integer&\\
+\hline
+CURLE\_BAD\_CONTENT\_ENCODING&integer&\\
+\hline
+CURLE\_LDAP\_INVALID\_URL&integer&\\
+\hline
+CURLE\_FILESIZE\_EXCEEDED&integer&\\
+\hline
+CURLE\_FTP\_SSL\_FAILED&integer&\\
+\hline
+CURLE\_SSH&integer&\\
+\hline
+CURLFTPAUTH\_DEFAULT&integer&\\
+\hline
+CURLFTPAUTH\_SSL&integer&\\
+\hline
+CURLFTPAUTH\_TLS&integer&\\
+\hline
+CURLPROXY\_HTTP&integer&\\
+\hline
+CURLPROXY\_SOCKS4&integer&\\
+\hline
+CURLPROXY\_SOCKS5&integer&\\
+\hline
+CURL\_NETRC\_OPTIONAL&integer&\\
+\hline
+CURL\_NETRC\_IGNORED&integer&\\
+\hline
+CURL\_NETRC\_REQUIRED&integer&\\
+\hline
+CURL\_HTTP\_VERSION\_NONE&integer&\\
+\hline
+CURL\_HTTP\_VERSION\_1\_0&integer&\\
+\hline
+CURL\_HTTP\_VERSION\_1\_1&integer&\\
+\hline
+CURLM\_CALL\_MULTI\_PERFORM&integer&\\
+\hline
+CURLM\_OK&integer&\\
+\hline
+CURLM\_BAD\_HANDLE&integer&\\
+\hline
+CURLM\_BAD\_EASY\_HANDLE&integer&\\
+\hline
+CURLM\_OUT\_OF\_MEMORY&integer&\\
+\hline
+CURLM\_INTERNAL\_ERROR&integer&\\
+\hline
+CURLMSG\_DONE&integer&\\
+\hline
+CURLOPT\_KEYPASSWD&integer&\\
+\hline
+CURLOPT\_SSH\_AUTH\_TYPES&integer&\\
+\hline
+CURLOPT\_SSH\_HOST\_PUBLIC\_KEY\_MD5&integer&\\
+\hline
+CURLOPT\_SSH\_PRIVATE\_KEYFILE&integer&\\
+\hline
+CURLOPT\_SSH\_PUBLIC\_KEYFILE&integer&\\
+\hline
+CURLMOPT\_PIPELINING&integer&\\
+\hline
+CURLMOPT\_MAXCONNECTS&integer&\\
+\hline
+CURLSSH\_AUTH\_ANY&integer&\\
+\hline
+CURLSSH\_AUTH\_DEFAULT&integer&\\
+\hline
+CURLSSH\_AUTH\_HOST&integer&\\
+\hline
+CURLSSH\_AUTH\_KEYBOARD&integer&\\
+\hline
+CURLSSH\_AUTH\_NONE&integer&\\
+\hline
+CURLSSH\_AUTH\_PASSWORD&integer&\\
+\hline
+CURLSSH\_AUTH\_PUBLICKEY&integer&\\
+\hline
+CURL\_WRAPPERS\_ENABLED&integer&在编译PHP时指定了\texttt{-\/-with-curlwrappers}时有效\\
+\hline
+CURLPAUSE\_ALL&integer&\\
+\hline
+CURLPAUSE\_CONT&integer&\\
+\hline
+CURLPAUSE\_RECV&integer&\\
+\hline
+CURLPAUSE\_RECV\_CONT&integer&\\
+\hline
+CURLPAUSE\_SEND&integer&\\
+\hline
+CURLPAUSE\_SEND\_CONT&integer&\\
+\hline
+CURLPIPE\_NOTHING&integer&\\
+\hline
+CURLPIPE\_HTTP1&integer&\\
+\hline
+CURLPIPE\_MULTIPLEX&integer&\\
+\hline
+CURLPROXY\_SOCKS4A&integer&\\
+\hline
+CURLPROXY\_SOCKS5\_HOSTNAME&integer&\\
+\hline
+\end{longtable}
+\zihao{5}
+
+
+\chapter{CURL Function}
+
+
+\section{curl\_version()}
+
+获取cURL版本信息
+
+\begin{lstlisting}[language=PHP]
+array curl_version ([ int $age = CURLVERSION_NOW ] )
+\end{lstlisting}
+
+返回关于cURL的版本信息，这个关联数组包含如下元素：
+
+
+\begin{longtable}{|m{110pt}|m{200pt}|m{150pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+Indice&值描述
+\endhead
+%endhead
+
+%firsthead
+\caption{cURL版本信息}\\
+\hline
+Indice&值描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+version\_number		&cURL 24位版本号\\
+\hline
+version				&cURL 版本号，字符串形式\\
+\hline
+ssl\_version\_number	&OpenSSL 24 位版本号\\
+\hline
+ssl\_version			&OpenSSL 版本号，字符串形式\\
+\hline
+libz\_version			&zlib 版本号，字符串形式\\
+\hline
+host					&关于编译cURL主机的信息\\
+\hline
+age	 				&\\
+\hline
+features				&一个CURL\_VERSION\_XXX常量的位掩码\\
+\hline
+protocols				&一个cURL支持的协议名字的数组\\
+\hline
+\end{longtable}
+
+下面的示例将会检查当前cURL版本使用curl\_version()返回的\texttt{'features'}位掩码中哪些特性是可用的。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 获取cURL版本数组
+$version = curl_version();
+
+// 在cURL编译版本中使用位域来检查某些特性
+$bitfields = Array(
+            'CURL_VERSION_IPV6', 
+            'CURL_VERSION_KERBEROS4', 
+            'CURL_VERSION_SSL', 
+            'CURL_VERSION_LIBZ'
+            );
+
+
+foreach($bitfields as $feature){
+    echo $feature . ($version['features'] & constant($feature) ? ' matches' : ' does not match');
+    echo PHP_EOL;
+}
+\end{lstlisting}
+
+\section{curl\_init()}
+
+
+初始化一个cURL会话
+
+
+\begin{lstlisting}[language=PHP]
+resource curl_init ([ string $url = NULL ] )
+\end{lstlisting}
+
+初始化一个新的会话并返回一个cURL句柄（出错返回 FALSE），可以让curl\_setopt(), curl\_exec()和curl\_close() 函数使用。
+
+\begin{compactitem}
+\item \$url - 如果提供了该参数，CURLOPT\_URL 选项将会被设置成这个值，同时也可以使用curl\_setopt()函数手动地设置这个值。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个新cURL资源
+$ch = curl_init();
+
+// 设置URL和相应的选项
+curl_setopt($ch, CURLOPT_URL, "http://www.example.com/");
+curl_setopt($ch, CURLOPT_HEADER, 0);
+
+// 抓取URL并把它传递给浏览器
+curl_exec($ch);
+
+// 关闭cURL资源，并且释放系统资源
+curl_close($ch);
+\end{lstlisting}
+
+\section{curl\_getinfo()}
+
+
+
+\begin{lstlisting}[language=PHP]
+mixed curl_getinfo ( resource $ch [, int $opt = 0 ] )
+\end{lstlisting}
+
+
+获取一个cURL连接资源句柄的信息，即获取最后一次传输的相关信息。
+
+
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+
+\item \$opt - 这个参数可能是以下常量之一：
+\end{compactitem}
+
+\zihao{6}
+\begin{longtable}{|m{160pt}|m{150pt}|m{200pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+配置项&默认值&可修改范围
+\endhead
+%endhead
+
+%firsthead
+\caption{cURL的curl\_getinfo()的可选参数意义说明}\\
+\hline
+配置项&默认值&可修改范围
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLINFO\_EFFECTIVE\_URL&最后一个有效的URL地址\\
+\hline
+CURLINFO\_HTTP\_CODE&最后一个收到的HTTP代码\\
+\hline
+CURLINFO\_FILETIME&远程获取文档的时间，如果无法获取，则返回值为“-1”\\
+\hline
+CURLINFO\_TOTAL\_TIME&最后一次传输所消耗的时间\\
+\hline
+CURLINFO\_NAMELOOKUP\_TIME&名称解析所消耗的时间\\
+\hline
+CURLINFO\_CONNECT\_TIME&建立连接所消耗的时间\\
+\hline
+CURLINFO\_PRETRANSFER\_TIME&从建立连接到准备传输所使用的时间\\
+\hline
+CURLINFO\_STARTTRANSFER\_TIME&从建立连接到传输开始所使用的时间\\
+\hline
+CURLINFO\_REDIRECT\_TIME&在事务传输开始前重定向所使用的时间\\
+\hline
+CURLINFO\_SIZE\_UPLOAD&上传数据量的总值\\
+\hline
+CURLINFO\_SIZE\_DOWNLOAD&下载数据量的总值\\
+\hline
+CURLINFO\_SPEED\_DOWNLOAD&平均下载速度\\
+\hline
+CURLINFO\_SPEED\_UPLOAD&平均上传速度\\
+\hline
+CURLINFO\_HEADER\_SIZE&header部分的大小\\
+\hline
+CURLINFO\_HEADER\_OUT&发送请求的字符串\\
+\hline
+CURLINFO\_REQUEST\_SIZE&在HTTP请求中有问题的请求的大小\\
+\hline
+CURLINFO\_SSL\_VERIFYRESULT&通过设置CURLOPT\_SSL\_VERIFYPEER返回的SSL证书验证请求的结果\\
+\hline
+CURLINFO\_CONTENT\_LENGTH\_DOWNLOAD&从Content-Length: field中读取的下载内容长度\\
+\hline
+CURLINFO\_CONTENT\_LENGTH\_UPLOAD&上传内容大小的说明\\
+\hline
+CURLINFO\_CONTENT\_TYPE&下载内容的Content-Type:值，NULL表示服务器没有发送有效的Content-Type: header\\
+\hline
+\end{longtable}
+\zihao{5}
+
+如果 opt 被设置，以字符串形式返回它的值，否则返回一个包含下列元素的关联数组(它们分别对应于 opt):
+
+
+\begin{compactitem}
+\item \texttt{"url"}
+\item \texttt{"content\_type"}
+\item \texttt{"http\_code"}
+\item \texttt{"header\_size"}
+\item \texttt{"request\_size"}
+\item \texttt{"filetime"}
+\item \texttt{"ssl\_verify\_result"}
+\item \texttt{"redirect\_count"}
+\item \texttt{"total\_time"}
+\item \texttt{"namelookup\_time"}
+\item \texttt{"connect\_time"}
+\item \texttt{"pretransfer\_time"}
+\item \texttt{"size\_upload"}
+\item \texttt{"size\_download"}
+\item \texttt{"speed\_download"}
+\item \texttt{"speed\_upload"}
+\item \texttt{"download\_content\_length"}
+\item \texttt{"upload\_content\_length"}
+\item \texttt{"starttransfer\_time"}
+\item \texttt{"redirect\_time"}
+\end{compactitem}
+
+
+\begin{example}
+curl\_getinfo()
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个cURL句柄
+$ch = curl_init('http://www.yahoo.com/');
+
+// 执行
+curl_exec($ch);
+
+// 检查是否有错误发生
+if(!curl_errno($ch)) {
+ $info = curl_getinfo($ch);
+ echo 'Took ' . $info['total_time'] . ' seconds to send a request to ' . $info['url'];
+}
+
+// Close handle
+curl_close($ch);
+\end{lstlisting}
+\end{example}
+
+
+
+如果重用cURL句柄，则会保留curl\_getinfo()函数此前收集的信息，也就是说除非统计信息在curl\_getinfo()函数内部被覆盖，否则将返回先前的信息。
+
+
+
+\section{curl\_setopt()}
+
+
+
+
+设置一个cURL传输选项（成功时返回 TRUE， 或者在失败时返回 FALSE）
+
+
+\begin{lstlisting}[language=PHP]
+bool curl_setopt ( resource $ch , int $option , mixed $value )
+\end{lstlisting}
+
+为 cURL 会话句柄设置选项。
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+
+\item \$option - 需要设置的CURLOPT\_XXX选项。
+
+\item \$value - 将设置在option选项上的值。
+
+\end{compactitem}
+
+\subsection{curl option(bool)}
+
+以下 option 参数的 value应该被设置成 bool 类型：
+
+\zihao{6}
+\begin{longtable}{|m{140pt}|m{150pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+选项&设置值&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{curl option(bool)}\\
+\hline
+选项&设置值&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLOPT\_AUTOREFERER&TRUE 时将根据 Location: 重定向时，自动设置 header 中的Referer:信息&\\
+\hline
+CURLOPT\_BINARYTRANSFER&TRUE时将在启用 CURLOPT\_RETURNTRANSFER 时，返回原生的（Raw）输出&(已废弃）现在CURLOPT\_RETURNTRANSFER总是会返回原生的（Raw）内容。\\
+\hline
+CURLOPT\_COOKIESESSION	& TRUE 时将开启新的一次 cookie 会话。它将强制 libcurl 忽略之前会话时存的其他 cookie。会话 cookie 是指没有过期时间，只存活在会话之中&libcurl 在默认状况下无论是否为会话，都会储存、加载所有 cookie\\
+\hline
+CURLOPT\_CERTINFO&TRUE 将在安全传输时输出 SSL 证书信息到 STDERR& 需要开启 CURLOPT\_VERBOSE 才有效\\
+\hline
+CURLOPT\_CONNECT\_ONLY&TRUE 将让库执行所有需要的代理、验证、连接过程，但不传输数据&此选项用于 HTTP、SMTP 和 POP3\\
+\hline
+CURLOPT\_CRLF&启用时将Unix的换行符转换成回车换行符&\\
+\hline
+CURLOPT\_DNS\_USE\_GLOBAL\_CACHE&TRUE 会启用一个全局的DNS缓存&此选项非线程安全的，默认已开启\\
+\hline
+CURLOPT\_FAILONERROR&当 HTTP 状态码大于等于 400，TRUE 将将显示错误详情&默认情况下将返回页面，忽略 HTTP 代码\\
+\hline
+CURLOPT\_FILETIME&TRUE 时，会尝试获取远程文档中的修改时间信息&信息可通过curl\_getinfo()函数的CURLINFO\_FILETIME 选项获取\\
+\hline
+CURLOPT\_FOLLOWLOCATION&TRUE 时将会根据服务器返回 HTTP 头中的\texttt{"Location: "}重定向&注意，这是递归的，\texttt{"Location: "}发送几次就重定向几次，除非设置了 CURLOPT\_MAXREDIRS，限制最大重定向次数）\\
+\hline
+CURLOPT\_FORBID\_REUSE&TRUE 在完成交互以后强制明确的断开连接，不能在连接池中重用&\\
+\hline
+CURLOPT\_FRESH\_CONNECT&TRUE 强制获取一个新的连接，而不是缓存中的连接&\\
+\hline
+CURLOPT\_FTP\_USE\_EPRT&TRUE 时，当 FTP 下载时使用 EPRT (和 LPRT)命令&FALSE 时禁用 EPRT 和 LPRT，仅使用PORT 命令\\
+\hline
+CURLOPT\_FTP\_USE\_EPSV&TRUE 时，在FTP传输过程中回到 PASV 模式前，先尝试 EPSV 命令&设置为 FALSE 时禁用 EPSV\\
+\hline
+CURLOPT\_FTP\_CREATE\_MISSING\_DIRS&TRUE 时，当 ftp 操作不存在的目录时将创建它&\\
+\hline
+CURLOPT\_FTPAPPEND&TRUE 为追加写入文件，而不是覆盖&\\
+\hline
+CURLOPT\_TCP\_NODELAY&TRUE 时禁用 TCP 的 Nagle 算法&就是减少网络上的小包数量\\
+\hline
+CURLOPT\_FTPASCII&CURLOPT\_TRANSFERTEXT 的别名&\\
+\hline
+CURLOPT\_FTPLISTONLY&TRUE 时只列出 FTP 目录的名字&\\
+\hline
+CURLOPT\_HEADER&启用时会将头文件的信息作为数据流输出&\\
+\hline
+CURLINFO\_HEADER\_OUT&TRUE 时追踪句柄的请求字符串&CURLINFO\_的前缀是有意的\\
+\hline
+CURLOPT\_HTTPGET&TRUE 时会设置 HTTP 的 method 为 GET&默认是 GET，只有 method 被修改时才需要该选项\\
+\hline
+CURLOPT\_HTTPPROXYTUNNEL&TRUE 会通过指定的 HTTP 代理来传输&\\
+\hline
+CURLOPT\_MUTE&TRUE 时将完全静默，无论是何 cURL 函数&（已废弃）可以使用 CURLOPT\_RETURNTRANSFER 作为代替\\
+\hline
+CURLOPT\_NETRC&TRUE 时，在连接建立时，访问\texttt{\~{}/.netrc}文件获取用户名和密码来连接远程站点&\\
+\hline
+CURLOPT\_NOBODY&TRUE 时将不输出 BODY 部分，同时 Mehtod 变成了 HEAD&修改为 FALSE 时不会变成 GET\\
+\hline
+CURLOPT\_NOPROGRESS&TRUE 时关闭 cURL 的传输进度&默认自动设置此选项为 TRUE，只有为了调试才需要改变设置\\
+\hline
+CURLOPT\_NOSIGNAL&TRUE 时忽略所有的 cURL 传递给 PHP 进行的信号&在 SAPI 多线程传输时此项被默认启用，所以超时选项仍能使用\\
+\hline
+CURLOPT\_POST&TRUE 时会发送 POST 请求，类型为application/x-www-form-urlencoded&这是 HTML 表单提交时最常见的一种\\
+\hline
+CURLOPT\_PUT&TRUE 时允许 HTTP 发送文件&要被 PUT 的文件必须在 CURLOPT\_INFILE和CURLOPT\_INFILESIZE 中设置\\
+\hline
+CURLOPT\_RETURNTRANSFER&TRUE 将curl\_exec()获取的信息以字符串返回，而不是直接输出&\\
+\hline
+CURLOPT\_SAFE\_UPLOAD&TRUE 禁用@前缀在 CURLOPT\_POSTFIELDS 中发送文件，这意味着 @可以在字段中安全得使用了&可使用 CURLFile 作为上传的代替\\
+\hline
+CURLOPT\_SSL\_VERIFYPEER&FALSE 禁止 cURL 验证对等证书&要验证的交换证书可以在 CURLOPT\_CAINFO 选项中设置，或在 CURLOPT\_CAPATH中设置证书目录\\
+\hline
+CURLOPT\_TRANSFERTEXT&TRUE 对 FTP 传输使用 ASCII 模式。对于LDAP，它检索纯文本信息而非 HTML&Windows 系统不会把 STDOUT 设置成二进制 模式\\
+\hline
+CURLOPT\_UNRESTRICTED\_AUTH&TRUE 在使用CURLOPT\_FOLLOWLOCATION重定向 header 中的多个 location 时继续发送用户名和密码信息，哪怕主机名已改变&\\
+\hline
+CURLOPT\_UPLOAD&TRUE 准备上传&\\
+\hline
+CURLOPT\_VERBOSE&TRUE 会输出所有的信息，写入到STDERR，或在CURLOPT\_STDERR中指定的文件&\\
+\hline
+\hline
+\end{longtable}
+\zihao{5}
+
+\subsection{curl option(integer)}
+
+以下 option 参数的 value应该被设置成 integer 类型：
+
+\zihao{6}
+\begin{longtable}{|m{140pt}|m{150pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+选项&设置值&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{curl option(integer)}\\
+\hline
+选项&设置值&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLOPT\_BUFFERSIZE&每次读入的缓冲的尺寸&不保证每次都会完全填满这个尺寸\\
+\hline
+CURLOPT\_CLOSEPOLICY&CURLCLOSEPOLICY\_* 中的一个&（已废弃）\\
+\hline
+CURLOPT\_CONNECTTIMEOUT&在尝试连接时等待的秒数&设置为0则无限等待\\
+\hline
+CURLOPT\_CONNECTTIMEOUT\_MS&尝试连接等待的时间，以毫秒为单位&设置为0，则无限等待。 如果 libcurl 编译时使用系统标准的名称解析器（ standard system name resolver），那部分的连接仍旧使用以秒计的超时解决方案，最小超时时间还是一秒钟\\
+\hline
+CURLOPT\_DNS\_CACHE\_TIMEOUT&设置在内存中缓存 DNS 的时间&默认为120秒（两分钟）\\
+\hline
+CURLOPT\_FTPSSLAUTH&FTP验证方式（启用的时候）：CURLFTPAUTH\_SSL (首先尝试SSL)，CURLFTPAUTH\_TLS (首先尝试TLS)或CURLFTPAUTH\_DEFAULT (让cURL自己决定)\\
+\hline
+CURLOPT\_HTTP\_VERSION&默认为CURL\_HTTP\_VERSION\_NONE（让cURL自己判断使用哪个版本）&CURL\_HTTP\_VERSION\_1\_0 (强制使用 HTTP/1.0)\newline CURL\_HTTP\_VERSION\_1\_1 (强制使用 HTTP/1.1)\\
+\hline
+CURLOPT\_HTTPAUTH&使用的 HTTP 验证方法。选项有CURLAUTH\_BASIC、CURLAUTH\_DIGEST、CURLAUTH\_GSSNEGOTIATE、CURLAUTH\_NTLM、CURLAUTH\_ANY和CURLAUTH\_ANYSAFE&可以使用 | 位域(OR)操作符结合多个值，cURL 会让服务器选择受支持的方法，并选择最好的那个。例如，CURLAUTH\_ANY是 CURLAUTH\_BASIC | CURLAUTH\_DIGEST | CURLAUTH\_GSSNEGOTIATE | CURLAUTH\_NTLM 的别名，CURLAUTH\_ANYSAFE 是 CURLAUTH\_DIGEST | CURLAUTH\_GSSNEGOTIATE | CURLAUTH\_NTLM 的别名\\
+\hline
+CURLOPT\_INFILESIZE&希望传给远程站点的文件尺寸，字节(byte)为单位&无法用这个选项阻止 libcurl 发送更多的数据，确切发送什么取决于 CURLOPT\_READFUNCTION\\
+\hline
+CURLOPT\_LOW\_SPEED\_LIMIT&传输速度，每秒字节（bytes）数&根据CURLOPT\_LOW\_SPEED\_TIME秒数统计是否因太慢而取消传输\\
+\hline
+CURLOPT\_LOW\_SPEED\_TIME&当传输速度小于CURLOPT\_LOW\_SPEED\_LIMIT时(bytes/sec)，PHP会根据CURLOPT\_LOW\_SPEED\_TIME来判断是否因太慢而取消传输&\\
+\hline
+CURLOPT\_MAXCONNECTS&允许的最大连接数量&到达限制时，会通过CURLOPT\_CLOSEPOLICY决定应该关闭哪些连接\\
+\hline
+CURLOPT\_MAXREDIRS&指定最多的 HTTP 重定向次数&这个选项是和CURLOPT\_FOLLOWLOCATION一起使用的\\
+\hline
+CURLOPT\_PORT&用来指定连接端口&\\
+\hline
+CURLOPT\_POSTREDIR&位掩码， 1 (301 永久重定向), 2 (302 Found) 和 4 (303 See Other)&设置 CURLOPT\_FOLLOWLOCATION 时，什么情况下需要再次 HTTP POST 到重定向网址\\
+\hline
+CURLOPT\_PROTOCOLS&CURLPROTO\_*的位掩码。 &启用时，会限制 libcurl 在传输过程中可使用哪些协议。 这将允许在编译libcurl时支持众多协议，但是限制只用允许的子集。\newline 默认 libcurl 将使用所有支持的协议，可用的协议选项为CURLPROTO\_HTTP、CURLPROTO\_HTTPS、CURLPROTO\_FTP、CURLPROTO\_FTPS、CURLPROTO\_SCP、CURLPROTO\_SFTP、CURLPROTO\_TELNET、CURLPROTO\_LDAP、CURLPROTO\_LDAPS、CURLPROTO\_DICT、CURLPROTO\_FILE、CURLPROTO\_TFTP、CURLPROTO\_ALL\\
+\hline
+CURLOPT\_PROXYAUTH&HTTP 代理连接的验证方式，使用在CURLOPT\_HTTPAUTH中的位掩码&当前仅仅支持 CURLAUTH\_BASIC和CURLAUTH\_NTLM\\
+\hline
+CURLOPT\_PROXYPORT&代理服务器的端口&端口也可以在CURLOPT\_PROXY中设置\\
+\hline
+CURLOPT\_PROXYTYPE&可以是 CURLPROXY\_HTTP (默认值)、CURLPROXY\_SOCKS4、 CURLPROXY\_SOCKS5、 CURLPROXY\_SOCKS4A 或 CURLPROXY\_SOCKS5\_HOSTNAME&\\
+\hline
+CURLOPT\_REDIR\_PROTOCOLS&CURLPROTO\_* 值的位掩码。如果被启用，位掩码会限制 libcurl 在 CURLOPT\_FOLLOWLOCATION开启时使用的协议&默认允许除 FILE 和 SCP 外所有协议， 这和 7.19.4 前的版本无条件支持所有支持的协议不同\\
+\hline
+CURLOPT\_RESUME\_FROM&在恢复传输时，传递字节为单位的偏移量（用来断点续传）&\\
+\hline
+CURLOPT\_SSL\_VERIFYHOST&设置为 1 是检查服务器SSL证书中是否存在一个公用名(common name)&公用名(Common Name)一般来讲就是填写你将要申请SSL证书的域名 (domain)或子域名(sub domain)。\newline 设置成 2，会检查公用名是否存在，并且是否与提供的主机名匹配。在生产环境中，这个值应该是 2（默认值）\\
+\hline
+CURLOPT\_SSLVERSION&CURL\_SSLVERSION\_DEFAULT (0), CURL\_SSLVERSION\_TLSv1 (1), CURL\_SSLVERSION\_SSLv2 (2), CURL\_SSLVERSION\_SSLv3 (3), CURL\_SSLVERSION\_TLSv1\_0 (4), CURL\_SSLVERSION\_TLSv1\_1 (5) ， CURL\_SSLVERSION\_TLSv1\_2 (6) 中的其中一个&最好别设置这个值，让它使用默认值。 设置为 2 或 3 比较危险，在 SSLv2 和 SSLv3 中有弱点存在\\
+\hline
+CURLOPT\_TIMECONDITION&默认为 CURL\_TIMECOND\_IFMODSINCE，设置如何对待 CURLOPT\_TIMEVALUE&使用 CURL\_TIMECOND\_IFMODSINCE，仅在页面 CURLOPT\_TIMEVALUE 之后修改，才返回页面。没有修改则返回 "304 Not Modified" 头，假设设置了 CURLOPT\_HEADER 为 TRUE。CURL\_TIMECOND\_IFUNMODSINCE则起相反的效果\\
+\hline
+CURLOPT\_TIMEOUT&允许 cURL 函数执行的最长秒数&\\
+\hline
+CURLOPT\_TIMEOUT\_MS&设置cURL允许执行的最长毫秒数。 &如果 libcurl 编译时使用系统标准的名称解析器（ standard system name resolver），那部分的连接仍旧使用以秒计的超时解决方案，最小超时时间还是一秒钟\\
+\hline
+CURLOPT\_TIMEVALUE&秒数，从 1970年1月1日开始&这个时间会被 CURLOPT\_TIMECONDITION使。默认使用CURL\_TIMECOND\_IFMODSINCE\\
+\hline
+CURLOPT\_MAX\_RECV\_SPEED\_LARGE&If a download exceeds this speed (counted in bytes per second) on cumulative average during the transfer, the transfer will pause to keep the average rate less than or equal to the parameter value. Defaults to unlimited speed.&\\
+\hline
+CURLOPT\_MAX\_SEND\_SPEED\_LARGE&If an upload exceeds this speed (counted in bytes per second) on cumulative average during the transfer, the transfer will pause to keep the average rate less than or equal to the parameter value. Defaults to unlimited speed.&\\
+\hline
+CURLOPT\_SSH\_AUTH\_TYPES&A bitmask consisting of one or more of CURLSSH\_AUTH\_PUBLICKEY, CURLSSH\_AUTH\_PASSWORD, CURLSSH\_AUTH\_HOST, CURLSSH\_AUTH\_KEYBOARD&Set to CURLSSH\_AUTH\_ANY to let libcurl pick one.\\
+\hline
+CURLOPT\_IPRESOLVE&Allows an application to select what kind of IP addresses to use when resolving host names. This is only interesting when using host names that resolve addresses using more than one version of IP, possible values are CURL\_IPRESOLVE\_WHATEVER, CURL\_IPRESOLVE\_V4, CURL\_IPRESOLVE\_V6, by default CURL\_IPRESOLVE\_WHATEVER.\\
+\hline
+\end{longtable}
+\zihao{5}
+
+\subsection{curl option(string)}
+
+以下 option 参数的 value应该被设置成 string 类型：
+
+\zihao{6}
+\begin{longtable}{|m{140pt}|m{150pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+选项&设置值&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{curl option(string)}\\
+\hline
+选项&设置值&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLOPT\_CAINFO&一个保存着1个或多个用来让服务端验证的证书的文件名（可能需要绝对路径）&这个参数仅仅在和CURLOPT\_SSL\_VERIFYPEER一起使用时才有意义\\
+\hline
+CURLOPT\_CAPATH&一个保存着多个CA证书的目录&这个选项是和CURLOPT\_SSL\_VERIFYPEER一起使用的\\
+\hline
+CURLOPT\_COOKIE&设定 HTTP 请求中\texttt{"Cookie: "}部分的内容。&多个 cookie 用分号分隔，分号后带一个空格(例如\texttt{"fruit=apple; colour=red"})\\
+\hline
+CURLOPT\_COOKIEFILE&包含 cookie 数据的文件名，cookie 文件的格式可以是 Netscape 格式，或者只是纯 HTTP 头部风格，存入文件&如果文件名是空的，不会加载 cookie，但 cookie 的处理仍旧启用\\
+\hline
+CURLOPT\_COOKIEJAR&连接结束后（比如调用 curl\_close）保存 cookie 信息的文件&\\
+\hline
+CURLOPT\_CUSTOMREQUEST&HTTP 请求时，使用自定义的 Method 来代替\texttt{"GET"}或\texttt{"HEAD"}。对\texttt{"DELETE"}或者其他更隐蔽的 HTTP 请求有用。 有效值如 \texttt{"GET"}，\texttt{"POST"}，\texttt{"CONNECT"}等，也就是说不要在这里输入整行 HTTP 请求，例如输入\texttt{"GET /index.html HTTP/1.0\textbackslash r\textbackslash n\textbackslash r\textbackslash n"}是不正确的&不确定服务器支持这个自定义方法则不要使用它\\
+\hline
+CURLOPT\_EGDSOCKET&类似CURLOPT\_RANDOM\_FILE，除了一个Entropy Gathering Daemon套接字&\\
+\hline
+CURLOPT\_ENCODING&HTTP请求头中\texttt{"Accept-Encoding: "}的值，能够解码响应的内容， 支持的编码有\texttt{"identity"}，\texttt{"deflate"}和\texttt{"gzip"}&如果为空字符串\texttt{""}，会发送所有支持的编码类型\\
+\hline
+CURLOPT\_FTPPORT&这个值将被用来获取供FTP的\texttt{"PORT"}指令所需要的IP地址，\texttt{"PORT"}指令告诉远程服务器连接到我们指定的IP地址&这个字符串可以是纯文本的IP地址、主机名、一个网络接口名（UNIX下）或者只是一个\texttt{'-'}来使用默认的 IP 地址\\
+\hline
+CURLOPT\_INTERFACE&发送的网络接口（interface）&可以是一个接口名、IP 地址或者是一个主机名\\
+\hline
+CURLOPT\_KEYPASSWD&使用 CURLOPT\_SSLKEY 或 CURLOPT\_SSH\_PRIVATE\_KEYFILE 私钥时候的密码\\
+\hline
+CURLOPT\_KRB4LEVEL&KRB4 (Kerberos 4) 安全级别。下面的任何值都是有效的(从低到高的顺序)：\texttt{"clear"}、\texttt{"safe"}、\texttt{"confidential"}、\texttt{"private"}。如果字符串以上这些，将使用\texttt{"private"}&这个选项设置为 NULL 时将禁用 KRB4 安全认证，目前 KRB4 安全认证只能用于 FTP 传输\\
+\hline
+CURLOPT\_POSTFIELDS&全部数据使用HTTP协议中的\texttt{"POST"}操作来发送，如果要发送文件，在文件名前面加上@前缀并使用完整路径，文件类型可以在文件名后以\texttt{';type=mimetype'}的格式指定。这个参数可以是 urlencoded 后的字符串，类似\texttt{'para1=val1\&para2=val2\&...'}，也可以使用一个以字段名为键值，字段数据为值的数组。 如果value是一个数组，Content-Type头将会被设置成multipart/form-data&使用 @ 前缀传递文件时，value 必须是个数组，现在文件可通过 CURLFile 发送。 设置 CURLOPT\_SAFE\_UPLOAD 为 TRUE 可禁用 @ 前缀发送文件以增加安全性\\
+\hline
+CURLOPT\_PRIVATE&Any data that should be associated with this cURL handle. This data can subsequently be retrieved with the CURLINFO\_PRIVATE option of curl\_getinfo()&cURL does nothing with this data. When using a cURL multi handle, this private data is typically a unique key to identify a standard cURL handle\\
+\hline
+CURLOPT\_PROXY&HTTP 代理通道&\\
+\hline
+CURLOPT\_PROXYUSERPWD&一个用来连接到代理的\texttt{"[username]:[password]"}格式的字符串&\\
+\hline
+CURLOPT\_RANDOM\_FILE&一个被用来生成 SSL 随机数种子的文件名&\\
+\hline
+CURLOPT\_RANGE&以\texttt{"X-Y"}的形式，其中X和Y都是可选项获取数据的范围，以字节计&HTTP传输线程也支持在重复项中间用逗号分隔（例如\texttt{"X-Y,N-M"}）\\
+\hline
+CURLOPT\_REFERER&在HTTP请求头中\texttt{"Referer: "}的内容&\\
+\hline
+CURLOPT\_SSH\_HOST\_PUBLIC\_KEY\_MD5&包含 32 位长的 16 进制数值。这个字符串应该是远程主机公钥（public key） 的 MD5 校验值。在不匹配的时候 libcurl 会拒绝连接&此选项仅用于 SCP 和 SFTP 的传输\\
+\hline
+CURLOPT\_SSH\_PUBLIC\_KEYFILE&The file name for your public key. If not used, libcurl defaults to \$HOME/.ssh/id\_dsa.pub if the HOME environment variable is set, and just ``id\_dsa.pub" in the current directory if HOME is not set&\\
+\hline
+CURLOPT\_SSH\_PRIVATE\_KEYFILE&The file name for your private key. If not used, libcurl defaults to \$HOME/.ssh/id\_dsa if the HOME environment variable is set, and just ``id\_dsa" in the current directory if HOME is not set. If the file is password-protected, set the password with CURLOPT\_KEYPASSWD&\\
+\hline
+CURLOPT\_SSL\_CIPHER\_LIST&一个SSL的加密算法列表&RC4-SHA和TLSv1都是可用的加密列表\\
+\hline
+CURLOPT\_SSLCERT&一个包含 PEM 格式证书的文件名&\\
+\hline
+CURLOPT\_SSLCERTPASSWD&使用CURLOPT\_SSLCERT证书需要的密码&\\
+\hline
+CURLOPT\_SSLCERTTYPE&证书的类型。支持的格式有``PEM" (默认值), ``DER"和``ENG"&\\
+\hline
+CURLOPT\_SSLENGINE&用来在CURLOPT\_SSLKEY中指定的SSL私钥的加密引擎变量&\\
+\hline
+CURLOPT\_SSLENGINE\_DEFAULT&用来做非对称加密操作的变量&\\
+\hline
+CURLOPT\_SSLKEY&包含 SSL 私钥的文件名&\\
+\hline
+CURLOPT\_SSLKEYPASSWD&在 CURLOPT\_SSLKEY中指定了的SSL私钥的密码&这个选项包含了敏感的密码信息，需要保证这个PHP脚本的安全\\
+\hline
+CURLOPT\_SSLKEYTYPE&CURLOPT\_SSLKEY中规定的私钥的加密类型&支持的密钥类型为``PEM"(默认值)、``DER"和``ENG"\\
+\hline
+CURLOPT\_URL&需要获取的 URL 地址&也可以在curl\_init() 初始化会话时设置\\
+\hline
+CURLOPT\_USERAGENT&在HTTP请求中包含一个``User-Agent: "头的字符串&\\
+\hline
+CURLOPT\_USERPWD&传递一个连接中需要的用户名和密码，格式为``[username]:[password]"&\\
+\hline
+\end{longtable}
+\zihao{5}
+
+
+\subsection{curl option(array)}
+
+以下 option 参数的 value应该被设置成 array 类型：
+
+\zihao{6}
+\begin{longtable}{|m{140pt}|m{150pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+选项&设置值&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{curl option(array)}\\
+\hline
+选项&设置值&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLOPT\_HTTP200ALIASES&HTTP 200 响应码数组&数组中的响应码被认为是正确的响应，而非错误\\
+\hline
+CURLOPT\_HTTPHEADER&设置 HTTP 头字段的数组&例如\texttt{array('Content-type: text/plain', 'Content-length: 100')}\\
+\hline
+CURLOPT\_POSTQUOTE&在 FTP 请求执行完成后，在服务器上执行的一组array格式的 FTP 命令&\\
+\hline
+CURLOPT\_QUOTE&一组先于 FTP 请求的在服务器上执行的FTP命令&\\
+\hline
+\end{longtable}
+\zihao{5}
+
+
+\subsection{curl option(stream)}
+
+以下 option 参数的 value应该被设置成 stream 类型（例如使用fopen()）：
+
+\zihao{6}
+\begin{longtable}{|m{140pt}|m{150pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+选项&设置值&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{curl option(stream)}\\
+\hline
+选项&设置值&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLOPT\_FILE&设置输出文件&默认为STDOUT (浏览器)\\
+\hline
+CURLOPT\_INFILE&上传文件时需要读取的文件&\\
+\hline
+CURLOPT\_STDERR&错误输出的地址，取代默认的STDERR&\\
+\hline
+CURLOPT\_WRITEHEADER&设置 header 部分内容的写入的文件地址&\\
+\hline
+\end{longtable}
+\zihao{5}
+
+
+\subsection{curl option(function)}
+
+以下 option 参数的 value应该被设置成有效的函数或闭包类型：
+
+\zihao{6}
+\begin{longtable}{|m{140pt}|m{150pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+选项&设置值&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{curl option(function)}\\
+\hline
+选项&设置值&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLOPT\_HEADERFUNCTION&设置一个回调函数，这个函数有两个参数，第一个是cURL的资源句柄，第二个是输出的 header 数据&header数据的输出必须依赖这个函数，返回已写入的数据大小\\
+\hline
+CURLOPT\_PASSWDFUNCTION&设置一个回调函数，有三个参数，第一个是cURL的资源句柄，第二个是一个密码提示符，第三个参数是密码长度允许的最大值&返回密码的值\\
+\hline
+CURLOPT\_PROGRESSFUNCTION&设置一个回调函数，有五个参数，第一个是cURL的资源句柄，第二个是预计要下载的总字节（bytes）数。第三个是目前下载的字节数，第四个是预计传输中总上传字节数，第五个是目前上传的字节数&只有设置 CURLOPT\_NOPROGRESS 选项为 FALSE 时才会调用这个回调函数，返回非零值将中断传输，传输将设置 CURLE\_ABORTED\_BY\_CALLBACK 错误\\
+\hline
+CURLOPT\_READFUNCTION&回调函数名。该函数应接受三个参数。第一个是 cURL resource，第二个是通过选项 CURLOPT\_INFILE 传给 cURL 的 stream resource，第三个参数是最大可以读取的数据的数量&回调函数必须返回一个字符串，长度小于或等于请求的数据量（第三个参数）。一般从传入的 stream resource 读取。返回空字符串作为 EOF（文件结束） 信号\\
+\hline
+CURLOPT\_WRITEFUNCTION&回调函数名。该函数应接受两个参数。第一个是 cURL resource，第二个是要写入的数据字符串&数据必须在函数中被保存，函数必须准确返回写入数据的字节数，否则传输会被一个错误所中断\\
+\hline
+\end{longtable}
+\zihao{5}
+
+
+\subsection{curl option(resource)}
+
+以下 option 参数的 value应该被设置成其他值类型：
+
+\zihao{6}
+\begin{longtable}{|m{140pt}|m{150pt}|m{120pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+选项&设置值&备注
+\endhead
+%endhead
+
+%firsthead
+\caption{curl option(resource)}\\
+\hline
+选项&设置值&备注
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLOPT\_SHARE&curl\_share\_init() 返回的结果&使cURL 可以处理共享句柄里的数据\\
+\hline
+\end{longtable}
+\zihao{5}
+
+\begin{example}
+设置cURL选项示例
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个新cURL资源
+$ch = curl_init();
+
+// 设置URL和相应的选项
+curl_setopt($ch, CURLOPT_URL, "http://www.example.com/");
+curl_setopt($ch, CURLOPT_HEADER, false);
+
+// 抓取URL并把它传递给浏览器
+curl_exec($ch);
+
+//关闭cURL资源，并且释放系统资源
+curl_close($ch);
+\end{lstlisting}
+\end{example}
+
+
+
+
+\begin{example}
+上传文件时的cURL选项示例
+\begin{lstlisting}[language=PHP]
+<?php
+/* 
+  * http://localhost/upload.php:
+  * print_r($_POST);
+  * print_r($_FILES);
+  */
+$ch = curl_init();
+
+$data = array('name' => 'Foo', 'file' => '@/home/user/test.png');
+
+curl_setopt($ch, CURLOPT_URL, 'http://localhost/upload.php');
+curl_setopt($ch, CURLOPT_POST, 1);
+curl_setopt($ch, CURLOPT_SAFE_UPLOAD, false); //  PHP 5.6.0 后必须开启
+curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+
+curl_exec($ch);
+\end{lstlisting}
+\end{example}
+
+以上例程会输出：
+
+\begin{lstlisting}
+Array
+(
+    [name] => Foo
+)
+Array
+(
+    [file] => Array
+        (
+            [name] => test.png
+            [type] => image/png
+            [tmp_name] => /tmp/phpcpjNeQ
+            [error] => 0
+            [size] => 279
+        )
+)
+\end{lstlisting}
+
+
+
+
+
+
+\section{curl\_setopt\_array()}
+
+为cURL传输会话批量设置选项，如果全部的选项都被成功设置则返回TRUE，只要有一个选项不能被成功设置，马上返回FALSE，忽略其后的任何在options数组中的选项。
+
+
+
+\begin{lstlisting}[language=PHP]
+bool curl_setopt_array ( resource $ch , array $options )
+\end{lstlisting}
+
+curl\_setopt\_array()为cURL传输会话批量设置选项。这个函数对于需要设置大量的cURL选项是非常有用的，不需要重复地调用curl\_setopt()。
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+
+\item \$options - 一个array用来确定将被设置的选项及其值。数组的键值必须是一个有效的curl\_setopt()常量或者是它们对等的整数值。
+\end{compactitem}
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个新cURL资源
+$ch = curl_init();
+
+// 设置URL和相应的选项
+$options = array(
+   CURLOPT_URL => 'http://www.example.com/',
+   CURLOPT_HEADER => false
+);
+
+curl_setopt_array($ch, $options);
+
+// 抓取URL并把它传递给浏览器
+curl_exec($ch);
+
+// 关闭cURL资源，并且释放系统资源
+curl_close($ch);
+\end{lstlisting}
+
+下面是一个对curl\_setopt\_array()的等价实现。
+
+\begin{lstlisting}[language=PHP]
+<?php
+if (!function_exists('curl_setopt_array')) {
+   function curl_setopt_array(&$ch, $curl_options) {
+       foreach ($curl_options as $option => $value) {
+           if (!curl_setopt($ch, $option, $value)) {
+               return false;
+           } 
+       }
+       return true;
+   }
+}
+\end{lstlisting}
+
+
+注意，对于curl\_setopt()来说：
+
+\begin{compactitem}
+\item 传递一个数组到CURLOPT\_POST将会把数据以multipart/form-data的方式编码。
+\item 传递一个URL-encoded字符串到CURLOPT\_POST将会以application/x-www-form-urlencoded的方式对数据进行编码。
+\end{compactitem}
+
+
+\section{curl\_escape()}
+
+
+根据RFC 3986规范编码给定的字符串，返回编码后的字符串或者在失败时返回 FALSE。
+
+\begin{lstlisting}[language=PHP]
+string curl_escape ( resource $ch , string $str )
+\end{lstlisting}
+
+
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\item \$str - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+
+
+
+\begin{example}
+curl\_escape()
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个 curl 句柄
+$ch = curl_init();
+
+// 把编码后的字符串当做一个 GET 参数
+$location = curl_escape($ch, 'Hofbräuhaus / München');
+// 结果： Hofbr%C3%A4uhaus%20%2F%20M%C3%BCnchen
+
+// 用编码好的字符串组装一个 URL
+$url = "http://example.com/add_location.php?location={$location}";
+// 结果： http://example.com/add_location.php?location=Hofbr%C3%A4uhaus%20%2F%20M%C3%BCnchen
+
+// 发送 HTTP 请求并关闭句柄
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_exec($ch);
+curl_close($ch);
+\end{lstlisting}
+\end{example}
+
+\section{curl\_unescape()}
+
+
+解码给定的 URL 编码的字符串（返回解码后的字符串 或者在失败时返回 FALSE）
+
+\begin{lstlisting}[language=PHP]
+string curl_unescape ( resource $ch , string $str )
+\end{lstlisting}
+
+curl\_unescape()函数解码给定的 URL 编码的字符串。
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\item \$str - 需要解码的 URL 编码字符串
+\end{compactitem}
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个 curl 句柄
+$ch = curl_init('http://example.com/redirect.php');
+
+// 发送 HTTP 请求并且遵循重定向
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+curl_exec($ch);
+
+// 获取最后的有效 URL
+$effective_url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+// 结果： "http://example.com/show_location.php?loc=M%C3%BCnchen"
+
+// 解码这个 URL
+$effective_url_decoded = curl_unescape($ch, $effective_url);
+// "http://example.com/show_location.php?loc=München"
+
+// 关闭句柄
+curl_close($ch);
+\end{lstlisting}
+
+注意，curl\_unescape() 不会将加号 (+) 解码成空格，但是urldecode() 会。
+
+
+\section{curl\_exec()}
+
+
+执行一个cURL会话
+
+
+\begin{lstlisting}[language=PHP]
+mixed curl_exec ( resource $ch )
+\end{lstlisting}
+
+执行给定的cURL会话，而且这个函数应该在初始化一个cURL会话并且全部的选项都被设置后被调用。
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+默认情况下，成功时返回 TRUE， 或者在失败时返回 FALSE。 不过，如果 CURLOPT\_RETURNTRANSFER选项被设置，函数执行成功时会返回执行的结果，失败时返回 FALSE 。
+
+
+
+\begin{example}
+curl\_exec()
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个cURL资源
+$ch = curl_init();
+
+// 设置URL和相应的选项
+curl_setopt($ch, CURLOPT_URL, "http://www.example.com/");
+curl_setopt($ch, CURLOPT_HEADER, 0);
+
+// 抓取URL并把它传递给浏览器
+curl_exec($ch);
+
+// 关闭cURL资源，并且释放系统资源
+curl_close($ch);
+\end{lstlisting}
+\end{example}
+
+
+\section{curl\_errno()}
+
+返回最后一次的错误号（如果没有错误发生，返回错误号为0）。
+
+\begin{lstlisting}[language=PHP]
+int curl_errno ( resource $ch )
+\end{lstlisting}
+
+返回最后一次cURL操作的错误号。
+
+
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+
+
+
+\begin{example}
+curl\_errno()
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个指向一个不存在的位置的cURL句柄
+$ch = curl_init('http://404.php.net/');
+
+// 执行
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_exec($ch);
+
+// 检查是否有错误发生
+if(curl_errno($ch)) {
+    echo 'Curl error: ' . curl_error($ch);
+}
+
+// 关闭句柄
+curl_close($ch);
+\end{lstlisting}
+\end{example}
+
+\section{curl\_error()}
+
+返回一个包含当前会话最近一次错误的字符串（如果没有任何错误发生，那么返回一个空字符串）
+
+\begin{lstlisting}[language=PHP]
+string curl_error ( resource $ch )
+\end{lstlisting}
+
+返回一条最近一次cURL操作明确的文本的错误信息。
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+
+
+
+
+\begin{example}
+curl\_error()
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个指向一个不存在的位置的cURL句柄
+$ch = curl_init('http://404.php.net/');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+if(curl_exec($ch) === false){
+    echo 'Curl error: ' . curl_error($ch);
+} else {
+    echo '操作完成没有任何错误';
+}
+
+// 关闭句柄
+curl_close($ch);
+\end{lstlisting}
+\end{example}
+
+
+\section{curl\_strerror()}
+
+Return string describing the given error code（如果错误码不存在则返回NULL）
+
+
+\begin{lstlisting}[language=PHP]
+string curl_strerror ( int $errornum )
+\end{lstlisting}
+
+Returns a text error message describing the given error code.
+
+\begin{compactitem}
+\item \$errornum - cURL错误码常量之一
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{curl\_pause()}
+
+中止或继续一个连接（成功返回CURLE\_OK，出错则返回一个错误码）
+
+
+\begin{lstlisting}[language=PHP]
+int curl_pause ( resource $ch , int $bitmask )
+\end{lstlisting}
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\item CURLPAUSE\_*常量之一
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// Create a curl handle with a mispelled protocol in URL
+$ch = curl_init("htp://example.com/");
+
+// Send request
+curl_exec($ch);
+
+// Check for errors and display the error message
+if($errno = curl_errno($ch)) {
+    $error_message = curl_strerror($errno);
+    echo "cURL error ({$errno}):\n {$error_message}";
+}
+
+// Close the handle
+curl_close($ch);
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{lstlisting}
+cURL error (1):
+ Unsupported protocol
+\end{lstlisting}
+
+\section{curl\_reset()}
+
+重置一个 libcurl 会话句柄的所有的选项
+
+
+\begin{lstlisting}[language=PHP]
+void curl_reset ( resource $ch )
+\end{lstlisting}
+
+curl\_reset()将给定的 cURL 句柄所有选项重新设置为默认值。
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个url 句柄
+$ch = curl_init();
+
+// 设置 CURLOPT_USERAGENT 选项
+curl_setopt($ch, CURLOPT_USERAGENT, "My test user-agent");
+
+// 重置所有的预先设置的选项
+curl_reset($ch);
+
+// 发送 HTTP 请求
+curl_setopt($ch, CURLOPT_URL, 'http://example.com/');
+curl_exec($ch); // 预先设置的 user-agent 不会被发送，它已经被 curl_reset 重置掉了
+
+// 关闭句柄
+curl_close($ch);
+\end{lstlisting}
+
+注意，curl\_reset()同时也会重置curl\_init()时传入的URL参数。
+
+\section{curl\_close()}
+
+关闭一个cURL会话，没有返回值。
+
+
+\begin{lstlisting}[language=PHP]
+void curl_close ( resource $ch )
+\end{lstlisting}
+
+关闭一个cURL会话并且释放所有资源，而且cURL句柄ch 也会被释放。
+
+\begin{example}
+初始化一个cURL会话来获取一个网页
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个新cURL资源
+$ch = curl_init();
+
+// 设置URL和相关选项
+curl_setopt($ch,CURLOPT_URL,'http://example.com/');
+curl_setopt($ch,CURLOPT_HEADER,0);
+
+// 抓取URL并把它传递给浏览器
+curl_exec($ch);
+
+// 关闭cURL资源，并且释放系统资源
+curl_close();
+\end{lstlisting}
+\end{example}
+
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{curl\_copy\_handle()}
+
+复制一个cURL句柄和它的所有选项，并返回一个新的cURL句柄。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+resource curl_copy_handle ( resource $ch )
+\end{lstlisting}
+
+复制一个cURL句柄并保持相同的选项。
+
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+
+
+\begin{example}
+复制一个cURL句柄
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一个新的cURL资源
+$ch = curl_init();
+
+// 设置URL和相应的选项
+curl_setopt($ch, CURLOPT_URL, 'http://www.example.com/');
+curl_setopt($ch, CURLOPT_HEADER, 0);
+
+// 复制句柄
+$ch2 = curl_copy_handle($ch);
+
+// 抓取URL (http://www.example.com/) 并把它传递给浏览器
+curl_exec($ch2);
+
+// 关闭cURL资源，并且释放系统资源
+curl_close($ch2);
+curl_close($ch);
+\end{lstlisting}
+\end{example}
+
+
+
+\section{curl\_multi\_init()}
+
+返回一个新cURL批处理句柄（失败则返回FALSE）
+
+\begin{lstlisting}[language=PHP]
+resource curl_multi_init ( void )
+\end{lstlisting}
+
+cURL允许并行地处理批处理cURL句柄。
+
+下面的示例将会创建2个cURL句柄，把它们加到批处理句柄，然后并行地运行它们。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建两个cURL资源
+$ch1 = curl_init();
+$ch2 = curl_init();
+
+// 设置URL和相应的选项
+curl_setopt($ch1,CURLOPT_URL,'http://www.example.com/');
+curl_setopt($ch1,CURLOPT_HEADER,0);
+curl_setopt($ch2,CURLOPT_URL,'http://www.php.net/');
+curl_setopt($ch2,CURLOPT_HEADER,0);
+
+// 创建批处理cURL句柄
+$mh = curl_multi_init();
+
+// 增加两个句柄
+curl_multi_add_handle($mh,$ch1);
+curl_multi_add_handle($mh,$ch2);
+
+$running = null;
+// 执行批处理句柄
+do {
+   usleep(10000);
+   curl_multi_exec($mh,$running);
+}while(running > 0);
+
+// 关闭全局句柄
+curl_multi_remove_handle($mh,$ch1);
+curl_multi_remove_handle($mh,$ch2);
+curl_multi_close($mh);
+\end{lstlisting}
+
+\section{curl\_multi\_info\_read()}
+
+获取当前解析的cURL的相关传输信息（成功时返回相关信息的数组，失败时返回FALSE）
+
+\begin{lstlisting}[language=PHP]
+array curl_multi_info_read ( resource $mh [, int &$msgs_in_queue = NULL ] )
+\end{lstlisting}
+
+查询批处理句柄是否单独的传输线程中有消息或信息返回。消息可能包含诸如从单独的传输线程返回的错误码或者只是传输线程有没有完成之类的报告。
+
+重复调用这个函数，它每次都会返回一个新的结果，直到这时没有更多信息返回时，FALSE 被当作一个信号返回。
+
+通过msgs\_in\_queue返回的整数指出将会包含当这次函数被调用后，还剩余的消息数。
+
+返回的资源指向的数据在调用curl\_multi\_remove\_handle()后将不会存在。
+
+\begin{compactitem}
+\item \$ch - 由 curl\_multi\_init() 返回的 cURL 多个句柄。
+\item \$msgs\_in\_queue - 仍在队列中的消息数量。
+\end{compactitem}
+
+返回数组的内容的具体描述如下：
+
+
+\begin{longtable}{|m{50pt}|m{200pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+key&value
+\endhead
+%endhead
+
+%firsthead
+\caption{curl\_multi\_info\_read()返回的数组的内容}\\
+\hline
+key&value
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+msg & CURLMSG\_DONE常量。其他返回值当前不可用。\\
+\hline
+result & CURLE\_*常量之一。如果一切操作没有问题，将会返回CURLE\_OK常量。\\
+\hline
+handle&cURL资源类型表明它有关的句柄。\\
+\hline
+\end{longtable}
+
+\begin{lstlisting}[language=PHP]
+<?php
+$urls = array(
+   "http://www.cnn.com/",
+   "http://www.bbc.co.uk/",
+   "http://www.yahoo.com/"
+);
+
+$mh = curl_multi_init();
+
+foreach ($urls as $i => $url) {
+    $conn[$i] = curl_init($url);
+    curl_setopt($conn[$i], CURLOPT_RETURNTRANSFER, 1);
+    curl_multi_add_handle($mh, $conn[$i]);
+}
+
+do {
+    $status = curl_multi_exec($mh, $active);
+    $info = curl_multi_info_read($mh);
+    if (false !== $info) {
+        var_dump($info);
+    }
+} while ($status === CURLM_CALL_MULTI_PERFORM || $active);
+
+foreach ($urls as $i => $url) {
+    $res[$i] = curl_multi_getcontent($conn[$i]);
+    curl_close($conn[$i]);
+}
+
+var_dump(curl_multi_info_read($mh));
+\end{lstlisting}
+
+以上例程的输出类似于：
+
+
+
+\begin{lstlisting}
+array(3) {
+  ["msg"]=>
+  int(1)
+  ["result"]=>
+  int(0)
+  ["handle"]=>
+  resource(5) of type (curl)
+}
+array(3) {
+  ["msg"]=>
+  int(1)
+  ["result"]=>
+  int(0)
+  ["handle"]=>
+  resource(7) of type (curl)
+}
+array(3) {
+  ["msg"]=>
+  int(1)
+  ["result"]=>
+  int(0)
+  ["handle"]=>
+  resource(6) of type (curl)
+}
+bool(false)
+\end{lstlisting}
+
+\section{curl\_multi\_add\_handle()}
+
+向curl批处理会话中添加单独的curl句柄（增加 ch 句柄到批处理会话mh）
+
+
+\begin{lstlisting}[language=PHP]
+int curl_multi_add_handle ( resource $mh , resource $ch )
+\end{lstlisting}
+
+\begin{compactitem}
+\item \$mh - 由 curl\_multi\_init() 返回的 cURL 多个句柄。
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+成功时返回0，失败时返回CURLM\_XXX之一的错误码。
+
+下面的示例将会创建2个cURL句柄，把它们加到批处理句柄，然后并行地运行它们。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一对cURL资源
+$ch1 = curl_init();
+$ch2 = curl_init();
+
+// 设置URL和相应的选项
+curl_setopt($ch1, CURLOPT_URL, "http://www.example.com/");
+curl_setopt($ch1, CURLOPT_HEADER, 0);
+curl_setopt($ch2, CURLOPT_URL, "http://www.php.net/");
+curl_setopt($ch2, CURLOPT_HEADER, 0);
+
+// 创建批处理cURL句柄
+$mh = curl_multi_init();
+
+// 增加2个句柄
+curl_multi_add_handle($mh,$ch1);
+curl_multi_add_handle($mh,$ch2);
+
+$running=null;
+// 执行批处理句柄
+do {
+    curl_multi_exec($mh,$running);
+} while($running > 0);
+
+// 关闭全部句柄
+curl_multi_remove_handle($mh, $ch1);
+curl_multi_remove_handle($mh, $ch2);
+curl_multi_close($mh);
+\end{lstlisting}
+
+\section{curl\_multi\_remove\_handle()}
+
+移除curl批处理句柄资源中的某个句柄资源（成功时返回一个cURL句柄，失败时返回FALSE）
+
+\begin{lstlisting}[language=PHP]
+int curl_multi_remove_handle ( resource $mh , resource $ch )
+\end{lstlisting}
+
+从给定的批处理句柄mh中移除ch句柄。当ch句柄被移除以后，仍然可以合法地用curl\_exec()执行这个句柄。当正在移除的句柄正在被使用，在处理的过程中所有的传输任务会被终止。
+
+\begin{compactitem}
+\item \$mh - 由 curl\_multi\_init() 返回的 cURL 多个句柄。
+
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{curl\_multi\_setopt()}
+
+为 cURL 并行处理设置一个选项（成功时返回 TRUE， 或者在失败时返回 FALSE）
+
+\begin{lstlisting}[language=PHP]
+bool curl_multi_setopt ( resource $mh , int $option , mixed $value )
+\end{lstlisting}
+
+\begin{compactitem}
+\item \$mh
+
+\item \$option - 常量 CURLMOPT\_* 之一。
+
+\item \$value - 将要设置给 option 的值。
+\end{compactitem}
+
+在 option 参数为下列值时 value 需要为 int 类型：
+
+
+\zihao{6}
+\begin{longtable}{|m{50pt}|m{250pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+Option 的值&将 value 设为
+\endhead
+%endhead
+
+%firsthead
+\caption{cURL的curl\_multi\_setopt()的options参数说明}\\
+\hline
+Option 的值&将 value 设为
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CURLMOPT\_PIPELINING&传入 1 来启用或 0 来禁用。 \newline 在并行处理时启用管道模式 将会尽可能地使用管线化的 HTTP （即HTTP长连接）来 传输，这意味着如果你提交第二个请求，这个请求将会使用 已经存在的链接，第二个请求将会被送入同一个链接的“管 道”中。\\
+\hline
+CURLMOPT\_MAXCONNECTS&传入一个数字来指定 libcurl 可以同时缓存的活跃链接的数量。默认值为 10。\newline 当缓存写满时， lincurl 将关闭较早创建的链接来创建新的链接。\\
+\hline
+\end{longtable}
+\zihao{6}
+
+下面的示例说明如何同时启用HTTP/1.1 pipelining和HTTP/2 multiplexing。
+
+\begin{lstlisting}[language=PHP]
+<?php
+curl_multi_setopt($mh, CURLMOPT_PIPELINING, 3);
+\end{lstlisting}
+
+或
+
+\begin{lstlisting}[language=PHP]
+<?php
+curl_multi_setopt($mh, CURLMOPT_PIPELINING, CURLPIPE_HTTP1 | CURLPIPE_MULTIPLEX);
+\end{lstlisting}
+
+\section{curl\_multi\_select()}
+
+等待所有cURL批处理中的活动连接
+
+
+\begin{lstlisting}[language=PHP]
+int curl_multi_select ( resource $mh [, float $timeout = 1.0 ] )
+\end{lstlisting}
+
+阻塞直到cURL批处理连接中有活动连接。
+
+\begin{compactitem}
+\item \$mh - 由 curl\_multi\_init() 返回的 cURL 多个句柄。
+\item \$timeout - 以秒为单位，等待响应的时间。
+\end{compactitem}
+
+curl\_multi\_select()成功时返回描述符集合中描述符的数量。失败时，select失败时返回-1，否则返回超时(从底层的select系统调用).
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{curl\_multi\_exec()}
+
+运行当前 cURL 句柄的子连接，并且返回一个定义于 cURL 预定义常量中的 cURL 代码。
+
+
+
+\begin{lstlisting}[language=PHP]
+int curl_multi_exec ( resource $mh , int &$still_running )
+\end{lstlisting}
+
+处理在栈中的每一个句柄。无论该句柄需要读取或写入数据都可调用此方法。
+
+\begin{compactitem}
+\item \$mh - 由 curl\_multi\_init() 返回的 cURL 多个句柄。
+\item \$still\_running - 一个用来判断操作是否仍在执行的标识的引用。
+\end{compactitem}
+
+注意，curl\_multi\_exec()函数仅返回关于整个批处理栈相关的错误。即使返回 CURLM\_OK 时单个传输仍可能有问题。
+
+下面的示例将会创建 2 个 cURL 句柄，把它们加到批处理句柄，然后并行地运行它们。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一对cURL资源
+$ch1 = curl_init();
+$ch2 = curl_init();
+
+// 设置URL和相应的选项
+curl_setopt($ch1, CURLOPT_URL, "http://lxr.php.net/");
+curl_setopt($ch1, CURLOPT_HEADER, 0);
+curl_setopt($ch2, CURLOPT_URL, "http://www.php.net/");
+curl_setopt($ch2, CURLOPT_HEADER, 0);
+
+// 创建批处理cURL句柄
+$mh = curl_multi_init();
+
+// 增加2个句柄
+curl_multi_add_handle($mh,$ch1);
+curl_multi_add_handle($mh,$ch2);
+
+$active = null;
+// 执行批处理句柄
+do {
+    $mrc = curl_multi_exec($mh, $active);
+} while ($mrc == CURLM_CALL_MULTI_PERFORM);
+
+while ($active && $mrc == CURLM_OK) {
+    if (curl_multi_select($mh) != -1) {
+        do {
+            $mrc = curl_multi_exec($mh, $active);
+        } while ($mrc == CURLM_CALL_MULTI_PERFORM);
+    }
+}
+
+// 关闭全部句柄
+curl_multi_remove_handle($mh, $ch1);
+curl_multi_remove_handle($mh, $ch2);
+curl_multi_close($mh);
+\end{lstlisting}
+
+\section{curl\_multi\_strerror()}
+
+返回错误码对应的错误信息（如果错误码已存在返回错误信息，否则返回NULL）。
+
+
+\begin{lstlisting}[language=PHP]
+string curl_multi_strerror ( int $errornum )
+\end{lstlisting}
+
+Returns a text error message describing the given CURLM error code.
+
+\begin{compactitem}
+\item \$errornum - CURLM错误代码常量之一
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// Create cURL handles
+$ch1 = curl_init("http://example.com"/);
+$ch2 = curl_init("http://php.net/");
+
+// Create a cURL multi handle
+$mh = curl_multi_init();
+
+// Add the handles to the multi handle
+curl_multi_add_handle($mh, $ch1);
+curl_multi_add_handle($mh, $ch2);
+
+// Execute the multi handle
+do {
+    $status = curl_multi_exec($mh, $active);
+    // Check for errors
+    if($status > 0) {
+        // Display error message
+        echo "ERROR!\n " . curl_multi_strerror($status);
+    }
+} while ($status === CURLM_CALL_MULTI_PERFORM || $active);
+\end{lstlisting}
+
+
+
+\section{curl\_multi\_getcontent()}
+
+如果设置了CURLOPT\_RETURNTRANSFER，则返回获取的输出的文本流
+
+\begin{lstlisting}[language=PHP]
+string curl_multi_getcontent ( resource $ch )
+\end{lstlisting}
+
+如果CURLOPT\_RETURNTRANSFER作为一个选项被设置到一个具体的句柄，那么这个函数将会以字符串的形式返回那个cURL句柄获取的内容。
+
+\begin{compactitem}
+\item \$ch - 由 curl\_init() 返回的 cURL 句柄。
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{curl\_multi\_close()}
+
+关闭一组cURL句柄
+
+\begin{lstlisting}[language=PHP]
+void curl_multi_close ( resource $mh )
+\end{lstlisting}
+
+\begin{compactitem}
+\item \$mh - 由 curl\_multi\_init() 返回的 cURL 多个句柄。
+\end{compactitem}
+
+下面的示例将会创建2个cURL句柄，把它们加到批处理句柄，然后并行地运行它们。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 创建一对cURL资源
+$ch1 = curl_init();
+$ch2 = curl_init();
+
+// 设置URL和相应的选项
+curl_setopt($ch1, CURLOPT_URL, "http://www.example.com/");
+curl_setopt($ch1, CURLOPT_HEADER, 0);
+curl_setopt($ch2, CURLOPT_URL, "http://www.php.net/");
+curl_setopt($ch2, CURLOPT_HEADER, 0);
+
+// 创建批处理cURL句柄
+$mh = curl_multi_init();
+
+// 增加2个句柄
+curl_multi_add_handle($mh,$ch1);
+curl_multi_add_handle($mh,$ch2);
+
+$running=null;
+// 执行批处理句柄
+do {
+    curl_multi_exec($mh,$running);
+} while ($running > 0);
+
+// 关闭全部句柄
+curl_multi_remove_handle($mh, $ch1);
+curl_multi_remove_handle($mh, $ch2);
+curl_multi_close($mh);
+\end{lstlisting}
+
+\section{curl\_share\_init()}
+
+Initialize a cURL share handle（返回cURL共享句柄）
+
+\begin{lstlisting}[language=PHP]
+resource curl_share_init ( void )
+\end{lstlisting}
+
+cURL allows to share data between cURL handles.
+
+下面的示例将创建一个cURL共享句柄，向其中添加两个cURL句柄，然后使用cookie数据共享运行它们。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// Create cURL share handle and set it to share cookie data
+$sh = curl_share_init();
+curl_share_setopt($sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+
+// Initialize the first cURL handle and assign the share handle to it
+$ch1 = curl_init("http://example.com/");
+curl_setopt($ch1, CURLOPT_SHARE, $sh);
+
+// Execute the first cURL handle
+curl_exec($ch1);
+
+// Initialize the second cURL handle and assign the share handle to it
+$ch2 = curl_init("http://php.net/");
+curl_setopt($ch2, CURLOPT_SHARE, $sh);
+
+// Execute the second cURL handle
+//  all cookies from $ch1 handle are shared with $ch2 handle
+curl_exec($ch2);
+
+// Close the cURL share handle
+curl_share_close($sh);
+
+// Close the cURL handles
+curl_close($ch1);
+curl_close($ch2);
+\end{lstlisting}
+
+\section{curl\_share\_setopt()}
+
+Set an option for a cURL share handle(成功时返回 TRUE， 或者在失败时返回 FALSE).
+
+\begin{lstlisting}[language=PHP]
+bool curl_share_setopt ( resource $sh , int $option , string $value )
+\end{lstlisting}
+
+Sets an option on the given cURL share handle.
+
+\begin{compactitem}
+\item \$sh - A cURL share handle returned by curl\_share\_init().
+
+\item \$option
+
+\begin{compactenum}
+\item CURLSHOPT\_SHARE - Specifies a type of data that should be shared.
+\item CURLSHOPT\_UNSHARE - Specifies a type of data that will be no longer shared.
+\end{compactenum}
+
+\item \$value
+
+\begin{compactenum}
+\item CURL\_LOCK\_DATA\_COOKIE - Shares cookie data.
+\item CURL\_LOCK\_DATA\_DNS - Shares DNS cache. Note that when you use cURL multi handles, all handles added to the same multi handle will share DNS cache by default.
+\item CURL\_LOCK\_DATA\_SSL\_SESSION - Shares SSL session IDs, reducing the time spent on the SSL handshake when reconnecting to the same server. Note that SSL session IDs are reused within the same handle by default.
+\end{compactenum}
+\end{compactitem}
+
+
+下面的示例将创建一个cURL共享句柄，向其中添加两个cURL句柄，然后使用cookie数据共享运行它们。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// Create cURL share handle and set it to share cookie data
+$sh = curl_share_init();
+curl_share_setopt($sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+
+// Initialize the first cURL handle and assign the share handle to it
+$ch1 = curl_init("http://example.com/");
+curl_setopt($ch1, CURLOPT_SHARE, $sh);
+
+// Execute the first cURL handle
+curl_exec($ch1);
+
+// Initialize the second cURL handle and assign the share handle to it
+$ch2 = curl_init("http://php.net/");
+curl_setopt($ch2, CURLOPT_SHARE, $sh);
+
+// Execute the second cURL handle
+//  all cookies from $ch1 handle are shared with $ch2 handle
+curl_exec($ch2);
+
+// Close the cURL share handle
+curl_share_close($sh);
+
+// Close the cURL handles
+curl_close($ch1);
+curl_close($ch2);
+\end{lstlisting}
+
+\section{curl\_share\_close()}
+
+
+Close a cURL share handle
+
+
+\begin{lstlisting}[language=PHP]
+void curl_share_close ( resource $sh )
+\end{lstlisting}
+
+Closes a cURL share handle and frees all resources.
+
+\begin{compactitem}
+\item \$sh - A cURL share handle returned by curl\_share\_init()
+\end{compactitem}
+
+下面的示例将创建一个cURL共享句柄，向其中添加两个cURL句柄，然后使用cookie数据共享运行它们。
+
+
+\begin{example}
+关闭共享cURL句柄
+\begin{lstlisting}[language=PHP]
+<?php
+// Create cURL share handle and set it to share cookie data
+$sh = curl_share_init();
+curl_share_setopt($sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+
+// Initialize the first cURL handle and assign the share handle to it
+$ch1 = curl_init("http://example.com/");
+curl_setopt($ch1, CURLOPT_SHARE, $sh);
+
+// Execute the first cURL handle
+curl_exec($ch1);
+
+// Initialize the second cURL handle and assign the share handle to it
+$ch2 = curl_init("http://php.net/");
+curl_setopt($ch2, CURLOPT_SHARE, $sh);
+
+// Execute the second cURL handle
+//  all cookies from $ch1 handle are shared with $ch2 handle
+curl_exec($ch2);
+
+// Close the cURL share handle
+curl_share_close($sh);
+
+// Close the cURL handles
+curl_close($ch1);
+curl_close($ch2);
+\end{lstlisting}
+\end{example}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{curl\_file\_create()}
+
+创建一个 CURLFile 对象，curl\_file\_create()是此函数是\texttt{CURLFile::\_\_construct()}的别名。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if (!function_exists('curl_file_create')) {
+    function curl_file_create($filename, $mimetype = '', $postname = '') {
+        return "@$filename;filename="
+            . ($postname ?: basename($filename))
+            . ($mimetype ? ";type=$mimetype" : '');
+    }
+}
+\end{lstlisting}
+
+
+\chapter{CURLFile Class}
+
+
+CURLFile 应该与选项 CURLOPT\_POSTFIELDS 一同使用用于上传文件。
+
+
+\section{Synopsis}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+CURLFile {
+   /* 属性 */
+   public $name ;
+   public $mime ;
+   public $postname ;
+   /* 方法 */
+   public __construct ( string $filename [, string $mimetype [, string $postname ]] )
+   public string getFilename ( void )
+   public string getMimeType ( void )
+   public string getPostFilename ( void )
+   public void setMimeType ( string $mime )
+   public void setPostFilename ( string $postname )
+   public void __wakeup ( void )
+}
+\end{lstlisting}
+
+
+\section{Property}
+
+
+
+\subsection{\$name}
+
+\$name - 待上传文件的名称
+
+
+
+\subsection{\$mime}
+
+\$mime - 文件的MIME类型（默认为application/octet-stream）
+
+
+\subsection{\$postname}
+
+\$postname - 上传数据中的文件名称（默认为属性name）
+
+\section{Method}
+
+
+\subsection{CURLFile::\_\_construct()}
+
+创建 CURLFile 对象（返回一个CURLFile对象）
+
+
+\begin{compactitem}
+\item 面向对象风格
+
+\begin{lstlisting}[language=PHP]
+public CURLFile::__construct ( string $filename [, string $mimetype [, string $postname ]] )
+\end{lstlisting}
+
+\item 过程式风格
+
+\begin{lstlisting}[language=PHP]
+CURLFile curl_file_create ( string $filename [, string $mimetype [, string $postname ]] )
+\end{lstlisting}
+
+\end{compactitem}
+
+创建一个 CURLFile 对象, 使用 CURLOPT\_POSTFIELDS 选项上传文件。
+
+
+\begin{compactitem}
+\item \$filename - 被上传的文件的路径
+\item \$mimetype - 被上传的文件的MIME类型
+\item \$postname - 被上传文件的文件名
+\end{compactitem}
+
+\begin{example}
+CURLFile::\_\_construct()示例
+\begin{lstlisting}[language=PHP]
+<?php
+/*
+  * http://example.com/upload.php
+  * var_dump($_FILES)
+  */
+// create a cURL handle
+$ch = curl_init('http://example.com/upload.php');
+
+// create a CURLFile object
+$cfile = new CURLFile('test.jpg','image/jpeg','test_name');
+
+// assign POST data
+$data = array(
+   'test_file'=>$cfile
+);
+curl_setopt($ch,CURLOPT_POST,1);
+curl_setopt($ch,CURLOPT_POSTFIELDS,$data);
+
+// execute the handle
+curl_exec($ch);
+\end{lstlisting}
+\end{example}
+
+
+\begin{example}
+CURLFile::\_\_construct()示例(过程化风格)
+\begin{lstlisting}[language=PHP]
+<?php
+/*
+  * http://example.com/upload.php
+  * var_dump($_FILES)
+  */
+// Create a cURL handle
+$ch = curl_init('http://example.com/upload.php');
+
+// Create a CURLFile object
+$cfile = curl_file_create('cats.jpg','image/jpeg','test_name');
+
+// Assign POST data
+$data = array('test_file' => $cfile);
+curl_setopt($ch, CURLOPT_POST,1);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+
+// Execute the handle
+curl_exec($ch);
+\end{lstlisting}
+\end{example}
+
+上述的示例的输出入如下：
+
+\begin{lstlisting}
+array(1) {
+  ["test_file"]=>
+  array(5) {
+    ["name"]=>
+    string(9) "test_name"
+    ["type"]=>
+    string(10) "image/jpeg"
+    ["tmp_name"]=>
+    string(14) "/tmp/phpPC9Kbx"
+    ["error"]=>
+    int(0)
+    ["size"]=>
+    int(46334)
+  }
+}
+\end{lstlisting}
+
+\subsection{CURLFile::getFilename()}
+
+获取被上传文件的文件名
+
+\begin{lstlisting}[language=PHP]
+public string CURLFile::getFilename ( void )
+\end{lstlisting}
+
+
+
+
+\subsection{CURLFile::getMimetype()}
+
+获取被上传文件的 MIME 类型
+
+\begin{lstlisting}[language=PHP]
+public string CURLFile::getMimeType ( void )
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{CURLFile::getPostFilename()}
+
+获取 POST 请求时使用的 文件名
+
+\begin{lstlisting}[language=PHP]
+public string CURLFile::getPostFilename ( void )
+\end{lstlisting}
+
+
+
+\subsection{CURLFile::setMimeType()}
+
+设置被上传文件的 MIME 类型
+
+\begin{lstlisting}[language=PHP]
+public void CURLFile::setMimeType ( string $mime )
+\end{lstlisting}
+
+
+\subsection{CURLFile::setPostFilename()}
+
+设置 POST 请求时使用的 文件名
+
+\begin{lstlisting}[language=PHP]
+public void CURLFile::setPostFilename ( string $postname )
+\end{lstlisting}
+
+
+
+\subsection{CURLFile::\_\_wakeup()}
+
+反序列化句柄
+
+\begin{lstlisting}[language=PHP]
+public void CURLFile::__wakeup ( void )
+\end{lstlisting}
+
+注意，CURLFile 对象不能从序列化数据重建。
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+

@@ -6,7 +6,7 @@
 
 
 
-PHP核心提供的网络函数族包含一系列联网函数。
+PHP核心提供的网络函数族包含一系列联网函数，而且它们的实际效率比使用CURL更高。
 
 \section{Requirement}
 
@@ -253,6 +253,9 @@ DNS\_ALL&Iteratively query the name server for each available record type.\\
 
 
 \chapter{Functions}
+
+
+PHP核心提供的网络函数族在实际应用中比cURL效率高的原因在于，前端服务器的端口回收很慢，并发高的时候有明显不足。例如，三次握手多次就会很慢，HTTP每次请求后拿到结果都会马上关闭，如果使用keepalive很难完善后续操作，客户端/服务端通讯很难自定义通信协议。
 
 
 \section{checkdnsrr()}

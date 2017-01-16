@@ -1,0 +1,194 @@
+\part{Excel}
+
+
+\chapter{Overview}
+
+
+
+
+
+
+\chapter{PHPExcel}
+
+
+
+\section{PHPOffice/PHPExcel}
+
+
+PHPExcel是一个读写不同格式的电子表格文件的PHP库，用户可以使用PHPExcel处理Excel (BIFF) .xls, Excel 2007 (OfficeOpenXML) .xlsx, CSV, Libre/OpenOffice Calc .ods, Gnumeric, PDF和HTML等类型的文件。
+
+PHPExcel遵循Microsoft OpenXML标准，并且可以设置电子表格文件的元数据（作者、标题和描述等）、多工作表、多字体和字体样式、单元格、填充、渐变、图片、公式和文件类型转换等操作。
+
+
+
+\begin{compactenum}
+\item Reading
+
+\begin{compactitem}
+\item BIFF 5-8 (.xls) Excel 95和更高
+\item Office Open XML (.xlsx) Excel 2007和更高
+\item SpreadsheetML (.xml) Excel 2003
+\item Open Document Format/OASIS (.ods)
+\item Gnumeric
+\item HTML
+\item SYLK
+\item CSV
+\end{compactitem}
+
+\item Writing
+
+\begin{compactitem}
+\item BIFF 8 (.xls) Excel 95 and above
+\item Office Open XML (.xlsx) Excel 2007 and above
+\item HTML
+\item CSV
+\item PDF (需要独立安装tcPDF, DomPDF或mPDF库)
+\end{compactitem}
+
+\end{compactenum}
+
+
+
+如果需要在项目中使用PHPExcel，可以和PHPExcel的源文件放入项目的指定目录下，这样就可以在项目中集成对电子表格文件的读写功能，例如：
+
+\begin{lstlisting}
+/var/www/Classes/PHPExcel.php
+/var/www/Classes/PHPExcel/Calculation.php
+/var/www/Classes/PHPExcel/Cell.php
+...
+\end{lstlisting}
+
+为了了解PHPExcel提供的具体功能，可以把Examples目录放入项目的指定目录下，并且在浏览器中访问指定的文件。
+
+\begin{lstlisting}
+/var/www/Examples/01simple.php
+/var/www/Examples/02types.php
+...
+\end{lstlisting}
+
+可以通过如下链接来访问对应的示例文件来测试PHPExcel的功能：
+
+\begin{compactitem}
+\item \url{http://example.com/Tests/01simple.php}
+\item \url{http://example.com/Tests/02types.php}
+\end{compactitem}
+
+
+
+
+\subsection{Requirement}
+
+PHPExcel需要zip、xml和gd2（可选）扩展的支持，并且要求在所有的文件中统一设置UTF-8编码。
+
+如果要处理的文件编码不是UTF-8，那么可以使用PHP提供的iconv()或mb\_convert\_encoding()函数转换后再使用PHPExcel进行操作。
+
+
+从Excel2007和OOCalc开始在内部使用Zip压缩，因此PHPExcel的ZipArchive类要求启用PHP的zip扩展，同时PHPExcel还内置了PCLZip库来作为ZipArchive类的替代。
+
+在调用Excel2007 Writer的同名方法之前，可以通过如下的设置来启用PCLZip：
+
+\begin{lstlisting}[language=PHP]
+<?php
+PHPExcel_Settings::setZipClass(PHPExcel_Settings::PCLZIP);
+\end{lstlisting}
+
+如果需要继续使用ZipArchive类，可以使用如下的设置来启用ZipArchive类：
+
+\begin{lstlisting}[language=PHP]
+<?php
+PHPExcel_Settings::setZipClass(PHPExcel_Settings::ZIPARCHIVE);
+\end{lstlisting}
+
+\subsection{Intergration}
+
+如果需要在Yii中使用PHPExcel，可以在protected/config/main.php添加如下的配置项：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+// application components
+'components'=>array(
+   'excel'=>array(
+        'class'=>'application.extensions.PHPExcel',
+   ),
+)
+\end{lstlisting}
+
+接下来需要修改protected/extensions/PHPExcel/Autoloader.php中的Register()方法：
+
+\begin{lstlisting}[language=PHP]
+<?php
+// ...
+public static function Register() {
+    $functions = spl_autoload_function();
+    foreach($functions as $function) {
+        spl_autoload_unregister($function);
+        $functions = array_merge(array(array('PHPExcel_Autoloader','Load')),$functions);
+        foreach($functions as $function){
+            $x = spl_autoload_register($function);
+            return x;
+        }
+    }
+}
+\end{lstlisting}
+
+
+在PHP5.3以上的版本中，可以直接使用如下的代码来引入PHPExcel库，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+// ...
+public static function Register() {
+    return spl_autoload_register(array('PHPExcel_Autoloader','Load'),false,true);
+}
+\end{lstlisting}
+
+在Yii项目使用PHPExcel的示例如下：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+public function actionExcel() {
+    $objPHPExcel = new PHPExcel();
+
+    $objPHPExcel->setActiveSheetIndex(0)
+        ->setCellValue('A1', 'Hello')
+        ->setCellValue('B2', 'world!')
+        ->setCellValue('C1', 'Hello')
+        ->setCellValue('D2', 'world!');
+
+    $objPHPExcel->setActiveSheetIndex(0)
+        ->setCellValue('A4', 'Miscellaneous glyphs')
+        ->setCellValue('A5', 'eaeuaeioueiuyaouc');
+
+    $objPHPExcel->getActiveSheet()->setTitle('Simple');
+
+    $objPHPExcel->setActiveSheetIndex(0);
+
+    ob_end_clean();
+    ob_start();
+
+    header('Content-Type: application/vnd.ms-excel');
+    header('Content-Disposition: attachment;filename="test.xls"');
+    header('Cache-Control: max-age=0');
+    $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');
+    $objWriter->save('php://output');
+}
+\end{lstlisting}
+
+
+\subsection{Resource Type}
+
+
+\subsection{Build-in Module}
+
+
+
+\subsection{Runtime Configure}
+
+
+\subsection{Predefined Constructs}
+
+
+
+
