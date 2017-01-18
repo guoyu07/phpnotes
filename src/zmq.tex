@@ -1,0 +1,249 @@
+\part{ZMQ}
+
+\chapter{Overview}
+
+
+ZeroMQ是一个允许用户快速设计和实现快速的基于消息的应用程序的软件库。
+
+\begin{compactitem}
+\item 支持任何语言和任何平台连接消息系统
+\item 支持在进程内、IPC、TCP、TIPC和广播来传递信息
+\item 支持publish/subscribe、push/pull和router/dealer
+\item 内置的库可以提供高速的异步I/O引擎
+\item 支持构建中心式、分布式的不同规模的架构
+\end{compactitem}
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+/* Create new queue object */
+$queue = new ZMQSocket(new ZMQContext(), ZMQ::SOCKET_REQ, "MySock1");
+
+/* Connect to an endpoint */
+$queue->connect("tcp://127.0.0.1:5555");
+
+/* send and receive */
+var_dump($queue->send("hello there, using socket 1")->recv());
+\end{lstlisting}
+
+
+\section{Requirement}
+
+
+PECL/zmq需要有ZeroMQ支持。
+
+
+\begin{lstlisting}[language=bash]
+$ ./configure
+$ make
+$ make install
+Making install in doc
+make[1]: Entering directory `/home/zgy/Downloads/zeromq-4.2.0/doc'
+make[2]: Entering directory `/home/zgy/Downloads/zeromq-4.2.0/doc'
+make[2]: Nothing to be done for `install-exec-am'.
+ /bin/mkdir -p '/usr/local/share/man/man3'
+ /usr/bin/install -c -m 644 zmq_bind.3 zmq_unbind.3 zmq_connect.3 zmq_disconnect.3 zmq_close.3 zmq_ctx_new.3 zmq_ctx_term.3 zmq_ctx_get.3 zmq_ctx_set.3 zmq_ctx_shutdown.3 zmq_msg_init.3 zmq_msg_init_data.3 zmq_msg_init_size.3 zmq_msg_move.3 zmq_msg_copy.3 zmq_msg_size.3 zmq_msg_data.3 zmq_msg_close.3 zmq_msg_send.3 zmq_msg_recv.3 zmq_msg_routing_id.3 zmq_msg_set_routing_id.3 zmq_send.3 zmq_recv.3 zmq_send_const.3 zmq_msg_get.3 zmq_msg_set.3 zmq_msg_more.3 zmq_msg_gets.3 zmq_getsockopt.3 zmq_setsockopt.3 zmq_socket.3 zmq_socket_monitor.3 zmq_poll.3 zmq_errno.3 zmq_strerror.3 zmq_version.3 zmq_sendmsg.3 zmq_recvmsg.3 zmq_proxy.3 '/usr/local/share/man/man3'
+ /usr/bin/install -c -m 644 zmq_proxy_steerable.3 zmq_z85_encode.3 zmq_z85_decode.3 zmq_curve_keypair.3 zmq_has.3 zmq_atomic_counter_new.3 zmq_atomic_counter_set.3 zmq_atomic_counter_inc.3 zmq_atomic_counter_dec.3 zmq_atomic_counter_value.3 zmq_atomic_counter_destroy.3 '/usr/local/share/man/man3'
+ /bin/mkdir -p '/usr/local/share/man/man7'
+ /usr/bin/install -c -m 644 zmq.7 zmq_tcp.7 zmq_pgm.7 zmq_inproc.7 zmq_ipc.7 zmq_null.7 zmq_plain.7 zmq_curve.7 zmq_tipc.7 zmq_vmci.7 zmq_udp.7 '/usr/local/share/man/man7'
+make[2]: Leaving directory `/home/zgy/Downloads/zeromq-4.2.0/doc'
+make[1]: Leaving directory `/home/zgy/Downloads/zeromq-4.2.0/doc'
+make[1]: Entering directory `/home/zgy/Downloads/zeromq-4.2.0'
+make[2]: Entering directory `/home/zgy/Downloads/zeromq-4.2.0'
+ /bin/mkdir -p '/usr/local/lib'
+ /bin/bash ./libtool   --mode=install /usr/bin/install -c   src/libzmq.la '/usr/local/lib'
+libtool: install: /usr/bin/install -c src/.libs/libzmq.so.5.1.0 /usr/local/lib/libzmq.so.5.1.0
+libtool: install: (cd /usr/local/lib && { ln -s -f libzmq.so.5.1.0 libzmq.so.5 || { rm -f libzmq.so.5 && ln -s libzmq.so.5.1.0 libzmq.so.5; }; })
+libtool: install: (cd /usr/local/lib && { ln -s -f libzmq.so.5.1.0 libzmq.so || { rm -f libzmq.so && ln -s libzmq.so.5.1.0 libzmq.so; }; })
+libtool: install: /usr/bin/install -c src/.libs/libzmq.lai /usr/local/lib/libzmq.la
+libtool: install: /usr/bin/install -c src/.libs/libzmq.a /usr/local/lib/libzmq.a
+libtool: install: chmod 644 /usr/local/lib/libzmq.a
+libtool: install: ranlib /usr/local/lib/libzmq.a
+libtool: finish: PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/texlive/bin/x86_64-linux:/sbin" ldconfig -n /usr/local/lib
+Libraries have been installed in:
+   /usr/local/lib
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the `-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the `LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the `LD_RUN_PATH' environment variable
+     during linking
+   - use the `-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to `/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+ /bin/mkdir -p '/usr/local/include'
+ /usr/bin/install -c -m 644 include/zmq.h include/zmq_utils.h '/usr/local/include'
+ /bin/mkdir -p '/usr/local/lib/pkgconfig'
+ /usr/bin/install -c -m 644 src/libzmq.pc '/usr/local/lib/pkgconfig'
+make[2]: Leaving directory `/home/zgy/Downloads/zeromq-4.2.0'
+make[1]: Leaving directory `/home/zgy/Downloads/zeromq-4.2.0'
+\end{lstlisting}
+
+
+\chapter{ZMQ Class}
+
+\section{Class Synopsis}
+
+
+
+\begin{lstlisting}[language=PHP]
+ZMQ {
+/* Constants */
+const integer SOCKET_PAIR ;
+const integer SOCKET_PUB ;
+const integer SOCKET_SUB ;
+const integer SOCKET_REQ ;
+const integer SOCKET_REP ;
+const integer SOCKET_XREQ ;
+const integer SOCKET_XREP ;
+const integer SOCKET_PUSH ;
+const integer SOCKET_PULL ;
+const integer SOCKET_ROUTER ;
+const integer SOCKET_DEALER ;
+const integer SOCKET_XPUB ;
+const integer SOCKET_XSUB ;
+const integer SOCKET_STREAM ;
+const integer SOCKOPT_HWM ;
+const integer SOCKOPT_SNDHWM ;
+const integer SOCKOPT_RCVHWM ;
+const integer SOCKOPT_AFFINITY ;
+const integer SOCKOPT_IDENTITY ;
+const integer SOCKOPT_SUBSCRIBE ;
+const integer SOCKOPT_UNSUBSCRIBE ;
+const integer SOCKOPT_RATE ;
+const integer SOCKOPT_RECOVERY_IVL ;
+const integer SOCKOPT_RECONNECT_IVL ;
+const integer SOCKOPT_RECONNECT_IVL_MAX ;
+const integer SOCKOPT_MCAST_LOOP ;
+const integer SOCKOPT_SNDBUF ;
+const integer SOCKOPT_RCVBUF ;
+const integer SOCKOPT_RCVMORE ;
+const integer SOCKOPT_TYPE ;
+const integer SOCKOPT_LINGER ;
+const integer SOCKOPT_BACKLOG ;
+const integer SOCKOPT_MAXMSGSIZE ;
+const integer SOCKOPT_SNDTIMEO ;
+const integer SOCKOPT_RCVTIMEO ;
+const integer SOCKOPT_IPV4ONLY ;
+const integer SOCKOPT_LAST_ENDPOINT ;
+const integer SOCKOPT_TCP_KEEPALIVE_IDLE ;
+const integer SOCKOPT_TCP_KEEPALIVE_CNT ;
+const integer SOCKOPT_TCP_KEEPALIVE_INTVL ;
+const integer SOCKOPT_TCP_ACCEPT_FILTER ;
+const integer SOCKOPT_TCP_ACCEPT_FILTER ;
+const integer SOCKOPT_DELAY_ATTACH_ON_CONNECT ;
+const integer SOCKOPT_XPUB_VERBOSE ;
+const integer SOCKOPT_ROUTER_RAW ;
+const integer SOCKOPT_IPV6 ;
+const integer CTXOPT_MAX_SOCKETS ;
+const integer POLL_IN ;
+const integer POLL_OUT ;
+const integer MODE_NOBLOCK ;
+const integer MODE_DONTWAIT ;
+const integer MODE_SNDMORE ;
+const integer ERR_INTERNAL ;
+const integer ERR_EAGAIN ;
+const integer ERR_ENOTSUP ;
+const integer ERR_EFSM ;
+const integer ERR_ETERM ;
+/* Methods */
+private__construct ( void )
+}
+\end{lstlisting}
+
+
+
+\section{Predefined Constants}
+
+
+
+\chapter{ZMQContext Class}
+
+
+\section{Class Synopsis}
+
+
+
+\begin{lstlisting}[language=PHP]
+ZMQContext {
+/* Methods */
+__construct ([ integer $io_threads = 1 [, boolean $is_persistent = true ]] )
+public mixed getOpt ( string $key )
+public ZMQSocket getSocket ( integer $type [, string $persistent_id = null [, callback $on_new_socket = null ]] )
+public boolean isPersistent ( void )
+public ZMQContext setOpt ( integer $key , mixed $value )
+}
+\end{lstlisting}
+
+
+
+\chapter{ZMQSocket Class}
+
+
+\section{Class Synopsis}
+
+
+\begin{lstlisting}[language=PHP]
+ZMQSocket {
+/* Methods */
+public ZMQSocket bind ( string $dsn [, boolean $force = false ] )
+public ZMQSocket connect ( string $dsn [, boolean $force = false ] )
+__construct ( ZMQContext $context , int $type [, string $persistent_id = null [, callback $on_new_socket = null ]] )
+public ZMQSocket disconnect ( string $dsn )
+public array getEndpoints ( void )
+public string getPersistentId ( void )
+public integer getSocketType ( void )
+public mixed getSockOpt ( string $key )
+public boolean isPersistent ( void )
+public string recv ([ integer $mode = 0 ] )
+public string recvMulti ([ integer $mode = 0 ] )
+public ZMQSocket send ( string $message [, integer $mode = 0 ] )
+public ZMQSocket send ( array $message [, integer $mode = 0 ] )
+public ZMQSocket setSockOpt ( integer $key , mixed $value )
+public ZMQSocket unbind ( string $dsn )
+}
+\end{lstlisting}
+
+
+\chapter{ZMQPoll Class}
+
+\section{Class Synopsis}
+
+
+\begin{lstlisting}[language=PHP]
+ZMQPoll {
+/* Methods */
+public string add ( mixed $entry , integer $type )
+public ZMQPoll clear ( void )
+public integer count ( void )
+public array getLastErrors ( void )
+public integer poll ( array &$readable , array &$writable [, integer $timeout = -1 ] )
+public boolean remove ( mixed $item )
+}
+\end{lstlisting}
+
+\chapter{ZMQDevice Class}
+
+\section{Class Synopsis}
+
+
+\begin{lstlisting}[language=PHP]
+ZMQDevice {
+/* Methods */
+__construct ( ZMQSocket $frontend , ZMQSocket $backend [, ZMQSocket $listener ] )
+public ZMQDevice getIdleTimeout ( void )
+public ZMQDevice getTimerTimeout ( void )
+public void run ( void )
+public ZMQDevice setIdleCallback ( callable $cb_func , integer $timeout [, mixed $user_data ] )
+public ZMQDevice setIdleTimeout ( integer $timeout )
+public ZMQDevice setTimerCallback ( callable $cb_func , integer $timeout [, mixed $user_data ] )
+public ZMQDevice setTimerTimeout ( integer $timeout )
+}
+\end{lstlisting}

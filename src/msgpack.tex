@@ -2,3 +2,28 @@
 
 
 \chapter{Overview}
+
+
+\begin{lstlisting}[language=bash]
+$ sudo pecl install msgpack
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=bash]
+$ /path/to/phpize
+$ ./configure 
+$ make && make install
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$data = array(0=>1,1=>2,2=>3);
+$msg = msgpack_pack($data);
+$data = msgpack_unpack($msg);
+\end{lstlisting}

@@ -1,0 +1,715 @@
+\part{Option/Info}
+
+\chapter{Overview}
+
+
+PHP的选项/信息函数允许用户获取关于PHP自身的参数（例如运行时的配置，被加载的扩展和版本等），而且用户也可以使用这些函数来设置运行中的PHP的选项。
+
+
+\section{Requirement}
+
+
+PHP的选项/信息函数是PHP核心的一部分，构建它们不需要其他扩展。
+
+\section{Runtime Configuration}
+
+PHP的选项/信息函数受到php.ini中的设置的影响。
+
+
+\begin{longtable}{|m{150pt}|m{30pt}|m{100pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+名字&默认&可修改范围
+\endhead
+%endhead
+
+%firsthead
+\caption{PHP选项/Inf配置选项}\\
+\hline
+名字&默认&可修改范围
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+assert.active				&\texttt{"1"}		&\texttt{PHP\_INI\_ALL}\\
+\hline	 
+assert.bail				&\texttt{"0"}		&\texttt{PHP\_INI\_ALL}\\
+\hline	 
+assert.warning			&\texttt{"1"}		&\texttt{PHP\_INI\_ALL}\\
+\hline	 
+assert.callback			&\texttt{NULL}	&\texttt{PHP\_INI\_ALL}\\
+\hline	 
+assert.quiet\_eval			&\texttt{"0"}		&\texttt{PHP\_INI\_ALL}\\
+\hline	 
+assert.exception			&\texttt{"0"}		&\texttt{PHP\_INI\_ALL}\\
+\hline
+enable\_dl				&\texttt{"1"}		&\texttt{PHP\_INI\_SYSTEM}\\
+\hline
+max\_execution\_time		&\texttt{"30"}		&\texttt{PHP\_INI\_ALL} \\
+\hline
+max\_input\_time			&\texttt{"-1"}		&\texttt{PHP\_INI\_PERDIR}\\
+\hline
+max\_input\_nesting\_level	&\texttt{"64"}		&\texttt{PHP\_INI\_PERDIR}\\
+\hline
+max\_input\_vars			&\texttt{1000}	&\texttt{PHP\_INI\_PERDIR}\\
+\hline
+magic\_quotes\_gpc		&\texttt{"1"}		&\texttt{PHP\_INI\_PERDIR}\\
+\hline
+magic\_quotes\_runtime	&\texttt{"0"}		&\texttt{PHP\_INI\_ALL}\\
+\hline
+zend.enable\_gc			&\texttt{"1"}		&\texttt{PHP\_INI\_ALL}\\
+\hline
+\end{longtable}
+
+
+\subsection{assert.active}
+
+assert.active(boolean)-激活assert()断言检查。
+
+\subsection{assert.bail}
+
+assert.bail(boolean)-失败的断言将中止脚本。
+
+\subsection{assert.warning}
+
+assert.warning(boolean)-每个失败的断言产生一条PHP警告信息。
+
+\subsection{assert.callback}
+
+assert.callback(string)-失败的断言将调用用户定义的回调函数。
+
+\subsection{assert.quiet\_eval()}
+
+assert.quiet\_eval(boolean)-在断言表达式执行时error\_reporting()使用当前的设置。
+
+\begin{compactitem}
+\item 如果启用了，在执行时错误将不会被显示（隐式的 error\_reporting(0)）。
+\item 如果禁用了，错误将根据 error\_reporting() 的设置来显示。
+\end{compactitem}
+
+
+\subsection{assert.exception}
+
+assert.exception(boolean)-在断言（assert）失败时产生 AssertionError 异常。
+
+
+\subsection{enable\_dl}
+
+enable\_dl(boolean)-指令仅对 Apache 模块版本的 PHP 有效，可以针对每个虚拟机或每个目录开启或关闭 dl() 动态加载 PHP 模块。
+
+\begin{compactitem}
+\item 默认允许动态加载，除了使用 安全模式。
+\item 在安全模式下，总是无法使用 dl()。
+\end{compactitem}
+
+
+
+
+关闭动态加载的主要原因是为了安全，否则通过动态加载，有可能忽略所有 open\_basedir 限制。
+
+\subsection{max\_execution\_time}
+
+
+max\_execution\_time(integer)-设置了脚本被解析器中止之前允许的最大执行时间（单位秒），有助于防止写得不好的脚本占尽服务器资源，默认设置为 30。
+
+从命令行运行 PHP 时，默认设置为 0，最大执行时间不会影响系统调用和系统操作等。
+
+在安全模式下不能通过 ini\_set() 来修改此设置，唯一的解决方法是关闭安全模式或者在 php.ini 中修改时间限制。
+
+另外，Web服务器也可以有其他超时设置，也有可能中断 PHP 的执行。例如，Apache 有一个 Timeout 指令，IIS 有一个 CGI 超时功能，它们默认都是 300 秒。
+
+\subsection{max\_input\_time}
+
+
+max\_input\_time(integer)-脚本解析输入数据（类似 POST 和 GET）允许的最大时间（单位是秒），它是从接收所有数据到开始执行脚本进行测量的。
+
+\subsection{max\_input\_nesting\_level}
+
+max\_input\_nesting\_level(integer)-设置输入变量的嵌套深度 (例如\$\_GET，\$\_POST等)。
+
+\subsection{max\_input\_vars}
+
+max\_input\_vars(integer)-接受多少输入的变量（限制分别应用于\$\_GET、\$\_POST 和 \$\_COOKIE 超全局变量） 指令的使用减轻了以哈希碰撞来进行拒绝服务攻击的可能性。如果有超过指令指定数量的输入变量，将会导致 E\_WARNING 的产生， 更多的输入变量将会从请求中截断。
+
+max\_input\_vars的限制可以通过流式输入来解除，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$sRawInputData = fopen('php://input');
+\end{lstlisting}
+
+\subsection{magic\_quotes\_gpc}
+
+magic\_quotes\_gpc(boolean，已废弃)-为 GPC (Get/Post/Cookie) 操作设置 magic\_quotes 状态。
+
+
+\begin{compactitem}
+\item 如果magic\_quotes 为 on，所有的 \texttt{'} (单引号)、\texttt{"}(双引号)、\textbackslash （反斜杠）和 \texttt{NUL's}被一个反斜杠自动转义。
+\item 如果magic\_quotes\_sybase 也是 on，它会完全覆盖 magic\_quotes\_gpc。
+\item 如果两个指令都启用意味着只有单引号被转义为 \texttt{''}，双引号、反斜杠和\texttt{NUL's}不会被转义。
+\end{compactitem}
+
+\subsection{magic\_quotes\_runtime}
+
+magic\_quotes\_runtime(boolean，已废弃)-如果启用了 magic\_quotes\_runtime，大多数返回任何形式外部数据的函数，包括数据库和文本段将会用反斜线转义引号。
+
+如果启用了 magic\_quotes\_sybase，单引号会被单引号转义而不是反斜线。
+
+
+受 magic\_quotes\_runtime 影响的函数（不包括 PECL 里的函数）包括：
+
+\begin{compactitem}
+\item get\_meta\_tags()
+\item file\_get\_contents()
+\item file()
+\item fgets()
+\item fwrite()
+\item fread()
+\item fputcsv()
+\item stream\_socket\_recvfrom()
+\item exec()
+\item system()
+\item passthru()
+\item stream\_get\_contents()
+\item bzread()
+\item gzfile()
+\item gzgets()
+\item gzwrite()
+\item gzread()
+\item exif\_read\_data()
+\item dba\_insert()
+\item dba\_replace()
+\item dba\_fetch()
+\item ibase\_fetch\_row()
+\item ibase\_fetch\_assoc()
+\item ibase\_fetch\_object()
+\item mssql\_fetch\_row()
+\item mssql\_fetch\_object()
+\item mssql\_fetch\_array()
+\item mssql\_fetch\_assoc()
+\item mysqli\_fetch\_row()
+\item mysqli\_fetch\_array()
+\item mysqli\_fetch\_assoc()
+\item mysqli\_fetch\_object()
+\item pg\_fetch\_row()
+\item pg\_fetch\_assoc()
+\item pg\_fetch\_array()
+\item pg\_fetch\_object()
+\item pg\_fetch\_all()
+\item pg\_select()
+\item sybase\_fetch\_object()
+\item sybase\_fetch\_array()
+\item sybase\_fetch\_assoc()
+\item SplFileObject::fgets()
+\item SplFileObject::fgetcsv()
+\item SplFileObject::fwrite()
+\end{compactitem}
+
+
+
+\subsection{zend.enable\_gc}
+
+zend.enable\_gc(boolean)-启用或禁用循环引用记数搜集器。
+
+
+\section{Resource Type}
+
+PHP的选项/信息函数没有定义资源类型。
+
+\section{Predefined Constants}
+
+下列常量作为 PHP 核心的一部分总是可用的。
+
+
+\subsection{phpcredits()}
+
+
+\begin{longtable}{|m{100pt}|m{30pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量&值&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{phpcredits()预定义常量}\\
+\hline
+常量&值&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+CREDITS\_GROUP	&1&	核心开发者名单\\
+\hline
+CREDITS\_GENERAL&2&总的贡献：语言设计和理念，PHP 作者 和 SAPI 模块。\\
+\hline
+CREDITS\_SAPI	&4&	PHP 的服务器 API 模块列表，以及它们的作者。\\
+\hline
+CREDITS\_MODULES&8&PHP 扩展的列表，以及它们的作者。\\
+\hline
+CREDITS\_DOCS	&16&文档组的贡献。\\
+\hline
+CREDITS\_FULLPAGE&32&通常与其他标志组合使用。通过其他标志指示了完整独立的 HTML 页面，用于打印包含信息。\\
+\hline
+CREDITS\_QA	&64&质量保证团队的贡献。\\
+\hline
+CREDITS\_ALL	&-1&所有的贡献者，等于使用 CREDITS\_DOCS + CREDITS\_GENERAL + CREDITS\_GROUP + CREDITS\_MODULES + CREDITS\_QA CREDITS\_FULLPAGE。它以合适的标签产生了完整的独立 HTML 页面。这是默认的值。\\
+\hline
+\end{longtable}
+
+\subsection{phpinfo()}
+
+
+\begin{longtable}{|m{100pt}|m{30pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量&值&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{phpinfo()预定义常量}\\
+\hline
+常量&值&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+INFO\_GENERAL&1&配置行，php.ini 的位置、构建日期，Web 服务器、操作系统及其他\\
+\hline
+INFO\_CREDITS&2&PHP 贡献者\\
+\hline
+INFO\_CONFIGURATION&4&当前 PHP 指令的本地（Local）和主（Master）值\\
+\hline
+INFO\_MODULES&8&已加载的模块和各自的设置\\
+\hline
+INFO\_ENVIRONMENT&16&环境变量信息在\$\_ENV 中亦有效\\
+\hline
+INFO\_VARIABLES&32&显示所有 EGPCS （环境变量、GET、POST、Cookie、Server）中的预定义变量\\
+\hline
+INFO\_LICENSE&64&PHP 版权信息\\
+\hline
+INFO\_ALL&-1&显示以上所有，这是默认值\\
+\hline
+\end{longtable}
+
+\subsection{assert()}
+
+断言常量用于设置 assert\_options() 中的断言标记 。
+
+\begin{longtable}{|m{100pt}|m{30pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量&INI设置&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{assert()预定义常量}\\
+\hline
+常量&INI设置&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+ASSERT\_ACTIVE		&assert.active&启用 assert()\\
+\hline
+ASSERT\_CALLBACK	&assert.callback&失败断言的回调函数\\
+\hline
+ASSERT\_BAIL			&assert.bail&断言失败时中止执行\\
+\hline
+ASSERT\_WARNING	&assert.warning&为每个失败的断言产生一条 PHP 警告\\
+\hline
+ASSERT\_QUIET\_EVAL	&assert.quiet\_eval&在执行断言表达式时禁用 error\_reporting\\
+\hline
+\end{longtable}
+
+\subsection{Windows}
+
+以下常量仅在主机操作系统是 Windows的情况下有效，能得到不同版本信息，能够检测利用一些功能。 
+
+
+\begin{longtable}{|m{150pt}|m{20pt}|m{250pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量&值&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{Windows特定常量}\\
+\hline
+常量&值&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+PHP\_WINDOWS\_VERSION\_MAJOR&&windows 主版本，可以是 4 (NT4/Me/98/95)、 5 (XP/2003 R2/2003/2000) 或 6 (Vista/2008)\\
+\hline
+PHP\_WINDOWS\_VERSION\_MINOR&&Windows 副版本号，可以是 0 (Vista/2008/2000/NT4/95)、 1 (XP)、2 (2003 R2/2003/XP x64)、 10 (98) 或 90 (ME)\\
+\hline
+PHP\_WINDOWS\_VERSION\_BUILD&&Windows 内部版本号(例如 Windows Vista SP1 是 build 6001)\\
+\hline
+PHP\_WINDOWS\_VERSION\_PLATFORM&&PHP 当前运行的平台， Windows Vista/XP/2000/NT4、Server 2008/2003 的值是 2， Windows ME/98/95 下值是 1\\
+\hline
+PHP\_WINDOWS\_VERSION\_SP\_MAJOR&&安装的 service pack 主版本号，没有安装是 0。 例如， Windows XP service pack 3 上这个值是 3\\
+\hline
+PHP\_WINDOWS\_VERSION\_SP\_MINOR&&安装的 service pack 副版本号，如果没有安装则是 0 \\
+\hline
+PHP\_WINDOWS\_VERSION\_SUITEMASK&&The suitemask is a bitmask that can tell if various features of Windows is installed\\
+\hline
+PHP\_WINDOWS\_VERSION\_PRODUCTTYPE&&This contains the value used to determine the PHP\_WINDOWS\_NT\_* constants. This value may be one of the PHP\_WINDOWS\_NT\_* constants indicating the platform type\\
+\hline
+PHP\_WINDOWS\_NT\_DOMAIN\_CONTROLLER&&这是域控制器\\
+\hline
+PHP\_WINDOWS\_NT\_SERVER&&这是一个服务器系统 (eg. Server 2008/2003/2000)，注意如果这是一个域控制器，通过 PHP\_WINDOWS\_NT\_DOMAIN\_CONTROLLER 报告\\
+\hline
+PHP\_WINDOWS\_NT\_WORKSTATION&&这是一个工作站系统 (例如 Vista/XP/2000/NT4)\\
+\hline
+\end{longtable}
+
+此功能列表可以通过 PHP\_WINDOWS\_VERSION\_SUITEMASK 位掩码检测。
+
+
+
+\begin{longtable}{|m{80pt}|m{250pt}|}
+%head
+\multicolumn{2}{r}{}
+\tabularnewline\hline
+Bits&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{Windows suitemask 位字段}\\
+\hline
+Bits&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{2}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+0x00000004	&安装的是 Microsoft BackOffice components\\
+\hline
+0x00000400	&安装的是 Windows Server 2003, Web Edition\\
+\hline
+0x00004000	&安装的是 Windows Server 2003, Compute Cluster Edition\\
+\hline
+0x00000080	&安装的是 Windows Server 2008 Datacenter, Windows Server 2003, Datacenter Edition or Windows 2000 Datacenter Server\\
+\hline
+0x00000002	&安装的是 Windows Server 2008 Enterprise, Windows Server 2003, Enterprise Edition, Windows 2000 Advanced Server 或 Windows NT Server 4.0 Enterprise Edition\\
+\hline
+0x00000040	&安装的是 Windows XP Embedded\\
+\hline
+0x00000200	&安装的是 Windows Vista Home Premium, Windows Vista Home Basic 或 Windows XP Home Edition\\
+\hline
+0x00000100	&Remote Desktop is supported, but only one interactive session is supported. This value is set unless the system is running in application server mode\\
+\hline
+0x00000001	&Microsoft Small Business Server was once installed on the system, but may have been upgraded to another version of Windows\\
+\hline
+0x00000020	&Microsoft Small Business Server is installed with the restrictive client license in force\\
+\hline
+0x00002000	&安装的是 Windows Storage Server 2003 R2 或 Windows Storage Server 2003\\
+\hline
+0x00000010	&中断服务安装了。这个值总是设置的。如果这个值设置了，但 0x00000100 没有设置，操作系统运行于 application server 模式\\
+\hline
+0x00008000	&安装的是 Windows Home Server\\
+\hline
+\end{longtable}
+
+\subsection{INI}
+
+\begin{longtable}{|m{100pt}|m{30pt}|m{200pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+常量&值&描述
+\endhead
+%endhead
+
+%firsthead
+\caption{INI预定义常量}\\
+\hline
+常量&值&描述
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+INI\_USER&1&Unused\\
+\hline
+INI\_PERDIR&2&Unused\\
+\hline
+INI\_SYSTEM&4&Unused\\
+\hline
+INI\_ALL&7&Unused\\
+\hline
+\end{longtable}
+
+
+
+\chapter{Functions}
+
+
+\section{assert\_options()}
+
+设置/获取断言的各种标志
+\section{assert()}
+
+检查一个断言是否为 FALSE
+\section{cli\_get\_process\_title()}
+
+Returns the current process title
+\section{cli\_set\_process\_title()}
+
+Sets the process title
+\section{dl()}
+
+运行时载入一个 PHP 扩展
+\section{extension\_loaded()}
+
+检查一个扩展是否已经加载
+\section{gc\_collect\_cycles()}
+
+强制收集所有现存的垃圾循环周期
+\section{gc\_disable()}
+
+停用循环引用收集器
+\section{gc\_enable()}
+
+激活循环引用收集器
+\section{gc\_enabled()}
+
+返回循环引用计数器的状态
+\section{gc\_mem\_caches()}
+
+Reclaims memory used by the Zend Engine memory manager
+\section{get\_cfg\_var()}
+
+获取 PHP 配置选项的值
+\section{get\_current\_user()}
+
+获取当前 PHP 脚本所有者名称
+\section{get\_defined\_constants()}
+
+返回所有常量的关联数组，键是常量名，值是常量值
+\section{get\_extension\_funcs()}
+
+返回模块函数名称的数组
+\section{get\_include\_path()}
+
+获取当前的 include\_path 配置选项
+\section{get\_included\_files()}
+
+返回被 include 和 require 文件名的 array
+\section{get\_loaded\_extensions()}
+
+返回所有编译并加载模块名的 array
+\section{get\_magic\_quotes\_gpc()}
+
+获取当前 magic\_quotes\_gpc 的配置选项设置
+\section{get\_magic\_quotes\_runtime()}
+
+获取当前 magic\_quotes\_runtime 配置选项的激活状态
+\section{get\_required\_files()}
+
+别名 get\_included\_files
+\section{get\_resources()}
+
+Returns active resources
+\section{getenv()}
+
+获取一个环境变量的值
+\section{getlastmod()}
+
+获取页面最后修改的时间
+\section{getmygid()}
+
+获取当前 PHP 脚本拥有者的 GID
+\section{getmyinode()}
+
+获取当前脚本的索引节点（inode）
+\section{getmypid()}
+
+获取 PHP 进程的 ID
+\section{getmyuid()}
+
+获取 PHP 脚本所有者的 UID
+\section{getopt()}
+
+从命令行参数列表中获取选项
+\section{getrusage()}
+
+获取当前资源使用状况
+\section{ini\_alter()}
+
+别名 ini\_set
+\section{ini\_get\_all()}
+
+获取所有配置选项
+\section{ini\_get()}
+
+获取一个配置选项的值
+\section{ini\_restore()}
+
+恢复配置选项的值
+\section{ini\_set()}
+
+为一个配置选项设置值
+\section{magic\_quotes\_runtime()}
+
+别名 set\_magic\_quotes\_runtime
+\section{main()}
+
+虚拟的main
+\section{memory\_get\_peak\_usage()}
+
+返回分配给 PHP 内存的峰值
+\section{memory\_get\_usage()}
+
+返回分配给 PHP 的内存量
+\section{php\_ini\_loaded\_file()}
+
+取得已加载的 php.ini 文件的路径
+\section{php\_ini\_scanned\_files()}
+
+返回从额外 ini 目录里解析的 .ini 文件列表
+\section{php\_logo\_guid()}
+
+获取 logo 的 guid
+\section{php\_sapi\_name()}
+
+返回 web 服务器和 PHP 之间的接口类型
+\section{php\_uname()}
+
+返回运行 PHP 的系统的有关信息
+\section{phpcredits()}
+
+打印 PHP 贡献者名单
+\section{phpinfo()}
+
+输出关于 PHP 配置的信息
+\section{phpversion()}
+
+获取当前的PHP版本
+\section{putenv()}
+
+设置环境变量的值
+\section{restore\_include\_path()}
+
+还原 include\_path 配置选项的值
+\section{set\_include\_path()}
+
+设置 include\_path 配置选项
+\section{set\_magic\_quotes\_runtime()}
+
+设置当前 magic\_quotes\_runtime 配置选项的激活状态
+\section{set\_time\_limit()}
+
+设置脚本最大执行时间
+\section{sys\_get\_temp\_dir()}
+
+返回用于临时文件的目录
+\section{version\_compare()}
+
+对比两个「PHP 规范化」的版本数字字符串
+\section{zend\_logo\_guid()}
+
+获取 Zend guid
+\section{zend\_thread\_id()}
+
+返回当前线程的唯一识别符
+\section{zend\_version()}
+
+获取当前 Zend 引擎的版本
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
