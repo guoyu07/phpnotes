@@ -1,0 +1,1603 @@
+\part{Control Flow}
+
+\chapter{Overview}
+
+
+任何 PHP 脚本都是由一系列语句构成的。一条语句可以是一个赋值语句，一个函数调用，一个循环，一个条件语句或空语句。
+
+
+PHP语句通常以分号结束，也可以用花括号将一组语句封装成一个语句组，语句组本身可以当作是一行语句。
+
+
+\chapter{PHP Statements}
+
+
+
+if、elseif 以及 else 语句用于执行基于不同条件的不同动作。
+
+
+
+\section{Conditional statements}
+
+编写代码时，常常需要为不同的判断执行不同的动作，这时可以在代码中使用条件语句来完成此任务。
+
+\begin{compactitem}
+\item if...else
+
+在条件成立时执行一块代码，条件不成立时执行另一块代码
+
+\item elseif
+
+与 if...else 配合使用，在若干条件之一成立时执行一个代码块
+\end{compactitem}
+
+if 结构是很多语言包括 PHP 在内最重要的特性之一，它允许按照条件执行代码片段。PHP 的 if 结构和 C 语言相似：
+
+\begin{verbatim}
+<?php
+if (expr)
+  statement
+?>
+\end{verbatim}
+
+expr 按照布尔求值。如果 expr 的值为 TRUE，PHP 将执行 statement，如果值为 FALSE ——将忽略 statement。
+
+
+
+\subsection{if...else statements}
+
+如果希望在某个条件成立时执行一些代码，在条件不成立时执行另一些代码，使用 if....else 语句。
+
+\begin{lstlisting}[language=PHP]
+if (condition)
+  code to be executed if condition is true;
+else
+  code to be executed if condition is false; 
+\end{lstlisting}
+
+
+如果 \$a 大于 \$b，则以下例子将显示 a is bigger than b：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a > $b)
+  echo "a is bigger than b";
+?>
+\end{lstlisting}
+
+经常需要按照条件执行不止一条语句，当然并不需要给每条语句都加上一个 if 子句，可以将这些语句放入语句组中。例如，如果 \$a 大于 \$b，以下代码将显示 a is bigger than b 并且将 \$a 的值赋给 \$b：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a > $b) {
+  echo "a is bigger than b";
+  $b = $a;
+}
+?>
+\end{lstlisting}
+
+if 语句可以无限层地嵌套在其它 if 语句中，从而给程序的不同部分的条件执行提供了充分的弹性。
+
+else 延伸了 if 语句，可以在 if 语句中的表达式的值为 FALSE 时执行语句。例如，以下代码在 \$a 大于 \$b 时显示 a is bigger than b，反之则显示 a is NOT bigger than b：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a > $b) {
+  echo "a is greater than b";
+} else {
+  echo "a is NOT greater than b";
+}
+?>
+\end{lstlisting}
+
+如果当前日期是周五，下面的代码将输出\texttt{"Have a nice weekend!"}，否则会输出\texttt{"Have a nice day!"}。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$d=date("D");
+if ($d=="Fri")
+  echo "Have a nice weekend!"; 
+else
+  echo "Have a nice day!"; 
+?>
+\end{lstlisting}
+
+如果需要在条件成立或不成立时执行多行代码，应该把这些代码行包括在花括号中：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$d=date("D");
+if ($d=="Fri")
+  {
+  echo "Hello!<br />"; 
+  echo "Have a nice weekend!";
+  echo "See you on Monday!";
+  }
+?>
+\end{lstlisting}
+
+else 语句仅在 if 以及 elseif（如果有的话）语句中的表达式的值为 FALSE 时执行。
+
+
+\subsection{elseif statements}
+
+elseif是 if 和 else 的组合，它和 else 一样都延伸了 if 语句，可以在原来的 if 表达式值为 FALSE 时执行不同语句。
+
+和 else 不一样的是，elseif仅在 elseif 的条件表达式值为 TRUE 时执行语句。如果希望在多个条件之一成立时执行代码，可以使用 elseif 语句。
+
+\begin{lstlisting}[language=PHP]
+if (condition)
+  code to be executed if condition is true;
+elseif (condition)
+  code to be executed if condition is true;
+else
+  code to be executed if condition is false; 
+\end{lstlisting}
+
+以下代码将根据条件分别显示 a is bigger than b，a equal to b 或者 a is smaller than b：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a > $b) {
+    echo "a is bigger than b";
+} elseif ($a == $b) {
+    echo "a is equal to b";
+} else {
+    echo "a is smaller than b";
+}
+?>
+\end{lstlisting}
+
+如果当前日期是周五，下面的例子会输出 "Have a nice weekend!"，如果是周日，则输出 "Have a nice Sunday!"，否则输出 "Have a nice day!"：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$d=date("D");
+if ($d=="Fri")
+  echo "Have a nice weekend!"; 
+elseif ($d=="Sun")
+  echo "Have a nice Sunday!"; 
+else
+  echo "Have a nice day!"; 
+?>
+\end{lstlisting}
+
+在同一个 if 语句中可以有多个 elseif 部分，其中第一个表达式值为 TRUE（如果有的话）的 elseif 部分将会执行，而且elseif也可以写成“else~if”，它和“elseif”（一个单词）的行为完全一样，两者会产生完全一样的行为。
+
+elseif 的语句仅在之前的 if 和所有之前 elseif 的表达式值为 FALSE，并且当前的 elseif 表达式值为 TRUE 时执行。
+
+必须要注意的是，elseif 与 else if 只有在类似上例中使用花括号的情况下才认为是完全相同。如果用冒号来定义 if/elseif 条件，那就不能用两个单词的 else~if，否则 PHP 会产生解析错误。
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+/* 不正确的使用方法： */
+if($a > $b):
+    echo $a." is greater than ".$b;
+else if($a == $b): // 将无法编译
+    echo "The above line causes a parse error.";
+endif;
+
+
+/* 正确的使用方法： */
+if($a > $b):
+    echo $a." is greater than ".$b;
+elseif($a == $b): // 注意使用了一个单词的 elseif
+    echo $a." equals ".$b;
+else:
+    echo $a." is neither greater than or equal to ".$b;
+endif;
+
+?>
+\end{lstlisting}
+
+在else if嵌套结构的最后加上一个else块，可以保证各个块中的判断条件是互斥的，从而避免出现非预期的结果。
+
+
+\subsection{table drive}
+
+表驱动（table drive）可以出于特定的目的来使用表，从而不必使用很多的逻辑语句（if或case）就可以从表中找出信息。
+
+事实上，任何信息都可以通过表来挑选，只是逻辑语句在简单的情况下往往更简单而且更直接，但是随着逻辑链的复杂，表就变得越来越富有吸引力了。
+
+假设需要一个可以返回每个月中天数的函数（为简单起见不考虑闰年），可以使用下面的函数来实现：
+
+
+\begin{lstlisting}[language=PHP]
+funtion getMonthDays($month){
+	if ( 1==$month){days=31;}
+	elseif(2==$month){$days=28;}
+	elseif(3==$month){$days=31;}
+	elseif(4==$month){$days=30;}
+	elseif(5==$month){$days=31;}
+	elseif(6==$month){$days=30;}
+	elseif(7==$month){$days=31;}
+	elseif(8==$month){$days=31;}
+	elseif(9==$month){$days=30;}
+	elseif(10==$month){$days=31;}
+	elseif(11==$month){$days=30;}
+	elseif(12==$month){$days=31;}
+	return $days;
+}
+\end{lstlisting}
+
+如果使用表驱动法来解决elseif冗余的问题，可以将上述代码改写为：
+
+
+\begin{lstlisting}[language=PHP]
+$monthDays=array(31,28,31,30,31,30,31,31,30,31,30,31);
+for($i=0; $i<12; $i++){
+	return $monthDays[$i];
+}
+\end{lstlisting}
+
+\section{Select statements}
+
+PHP 中的switch 语句用于执行基于多个不同条件的不同动作，通过switch语句可以可以避免冗长的 if..elseif..else 代码块，从而有选择地执行若干代码块之一。
+
+
+\subsection{switch...case...default}
+
+switch 语句类似于具有同一个表达式的一系列 if 语句。很多场合下需要把同一个变量（或表达式）与很多不同的值比较，并根据它等于哪个值来执行不同的代码。
+
+和其它语言不同的是，switch/case 作的是松散比较，而且continue 语句作用到 switch 上的作用类似于 break。如果在循环中有一个 switch 并希望 continue 到外层循环中的下一轮循环，用 continue 2。
+
+\begin{lstlisting}[language=PHP]
+switch (expression)
+{
+case label1:
+  code to be executed if expression = label1;
+  break;  
+case label2:
+  code to be executed if expression = label2;
+  break;
+default:
+  code to be executed
+  if expression is different 
+  from both label1 and label2;
+}
+\end{lstlisting}
+
+下面两个例子使用两种不同方法实现同样的事，一个用一系列的 if 和 elseif 语句，另一个用 switch 语句：
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($i == 0) {
+    echo "i equals 0";
+} elseif ($i == 1) {
+    echo "i equals 1";
+} elseif ($i == 2) {
+    echo "i equals 2";
+}
+
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+}
+?>
+\end{lstlisting}
+
+为避免错误，理解 switch 是怎样执行的非常重要。switch 语句一行接一行地执行（实际上是语句接语句）。开始时没有代码被执行，仅当一个 case 语句中的值和 switch 表达式的值匹配时 PHP 才开始执行语句，直到 switch 的程序段结束或者遇到第一个 break 语句为止。
+
+如果不在 case 的语句段最后写上 break 的话，PHP 将继续执行下一个 case 中的语句段，因此合理地使用break可以控制退出switch语句的时机。
+
+
+switch语句的工作原理如下：
+
+\begin{compactenum}
+\item 对表达式（通常是变量）进行一次计算；
+\item 把表达式的值与结构中 case 的值进行比较；
+\item 如果存在匹配，则执行与 case 关联的代码；
+\item 代码执行后，break 语句阻止代码跳入下一个 case 中继续执行；
+\item 如果没有 case 为真，则使用 default 语句。
+\end{compactenum}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+    case 1:
+        echo "i equals 1";
+    case 2:
+        echo "i equals 2";
+}
+?>
+\end{lstlisting}
+
+这里如果 \$i 等于 0，PHP 将执行所有的 echo 语句，如果 \$i 等于 1则执行后面两条 echo 语句。只有当 \$i 等于 2 时，才会得到“预期”的结果——只显示“i equals 2”。
+
+在 switch 语句中条件只求值一次并用来和每个 case 语句比较。在 elseif 语句中条件会再次求值。如果条件比一个简单的比较要复杂得多或者在一个很多次的循环中，那么用 switch 语句可能会快一些。
+
+在一个 case 中的语句也可以为空，这样只不过将控制转移到了下一个 case 中的语句。
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch ($i) {
+    case 0:
+    case 1:
+    case 2:
+        echo "i is less than 3 but not negative";
+        break;
+    case 3:
+        echo "i is 3";
+}
+?>
+\end{lstlisting}
+
+
+case的特例是 default，它匹配了任何和其它 case 都不匹配的情况，并且应该放在最后。
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch ($i) {
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+    default:
+        echo "i is not equal to 0, 1 or 2";
+}
+?>
+\end{lstlisting}
+
+case表达式的个数是没有限制的，而且case表达式可以是任何求值为简单类型的表达式（即整型、浮点数、字符串、布尔值或NULL），但是不能用数组或对象，除非它们被解除引用成为简单类型。
+
+switch 支持替代语法的流程控制。
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch ($i):
+    case 0:
+        echo "i equals 0";
+        break;
+    case 1:
+        echo "i equals 1";
+        break;
+    case 2:
+        echo "i equals 2";
+        break;
+    default:
+        echo "i is not equal to 0, 1 or 2";
+endswitch;
+?>
+\end{lstlisting}
+
+
+允许使用分号代替 case 语句后的冒号，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+switch($beer)
+{
+    case 'tuborg';
+    case 'carlsberg';
+    case 'heineken';
+        echo 'Good choice';
+    break;
+    default;
+        echo 'Please make a new selection...';
+    break;
+}
+?>
+\end{lstlisting}
+
+\section{Loop statements}
+
+
+
+在编写代码时，经常需要让相同的代码块运行很多次，可以在代码中使用循环语句来完成这个任务。
+
+
+PHP 中的循环语句用于执行相同的代码块指定的次数。
+
+
+\begin{compactitem}
+\item \texttt{while} - 只要指定的条件成立，则循环执行代码块
+\item \texttt{do...while} - 首先执行一次代码块，然后在指定的条件成立时重复这个循环
+\item \texttt{for} - 循环执行代码块指定的次数
+\item \texttt{foreach} - 根据数组中每个元素来循环代码块
+\end{compactitem}
+
+
+
+\subsection{while statements}
+
+while 循环是 PHP 中最简单的循环类型，而且和C语言中的 while 表现一致。
+
+\begin{verbatim}
+while (expr)
+    statement
+\end{verbatim}
+
+while 语句告诉 PHP只要指定的条件（while 表达式）成立，while 语句将重复执行代码块。
+
+
+\begin{lstlisting}[language=PHP]
+while (condition)
+  code to be executed;
+\end{lstlisting}
+
+下面的例子示范了一个循环，只要变量 i 小于或等于 5，代码就会一直循环执行下去，而且循环每循环一次，变量就会递增 1：
+
+\begin{lstlisting}[language=PHP]
+<?php 
+$i=1;
+while($i<=5)
+  {
+  echo "The number is " . $i . "<br />";
+  $i++;
+  }
+?>
+\end{lstlisting}
+
+表达式的值在每次开始循环时检查，所以即使这个值在循环语句中改变了，语句也不会停止执行，直到本次循环结束。
+
+如果 while 表达式的值一开始就是 FALSE，则循环语句一次都不会执行。
+
+和 if 语句一样，可以在 while 循环中用花括号括起一个语句组，或者用替代语法：
+
+\begin{verbatim}
+while (expr):
+    statement
+    ...
+endwhile;
+\end{verbatim}
+
+下面两个例子完全一样，都显示数字 1 到 10：
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* example 1 */
+
+$i = 1;
+while ($i <= 10) {
+    echo $i++;  /* the printed value would be
+                    $i before the increment
+                    (post-increment) */
+}
+
+/* example 2 */
+
+$i = 1;
+while ($i <= 10):
+    print $i;
+    $i++;
+endwhile;
+?>
+\end{lstlisting}
+
+while的主要应用是对数组的遍历，可以使用each()函数读取当前的数组元素，并将数组指针后移一步。
+
+
+在遍历数组的循环开始前，应该首先重置数组指针的位置，例如在“\texttt{list(\$index,\$fruit)=each(\$attr)}”表达式中，可以使用list()函数将数组\texttt{\$arr}当前元素的键名和值赋给变量\texttt{\$index}和\texttt{\$fruit}。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array('apple','orange','pear');
+
+reset($arr);
+
+while(list($index,$fruit)=each($arr)){
+	echo "第'' . $index . "种水果是：" . $fruit . "\n";
+}
+?>
+\end{lstlisting}
+
+
+\subsection{do...while statements}
+
+do-while 循环和 while 循环非常相似，区别在于表达式的值是在每次循环结束时检查而不是开始时。和一般的 while 循环主要的区别是，do-while 语句会至少执行一次代码（表达式的真值在每次循环结束后检查），然后只要条件成立，就会重复进行循环。
+
+这种情况在一般的 while 循环中是不一定的，它们在循环开始时检查表达式的真值，如果一开始就为 FALSE 则整个循环立即终止，一次都不执行。
+
+do-while 循环只有一种语法：
+
+\begin{lstlisting}[language=PHP]
+do
+{
+  code to be executed;
+}
+while (condition); 
+\end{lstlisting}
+
+下面的例子将对 i 的值进行一次累加，然后，只要 i 小于 5 的条件成立，就会继续累加下去：
+
+\begin{lstlisting}[language=PHP]
+<?php 
+$i=0;
+do {
+  $i++;
+  echo "The number is " . $i . "<br />";
+}
+while ($i<5);
+?>
+\end{lstlisting}
+
+下面的循环将正好运行一次，因为经过第一次循环后，当检查表达式的真值时，其值为 FALSE（\$i 不大于 0）而导致循环终止。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$i = 0;
+do {
+   echo $i;
+} while ($i > 0);
+?>
+\end{lstlisting}
+
+
+C 语言用户可能熟悉另一种不同的 do-while 循环用法，把语句放在 do-while(0) 之中，在循环内部用 break 语句来结束执行循环。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+do {
+    if ($i < 5) {
+        echo "i is not big enough";
+        break;
+    }
+    $i *= $factor;
+    if ($i < $minimum_limit) {
+        break;
+    }
+    echo "i is ok";
+
+    /* process i */
+
+} while(0);
+?>
+\end{lstlisting}
+
+PHP还支持使用 goto 来跳出while循环。
+
+
+\subsection{for statements}
+
+如果已经确定了代码块的重复执行次数，则可以使用 for 语句。
+
+for 循环是 PHP 中最复杂的循环结构，它的行为和 C 语言的相似。 
+
+\begin{lstlisting}[language=PHP]
+for (initialization; condition; increment)
+{
+  code to be executed;
+}
+\end{lstlisting}
+
+
+
+
+for 语句有三个参数。第一个参数初始化变量，第二个参数保存条件，第三个参数包含执行循环所需的增量。
+
+\begin{compactitem}
+\item 第一个参数（initialization）会在循环开始前无条件求值（并执行）一次。
+\item 第二个参数（condition）在每次循环开始前求值，如果值为 TRUE，则继续循环，执行嵌套的循环语句。如果值为 FALSE，则终止循环。
+\item 第一个参数（increment）在每次循环之后被求值（并执行）。
+\end{compactitem}
+
+
+
+
+每个表达式都可以为空或包括逗号分隔的多个表达式，如果 initialization 或 increment 参数中包括了多个变量，需要用逗号进行分隔，但所有用逗号分隔的表达式都会计算，但只取最后一个结果。条件必须计算为 true 或者 false，因为如果为空意味着将无限循环下去（和 C 一样，PHP 暗中认为其值为 TRUE）。
+
+在实际应用中，可以用有条件的 break 语句来结束循环而不是用 for 的表达式真值判断。
+
+\begin{lstlisting}[language=PHP]
+for (initialization; condition; increment)
+{
+  code to be executed;
+}
+\end{lstlisting}
+
+下面的例子会把文本 "Hello World!" 显示 5 次：
+
+\begin{lstlisting}[language=PHP]
+<?php
+for ($i=1; $i<=5; $i++)
+{
+  echo "Hello World!<br />";
+}
+?>
+\end{lstlisting}
+
+考虑以下的例子，它们都显示数字 1 到 10：
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* example 1 */
+
+for ($i = 1; $i <= 10; $i++) {
+    echo $i;
+}
+
+/* example 2 */
+
+for ($i = 1; ; $i++) {
+    if ($i > 10) {
+        break;
+    }
+    echo $i;
+}
+
+/* example 3 */
+
+$i = 1;
+for (;;) {
+    if ($i > 10) {
+        break;
+    }
+    echo $i;
+    $i++;
+}
+
+/* example 4 */
+
+for ($i = 1, $j = 0; $i <= 10; $j += $i, print $i, $i++);
+?>
+\end{lstlisting}
+
+
+在 for 循环中用空的表达式在很多场合下会很方便，而且PHP 也支持用冒号的 for 循环的替代语法。
+
+
+\begin{verbatim}
+for (expr1; expr2; expr3):
+    statement;
+    ...
+endfor;
+\end{verbatim}
+
+为了对数组进行遍历，可以使用如下的代码示例：
+
+\begin{lstlisting}[language=PHP]
+<?php
+/*
+ * 此数组将在遍历的过程中改变其中某些单元的值
+ */
+$people = Array(
+        Array('name' => 'Kalle', 'salt' => 856412), 
+        Array('name' => 'Pierre', 'salt' => 215863)
+        );
+
+for($i = 0; $i < count($people); ++$i)
+{
+    $people[$i]['salt'] = rand(000000, 999999);
+}
+?>
+\end{lstlisting}
+
+以上代码可能执行很慢，因为每次循环时都要计算一遍数组的长度。由于数组的长度始终不变，可以用一个中间变量来储存数组长度以优化而不是不停调用 count()：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$people = Array(
+        Array('name' => 'Kalle', 'salt' => 856412), 
+        Array('name' => 'Pierre', 'salt' => 215863)
+        );
+
+for($i = 0, $size = count($people); $i < $size; ++$i)
+{
+    $people[$i]['salt'] = rand(000000, 999999);
+}
+?>
+\end{lstlisting}
+
+
+\subsection{foreach statements}
+
+
+
+foreach 语法结构提供了遍历数组的简单方式，每进行一次循环，当前数组元素的值就会被赋值给 value 变量（数组指针会逐一地移动），以此类推。
+
+
+\begin{lstlisting}[language=PHP]
+foreach (array as value)
+{
+    code to be executed;
+}
+\end{lstlisting}
+
+具体来说，foreach有两种语法：
+
+\begin{verbatim}
+foreach (array_expression as $value)
+    statement
+foreach (array_expression as $key => $value)
+    statement
+\end{verbatim}
+
+\begin{compactitem}
+\item 第一种格式遍历给定的 array\_expression 数组，并且将每次循环中的当前单元的值赋给 \$value，并且数组内部的指针向前移一步（因此下一次循环中将会得到下一个单元）。
+\item 第二种格式做同样的事，只除了当前单元的键名也会在每次循环中被赋给变量 \$key。
+\end{compactitem}
+
+除此之外，还可以自定义遍历对象。
+
+
+
+下面的例子示范了一个循环，这个循环可以输出给定数组的值：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr=array("one", "two", "three");
+
+foreach ($arr as $value)
+{
+  echo "Value: " . $value . "<br />";
+}
+?>
+\end{lstlisting}
+
+foreach 语句仅能够应用于用于循环遍历数组和对象，如果尝试应用于其他数据类型的变量，或者未初始化的变量将发出错误信息，因此需要提前判断变量的类型来避免避免foreach错误。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr=array("one", "two", "three");
+
+if(is_array($arr)){
+	foreach ($arr as $value)
+	{
+		echo "Value: " . $value . "<br />";
+	}
+}
+?>
+\end{lstlisting}
+
+
+另外，和while遍历数组的原理不同，foreach将自动重置数组的指针位置。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array('apple','orange','pear');
+$i = 0;
+
+// 
+foreach($arr as $fruit){
+	echo "第" . $i . "种水果：" . $fruit . "\n";
+}
+
+// 或者
+foreach($arr as $index => $fruit){
+	echo "第'' . $index . "种水果是：" . $fruit . "\n";
+}
+?>
+\end{lstlisting}
+
+
+当 foreach 开始执行时，数组内部的指针会自动指向第一个单元，这意味着不需要在 foreach 循环之前调用 reset()。
+
+foreach 依赖内部数组指针，在循环中修改其值将可能导致意外的行为，而且foreach 不支持用“@”来抑制错误信息的能力。
+
+
+可以很容易地通过在 \$value 之前加上 \& 来修改数组的元素，该方法将以引用赋值而不是拷贝一个值。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array(1, 2, 3, 4);
+foreach ($arr as &$value) {
+    $value = $value * 2;
+}
+// $arr is now array(2, 4, 6, 8)
+unset($value); // 最后取消掉引用
+?>
+\end{lstlisting}
+
+这里，数组最后一个元素的 \$value 引用在 foreach 循环之后仍会保留，因此建议使用 unset() 来将其销毁。
+
+\$value 的引用仅在被遍历的数组可以被引用时才可用（例如必须是变量）。例如，以下代码则无法运行：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+foreach (array(1, 2, 3, 4) as &$value) {
+    $value = $value * 2;
+}
+?>
+\end{lstlisting}
+
+
+
+用户可能注意到了以下的代码功能完全相同：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array("one", "two", "three");
+reset($arr);
+while (list(, $value) = each($arr)) {
+    echo "Value: $value<br>\n";
+}
+
+foreach ($arr as $value) {
+    echo "Value: $value<br />\n";
+}
+?>
+\end{lstlisting}
+
+以下代码功能也完全相同：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array("one", "two", "three");
+reset($arr);
+while (list($key, $value) = each($arr)) {
+    echo "Key: $key; Value: $value<br />\n";
+}
+
+foreach ($arr as $key => $value) {
+    echo "Key: $key; Value: $value<br />\n";
+}
+?>
+\end{lstlisting}
+
+
+下面是示范用法的更多例子：
+
+\begin{lstlisting}[language=PHP]
+<?php
+/* foreach example 1: value only */
+
+$a = array(1, 2, 3, 17);
+
+foreach ($a as $v) {
+   echo "Current value of \$a: $v.\n";
+}
+
+/* foreach example 2: value (with its manual access notation printed for illustration) */
+
+$a = array(1, 2, 3, 17);
+
+$i = 0; /* for illustrative purposes only */
+
+foreach ($a as $v) {
+    echo "\$a[$i] => $v.\n";
+    $i++;
+}
+
+/* foreach example 3: key and value */
+
+$a = array(
+    "one" => 1,
+    "two" => 2,
+    "three" => 3,
+    "seventeen" => 17
+);
+
+foreach ($a as $k => $v) {
+    echo "\$a[$k] => $v.\n";
+}
+
+/* foreach example 4: multi-dimensional arrays */
+$a = array();
+$a[0][0] = "a";
+$a[0][1] = "b";
+$a[1][0] = "y";
+$a[1][1] = "z";
+
+foreach ($a as $v1) {
+    foreach ($v1 as $v2) {
+        echo "$v2\n";
+    }
+}
+
+/* foreach example 5: dynamic arrays */
+
+foreach (array(1, 2, 3, 4, 5) as $v) {
+    echo "$v\n";
+}
+?>
+\end{lstlisting}
+
+
+
+PHP支持使用list()给嵌套的数组解包，也就是遍历一个数组的数组的同时把嵌套的数组解包到循环变量中，只需将 list() 作为值提供，这样就可以用 list() 给嵌套的数组解包。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = [
+    [1, 2],
+    [3, 4],
+];
+
+foreach ($array as list($a, $b)) {
+    // $a contains the first element of the nested array,
+    // and $b contains the second element.
+    echo "A: $a; B: $b\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+A: 1; B: 2
+A: 3; B: 4
+\end{verbatim}
+
+list() 中的单元可以少于嵌套数组的，此时多出来的数组单元将被忽略：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = [
+    [1, 2],
+    [3, 4],
+];
+
+foreach ($array as list($a)) {
+    // Note that there is no $b here.
+    echo "$a\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+1
+3
+\end{verbatim}
+
+如果 list() 中列出的单元多于嵌套数组则会发出一条消息级别的错误信息：
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$array = [
+    [1, 2],
+    [3, 4],
+];
+
+foreach ($array as list($a, $b, $c)) {
+    echo "A: $a; B: $b; C: $c\n";
+}
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+
+\begin{verbatim}
+Notice: Undefined offset: 2 in example.php on line 7
+A: 1; B: 2; C: 
+
+Notice: Undefined offset: 2 in example.php on line 7
+A: 3; B: 4; C: 
+\end{verbatim}
+
+\section{Break statements}
+
+break和continue可以在循环体种控制程序跳转。
+
+break具有“终止”、“中断”的含义，可以从while、do-while、for、foreach和switch语句中跳出，或者说break 结束当前 for，foreach，while，do-while 或者 switch 结构的执行。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$i = 1;
+do{
+	echo "$i\n";
+	if($i++ >= 50) break;
+}while(1);
+
+// 或者
+for($i = 0; ; ){
+	if($i++ >= 50) break;
+	echo "$i\n";
+}
+?>
+\end{lstlisting}
+
+break 可以接受一个可选的数字参数\footnote{在PHP 5.4.0以后，\texttt{break 0;} 不再合法，这在之前的版本被解析为 \texttt{break 1;}来决定跳出多少层循环。
+
+另外，取消变量也可以作为参数传递（例如 \texttt{\$num = 2; break \$num;}）。}来决定跳出几重循环。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$arr = array('one', 'two', 'three', 'four', 'stop', 'five');
+while (list (, $val) = each($arr)) {
+    if ($val == 'stop') {
+        break;    /* You could also write 'break 1;' here. */
+    }
+    echo "$val<br />\n";
+}
+
+/* 使用可选参数 */
+
+$i = 0;
+while (++$i) {
+    switch ($i) {
+    case 5:
+        echo "At 5<br />\n";
+        break 1;  /* 只退出 switch. */
+    case 10:
+        echo "At 10; quitting<br />\n";
+        break 2;  /* 退出 switch 和 while 循环 */
+    default:
+        break;
+    }
+}
+?>
+\end{lstlisting}
+
+
+
+
+
+
+\section{Continue stataments}
+
+
+continue用于在循环体中跳过本次循环中剩余的代码，并开始执行下一次循环。
+
+
+
+continue 在循环结构用用来跳过本次循环中剩余的代码并在条件求值为真时开始执行下一次循环，switch 语句被认为是可以使用 continue 的一种循环结构。
+
+continue同样接受一个可选的数字参数来决定跳过几重循环到循环结尾。默认值是 1\footnote{在PHP 5.4.0以后，\texttt{continue 0;} 不再合法。这在之前的版本被解析为 \texttt{continue 1;}，而且取消变量作为参数传递（例如 \texttt{\$num = 2; continue \$num;}）。}，即跳到当前循环末尾。
+
+\begin{lstlisting}[language=PHP]
+<?php
+while (list ($key, $value) = each($arr)) {
+    if (!($key % 2)) { // skip odd members
+        continue;
+    }
+    do_something_odd($value);
+}
+
+$i = 0;
+while ($i++ < 5) {
+    echo "Outer<br />\n";
+    while (1) {
+        echo "Middle<br />\n";
+        while (1) {
+            echo "Inner<br />\n";
+            continue 3;
+        }
+        echo "This never gets output.<br />\n";
+    }
+    echo "Neither does this.<br />\n";
+}
+?>
+\end{lstlisting}
+
+省略 continue 后面的分号会导致混淆。
+
+\begin{lstlisting}[language=PHP]
+<?php
+  for ($i = 0; $i < 5; ++$i) {
+      if ($i == 2)
+          continue
+      print "$i\n";
+  }
+?>
+\end{lstlisting}
+
+我们希望得到的结果是：
+
+\begin{verbatim}
+0
+1
+3
+4
+\end{verbatim}
+
+可实际的输出是：
+
+\begin{verbatim}
+2
+\end{verbatim}
+
+这是因为整个 \texttt{continue print "\$i\textbackslash n";} 被当做单一的表达式而求值，所以 print 函数只有在 \texttt{\$i == 2} 为真时才被调用（print 的值被当成了上述的可选数字参数而传递给了 continue）。
+
+
+\section{Declare statements}
+
+declare 结构用来设定一段代码的执行指令。
+
+\begin{verbatim}
+declare (directive)
+    statement
+\end{verbatim}
+
+directive 部分允许设定 declare 代码段的行为，目前只能识别两个指令——ticks和encoding。
+
+declare 代码段中的 statement 部分将被执行——怎样执行以及执行中有什么副作用出现取决于 directive 中设定的指令。
+
+declare 结构也可用于全局范围，影响到其后的所有代码（但如果有 declare 结构的文件被其它文件包含，则对包含它的父文件不起作用）。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// these are the same:
+
+// you can use this:
+declare(ticks=1) {
+    // entire script here
+}
+
+// or you can use this:
+declare(ticks=1);
+// entire script here
+?>
+\end{lstlisting}
+
+\subsection{Ticks}
+
+Tick（时钟周期）是一个在 declare 代码段中解释器每执行 N 条可计时的低级语句就会发生的事件。N 的值是在 declare 中的 directive 部分用 ticks=N 来指定的。
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+declare(ticks=1);
+
+// A function called on each tick event
+function tick_handler()
+{
+    echo "tick_handler() called\n";
+}
+
+register_tick_function('tick_handler');
+
+$a = 1;
+
+if ($a > 0) {
+    $a += 2;
+    print($a);
+}
+
+?>
+\end{lstlisting}
+
+不是所有语句都可计时，通常条件表达式和参数表达式都不可计时。
+
+在每个 tick 中出现的事件是由 register\_tick\_function() 来指定的，而且每个 tick 中可以出现多个事件。
+
+\begin{lstlisting}[language=PHP]
+<?php
+
+function tick_handler()
+{
+  echo "tick_handler() called\n";
+}
+
+$a = 1;
+tick_handler();
+
+if ($a > 0) {
+    $a += 2;
+    tick_handler();
+    print($a);
+    tick_handler();
+}
+tick_handler();
+?>
+\end{lstlisting}
+
+\subsection{Encoding}
+
+可以用 encoding 指令来对每段脚本指定其编码方式。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+declare(encoding='ISO-8859-1');
+// code here
+?>
+\end{lstlisting}
+
+
+
+当和命名空间结合起来时 declare 的唯一合法语法是 \colorbox{lightgray}{\texttt{declare(encoding='...');}}，其中 \texttt{...} 是编码的值，而 \colorbox{lightgray}{\texttt{declare(encoding='...') \{\}}} 将在与命名空间结合时产生解析错误。
+
+在 PHP 5.3 中除非在编译时指定了 \texttt{-\/-enable-zend-multibyte}，否则 declare 中的 encoding 值会被忽略，而且除非用 phpinfo()，否则 PHP 不会显示出是否在编译时指定了 \texttt{-\/-enable-zend-multibyte}。
+
+\section{Return statements}
+
+如果在一个函数中调用 return 语句，将立即结束此函数的执行并将它的参数作为函数的值返回，而且return 也会终止 eval() 语句或者脚本文件的执行。
+
+
+\begin{compactitem}
+\item 如果在全局范围中调用，则当前脚本文件中止运行。
+\item 如果当前脚本文件是被 include 的或者 require 的，则控制交回调用文件。
+\item 如果当前脚本是被 include 的，则 return 的值会被当作 include 调用的返回值。
+\item 如果在主脚本文件中调用 return，则脚本中止运行。
+\item 如果当前脚本文件是在 php.ini 中的配置选项 auto\_prepend\_file 或者 auto\_append\_file 所指定的，则此脚本文件中止运行。
+\end{compactitem}
+
+
+既然 return 是语言结构而不是函数，因此其参数没有必要用括号将其括起来。通常都不用括号，实际上也应该不用，这样可以降低 PHP 的负担。
+
+
+\begin{compactitem}
+\item 如果没有提供参数，则一定不能用括号，此时返回 NULL。
+\item 如果调用 return 时加上了括号却又没有参数会导致解析错误。
+\end{compactitem}
+
+
+当用引用返回值时永远不要使用括号，这样行不通，只能通过引用返回变量，而不是语句的结果。
+
+如果使用\texttt{return (\$a);}，其实不是返回一个变量，而是表达式 (\$a) 的值。
+
+\section{Include Statement}
+
+
+服务器端包含 (SSI) 用于创建可在多个页面重复使用的函数、页眉、页脚或元素，PHP解析器能够在执行 PHP 文件之前把该文件插入另一个 PHP 文件中。
+
+include 和 require 语句用于在执行流中向其他文件插入有用的的代码。
+
+include 和 require 很相似，都用于包含并运行指定文件，区别在于错误处理方面的差异：
+
+\begin{compactitem}
+\item require 会产生致命错误 (E\_COMPILE\_ERROR)，并停止脚本
+\item include 只会产生警告 (E\_WARNING)，脚本将继续
+\end{compactitem}
+
+require 在出错时产生 E\_COMPILE\_ERROR 级别的错误。换句话说将导致脚本中止而 include 只产生警告（E\_WARNING），但脚本会继续运行。
+
+如果希望继续执行，并向用户输出结果，即使包含文件已丢失，那么可以使用 include。否则，在框架、CMS 或者复杂的 PHP 应用程序编程中，始终使用 require 向执行流引用关键文件，这样有助于在某个关键文件意外丢失的情况下，提高应用程序的安全性和完整性。
+
+
+\subsection{include}
+
+被包含文件先按参数给出的路径寻找，如果没有给出目录（只有文件名）时则按照 include\_path 指定的目录寻找。如果在 include\_path 下没找到该文件则 include 在调用脚本文件所在的目录和当前工作目录下寻找。
+
+如果最后仍未找到文件则 include 结构会发出一条警告，这一点和 require 不同，后者会发出一个致命错误并终止脚本执行。
+
+如果定义了路径——不管是绝对路径（在 Windows 下以盘符或者 \textbackslash 开头，在 Unix/Linux 下以 / 开头）还是当前目录的相对路径（以 . 或者 .. 开头）——include\_path 都会被完全忽略。例如，一个文件以 ../ 开头，则解析器会在当前目录的父目录下寻找该文件。
+
+\begin{lstlisting}[language=PHP]
+include 'filename';
+\end{lstlisting}
+
+或者：
+
+\begin{lstlisting}[language=PHP]
+require 'filename';
+\end{lstlisting}
+
+当一个文件被包含时，其中所包含的代码继承了 include 所在行的变量范围。从该处开始，调用文件在该行处可用的任何变量在被调用的文件中也都可用，不过所有在包含文件中定义的函数和类都具有全局作用域。
+
+
+
+
+
+PHP可以把变量包含在独立的文件中，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+$color='red';
+$car='BMW';
+?>
+\end{lstlisting}
+
+
+通过require/include语句来引用上述的变量的示例如下：
+
+
+\begin{lstlisting}[language=HTML]
+<html>
+<body>
+
+<h1>Welcome to my home page.</h1>
+<?php include 'vars.php';
+  echo "I have a $color $car"; // I have a red BMW
+?>
+
+</body>
+</html>
+\end{lstlisting}
+
+如果 include 出现于调用文件中的一个函数里，则被调用的文件中所包含的所有代码将表现得如同它们是在该函数内部定义的一样，因此会遵循该函数的变量范围。这个规则的一个例外是魔术常量，它们是在发生包含之前就已被解析器处理的。
+
+\begin{lstlisting}[language=HTML]
+<?php
+function foo() {
+    global $color;
+
+    include 'vars.php';
+
+    echo "A $color $fruit";
+}
+
+/* vars.php is in the scope of foo() so     *
+ * $fruit is NOT available outside of this  *
+ * scope.  $color is because we declared it *
+ * as global.                               */
+
+foo();                    // A green apple
+echo "A $color $fruit";   // A green
+\end{lstlisting}
+
+当一个文件被包含时，语法解析器在目标文件的开头脱离 PHP 模式并进入 HTML 模式，到文件结尾处恢复，因此目标文件中需要作为 PHP 代码执行的任何代码都必须被包括在有效的 PHP 起始和结束标记之中。
+
+如果“URL fopen wrappers”在 PHP 中被激活（默认配置），可以用 URL（通过 HTTP 或者其它支持的封装协议）而不是本地文件来指定要被包含的文件\footnote{Windows 版本的 PHP 在 4.3.0 版之前不支持通过此函数访问远程文件，即使已经启用 allow\_url\_fopen。}。如果目标服务器将目标文件作为 PHP 代码解释，则可以用适用于 HTTP GET 的 URL 请求字符串来向被包括的文件传递变量。严格的说，这和包含一个文件并继承父文件的变量空间并不是一回事，该脚本文件实际上已经在远程服务器上运行了，而本地脚本则包括了其结果。
+
+远程文件可能会经远程服务器处理（根据文件后缀以及远程服务器是否在运行 PHP 而定），但是必须产生出一个合法的 PHP 脚本，因为其将被本地服务器处理。如果来自远程服务器的文件应该在远端运行而只输出结果，那用 readfile() 函数更好。另外，还要格外小心以确保远程的脚本产生出合法并且是所需的代码。
+
+\begin{example}
+通过 HTTP 进行的 include操作的示例
+\begin{lstlisting}[language=HTML]
+<?php
+
+/* This example assumes that www.example.com is configured to parse .php *
+ * files and not .txt files. Also, 'Works' here means that the variables *
+ * $foo and $bar are available within the included file.                 */
+
+// Won't work; file.txt wasn't handled by www.example.com as PHP
+include 'http://www.example.com/file.txt?foo=1&bar=2';
+
+// Won't work; looks for a file named 'file.php?foo=1&bar=2' on the
+// local filesystem.
+include 'file.php?foo=1&bar=2';
+
+// Works.
+include 'http://www.example.com/file.php?foo=1&bar=2';
+
+$foo = 1;
+$bar = 2;
+include 'file.txt';  // Works.
+include 'file.php';  // Works.
+?>
+\end{lstlisting}
+\end{example}
+
+处理返回值时，失败时 include 返回 FALSE 并且发出警告，成功的包含则返回 1（除非在包含文件中另外给出了返回值）。
+
+\begin{compactitem}
+\item 可以在被包括的文件中使用 return 语句来终止该文件中程序的执行并返回调用它的脚本，同样也可以从被包含的文件中返回值。
+\item 可以像普通函数一样获得 include 调用的返回值。不过这在包含远程文件时却不行，除非远程文件的输出具有合法的 PHP 开始和结束标记（如同任何本地文件一样）。
+\item 可以在标记内定义所需的变量，该变量在文件被包含的位置之后就可用了。
+\end{compactitem}
+
+
+
+\begin{lstlisting}[language=HTML]
+return.php
+<?php
+
+$var = 'PHP';
+
+return $var;
+
+?>
+
+noreturn.php
+<?php
+
+$var = 'PHP';
+
+?>
+
+testreturns.php
+<?php
+
+$foo = include 'return.php';
+
+echo $foo; // prints 'PHP'
+
+$bar = include 'noreturn.php';
+
+echo $bar; // prints 1
+
+?>
+\end{lstlisting}
+
+
+\$bar 的值为 1 是因为 include 成功运行了。第一个在被包含的文件中用了 return 而另一个没有。如果文件不能被包含，则返回 FALSE 并发出一个 E\_WARNING 警告。因为是一个语言构造器而不是一个函数，不能被可变函数调用。
+
+如果在包含文件中定义有函数，这些函数不管是在 return 之前还是之后定义的，都可以独立在主文件中使用。如果文件被包含两次，PHP 5 发出致命错误因为函数已经被定义，但是 PHP 4 不会对在 return 之后定义的函数报错，推荐使用 include\_once 而不是检查文件是否已包含并在包含文件中有条件返回。
+
+另一个将 PHP 文件“包含”到一个变量中的方法是用输出控制函数结合 include 来捕获其输出。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$string = get_include_contents('somefile.php');
+
+function get_include_contents($filename) {
+    if (is_file($filename)) {
+        ob_start();
+        include $filename;
+        $contents = ob_get_contents();
+        ob_end_clean();
+        return $contents;
+    }
+    return false;
+}
+?>
+\end{lstlisting}
+
+要在脚本中自动包含文件，参见 php.ini 中的 auto\_prepend\_file 和 auto\_append\_file 配置选项。
+
+包含文件省去了大量的工作，这意味着用户可以为所有页面创建标准页头、页脚或者菜单文件，然后在页头需要更新时，只需更新这个页头包含文件即可。
+
+假设有一个标准的页头文件，名为 "header.php"，如果在页面中引用这个页头文件，使用 include/require的示例如下：
+
+
+\begin{lstlisting}[language=PHP]
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PHP Example</title>
+</head>
+<body>
+  <?php include 'header.php'; ?>
+  <h1>Welcome to home page</h1>
+  <p>Some text.</p>
+</body>
+</html>
+\end{lstlisting}
+
+假设现在有一个在所有页面中使用的标准菜单文件，网站中的所有页面均应引用该菜单文件：
+
+\begin{lstlisting}[language=HTML]
+"menu.php":
+
+echo '<a href="/default.php">Home</a>
+<a href="/tutorials.php">Tutorials</a>
+<a href="/references.php">References</a>
+<a href="/examples.php">Examples</a>
+<a href="/about.php">About Us</a>
+<a href="/contact.php">Contact Us</a>';
+\end{lstlisting}
+
+下面是引用这个标准菜单文件的具体的做法：
+
+\begin{lstlisting}[language=HTML]
+<html>
+<body>
+
+<div class="leftmenu">
+  <?php include 'menu.php'; ?>
+</div>
+
+<h1>Welcome to my home page.</h1>
+<p>Some text.</p>
+
+</body>
+</html>
+\end{lstlisting}
+
+
+\subsection{require}
+
+
+
+\subsection{require\_once}
+
+require\_once 语句和 require 语句完全相同，唯一区别是 PHP 会检查该文件是否已经被包含过，如果是则不会再次包含。如同此语句名字暗示的那样，只会包含一次。
+
+\subsection{include\_once}
+
+include\_once 语句在脚本执行期间包含并运行指定文件。此行为和 include 语句类似，唯一区别是如果该文件中已经被包含过，则不会再次包含。如同此语句名字暗示的那样，只会包含一次。
+
+include\_once 可以用于在脚本执行期间同一个文件有可能被包含超过一次的情况下，确保其只被包含一次以避免函数重定义、变量重新赋值等问题。
+
+在 PHP 4中，\_once 的行为在不区分大小写字母的操作系统（例如 Windows）中有所不同。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+include_once "a.php"; // 这将包含 a.php
+include_once "A.php"; // 这将再次包含 a.php！（仅 PHP 4）
+?>
+\end{lstlisting}
+
+在 PHP 5 中此行为已经修改，例如在 Windows 中路径先被规格化，因此 C:\textbackslash PROGRA\~{}1\textbackslash A.php 和 C:\textbackslash Program Files\textbackslash a.php 的实现一样，文件只会被包含一次。
+
+
+\section{Goto statements}
+
+goto\footnote{goto 操作符仅在 PHP 5.3及以上版本有效。} 操作符可以用来跳转到程序中的另一位置，该目标位置可以用目标名称加上冒号来标记，而跳转指令是 goto 之后接上目标位置的标记。
+
+
+
+goto可以跳出循环或者 switch，通常的用法是用 goto 代替多层的 break。
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+goto a;
+echo 'Foo';
+ 
+a:
+echo 'Bar';
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Bar
+\end{verbatim}
+
+\begin{lstlisting}[language=PHP]
+<?php
+for($i=0,$j=50; $i<100; $i++) {
+  while($j--) {
+    if($j==17) goto end; 
+  }  
+}
+echo "i = $i";
+end:
+echo 'j hit 17';
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+j hit 17
+\end{verbatim}
+
+以下写法无效：
+
+\begin{lstlisting}[language=PHP]
+<?php
+goto loop;
+for($i=0,$j=50; $i<100; $i++) {
+  while($j--) {
+    loop:
+  }
+}
+echo "$i = $i";
+?>
+\end{lstlisting}
+
+以上例程会输出：
+
+\begin{verbatim}
+Fatal error: 'goto' into loop or switch statement is disallowed in
+script on line 2
+\end{verbatim}
+
+PHP 中的 goto 有一定限制，目标位置只能位于同一个文件和作用域，也就是说无法跳出一个函数或类方法，也无法跳入到另一个函数，也无法跳入到任何循环或者 switch 结构中。
+
+
+\section{Alternative syntax}
+
+
+PHP 提供了if，while，for，foreach 和 switch等流程控制的替代语法，其最佳适用场合是嵌入到HTML的脚本中，否则在复杂的HTML页面中寻找花括号的匹配是很麻烦的。
+
+替代语法的基本形式是把左花括号（\{）换成冒号（:），把右花括号（\}）分别换成\texttt{endif;}，\texttt{endwhile;}，\texttt{endfor;}，\texttt{endforeach;} 以及 \texttt{endswitch;}。
+
+\begin{lstlisting}[language=PHP]
+<?php if ($a == 5): ?>
+A is equal to 5
+<?php endif; ?>
+\end{lstlisting}
+
+替代语法同样可以用在 else 和 elseif 中。
+
+\begin{lstlisting}[language=PHP]
+<?php
+if ($a == 5):
+    echo "a equals 5";
+    echo "...";
+elseif ($a == 6):
+    echo "a equals 6";
+    echo "!!!";
+else:
+    echo "a is neither 5 nor 6";
+endif;
+?>
+\end{lstlisting}
+
+不支持在同一个控制块内混合使用两种语法。

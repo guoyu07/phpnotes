@@ -15,6 +15,31 @@ MySQL可以进行缩减来支持嵌入的数据库应用程序，而且对于那
 
 从PHP5开始，MySQLi模块提供了更加有效的方法和实用工具来处理数据库操作，这些方法大都是以面向对象的方式实现。
 
+由于PHP的配置文件php.ini中的配置项upload\_max\_filesize（默认为8M）和post\_max\_size（默认为2M）以及Nginx的client\_max\_body\_size（默认为1M）的限制，可能会出现上传的文件大小超限的问题，需要根据实际需求进行修改。
+
+\begin{lstlisting}
+Syntax:	client_max_body_size size;
+Default:	client_max_body_size 1m;
+Context:	http, server, location
+\end{lstlisting}
+
+如果需要从MySQL中导入/导出数据，可以执行如下的操作：
+
+\begin{compactitem}
+\item 导入数据
+
+\begin{lstlisting}[language=bash]
+$ mysql -uroot -p < /var/lib/dbname.sql
+\end{lstlisting}
+
+\item 导出数据
+
+\begin{lstlisting}[language=bash]
+$ mysqldump -uroot -p abc > abc.sql
+\end{lstlisting}
+
+\end{compactitem}
+
 \section{mysql\_connect()}
 
 

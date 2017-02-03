@@ -2,3 +2,816 @@
 
 
 \chapter{Overview}
+
+Core扩展是PHP的核心的一部分。
+
+在这个例子中，首先定义了一个基类和该类的子类。 这个基类描述了普通的蔬菜，关于它是否可食用及其颜色。 子类 Spinach 添加了烹饪的方法和另一个检查是否已烹饪的方法。
+
+\begin{lstlisting}[language=PHP]
+<?php
+class Vegetable { // base class with member properties and methods
+  var $edible;
+  var $color;
+  function Vegetable($edible,$color='green'){
+    $this->edible = $edible;
+    $this->color = $color;
+  }
+  
+  function is_edible(){
+    return $this->edible;
+  }
+  
+  function what_color(){
+    return $this->color;
+  }
+} // end of class Vegetable
+
+class Spinach extends Vegetable { // extends base class
+  var $cooked = false;
+  function Spinach(){
+    $this->Vegetable(true,'gree');
+  }
+  
+  function cook_it(){
+    $this->cooked = true;
+  }
+  
+  function is_cooked(){
+    return $this->cooked;
+  }
+} // end of class Spinach
+\end{lstlisting}
+
+接下来从这些类中实例化了两个对象，并打印了它们的信息，包括了类的继承关系，同时也定义了一些实用函数，主要为了漂亮地打印出这些变量。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+include "Vegetable.php";
+
+// 实用函数
+function print_vars($obj) {
+  foreach (get_object_vars($obj) as $prop => $val) {
+    echo "\t$prop = $val\n";
+  }
+}
+
+function print_methods($obj) {
+  $arr = get_class_methods(get_class($obj));
+  foreach ($arr as $method) {
+    echo "\tfunction $method()\n";
+  }
+}
+
+function class_parentage($obj, $class) {
+  if (is_subclass_of($GLOBALS[$obj], $class)) {
+    echo "Object $obj belongs to class " . get_class($$obj);
+    echo " a subclass of $class\n";
+  } else {
+    echo "Object $obj does not belong to a subclass of $class\n";
+  }
+}
+
+// 实例化 2 对象
+
+$veggie = new Vegetable(true, "blue");
+$leafy = new Spinach();
+
+// 打印这些对象的信息
+echo "veggie: CLASS " . get_class($veggie) . "\n";
+echo "leafy: CLASS " . get_class($leafy);
+echo ", PARENT " . get_parent_class($leafy) . "\n";
+
+// 显示蔬菜的属性
+echo "\nveggie: Properties\n";
+print_vars($veggie);
+
+// and leafy methods
+echo "\nleafy: Methods\n";
+print_methods($leafy);
+
+echo "\nParentage:\n";
+class_parentage("leafy", "Spinach");
+class_parentage("leafy", "Vegetable");
+\end{lstlisting}
+
+注意，在上面的例子中，对象 \$leafy 是 Spinach 的实例（Vegetable 的子类），而且在脚本的最后部分会输出以下信息：
+
+
+\begin{lstlisting}
+[...]
+Parentage:
+Object leafy does not belong to a subclass of Spinach
+Object leafy belongs to class spinach a subclass of Vegetable
+\end{lstlisting}
+
+
+\section{Requirment}
+
+Core扩展提供了类和对象等功能。其中，类是PHP内置的功能，无需其他扩展即可支持类。
+
+
+
+
+\section{Runtime Configuration}
+
+Core扩展没有在php.ini中定义配置指令。
+
+
+\section{Resource Type}
+
+Core扩展没有定义资源类型。
+
+
+\section{Predefined Constants}
+
+Core扩展没有定义预定义常量。
+
+
+
+
+\chapter{Functions}
+
+类/对象相关的函数是PHP核心的一部分，用户通过类和对象相关的函数可以获得类和对象实例的相关信息。例如，可以获取对象所属的类名，也可以获取类的成员属性和方法。
+
+除了可以获取到对象和类的关系之外，还可以获取到它们之间的继承关系（例如对象继承自哪个类）。
+
+
+
+\section{\_\_autoload()}
+
+
+
+
+尝试加载未定义的类
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{call\_user\_method\_array()}
+
+调用一个用户方法，同时传递参数数组（已废弃）
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\section{call\_user\_method()}
+
+对特定对象调用用户方法（已废弃）
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{class\_alias()}
+为一个类创建别名
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{class\_exists()}
+检查类是否已定义
+
+
+
+\begin{lstlisting}[language=PHP]
+bool class_exists ( string $class_name [, bool $autoload = true ] )
+\end{lstlisting}
+
+
+检查指定的类是否已定义。
+
+\begin{compactitem}
+\item \$class\_name - 类名。名字的匹配是大小写敏感的。
+\item \$autoload - 是否默认调用 \_\_autoload。
+\end{compactitem}
+
+如果由 class\_name 所指的类已经定义，此函数返回 TRUE，否则返回 FALSE。注意，不再为已定义的 interface 返回 TRUE，需要使用 interface\_exists()。
+
+\begin{lstlisting}[language=PHP]
+<?php
+// 使用前检查类是否存在
+if (class_exists('MyClass')) {
+    $myclass = new MyClass();
+}
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function __autoload($class) {
+    include($class . '.php');
+
+    // Check to see whether the include declared the class
+    if (!class_exists($class, false)) {
+        trigger_error("Unable to load class: $class", E_USER_WARNING);
+    }
+}
+
+if (class_exists('MyClass')) {
+    $myclass = new MyClass();
+}
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\section{get\_called\_class()}
+
+后期静态绑定（"Late Static Binding"）类的名称
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{get\_class\_methods()}
+
+返回由类的方法名组成的数组
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{get\_class\_vars()}
+
+返回由类的默认属性组成的数组
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{get\_class()}
+
+返回对象的类名
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{get\_declared\_classes()}
+
+返回由已定义类的名字所组成的数组
+
+
+\begin{lstlisting}
+Array
+(
+    [0] => stdClass
+    [1] => Exception
+    [2] => ErrorException
+    [3] => Error
+    [4] => ParseError
+    [5] => TypeError
+    [6] => ArgumentCountError
+    [7] => ArithmeticError
+    [8] => DivisionByZeroError
+    [9] => Closure
+    [10] => Generator
+    [11] => ClosedGeneratorException
+    [12] => DateTime
+    [13] => DateTimeImmutable
+    [14] => DateTimeZone
+    [15] => DateInterval
+    [16] => DatePeriod
+    [17] => LibXMLError
+    [18] => ReflectionException
+    [19] => Reflection
+    [20] => ReflectionFunctionAbstract
+    [21] => ReflectionFunction
+    [22] => ReflectionGenerator
+    [23] => ReflectionParameter
+    [24] => ReflectionType
+    [25] => ReflectionNamedType
+    [26] => ReflectionMethod
+    [27] => ReflectionClass
+    [28] => ReflectionObject
+    [29] => ReflectionProperty
+    [30] => ReflectionClassConstant
+    [31] => ReflectionExtension
+    [32] => ReflectionZendExtension
+    [33] => LogicException
+    [34] => BadFunctionCallException
+    [35] => BadMethodCallException
+    [36] => DomainException
+    [37] => InvalidArgumentException
+    [38] => LengthException
+    [39] => OutOfRangeException
+    [40] => RuntimeException
+    [41] => OutOfBoundsException
+    [42] => OverflowException
+    [43] => RangeException
+    [44] => UnderflowException
+    [45] => UnexpectedValueException
+    [46] => RecursiveIteratorIterator
+    [47] => IteratorIterator
+    [48] => FilterIterator
+    [49] => RecursiveFilterIterator
+    [50] => CallbackFilterIterator
+    [51] => RecursiveCallbackFilterIterator
+    [52] => ParentIterator
+    [53] => LimitIterator
+    [54] => CachingIterator
+    [55] => RecursiveCachingIterator
+    [56] => NoRewindIterator
+    [57] => AppendIterator
+    [58] => InfiniteIterator
+    [59] => RegexIterator
+    [60] => RecursiveRegexIterator
+    [61] => EmptyIterator
+    [62] => RecursiveTreeIterator
+    [63] => ArrayObject
+    [64] => ArrayIterator
+    [65] => RecursiveArrayIterator
+    [66] => SplFileInfo
+    [67] => DirectoryIterator
+    [68] => FilesystemIterator
+    [69] => RecursiveDirectoryIterator
+    [70] => GlobIterator
+    [71] => SplFileObject
+    [72] => SplTempFileObject
+    [73] => SplDoublyLinkedList
+    [74] => SplQueue
+    [75] => SplStack
+    [76] => SplHeap
+    [77] => SplMinHeap
+    [78] => SplMaxHeap
+    [79] => SplPriorityQueue
+    [80] => SplFixedArray
+    [81] => SplObjectStorage
+    [82] => MultipleIterator
+    [83] => SessionHandler
+    [84] => __PHP_Incomplete_Class
+    [85] => php_user_filter
+    [86] => Directory
+    [87] => AssertionError
+    [88] => PDOException
+    [89] => PDO
+    [90] => PDOStatement
+    [91] => PDORow
+    [92] => AMQPConnection
+    [93] => AMQPChannel
+    [94] => AMQPQueue
+    [95] => AMQPExchange
+    [96] => AMQPEnvelope
+    [97] => AMQPException
+    [98] => AMQPConnectionException
+    [99] => AMQPChannelException
+    [100] => AMQPQueueException
+    [101] => AMQPExchangeException
+    [102] => APCuIterator
+    [103] => APCIterator
+    [104] => ast\Node
+    [105] => ast\Node\Decl
+    [106] => CURLFile
+    [107] => DOMException
+    [108] => DOMStringList
+    [109] => DOMNameList
+    [110] => DOMImplementationList
+    [111] => DOMImplementationSource
+    [112] => DOMImplementation
+    [113] => DOMNode
+    [114] => DOMNameSpaceNode
+    [115] => DOMDocumentFragment
+    [116] => DOMDocument
+    [117] => DOMNodeList
+    [118] => DOMNamedNodeMap
+    [119] => DOMCharacterData
+    [120] => DOMAttr
+    [121] => DOMElement
+    [122] => DOMText
+    [123] => DOMComment
+    [124] => DOMTypeinfo
+    [125] => DOMUserDataHandler
+    [126] => DOMDomError
+    [127] => DOMErrorHandler
+    [128] => DOMLocator
+    [129] => DOMConfiguration
+    [130] => DOMCdataSection
+    [131] => DOMDocumentType
+    [132] => DOMNotation
+    [133] => DOMEntity
+    [134] => DOMEntityReference
+    [135] => DOMProcessingInstruction
+    [136] => DOMStringExtend
+    [137] => DOMXPath
+    [138] => finfo
+    [139] => GearmanClient
+    [140] => GearmanTask
+    [141] => GearmanWorker
+    [142] => GearmanJob
+    [143] => GearmanException
+    [144] => GmagickException
+    [145] => GmagickPixelException
+    [146] => Gmagick
+    [147] => GmagickDraw
+    [148] => GmagickPixel
+    [149] => GMP
+    [150] => gnupg
+    [151] => gnupg_keylistiterator
+    [152] => Grpc\Call
+    [153] => Grpc\Channel
+    [154] => Grpc\Server
+    [155] => Grpc\Timeval
+    [156] => Grpc\ChannelCredentials
+    [157] => Grpc\CallCredentials
+    [158] => Grpc\ServerCredentials
+    [159] => ImagickException
+    [160] => ImagickDrawException
+    [161] => ImagickPixelIteratorException
+    [162] => ImagickPixelException
+    [163] => Imagick
+    [164] => ImagickDraw
+    [165] => ImagickPixelIterator
+    [166] => ImagickPixel
+    [167] => Collator
+    [168] => NumberFormatter
+    [169] => Normalizer
+    [170] => Locale
+    [171] => MessageFormatter
+    [172] => IntlDateFormatter
+    [173] => ResourceBundle
+    [174] => Transliterator
+    [175] => IntlTimeZone
+    [176] => IntlCalendar
+    [177] => IntlGregorianCalendar
+    [178] => Spoofchecker
+    [179] => IntlException
+    [180] => IntlIterator
+    [181] => IntlBreakIterator
+    [182] => IntlRuleBasedBreakIterator
+    [183] => IntlCodePointBreakIterator
+    [184] => IntlPartsIterator
+    [185] => UConverter
+    [186] => IntlChar
+    [187] => Lua
+    [188] => LuaClosure
+    [189] => LuaException
+    [190] => MemcachePool
+    [191] => Memcache
+    [192] => MongoDB\BSON\Binary
+    [193] => MongoDB\BSON\Decimal128
+    [194] => MongoDB\BSON\Javascript
+    [195] => MongoDB\BSON\MaxKey
+    [196] => MongoDB\BSON\MinKey
+    [197] => MongoDB\BSON\ObjectID
+    [198] => MongoDB\BSON\Regex
+    [199] => MongoDB\BSON\Timestamp
+    [200] => MongoDB\BSON\UTCDateTime
+    [201] => MongoDB\Driver\Command
+    [202] => MongoDB\Driver\Cursor
+    [203] => MongoDB\Driver\CursorId
+    [204] => MongoDB\Driver\Manager
+    [205] => MongoDB\Driver\Query
+    [206] => MongoDB\Driver\ReadConcern
+    [207] => MongoDB\Driver\ReadPreference
+    [208] => MongoDB\Driver\Server
+    [209] => MongoDB\Driver\BulkWrite
+    [210] => MongoDB\Driver\WriteConcern
+    [211] => MongoDB\Driver\WriteConcernError
+    [212] => MongoDB\Driver\WriteError
+    [213] => MongoDB\Driver\WriteResult
+    [214] => MongoDB\Driver\Exception\LogicException
+    [215] => MongoDB\Driver\Exception\RuntimeException
+    [216] => MongoDB\Driver\Exception\UnexpectedValueException
+    [217] => MongoDB\Driver\Exception\InvalidArgumentException
+    [218] => MongoDB\Driver\Exception\ConnectionException
+    [219] => MongoDB\Driver\Exception\AuthenticationException
+    [220] => MongoDB\Driver\Exception\SSLConnectionException
+    [221] => MongoDB\Driver\Exception\WriteException
+    [222] => MongoDB\Driver\Exception\BulkWriteException
+    [223] => MongoDB\Driver\Exception\ExecutionTimeoutException
+    [224] => MongoDB\Driver\Exception\ConnectionTimeoutException
+    [225] => MessagePack
+    [226] => MessagePackUnpacker
+    [227] => mysqli_sql_exception
+    [228] => mysqli_driver
+    [229] => mysqli
+    [230] => mysqli_warning
+    [231] => mysqli_result
+    [232] => mysqli_stmt
+    [233] => OAuth
+    [234] => OAuthException
+    [235] => OAuthProvider
+    [236] => PCS\Mgr
+    [237] => PharException
+    [238] => Phar
+    [239] => PharData
+    [240] => PharFileInfo
+    [241] => php\PropertyProxy
+    [242] => Redis
+    [243] => RedisArray
+    [244] => RedisCluster
+    [245] => RedisException
+    [246] => RedisClusterException
+    [247] => RRDGraph
+    [248] => RRDCreator
+    [249] => RRDUpdater
+    [250] => SeasLog
+    [251] => SimpleXMLElement
+    [252] => SimpleXMLIterator
+    [253] => SoapClient
+    [254] => SoapVar
+    [255] => SoapServer
+    [256] => SoapFault
+    [257] => SoapParam
+    [258] => SoapHeader
+    [259] => SQLite3
+    [260] => SQLite3Stmt
+    [261] => SQLite3Result
+    [262] => swoole_server
+    [263] => swoole\server
+    [264] => swoole_timer
+    [265] => swoole\timer
+    [266] => swoole_event
+    [267] => swoole\event
+    [268] => swoole_async
+    [269] => swoole\async
+    [270] => swoole_connection_iterator
+    [271] => swoole\connection\iterator
+    [272] => swoole_exception
+    [273] => swoole\exception
+    [274] => swoole_server_port
+    [275] => swoole\server\port
+    [276] => swoole_client
+    [277] => swoole\client
+    [278] => swoole_http_client
+    [279] => swoole\http\client
+    [280] => swoole_process
+    [281] => swoole\process
+    [282] => swoole_table
+    [283] => swoole\table
+    [284] => swoole_lock
+    [285] => swoole\lock
+    [286] => swoole_atomic
+    [287] => swoole\atomic
+    [288] => swoole_http_server
+    [289] => swoole\http\server
+    [290] => swoole_http_response
+    [291] => swoole\http\response
+    [292] => swoole_http_request
+    [293] => swoole\http\request
+    [294] => swoole_buffer
+    [295] => swoole\buffer
+    [296] => swoole_websocket_server
+    [297] => swoole\websocket\server
+    [298] => swoole_websocket_frame
+    [299] => swoole\websocket\frame
+    [300] => swoole_mysql
+    [301] => swoole\mysql
+    [302] => swoole_mysql_exception
+    [303] => swoole\mysql\exception
+    [304] => swoole_module
+    [305] => swoole\module
+    [306] => swoole_mmap
+    [307] => swoole\mmap
+    [308] => swoole_channel
+    [309] => swoole\channel
+    [310] => swoole_redis_server
+    [311] => swoole\redis\server
+    [312] => tidy
+    [313] => tidyNode
+    [314] => CouchbaseException
+    [315] => CouchbaseMetaDoc
+    [316] => CouchbaseDocumentFragment
+    [317] => CouchbaseN1qlIndex
+    [318] => _CouchbaseCluster
+    [319] => _CouchbaseBucket
+    [320] => CouchbaseMutationToken
+    [321] => XMLReader
+    [322] => XMLWriter
+    [323] => XSLTProcessor
+    [324] => Yac
+    [325] => Yaconf
+    [326] => Yaf_Application
+    [327] => Yaf_Bootstrap_Abstract
+    [328] => Yaf_Dispatcher
+    [329] => Yaf_Loader
+    [330] => Yaf_Request_Abstract
+    [331] => Yaf_Request_Http
+    [332] => Yaf_Request_Simple
+    [333] => Yaf_Response_Abstract
+    [334] => Yaf_Response_Http
+    [335] => Yaf_Response_Cli
+    [336] => Yaf_Controller_Abstract
+    [337] => Yaf_Action_Abstract
+    [338] => Yaf_Config_Abstract
+    [339] => Yaf_Config_Ini
+    [340] => Yaf_Config_Simple
+    [341] => Yaf_View_Simple
+    [342] => Yaf_Router
+    [343] => Yaf_Route_Static
+    [344] => Yaf_Route_Simple
+    [345] => Yaf_Route_Supervar
+    [346] => Yaf_Route_Rewrite
+    [347] => Yaf_Route_Regex
+    [348] => Yaf_Route_Map
+    [349] => Yaf_Plugin_Abstract
+    [350] => Yaf_Registry
+    [351] => Yaf_Session
+    [352] => Yaf_Exception
+    [353] => Yaf_Exception_StartupError
+    [354] => Yaf_Exception_RouterFailed
+    [355] => Yaf_Exception_DispatchFailed
+    [356] => Yaf_Exception_LoadFailed
+    [357] => Yaf_Exception_LoadFailed_Module
+    [358] => Yaf_Exception_LoadFailed_Controller
+    [359] => Yaf_Exception_LoadFailed_Action
+    [360] => Yaf_Exception_LoadFailed_View
+    [361] => Yaf_Exception_TypeError
+    [362] => Yar_Server
+    [363] => Yar_Client
+    [364] => Yar_Concurrent_Client
+    [365] => Yar_Server_Exception
+    [366] => Yar_Server_Request_Exception
+    [367] => Yar_Server_Protocol_Exception
+    [368] => Yar_Server_Packager_Exception
+    [369] => Yar_Server_Output_Exception
+    [370] => Yar_Client_Exception
+    [371] => Yar_Client_Transport_Exception
+    [372] => Yar_Client_Packager_Exception
+    [373] => Yar_Client_Protocol_Exception
+    [374] => ZipArchive
+    [375] => ZMQ
+    [376] => ZMQContext
+    [377] => ZMQSocket
+    [378] => ZMQPoll
+    [379] => ZMQDevice
+    [380] => ZMQException
+    [381] => ZMQContextException
+    [382] => ZMQSocketException
+    [383] => ZMQPollException
+    [384] => ZMQDeviceException
+    [385] => http\Exception\RuntimeException
+    [386] => http\Exception\UnexpectedValueException
+    [387] => http\Exception\BadMethodCallException
+    [388] => http\Exception\InvalidArgumentException
+    [389] => http\Exception\BadHeaderException
+    [390] => http\Exception\BadUrlException
+    [391] => http\Exception\BadMessageException
+    [392] => http\Exception\BadConversionException
+    [393] => http\Exception\BadQueryStringException
+    [394] => http\Cookie
+    [395] => http\Encoding\Stream
+    [396] => http\Encoding\Stream\Deflate
+    [397] => http\Encoding\Stream\Inflate
+    [398] => http\Encoding\Stream\Dechunk
+    [399] => http\Header
+    [400] => http\Header\Parser
+    [401] => http\Message
+    [402] => http\Message\Parser
+    [403] => http\Message\Body
+    [404] => http\QueryString
+    [405] => http\Client
+    [406] => http\Client\Request
+    [407] => http\Client\Response
+    [408] => http\Url
+    [409] => http\Env\Url
+    [410] => http\Env
+    [411] => http\Env\Request
+    [412] => http\Env\Response
+    [413] => http\Params
+    [414] => mimemessage
+    [415] => Memcached
+    [416] => MemcachedException
+)
+\end{lstlisting}
+
+\section{get\_declared\_interfaces()}
+
+返回一个数组包含所有已声明的接口
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\section{get\_declared\_traits()}
+
+返回所有已定义的 traits 的数组
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{get\_object\_vars()}
+
+返回由对象属性组成的关联数组
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{get\_parent\_class()}
+
+返回对象或类的父类名
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{interface\_exists()}
+
+检查接口是否已被定义
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{is\_a()}
+
+如果对象属于该类或该类是此对象的父类则返回 TRUE
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{is\_subclass\_of()}
+
+如果此对象是该类的子类，则返回 TRUE
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{method\_exists()}
+
+检查类的方法是否存在
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{property\_exists()}
+
+检查对象或类是否具有该属性
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{trait\_exists()}
+
+检查指定的 trait 是否存在
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+

@@ -8,7 +8,13 @@
 
 \chapter{Docker Image}
 
+在创建Docker镜像时，有些目录在安装软件过程中并不会自动创建，需要用户自己手动创建。例如，PHP-FPM的sock文件目录、pid文件目录，以及默认的Web服务器根目录等。
 
+
+\begin{lstlisting}[language=bash]
+$ sudo mkdir -p /var/run/php
+$ sudo mkdir -p /var/www/html
+\end{lstlisting}
 
 \section{Ubuntu}
 
