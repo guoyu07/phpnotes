@@ -2886,4 +2886,410 @@ public void CURLFile::__wakeup ( void )
 
 
 
+\chapter{CurlMulti}
 
+php-curlmulti是目前最好的php curl类库，该类库是对\texttt{curl\_multi\_*}系列函数的封装。
+
+
+\begin{compactitem}
+\item 极低的CPU和内存使用率。
+\item 速度在程序层面最高(实测抓取html速度达到2000+页每秒，下载速度1000Mbps)。
+\item 支持全局并发设置和根据任务类型单独设置并发。
+\item 支持状态回调，运行中的所有信息都被返回，包括单独的每个任务信息。
+\item 支持通过回调添加任务。
+\item 支持用户自定义回调，可以在回调中做任何事情。
+\item 支持成功回调返回值控制任务。
+\item 支持全局错误回调和单独任务的错误回调，所有和错误相关的信息都被返回。
+\item 支持内部全自动重试。
+\item 支持用户参数任意传递。
+\item 支持CURLOPT_*全局设置和单个任务设置。
+\item 强大的内置缓存，可以设置全局缓存和单独任务缓存。
+\item 所有配置可以在运行中动态改变并生效！
+\item 基于php-curlmulti库可以开发各种强劲的CURL应用。
+\end{compactitem}
+
+
+
+PHP周边性能优化的推荐规则如下：
+
+\begin{compactitem}
+\item Linux运行环境，服务器环境切换到Linux；
+\item 文件存储(硬盘)
+\item 数据库
+\item 缓存(内存)
+\item 网络
+\item 减少文件类操作
+\item 减少PHP网络操作(设置超时时间：1.连接超时200ms 2.读超时800ms 3.写超时500ms)
+\item 将串行请求并行化，使用 curl\_multi\_*()或使用swoole扩展实现
+
+\item 压缩PHP接口输出 (100K以上使用gzip，利：输出的字符串少了，更快的接收，弊：额外的cpu开销)
+\item PHP缓存复用
+\item Smarty 调优和重叠时间窗口思想
+\item 借助XHProf工具分析PHP性能(PHP --ri 扩展名)
+\item PHP性能分析工具扩展 1.ab压力测试 2.vld opcode代码分析
+\item PHP性能瓶颈 1.opcode cache：PHP扩展APC；2.runtime优化：HHVM
+\item pecl.php.net提供PHP的扩展
+\end{compactitem}
+
+
+\section{Composer}
+
+
+基于composer安装php-curlmulti的命令如下：
+
+\begin{lstlisting}[language=PHP]
+$ composer require phpdr.net/php-curlmulti:2.*
+\end{lstlisting}
+
+
+\section{Pthreads}
+
+
+
+没有pthreads扩展支持的情况下，PHP是单线程顺序执行的，所以php-curlmulti类库大量使用回调函数。
+
+
+\section{Method}
+
+
+php-curlmulti类库本身只有两个常用的方法，add()和start()，其中：
+
+\begin{compactitem}
+\item add()添加一个任务到内部任务池；
+\item start()开始以\$maxTrhead设置的并发数进行回调循环，此方法是阻塞的直到所有任务完成。
+\end{compactitem}
+
+
+
+
+
+如果有大量的任务需要处理，使用\$cbTask指定添加任务的回调函数，当并发不足并且任务池为空时此回调函数被调用。
+
+\subsection{add()}
+
+
+当一个任务完成之后add()中指定的回调立刻被执行，然后curl从任务池取一个任务添加到并发请求中。
+
+\subsection{start()}
+
+所有任务完成后start()函数结束。
+
+\section{Source}
+
+
+\subsection{src/Core.php}
+
+src/Core.php是php-curlmulti的核心库。
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{src/Base.php}
+
+src/Base.php是php-curlmulti核心库的封装，包含非常有用的工具和一些规范。
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{src/Exception.php}
+
+src/Exception.php是php-curlmulti的异常处理类。
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{src/Autoclone.php}
+
+src/Autoclone.php是一个完美的全自动网站克隆工具。
+
+
+\begin{compactitem}
+\item 软件工程，面向对象和编程技巧的完美结晶，和php-curlmulti一样非常具有艺术性。
+\item 使用方便，只有一个无参方法start()。
+\item 低耦合，扩展极其容易，配合php-curlmulti的强大能力可以分分钟拷贝一个站。
+\item 所有页面的重复的url只会精确处理一次。
+\item 全自动处理任意格式url的相对路径绝对路径。
+\item css中引入的背景图等资源全自动处理，css中的@import全自动处理，支持任意深度！
+\item 支持指定多个前缀url并且可以针对每个前缀url设置一个深度。
+\item 支持对每个前缀url指定二级前缀，每个二级前缀还可以设置一个深度。
+\item 全自动处理3xx跳转。
+\item 跨站资源共享，例如采集站点A的时候A用到了站点B的图片，jss，css等，等采集站点B的时候这些文件会直接使用不会再次下载。
+\item 同一个目录下可以复制任意数量的站点并且不会发生任何可能的文件重复或覆盖。
+\item 支持不同类型资源文件下载控制。
+\end{compactitem}
+
+
+针对IE浏览器的注释性css不会处理，因为还没找到一种符合标准的处理方式，这个问题造成的影响可以忽略不计。
+
+
+\section{API(Core)}
+
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $maxThread = 10
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $maxThreadType = array()
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $maxTry = 3
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $opt = array ()
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $cache = array ('enable' => false, 'enableDownload'=> false, 'compress' => false, 'dir' => null, 'expire' =>86400, 'dirLevel' => 1, 'verifyPost' => false, 'overwrite' => false, 'overwriteExpire' => 86400)
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $taskPoolType = 'queue'
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $cbTask = array(0=>'callback',1=>'callback param')
+\end{lstlisting}
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $cbInfo = null
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $cbUser = null
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public $cbFail = null
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public function __construct()
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+public function add(array $item, $process = null, $fail = null)
+\end{lstlisting}
+
+
+\begin{compactitem}
+\item \texttt{\$item['url']} 不能为空。
+\item \texttt{\$item['opt']=array()} 当前任务的CURLOPT\_*，覆盖全局的CURLOPT\_*。
+\item \texttt{\$item['args']} 成功和失败回调的第二个参数。
+\item \texttt{\$item['ctl']=array()} 一些额外的控制项
+\item \texttt{\$item['ctl']['type']} 任务类型，用在\$maxThreadType属性。
+\item \texttt{\$item['ctl']['cache']=array()} 任务缓存配置，覆盖合并\$cache属性。
+\item \texttt{\$item['ctl']['ahead']} 忽略\$taskPoolType属性，此种类型的任务总是被优先加入并发中。
+\item \texttt{\$process} 任务成功完成调用此回调，回调的第一个参数是结果数组，第二个参数是\texttt{\$item['args']}。
+\item \texttt{\$fail} 任务失败回调，第一个参数是相关信息，第二个参数是\texttt{\$item['args']}。
+\end{compactitem}
+
+\begin{lstlisting}[language=PHP]
+public function start($persist=null)
+\end{lstlisting}
+
+
+\section{API(Base)}
+
+
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function __construct($curlmulti = null)
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function hashpath($name, $level = 2)
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function substr($str, $start, $end = null, $mode = 'g')
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function cbCurlFail($error, $args)
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function cbCurlInfo($info,$isFirst,$isLast)
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function encoding($html, $in = null, $out = 'UTF-8', $mode = 'auto')
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function isUrl($str)
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function uri2url($uri, $urlCurrent)
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function url2uri($url, $urlCurrent)
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function urlDir($url)
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+function getCurl()
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
