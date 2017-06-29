@@ -5,26 +5,33 @@
 
 phpQuery is a server-side, chainable, CSS3 selector driven Document Object Model (DOM) API based on jQuery JavaScript Library.
 
-phpQuery(\url{github.com/TobiaszCudnik/phpquery})是一个服务器端运行的链式的、基于jQuery驱动的DOM API的CSS3选择器。
+phpQuery（\url{http://github.com/TobiaszCudnik/phpquery})是一个服务器端运行的链式的、CSS3选择器驱动的DOM解析工具。
 
-phpQuery基于PHP5开发，并且提供了额外的命令行工具。
+phpQuery参考了jQuery的语法，基于PHP5开发，并且提供了额外的命令行工具。
 
-\begin{lstlisting}[langugae=PHP]
+
+
+
+
+\begin{lstlisting}[language=PHP]
 $ pear channel-discover phpquery-pear.appspot.com 
 $ pear install phpquery/phpQuery
 \end{lstlisting}
 
 
+使用phpQuery采集网页的示例如下：
 
 
-
-\begin{lstlisting}[langugae=bash]
-phpquery 'http://code.google.com/p/phpquery/downloads/list?can=1'  --find '.vt.col_4 a' --contents --getString null array_sum
+\begin{lstlisting}[language=bash]
+$ phpquery 'http://code.google.com/p/phpquery/downloads/list?can=1'  --find '.vt.col_4 a' --contents --getString null array_sum
 \end{lstlisting}
 
 
 
-\begin{lstlisting}[langugae=bash]
+phpQuery依赖PHP的DOM扩展
+
+
+\begin{lstlisting}[language=PHP]
 <?php
 require('phpQuery/phpQuery.php');
 // INITIALIZE IT
@@ -79,46 +86,212 @@ print $doc;
 print $doc['ul'];
 \end{lstlisting}
 
+\section{Basics}
 
 
 
-\begin{lstlisting}[langugae=bash]
+
+
+\begin{lstlisting}[language=PHP]
+phpQuery::newDocumentFileXHTML('my-xhtml.html')->find('p'); $ul = pq('ul');
+\end{lstlisting}
+
+
+\subsection{Loading Document}
+
+
+\begin{compactitem}
+\item \texttt{phpQuery::newDocument(\$html, \$contentType = null)}
+
+Creates new document from markup. If no \$contentType, autodetection is made (based on markup). If it fails, text/html in utf-8 is used.
+\item \texttt{phpQuery::newDocumentFile(\$file, \$contentType = null)} 
+
+Creates new document from file. Works like newDocument()
+\item \texttt{phpQuery::newDocumentHTML(\$html, \$charset = 'utf-8')}
+
+\item \texttt{phpQuery::newDocumentXHTML(\$html, \$charset = 'utf-8')}
+
+\item \texttt{phpQuery::newDocumentXML(\$html, \$charset = 'utf-8')}
+\item \texttt{phpQuery::newDocumentPHP(\$html, \$contentType = null)}
+
+Read more about it on PHPSupport page
+\item \texttt{phpQuery::newDocumentFileHTML(\$file, \$charset = 'utf-8')}
+
+\item \texttt{phpQuery::newDocumentFileXHTML(\$file, \$charset = 'utf-8')}
+\item \texttt{phpQuery::newDocumentFileXML(\$file, \$charset = 'utf-8')}
+
+\item \texttt{phpQuery::newDocumentFilePHP(\$file, \$contentType)}
+\end{compactitem}
+
+
+\subsection{pq() function}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+pq($param, $context = null);
+\end{lstlisting}
+
+pq()类似于jQuery的\$()，pq()支持三种类型的操作。
+
+\begin{compactenum}
+\item Importing markup
+
+\begin{lstlisting}[language=PHP]
+// Import into selected document: 
+// doesn't accept text nodes at beginning of input string 
+pq('<div/>') 
+// Import into document with ID from $pq->getDocumentID(): 
+pq('<div/>', $pq->getDocumentID()) 
+// Import into same document as DOMNode belongs to: 
+pq('<div/>', DOMNode) 
+// Import into document from phpQuery object: 
+pq('<div/>', $pq)
+\end{lstlisting}
+
+\item Running queries
+
+\begin{lstlisting}[language=PHP]
+// Run query on last selected document: 
+pq('div.myClass') 
+// Run query on document with ID from $pq->getDocumentID(): 
+pq('div.myClass', $pq->getDocumentID()) 
+// Run query on same document as DOMNode belongs to and use node(s)as root for query: 
+pq('div.myClass', DOMNode) 
+// Run query on document from phpQuery object 
+// and use object's stack as root node(s) for query: 
+pq('div.myClass', $pq)
+\end{lstlisting}
+
+\item Wrapping DOMNodes with phpQuery objects
+
+\begin{lstlisting}[language=PHP]
+foreach(pq('li') as $li) // $li is pure DOMNode, change it to phpQuery object pq($li);
+\end{lstlisting}
+
+\end{compactenum}
+
+
+
+
+\section{jQuery}
+
+
+phpQuery提供了很多和jQuery类似的特性，例如：
+
+\begin{compactitem}
+\item htmlOuter() 
+\item xml() 
+\item xmlOuter() 
+\item markup() 
+\item markupOuter() 
+\item getString() 
+\item reverse() 
+\item contentsUnwrap() 
+\item switchWith() 
+\item all from PHPSupport 
+\item all from Basic 
+\item all from MultiDocumentSupport
+\end{compactitem}
+
+
+
+
+\subsection{Selectors}
+
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+\subsection{Attributes}
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+\subsection{Traversing}
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+\subsection{Manipulation}
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+\subsection{Ajax}
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+\subsection{Events}
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+\subsection{Utilities}
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+\subsection{Plugin}
+
+
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
 
 
 
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
 
 
 
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
 
 
 
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
 
 
 
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
@@ -126,7 +299,7 @@ print $doc['ul'];
 
 
 
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
@@ -134,7 +307,7 @@ print $doc['ul'];
 
 
 
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
@@ -142,48 +315,7 @@ print $doc['ul'];
 
 
 
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
@@ -191,7 +323,199 @@ print $doc['ul'];
 
 
 
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+\chapter{QueryList}
+
+
+\section{Overview}
+
+
+如果需要抓取一个网页的内容，但是只需要特定部分的信息，通常会用正则来解决。
+
+虽然正则是一个通用解决方案，不过特定情况下，往往有更简单快 捷的方法。例如，为了查询一个编程方面的问题，除了可以使用Google，stackoverflow 作为一个专业的编程问答社区，会提供给你更多，更靠谱的答案。
+
+不推荐在HTML页面使用正则，如果HTML页面过大，正则的效率无法保证，这种情况下可以考虑使用phpQuery来获取某个特定元素。
+
+phpQuery是一个用php实现的类似jQuery的开源项目，可以在服务器端以jQuery的语法形式解析网页元素。
+
+phpQuery支持使用类似jQuery的选择器，而且phpQuery可以对DOM进行任何复杂的操作。
+
+QueryList相当于phpQuery的子集，可以发挥phpQuery采集方面的强大功能。
+
+作为一个基于phpQuery的PHP通用列表采集类，QueryList让使用PHP采集网页信息时和使用jQuery选择元素一样简单。
+
+\begin{compactitem}
+\item QueryList只有一个核心的API——静态方法Query
+\item QueryList支持使用jQuery选择器来选择页面元素
+\item QueryList内置的过滤功能可以清洗无用的内容数据
+\item QueryList支持扩展来实现多线程批量采集，模拟登陆采集等功能
+\item QueryList采集结果直接以采集规则并按照列表的形式有序的返回
+\item QueryList支持无限层级嵌套采集
+\end{compactitem}
+
+QueryList3使用PSR-4和Composer，不兼容以前的版本。
+
+\begin{lstlisting}[language=bash]
+$ composer require jaeger/querylist
+\end{lstlisting}
+
+在使用Composer安装了QueryList之后，只需要引入vendor/autoload.php文件就可以使用QueryList及其所有插件（如果安装了插件的话）。
+
+
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+require 'vendor/autoload.php';
+
+use QL/QueryList;
+
+$hj = QueryList::Query('http://mobile.csdn.net/', array("url"=>array('.unit h1 a', 'href')));
+
+$data = $hj->getData(function($x){
+   return $x['url'];
+});
+print_r($data);
+\end{lstlisting}
+
+如果手动下载phpQuery.php和QueryList.php，可以在代码中使用require引入。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+require 'phpQuery.php';
+require 'QueryList.php';
+
+use QL\QueryList;
+
+$hj = QueryList::Query('http://mobile.csdn.net/',array("url"=>array('.unit h1 a','href')));
+$data = $hj->getData(function($x){
+    return $x['url'];
+});
+print_r($data);
+\end{lstlisting}
+
+
+同理，QueryList扩展也可以手动安装。例如，假设QueryList所在目录为/path/to/QueryList/，那么扩展目录就是/path/to/QueryList/Ext/，然后手动引入需要用到的插件文件就可以运行插件。
+
+所有的QueryList扩展都依赖一个基类AQuery，这个文件也存放在扩展目录（即/path/to/QueryList/Ext/）下。
+
+QueryList扩展所依赖的类库存放目录为/path/to/QueryList/Ext/Lib/。
+
+所有的QueryList扩展通过QueryList::run()方法运行。
+
+QueryList扩展可以根据需要选择性地安装：
+
+
+\begin{compactitem}
+\item Request网络操作扩展
+
+\begin{lstlisting}[language=bash]
+$ composer require jaeger/querylist-ext-request
+\end{lstlisting}
+
+\item Multi多线程扩展
+
+\begin{lstlisting}[language=bash]
+$ composer require jaeger/querylist-ext-multi
+\end{lstlisting}
+
+\item Login模拟登录扩展
+
+\begin{lstlisting}[language=bash]
+$ composer require jaeger/querylist-ext-login
+\end{lstlisting}
+\end{compactitem}
+
+包含QueyListy以及扩展的完整配置如下：
+
+\begin{lstlisting}[language=JavaScript]
+{
+    "require": {
+        "jaeger/querylist": "^3.1",
+        "jaeger/querylist-ext-request":"^1.0",
+        "jaeger/querylist-ext-multi":"^1.0",
+        "jaeger/querylist-ext-login":"^1.0"
+    }
+}
+\end{lstlisting}
+
+以下类库是上面扩展的依赖，安装扩展的时候会自动安装，也可以选择单独引入使用：
+
+\begin{compactitem}
+\item Http类
+
+\begin{lstlisting}[language=bash]
+$ composer require jaeger/http
+\end{lstlisting}
+
+\item CurlMulti多线程类
+
+\begin{lstlisting}[language=bash]
+$ composer require jaeger/curlmulti
+\end{lstlisting}
+
+\end{compactitem}
+
+QueryList支持遵循当前使用的PHP框架的引入类库的规则来加入到不同的框架中。
+
+\subsection{Login}
+
+QueryList的Login扩展可以实现模拟登陆然后采集。
+
+\subsection{Multi}
+
+QueryList的Multi扩展支持多线程（多进程）采集。
+
+
+\subsection{Request}
+
+QueryList的Request扩展可以实现携带cookie、伪造来路等任意复杂的网络请求。
+
+
+
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=bash]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
@@ -199,7 +523,7 @@ print $doc['ul'];
 
 
 
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
@@ -207,7 +531,7 @@ print $doc['ul'];
 
 
 
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}
 
@@ -215,71 +539,6 @@ print $doc['ul'];
 
 
 
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-
-\begin{lstlisting}[langugae=bash]
-
-\end{lstlisting}
-
-
-
-
-
-\begin{lstlisting}[langugae=bash]
+\begin{lstlisting}[language=bash]
 
 \end{lstlisting}

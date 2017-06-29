@@ -3,7 +3,7 @@
 
 \chapter{Overview}
 
-PHP的SOAP扩展支持SOAP1.1、SOAP1.2和WSDL1.1协议的子集，开发者可以使用SOAP扩展提供的功能来编写SOAP服务器和SOAP客户端代码。
+SOAP扩展支持SOAP1.1、SOAP1.2和WSDL1.1协议的子集，可以使用SOAP扩展提供的功能来编写SOAP服务器和SOAP客户端代码。
 
 
 \section{Requirement}
@@ -21,6 +21,11 @@ libXML streams => enabled
 \end{lstlisting}
 
 在编译PHP时需要打开\texttt{-\/-enable-soap}才能把SOAP扩展编译进PHP。
+
+\begin{lstlisting}[language=bash]
+$ sudo apt-get install php7.1-soap
+$ sudo service php7.1-fpm reload
+\end{lstlisting}
 
 
 \section{Resource Type}
@@ -74,17 +79,25 @@ soap.wsdl\_cache\_limit		&5		&PHP\_INI\_ALL\\
 
 soap.wsdl\_cache\_enabled(integer) - 启用/禁用WSDL缓存特性
 
+如果需要禁用WSDL缓存，可以在创建SOAP对象（例如soap\_server或soap\_client）之前设置如下：
+
+\begin{lstlisting}[language=PHP]
+<?php
+ini_set('soap.wsdl_cache_enabled', '0');
+ini_set('soap.wsdl_cache_ttl', '0'); 
+\end{lstlisting}
+
 \subsection{soap.wsdl\_cache\_dir}
 
 soap.wsdl\_cache\_dir(string) - 设置SOAP扩展存储缓存文件的目录名
 
 \subsection{soap.wsdl\_cache\_ttl}
 
-soap.wsdl\_cache\_ttl(integer) - 设置SOAP的缓存文件的生命期限（time to live）
+soap.wsdl\_cache\_ttl(integer) - 设置SOAP的缓存文件的生命期限（time to live，以秒为单位，默认为1天）
 
 \subsection{soap.wsdl\_cache}
 
-soap.wsdl\_cache(integer) - 如果soap.wsdl\_cache\_enabled为on，那么soap.wsdl\_cache设置确定缓存的类型，它可以是以下任何一个：
+soap.wsdl\_cache(integer) - 如果soap.wsdl\_cache\_enabled为on，那么soap.wsdl\_cache设置可以用来确定缓存的类型，它可以是以下任何一个：
 
 \begin{compactitem}
 \item WSDL\_CACHE\_NONE（0）
@@ -94,6 +107,27 @@ soap.wsdl\_cache(integer) - 如果soap.wsdl\_cache\_enabled为on，那么soap.ws
 \end{compactitem}
 
 这也可以通过SoapClient或SoapServer构造函数中的options数组设置。
+
+如果返回500内部错误，可能的原因是使用\texttt{['cache\_wsdl'=>WSDL\_CACHE\_DISK]}或\texttt{['cache\_wsdl'=>WSDL\_CACHE\_BOTH]}时未正确设置WSDL缓存目录权限问题。
+
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+  $arrContextOptions=array("ssl"=>array( "verify_peer"=>false, "verify_peer_name"=>false,'crypto_method' => STREAM_CRYPTO_METHOD_TLS_CLIENT));
+       
+  $options = array(
+       'soap_version'=>SOAP_1_2,
+       'exceptions'=>true,
+       'trace'=>1,
+       'cache_wsdl'=>WSDL_CACHE_NONE,
+       'stream_context' => stream_context_create($arrContextOptions)
+  );
+  $client = new SoapClient('https://url/dir/file.wsdl', $options); 
+} catch (Exception $e) {
+  echo "<h2>Exception Error!</h2>";
+  echo $e->getMessage();
+}
+\end{lstlisting}
 
 \subsection{soap.wsdl\_cache\_limit}
 
@@ -297,18 +331,66 @@ WSDL\_CACHE\_MEMORY (integer)	&2	 \\
 \hline
 WSDL\_CACHE\_BOTH (integer)	&3\\
 \hline
+SOAP\_SSL\_METHOD\_TLS & 0 \\
+\hline
+SOAP\_SSL\_METHOD\_SSLv2 & 1\\
+\hline
+SOAP\_SSL\_METHOD\_SSLv3 & 2\\
+\hline
+SOAP\_SSL\_METHOD\_SSLv23 & 3\\
+\hline
 \end{longtable}
+
+如果需要使用数字证书来请求SOAP服务，可以执行如下：
+
+\begin{lstlisting}[language=PHP]
+$ cat mycert.key > mycert.pem #mycert.key was the private key
+$ cat mycert.crt >> mycert.pem #mycert.crt was the signed certificate
+<?php
+$wsdl = "https://ws.ecopatz.de/ProductInfo?wsdl";
+$pass = 'a password';
+$certFile = "./mycert.pem";
+
+$client = new SoapClient($wsdl,
+    array(
+     'local_cert' => $certFile,
+     'passphrase' => $pass
+    )
+);
+\end{lstlisting}
+
 
 \section{Functions}
 
 
 \subsection{is\_soap\_fault()}
 
-
-is\_soap\_fault() - 检查一个SOAP调用是否失败。
-
 \begin{lstlisting}[language=PHP]
 bool is_soap_fault ( mixed $object )
+\end{lstlisting}
+
+
+is\_soap\_fault() - 检查一个SOAP调用是否失败(如果SOAP调用失败返回TRUE，否则返回FALSE)。
+
+\begin{lstlisting}[language=PHP]
+<?php
+$client = new SoapClient("some.wsdl", array('exceptions' => 0));
+$result = $client->SomeFunction();
+if (is_soap_fault($result)) {
+    trigger_error("SOAP Fault: (faultcode: {$result->faultcode}, faultstring: {$result->faultstring})", E_USER_ERROR);
+}
+\end{lstlisting}
+
+默认的SOAP错误报告方式是使用异常，例如：
+
+\begin{lstlisting}[language=PHP]
+<?php
+try {
+    $client = new SoapClient("some.wsdl");
+    $result = $client->SomeFunction(/* ... */);
+} catch (SoapFault $fault) {
+    trigger_error("SOAP Fault: (faultcode: {$fault->faultcode}, faultstring: {$fault->faultstring})", E_USER_ERROR);
+}
 \end{lstlisting}
 
 
@@ -323,11 +405,17 @@ use\_soap\_error\_handler() - 设置是否使用SOAP错误处理器。
 bool use_soap_error_handler ([ bool $handler = true ] )
 \end{lstlisting}
 
+如果\$handler设置为TRUE，那么SOAP服务器会发送错误细节到SOAP客户端。
+
+
 
 
 \chapter{SoapClient}
 
 SoapClient类提供一个SOAP1.1，SOAP1.2服务器的客户端类，而且SoapClient可以被用于WSDL模式或非WSDL模式。
+
+\section{Class synopsis}
+
 
 \begin{lstlisting}[language=PHP]
 SoapClient {
@@ -349,17 +437,141 @@ SoapClient {
 }
 \end{lstlisting}
 
+\subsection{Properties}
+
+
+
+\section{SoapClient::\_\_call()}
+
+
+\begin{lstlisting}[language=PHP]
+public mixed SoapClient::__call ( string $function_name , string $arguments )
+\end{lstlisting}
+
+\section{SoapClient::\_\_construct()}
+
+\begin{lstlisting}[language=PHP]
+public SoapClient::SoapClient ( mixed $wsdl [, array $options ] )
+\end{lstlisting}
+
+\section{SoapClient::\_\_doRequest()}
+
+\begin{lstlisting}[language=PHP]
+public string SoapClient::__doRequest ( string $request , string $location , string $action , int $version [, int $one_way = 0 ] )
+\end{lstlisting}
+
+
+\section{SoapClient::\_\_getFunctions()}
+
+\begin{lstlisting}[language=PHP]
+public array SoapClient::__getFunctions ( void )
+\end{lstlisting}
+
+注意，此函数仅在 WSDL 模式下生效。
+
+\section{SoapClient::\_\_getLastRequest()}
+
+
+\begin{lstlisting}[language=PHP]
+public string SoapClient::__getLastRequest ( void )
+\end{lstlisting}
+
+注意，此函数仅在SoapClient对象的trace配置项设置为true时才有效。
+
+\section{SoapClient::\_\_getLastRequestHeaders()}
+
+\begin{lstlisting}[language=PHP]
+public string SoapClient::__getLastRequestHeaders ( void )
+\end{lstlisting}
+
+注意，此函数仅在SoapClient对象的trace配置项设置为true时才有效。
+
+\section{SoapClient::\_\_getLastResponse()}
+
+\begin{lstlisting}[language=PHP]
+public string SoapClient::__getLastResponse ( void )
+\end{lstlisting}
+
+注意，此函数仅在SoapClient对象的trace配置项设置为true时才有效。
+
+\section{SoapClient::\_\_getLastResponseHeaders()}
+
+\begin{lstlisting}[language=PHP]
+public string SoapClient::__getLastResponseHeaders ( void )
+\end{lstlisting}
+
+注意，此函数仅在SoapClient对象的trace配置项设置为true时才有效。
+
+\section{SoapClient::\_\_getTypes()}
+
+\begin{lstlisting}[language=PHP]
+public array SoapClient::__getTypes ( void )
+\end{lstlisting}
+
+此函数仅在 WSDL 模式下生效。
+
+\section{SoapClient::\_\_setCookie()}
 
 
 
 \begin{lstlisting}[language=PHP]
-
+public void SoapClient::__setCookie ( string $name [, string $value ] )
 \end{lstlisting}
+
+\section{SoapClient::\_\_setLocation()}
+
+\begin{lstlisting}[language=PHP]
+public string SoapClient::__setLocation ([ string $new_location ] )
+\end{lstlisting}
+
+\section{SoapClient::\_\_setSoapHeaders()}
+
+\begin{lstlisting}[language=PHP]
+public bool SoapClient::__setSoapHeaders ([ mixed $soapheaders ] )
+\end{lstlisting}
+
+\section{SoapClient::\_\_soapCall()}
+
+\begin{lstlisting}[language=PHP]
+public mixed SoapClient::__soapCall ( string $function_name , array $arguments [, array $options [, mixed $input_headers [, array &$output_headers ]]] )
+\end{lstlisting}
+
+\section{SoapClient::SoapClient()}
+
+
+\begin{lstlisting}[language=PHP]
+public SoapClient::SoapClient ( mixed $wsdl [, array $options ] )
+\end{lstlisting}
+
+
+
+
+
+
+
+
+
 
 \chapter{SoapServer}
 
-\begin{lstlisting}[language=PHP]
 
+\section{Class synopsis}
+
+
+\begin{lstlisting}[language=PHP]
+SoapServer {
+  /* 方法 */
+  public void addFunction ( mixed $functions )
+  public void addSoapHeader ( SoapHeader $object )
+  public __construct ( mixed $wsdl [, array $options ] )
+  public void fault ( string $code , string $string [, string $actor [, string $details [, string $name ]]] )
+  public array getFunctions ( void )
+  public void handle ([ string $soap_request ] )
+  public void setClass ( string $class_name [, mixed $args [, mixed $... ]] )
+  public void setObject ( object $object )
+  public void setPersistence ( int $mode )
+  public SoapServer ( mixed $wsdl [, array $options ] )
+}
 \end{lstlisting}
 
 

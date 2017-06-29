@@ -1,0 +1,36 @@
+\part{Defensive}
+
+
+\chapter{Overview}
+
+
+防御性编程（Defensive programming）是防御式设计的一种具体体现，它是为了保证对程序的不可预见的使用不会造成程序功能上的损坏。
+
+防御性编程可以被看作是为了减少或消除墨菲定律效应的想法，主要用于可能被滥用，恶作剧或无意地造成灾难性影响的程序上。
+
+潜在的软件缺陷可能会被黑客利用来进行代码注入，拒绝服务攻击或其他攻击，因此防御性编程又称为安全编程（Secure Programming）。
+
+防御性编程与非防御性编程之间的区别在于，程序员不会对特定的函数调用或库的使用情况做假设。例如，下面的示例程序中，当输入超过1000个字符时，该函数将会崩溃。
+
+\begin{lstlisting}[language=PHP]
+int risky_programming(char *input) {
+   char str[1000+1]; // one more for the null character
+   // ...
+   strcpy(str, input); // copy input
+   // ...
+}
+\end{lstlisting}
+
+一些新手程序员可能并不会觉得这是个问题，因为没有用户会输入这么长的字符串。
+
+防御性编程不会允许这样的错误，因为这段程序包含一个已知的bug，一个可能会导致缓冲区溢出攻击的漏洞。下面这个例子是一个解决方案：
+
+\begin{lstlisting}[language=PHP]
+int secure_programming(char *input) {
+   char str[1000];
+   // ...
+   strncpy(str, input, sizeof(str)); // copy input without exceeding the length of the destination
+   str[sizeof(str)-1] = '\0'; // if strlen(input) == sizeof(str) then strcpy won't NUL terminate
+   // ...
+}
+\end{lstlisting}

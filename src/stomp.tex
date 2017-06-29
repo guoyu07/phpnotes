@@ -2,3 +2,32 @@
 
 
 \chapter{Overview}
+
+Stomp（Simple(or Streaming) Text Oriented Message Protocol）前身为TTMP，是一个与消息中间件（Message-Oriented Middleware）交互的基于文本的通信协议。
+
+Stomp提供了一个互操作性的wire format来允许Stomp客户端和任何支持Stomp协议的消息中间件（Message Broker）通信，因此Stomp是语言无关的，使用不同语言开发的Stomp客户端和消息中间件仍然可以进行通信。
+
+Stomp协议和HTTP协议很相似，二者都是在运行在TCP协议之上的。
+
+Stomp协议在TCP协议上运行时支持以下命令：
+
+\begin{compactitem}
+\item CONNECT
+\item SEND
+\item SUBSCRIBE
+\item UNSUBSCRIBE
+\item BEGIN
+\item COMMIT
+\item ABORT
+\item ACK
+\item NACK
+\item DISCONNECT
+\end{compactitem}
+
+Stomp客户端和Stomp服务器端进行通信时使用的包含多个行的帧（Frame）进行的，其中第一行包含命令，后面的行中包含的是key:value形式的header，接下来是一个空行，然后是body内容，最后以一个null字符结束。
+
+Stomp客户端和Stomp服务器端的通信过程中的帧主要是MESSAGE（消息帧）、RECEIPT（收据帧）和ERROR（出错帧）等，而且不同类型的帧的header和body格式是相似的。
+
+支持Stomp的MOM包括ActiveMQ、HornetQ、OpenMQ、RabbitMQ和Spring等。
+
+

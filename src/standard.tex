@@ -1,3 +1,211 @@
 \part{Standard}
 
 \chapter{Overview}
+
+
+
+\chapter{Yii}
+
+\begin{compactitem}
+\item 保持良好的PHP代码书写规范，合理使用缩进，保持代码美观，多余的var_dump/echo上线之后要记得删除
+\item 使用赋值符时变量名、赋值符、值之间以空格分隔 
+\item 多使用配置文件，避免硬编码  
+\item 多采用设计模式(工厂模式，单例模式等)
+\item 使用注释
+\item 尽量封装逻辑代码，尽量减少单个action体积；
+\item 尽量不要在action里面写数据库查询，应该封装到service类库
+\item 尽量让每个类做自己的事，每个函数做一件事
+\end{compactitem}
+
+
+
+
+
+\section{Class}
+
+
+文件名即类名。
+
+类名称： 驼峰式 首字母大字 
+
+\begin{lstlisting}[language=PHP]
+class PointController 
+class PointRatioController
+\end{lstlisting}
+
+
+\section{Method}
+
+
+\subsection{Public Method}
+
+
+公共成员方法： 驼峰式 首字母小写
+
+
+\begin{lstlisting}[language=PHP]
+public function getPointById()
+\end{lstlisting}
+
+
+\subsection{Private Method}
+
+私有成员方法： 驼峰式 首字母小写
+
+\begin{lstlisting}[language=PHP]
+private function _getPointById()
+\end{lstlisting}
+
+\section{Field}
+
+
+\subsection{Public Field}
+
+公共成员变量
+
+\begin{lstlisting}[language=PHP]
+public $users;
+public $userName;
+\end{lstlisting}
+
+
+\subsection{Private Field}
+
+
+\begin{lstlisting}[language=PHP]
+private $_user;
+private $_userName;
+\end{lstlisting}
+
+\section{Constant}
+
+
+常量： 所有字母大写，单词间用下划线分隔
+
+
+
+\begin{lstlisting}[language=PHP]
+const POS_HEAD = 0;
+\end{lstlisting}
+
+
+\section{MVC}
+
+
+\subsection{Controller}
+
+action尽量不要出现SQL查询（写进model或者封装到service类库），某个action很复杂首先应该考虑怎么拆分功能。
+
+\subsection{Service}
+
+
+protected目录下增加service文件夹用来放业务封装类库，并在配置文件增加该文件夹自动import选项。
+
+
+\subsection{View}
+
+PHP本身就是一种很好的模板，公共头部尾部等模板文件夹用\texttt{"\_include"}方式命名。
+
+
+\subsection{Model}
+
+
+Model负责与数据持久层的交互。
+
+Model中的必要方法包括：
+
+\begin{compactitem}
+\item model();      // 静态方法 返回模型的实例 
+\item tableName(); // 返回数据库表名 
+\item rules();      // 表单的各种验证规则(用户名，email) 
+\item relations();  // 表关系配置(n:1 or 1:1 or n:n) 
+\item attributeLabels();  // 表字段国际化处理
+\end{compactitem}
+
+\section{DataBase}
+
+多数Web应用都是由数据库驱动的，数据库表名和列名都使用小写命名。
+
+
+名字中的单词应使用下划线分割 (例如 product\_order)。
+
+
+对于表名，既可以使用单数也可以使用复数，但不要同时使用两者。为简单起见，推荐使用单数名字。
+
+表名可以使用一个通用前缀（例如 tbl\_），这样当应用所使用的表和另一个应用说使用的表共存于同一个数据库中时就特别有用。 这两个应用的表可以通过使用不同的表前缀很容易地区别开。 
+
+\section{Comment}
+
+\begin{compactitem}
+\item 对类名进行注释 
+\item 方法名进行注释(包括每个方法的参数与返回值)
+\item 对常量进行注释 
+\item 对成员属性进行注释(\texttt{public \$userName; // 用户名})
+\item 配置文件进行注释
+\end{compactitem}
+
+
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}

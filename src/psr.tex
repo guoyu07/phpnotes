@@ -8,7 +8,7 @@
 
 PSR 是 PHP Standard Recommendations 的简写，由 PHP FIG 组织制定的 PHP 规范，是 PHP 开发的实践标准。
 
-用户可以使用PHP\_CodeSniffer 来检查代码是否符合PSR代码规范。例如，可以通过这些工具来实时地自动修正程序语法使其符合标准。 
+用户可以使用PHP\_CodeSniffer 等来检查代码是否符合PSR代码规范。或者，可以通过PHP Coding Standards Fixer或php.tools等工具实时地自动修正程序语法使其符合标准。 
 
 \begin{compactitem}
 \item PHP Coding Standards Fixer
@@ -16,7 +16,7 @@ PSR 是 PHP Standard Recommendations 的简写，由 PHP FIG 组织制定的 PHP
 \end{compactitem}
 
 
-也可以手动运行 phpcs 命令来输出相应的错误以及如何修正的方法。同样地，phpcs也可以用在 git hook 中，这样如果分支代码不符合选择的代码标准则无法提交。
+手动运行 phpcs 命令也可以来输出相应的错误以及如何修正的方法，而且phpcs也可以用在 git hook 中，这样如果分支代码不符合选择的代码标准则无法提交。
 
 \begin{lstlisting}[language=bash]
 $ phpcs -sw --standard=PSR2 file.php
@@ -28,31 +28,33 @@ $ phpcs -sw --standard=PSR2 file.php
 
 \section{Introduction}
 
-FIG 是 Framework Interoperability Group（框架可互用性小组）的缩写，由几位开源框架的开发者成立于 2009 年，从那开始也选取了很多其他成员进来（包括但不限于 Laravel, Joomla, Drupal, Composer, Phalcon, Slim, Symfony, Zend Framework 等），虽然不是「官方」组织，但也代表了大部分的 PHP 社区。
+FIG（Framework Interoperability Group，框架可互用性小组）成立于 2009 年，成员包括但不限于 Laravel, Joomla, Drupal, Composer, Phalcon, Slim, Symfony, Zend Framework 等，虽然不是「官方」组织，但是也代表了大部分的 PHP 社区。
 
-FIG项目的目的在于：通过框架作者或者框架的代表之间讨论，以最低程度的限制，制定一个协作标准，各个框架遵循统一的编码规范，避免各家自行发展的风格阻碍了 PHP 的发展，解决这个程序设计师由来已久的困扰。
 
-目前已表决通过了的6套PSR标准，废弃了1套标准（自动加载规范），已经得到大部分 PHP 框架的支持和认可。
+
+FIG项目意在通过框架作者或者框架的代表之间讨论，以最低程度的限制，制定一个协作标准，各个框架遵循统一的编码规范，避免各自自行发展的风格阻碍了 PHP 的发展。
+
+目前FIG已表决通过了的6套PSR标准，废弃了1套标准（自动加载规范），已经得到大部分 PHP 框架的支持和认可。
 
 \begin{compactitem}
-\item 基础编码规范
-\item 编码风格规范
-\item 日志接口规范
-\item 自动加载规范
-\item 缓存接口规范
-\item HTTP 消息接口规范
+\item PSR-1（基础编码规范）
+\item PSR-2（编码风格规范）
+\item PSR-3（日志接口规范）
+\item PSR-4（自动加载规范）
+\item PSR-6（缓存接口规范）
+\item PSR-7（HTTP消息接口规范）
 \end{compactitem}
 
 正在起草中的规范包括：
 
 \begin{compactitem}
-\item PHPDoc 标准
-\item Huggable 接口
-\item 项目安全问题公示
-\item 项目安全上报方法
-\item 服务容器接口
-\item 全量编码风格规范
-\item 超媒体链接
+\item PSR-5（PHPDoc 标准）
+\item PSR-8（Huggable 接口）
+\item PSR-9（项目安全问题公示）
+\item PSR-10（项目安全上报方法）
+\item PSR-11（服务容器接口）
+\item PSR-12（全量编码风格规范）
+\item PSR-13（超媒体链接）
 \end{compactitem}
 
 
