@@ -7,11 +7,20 @@
 
 合适的调试器是软件开发中最有用的工具之一，它使你可以跟踪程序执行结果并监视程序堆栈中的信息。 
 
-Xdebug 是一个PHP的调试器，它可以被用来在很多 IDE(集成开发环境) 中做断点调试以及堆栈检查，而且Xdebug还可以像 PHPUnit 和 KCacheGrind 一样，做代码覆盖检查或者程序性能跟踪。
+Xdebug（\url{https://xdebug.org}）是一个PHP的调试器，它可以被用来在很多 IDE(集成开发环境) 中做断点调试以及堆栈检查，而且Xdebug还可以像 PHPUnit 和 KCacheGrind 一样，做代码覆盖检查或者程序性能跟踪。
 
 
 
-安装 Xdebug 可能很费事，但其中一个最重要的「远程调试」特性 —— 如果你在本地开发，并在虚拟机或者其他服务器上测试，远程调试可能是你想要的一种方式。
+Xdebug(\url{https://github.com/xdebug/xdebug.git})最重要的「远程调试」特性可以让用户在本地开发，并在虚拟机或者其他服务器上进行远程调试。
+
+
+\begin{lstlisting}[language=bash]
+$ cd xdebug-x.x.x
+$ phpize
+$ ./configure --enable-xdebug
+$ make
+$ sudo make install
+\end{lstlisting}
 
 通常，你需要修改Apache VHost 或者 .htaccess 文件的这些值:
 
@@ -33,7 +42,6 @@ http://your-website.example.com/index.php?XDEBUG_SESSION_START=1
 
 IDE 将会拦截当前执行的脚本状态，运行你设置的断点并查看内存中的值。
 
-例如：
 
 \begin{lstlisting}[language=bash]
 [xdebug]
@@ -45,5 +53,547 @@ xdebug.remote_port=9000
 xdebug.idekey=PHPSTORM
 \end{lstlisting}
 
+如果设置\texttt{extension=xdebug.so}会导致问题，而且xdebug必须在OPCache之后载入Xdebug。
 
 图形化的调试器可以让你非常容易的逐步的查看代码、变量，以及运行时的 evel 代码。许多 IDE 已经内置或提供了插件支持 XDebug 图形化调试器。比如 MacGDBp 是 Mac 上的一个免费，开源的单机调试器。
+
+注意，Xdebug和Zend Optimizer、DBG、APD以及ioncube等扩展不兼容。
+
+
+
+Xdebug重写了PHP的var\_dump()来打印变量，可以根据数组/对象属性的类型/位置设置不同的颜色、最大深度以及字符串长度等，而且Xdebug还提供了其他的函数来处理变量打印。
+
+
+Xdebug提供了不同的配置来对var\_dump()函数进行自定义，例如：
+
+\begin{compactitem}
+\item xdebug.var\_display\_max\_children
+\item xdebug.var\_display\_max\_data
+\item xdebug.var\_display\_max\_depth
+\end{compactitem}
+
+
+
+
+
+
+
+\section{Changelog}
+
+
+
+
+
+
+\subsection{1.2.0}
+
+\begin{compactitem}
+\item Xdebug支持profile和code coverage
+\item Xdebug引入了xdebug\_call\_class()函数
+\end{compactitem}
+
+\subsection{1.3.0}
+
+\begin{compactitem}
+\item Xdebug在Trace模式（使用xdebug\_start\_trace()或由错误引起）下时，只有明确要求才会拆箱（从变量中生成字符串）。
+\item Xdebug支持使用条件指令进行远程调试（例如条件断点、完整堆栈和本地变量等）。
+\item Xdebug支持额外的文件/行信息信号。
+\end{compactitem}
+
+从Xdebug2开始引入新的DBGp协议，DBGp协议是一个多语言协议，这样Xdebug2客户端可以和Active State的Perl、Python、Tcl和XSLT等客户端协同工作。
+
+\subsection{1.3.1}
+
+\begin{compactitem}
+\item 修复aggregate类/方法调用的profiler
+\item 修复调试客户端初始化Socket结构问题
+\item 修复GDB下使用source命令无法关闭源文件问题
+\end{compactitem}
+
+
+
+\subsection{1.3.2}
+
+Xdebug针对PHP5进行编译。
+
+\subsection{2.0.0}
+
+\begin{compactitem}
+\item Xdebug引入了新的栈跟踪布局和更好的代码覆盖度。
+\item Xdebug引入的栈跟踪布局可以支持寻址。
+\item profiler\_output\_name和trace\_output\_name设置不再支持crc32等参数，改为支持不同格式的信息（类似于prinf()和strtotime()等）。
+\item Xdebug支持改进的栈跟踪、打印跟踪文件、代码覆盖分析和远程调试。
+\end{compactitem}
+
+
+
+\subsection{2.0.1}
+
+Xdebug提升了代码覆盖分析的性能。
+
+\subsection{2.0.2}
+
+
+Xdebug支持代码覆盖分析。
+
+\subsection{2.0.3}
+
+Xdebug兼容PHP5.3。
+
+\subsection{2.0.4}
+
+
+Xdebug改进对PHP5.3的兼容。
+
+
+
+\subsection{2.0.5}
+
+\subsection{2.1.0}
+
+\begin{compactitem}
+\item Xdebug支持在函数追踪中跟踪变量变化；
+\item Xdebug支持从远程调试中回调相同IP地址；
+\item Xdebug支持返回显式的或隐式的头信息；
+\item Xdebug支持跳过@操作符的设置。
+\end{compactitem}
+
+
+\subsection{2.1.1}
+
+\begin{compactitem}
+\item Xdebug支持KCacheGrind。
+\end{compactitem}
+
+
+\subsection{2.1.2}
+
+Xdebug提升代码覆盖支持。
+
+
+\subsection{2.1.3}
+
+\subsection{2.1.4}
+
+\subsection{2.2.0}
+
+\begin{compactitem}
+\item Xdebug提供对PHP5.4的支持。
+\item Xdebug对命令行模式下的var\_dump()进行了重写。
+\end{compactitem}
+
+\subsection{2.2.1}
+
+Xdebug修复调试属性和静态属性的问题。
+
+\subsection{2.2.2}
+
+\subsection{2.2.3}
+
+
+\subsection{2.2.4}
+
+
+\subsection{2.2.5}
+
+
+\subsection{2.2.6}
+
+
+Xdebug修复调试连接工作不正常（要么只有一次正常，要么完全无法工作）的问题。
+
+\subsection{2.2.7}
+
+
+\subsection{2.3.0}
+
+
+\begin{compactitem}
+\item Xdebug支持代码覆盖分析中的路径覆盖和分支覆盖。
+\item Xdebug改进了远程调试中的异常处理。
+\item Xdebug支持性能分析和跟踪中的共享安全触发器。
+\item Xdebug增加了一个新的序列化变量选项。
+\item Xdebug改进了性能分析文件的大小控制和断点检查。
+\end{compactitem}
+
+Xdebug把默认的嵌套层级提高到了256。
+
+\subsection{2.3.1}
+
+
+Xdebug修复了性能分析和跟踪触发器的崩溃。
+
+
+\subsection{2.3.2}
+
+Xdebug修复了路径和分支覆盖的崩溃。
+
+\subsection{2.3.3}
+
+
+
+\begin{compactitem}
+\item Xdebug修复了路径和分支覆盖的崩溃问题。
+\item Xdebug修复了SPL类相关的问题并带来跟踪速度的提升。
+\end{compactitem}
+
+\subsection{2.4.0}
+
+
+从Xdebug2.4开始支持PHP7.0。
+
+\begin{compactitem}
+\item Xdebug对早期代码进行了重写，进一步提升了代码覆盖度。
+\item Xdebug修复了代码覆盖、堆栈跟踪和远程调试的问题。
+\item Xdebug修复了一些异常和崩溃。
+\item Xdebug针对GCC进行了优化。
+\end{compactitem}
+
+默认情况下，在var\_dump()中输出文件和行信息。
+
+Xdebug提供了新的函数监控器来允许用户使用xdebug\_start\_function\_monitor()定义一系列函数，这样每次使用函数时都会记录函数的调用点。
+
+Xdebug提供了新的xdebug.show\_error\_trace配置项来允许在每个可抛出错误（throwable）发生时输出堆栈跟踪信息。
+
+
+\subsection{2.4.1}
+
+\subsection{2.5.0}
+
+Xdebug提供了PHP7.1和IPv6的支持。
+
+\subsection{2.5.1}
+
+
+\subsection{2.5.2}
+
+
+Xdebug修复了OPcache和代码覆盖的问题。
+
+\subsection{2.5.3}
+
+
+Xdebug修复了pcntl扩展没有静态载入导致的崩溃问题。
+
+
+\subsection{2.5.4}
+
+
+\begin{compactitem}
+\item Xdebug修复了pcntl扩展没有静态载入并设置set\_time\_limit导致的无限循环。
+\end{compactitem}
+
+
+\subsection{2.5.5}
+
+\begin{compactitem}
+\item Xdebug修复了无法定位代码覆盖位置的问题。
+\end{compactitem}
+
+
+
+\section{Settings}
+
+
+\subsection{xdebug.cli\_color}
+
+
+
+\subsection{xdebug.overload\_var\_dump}
+
+
+
+\subsection{xdebug.var\_display\_max\_children}
+
+
+
+\subsection{xdebug.var\_display\_max\_data}
+
+
+
+\subsection{xdebug.var\_display\_max\_depth}
+
+
+
+\subsection{xdebug.collect\_includes}
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{xdebug.collect\_params}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{xdebug.collect\_vars}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+\subsection{xdebug.dump.*}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{xdebug.dump\_globals}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{xdebug.dump\_once}
+
+
+\subsection{xdebug.dump\_undefined}
+
+
+\subsection{xdebug.file\_link\_format}
+
+\subsection{xdebug.manual\_url}
+
+
+
+\subsection{xdebug.show\_error\_trace}
+
+
+\subsection{xdebug.show\_exeception\_trace}
+
+
+
+\subsection{xdebug.show\_local\_vars}
+
+
+\subsection{xdebug.show\_mem\_delta}
+
+
+\subsection{xdebug.auto\_trace}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\section{Functions}
+
+
+\subsection{var\_dump()}
+
+
+\begin{lstlisting}[language=PHP]
+void var_dump([mixed var[, ...]])
+\end{lstlisting}
+
+\subsection{xdebug\_debug\_zval()}
+
+
+\begin{lstlisting}[language=PHP]
+void xdebug_debug_zval([string varname[, ...]])
+\end{lstlisting}
+
+
+\subsection{xdebug\_debug\_zval\_stdout()}
+
+
+\begin{lstlisting}[language=PHP]
+void xdebug_debug_zval_stdout([string varname[, ...]])
+\end{lstlisting}
+
+
+\subsection{xdebug\_dump\_superglobals()}
+
+
+
+\begin{lstlisting}[language=PHP]
+void xdebug_dump_superglobals()
+\end{lstlisting}
+
+\subsection{xdebug\_var\_dump()}
+
+
+
+\begin{lstlisting}[language=PHP]
+void xdebug_var_dump([mixed var[, ...]])
+\end{lstlisting}
+
+
+\subsection{xdebug\_get\_declared\_vars()}
+
+
+
+\begin{lstlisting}[language=PHP]
+array xdebug_get_declared_vars()
+\end{lstlisting}
+
+
+
+\begin{example}
+xdebug\_get\_declared\_vars()示例
+\begin{lstlisting}[language=PHP]
+<?php
+    class strings {
+        static function fix_strings($a, $b) {
+            foreach ($b as $item) {
+            }
+            var_dump(xdebug_get_declared_vars());
+        }
+    }
+    strings::fix_strings(array(1,2,3), array(4,5,6));
+?>
+\end{lstlisting}
+\end{example}
+
+\subsection{xdebug\_get\_function\_stack()}
+
+
+\begin{lstlisting}[language=PHP]
+array xdebug_get_function_stack()
+\end{lstlisting}
+
+\begin{example}
+xdebug\_get\_function\_stack()示例
+\begin{lstlisting}[language=PHP]
+<?php
+    class strings {
+        function fix_string($a)
+        {
+            var_dump(xdebug_get_function_stack());
+        }
+
+        function fix_strings($b) {
+            foreach ($b as $item) {
+                $this->fix_string($item);
+            }
+        }
+    }
+
+    $s = new strings();
+    $ret = $s->fix_strings(array('Derick'));
+?>
+\end{lstlisting}
+\end{example}
+
+\subsection{xdebug\_get\_monitored\_functions()}
+
+
+\begin{lstlisting}[language=PHP]
+array xdebug_get_monitored_functions()
+\end{lstlisting}
+
+
+
+
+\begin{example}
+xdebug\_get\_monitored\_functions()示例
+\begin{lstlisting}[language=PHP]
+<?php
+/* Start the function monitor for strrev and array_push: */
+xdebug_start_function_monitor( [ 'strrev', 'array_push' ] );
+
+/* Run some code: */
+echo strrev("yes!"), "\n";
+
+echo strrev("yes!"), "\n";
+
+var_dump(xdebug_get_monitored_functions());
+xdebug_stop_function_monitor();
+?>  
+\end{lstlisting}
+\end{example}
+
+\subsection{xdebug\_get\_stack\_depth()}
+
+
+\begin{lstlisting}[language=PHP]
+integer xdebug_get_stack_depth()
+\end{lstlisting}
+
+
+
+\subsection{xdebug\_print\_function\_stack()}
+
+
+\begin{lstlisting}[language=PHP]
+none xdebug_print_function_stack([string message[, int options]])
+\end{lstlisting}
+
+
+\subsection{xdebug\_start\_function\_monitor}
+
+
+
+\begin{lstlisting}[language=PHP]
+void xdebug_start_function_monitor(array $list_of_functions_to_monitor)
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+\subsection{xdebug\_stop\_function\_monitor()}
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
+
+
+
+
+
+\begin{lstlisting}[language=PHP]
+
+\end{lstlisting}
