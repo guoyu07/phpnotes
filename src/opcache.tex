@@ -1,3 +1,181 @@
 \part{Zend Opcache}
 
 \chapter{Overview}
+
+
+PHP 5.5.0 及后续版本中默认绑定的OPcache扩展通过将 PHP 脚本预编译的字节码存储到共享内存中来提升 PHP 的性能， 存储预编译字节码的好处是不需要每次加载和解析PHP脚本，PHP5.4及之前的版本未内置Opcache扩展。
+
+Opcache默认支持file://和phar://流处理，不支持自定义数据流。
+
+如果需要将Xdebug扩展和OPcache一起使用，必须在Xdebug扩展之前加载 OPcache 扩展。
+
+\section{Requirement}
+
+构建Opcache扩展不需要其他扩展。
+
+\section{Resource Type}
+
+
+Opcache扩展没有定义资源类型。
+
+
+\section{Runtime Configure}
+
+OPcache 只能编译为共享扩展。 如果使用\texttt{-\/-disable-all}参数 禁用了默认扩展的构建， 那么必须使用\texttt{-\/-enable-opcache}选项来开启 OPcache。
+
+
+\begin{compactitem}
+\item \texttt{zend\_extension=/full/path/to/opcache.so}
+\item \texttt{zend\_extension=/full/path/to/php\_opcache.dll}
+\end{compactitem}
+
+zend\_extension 指令用来将 OPcache 扩展加载到 PHP 中，使用下列推荐设置来获得较好的性能：
+
+\begin{lstlisting}[language=bash]
+opcache.memory_consumption=128
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=4000
+opcache.revalidate_freq=60
+opcache.fast_shutdown=1
+opcache.enable_cli=1
+\end{lstlisting}
+
+可以禁用 opcache.save\_comments 并且启用 opcache.enable\_file\_override。
+
+在生产环境中使用上述配置之前，必须经过严格测试。 因为上述配置存在一个已知问题，它会引发一些框架和应用的异常， 尤其是在文档使用了注解的情况下。
+
+Opcache提供的函数的行为受php.ini中的对应设置的影响。
+
+\begin{longtable}{|m{150pt}|m{40pt}|m{150pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+配置项&默认值&可修改范围
+\endhead
+%endhead
+
+%firsthead
+\caption{Opcache配置选项}\\
+\hline
+配置项&默认值&可修改范围
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+opcache.enable						&\texttt{"1"}			&PHP\_INI\_ALL	 \\
+\hline
+opcache.enable\_cli					&\texttt{"1"}			&PHP\_INI\_SYSTEM\\
+\hline
+opcache.memory\_consumption			&\texttt{"64"}			&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.interned\_strings\_buffer		&\texttt{"4"}			&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.max\_accelerated\_files			&\texttt{"2000"}		&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.max\_wasted\_percentage		&\texttt{"5"}			&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.use\_cwd						&\texttt{"1"}			&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.validate\_timestamps			&\texttt{"1"}			&PHP\_INI\_ALL	 \\
+\hline
+opcache.revalidate\_freq				&\texttt{"2"}			&PHP\_INI\_ALL	 \\
+\hline
+opcache.revalidate\_path				&\texttt{"0"}			&PHP\_INI\_ALL	 \\
+\hline
+opcache.save\_comments				&\texttt{"1"}			&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.load\_comments				&\texttt{"1"}			&PHP\_INI\_ALL	 \\
+\hline
+opcache.fast\_shutdown				&\texttt{"0"}			&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.enable\_file\_override			&\texttt{"0"}			&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.optimization\_level			&\texttt{"0xffffffff"}	&PHP\_INI\_SYSTEM\\
+\hline	 
+opcache.inherited\_hack				&\texttt{"1"}			&PHP\_INI\_SYSTEM \\
+\hline
+opcache.dups\_fix						&\texttt{"0"}			&PHP\_INI\_ALL	 \\
+\hline
+opcache.blacklist\_filename				&\texttt{""}			&PHP\_INI\_SYSTEM \\
+\hline
+opcache.max\_file\_size				&\texttt{"0"}			&PHP\_INI\_SYSTEM \\
+\hline
+opcache.consistency\_checks			&\texttt{"0"}			&PHP\_INI\_ALL	 \\
+\hline
+opcache.force\_restart\_timeout			&\texttt{"180"}		&PHP\_INI\_SYSTEM \\
+\hline
+opcache.error\_log					&\texttt{""}			&PHP\_INI\_SYSTEM \\
+\hline
+opcache.log\_verbosity\_level			&\texttt{"1"}			&PHP\_INI\_SYSTEM \\
+\hline
+opcache.preferred\_memory\_model		&\texttt{""}			&PHP\_INI\_SYSTEM \\
+\hline
+opcache.protect\_memory				&\texttt{"0"}			&PHP\_INI\_SYSTEM \\
+\hline
+opcache.mmap\_base					&\texttt{NULL}		&PHP\_INI\_SYSTEM \\
+\hline
+opcache.restrict\_api					&\texttt{""}			&PHP\_INI\_SYSTEM \\
+\hline
+opcache.file\_cache					&\texttt{NULL}		&PHP\_INI\_SYSTEM\\
+\hline
+opcache.file\_cache\_only				&\texttt{"0"}			&PHP\_INI\_SYSTEM\\
+\hline
+opcache.file\_cache\_consistency\_checks	&\texttt{"1"}			&PHP\_INI\_SYSTEM\\
+\hline
+opcache.file\_cache\_fallback			&\texttt{"1"}			&PHP\_INI\_SYSTEM\\
+\hline
+opcache.validate\_permission			&\texttt{"0"}			&PHP\_INI\_SYSTEM\\
+\hline
+opcache.validate\_root					&\texttt{"0"}			&PHP\_INI\_SYSTEM\\
+\hline
+\end{longtable}
+
+
+\section{Predefined Constants}
+
+
+
+\chapter{Opcache Function}
+
+
+\section{opcache\_compile\_file()}
+
+
+无需运行，即可编译并缓存 PHP 脚本
+
+
+\section{opcache\_get\_configuration()}
+
+获取缓存的配置信息
+
+
+\section{opcache\_get\_status()}
+
+获取缓存的状态信息
+
+
+\section{opcache\_invalidate()}
+
+清除脚本缓存
+
+\section{opcache\_is\_script\_cached()}
+
+查询某个脚本是否缓存在Opcache中
+
+\section{opcache\_reset()}
+
+重置字节码缓存的内容
+
+
+
+
+
+

@@ -1,0 +1,106 @@
+\part{Output Buffering}
+
+
+\chapter{Overview}
+
+
+当PHP脚本有输出时，输出控制函数可以被用来控制输出。这在多种不同情况中非常有用，尤其是用来在脚本开始输出 数据后，发送http头信息到浏览器时。
+
+输出控制函数不影响由 header() 或 setcookie()发送的文件头信息，仅影响类似echo等函数和PHP代码块间的数据。
+
+
+\section{Requirement}
+
+输出控制扩展不需要其他扩展。
+
+
+
+\section{Resource Type}
+
+输出控制扩展没有定义资源类型。
+
+
+\section{Runtime Configure}
+
+输出控制函数的行为受 php.ini 中的设置影响。
+
+
+
+\begin{longtable}{|m{150pt}|m{40pt}|m{150pt}|}
+%head
+\multicolumn{3}{r}{}
+\tabularnewline\hline
+配置项&默认值&可修改范围
+\endhead
+%endhead
+
+%firsthead
+\caption{输出控制配置选项}\\
+\hline
+配置项&默认值&可修改范围
+\endfirsthead
+%endfirsthead
+
+%foot
+\multicolumn{3}{r}{}
+\endfoot
+%endfoot
+
+%lastfoot
+\endlastfoot
+%endlastfoot
+\hline
+output\_buffering	&\texttt{"0"}		&PHP\_INI\_PERDIR\\
+\hline
+output\_handler	&\texttt{NULL}	&PHP\_INI\_PERDIR\\
+\hline
+implicit\_flush	&\texttt{"0"}		&PHP\_INI\_ALL\\
+\hline
+\end{longtable}
+
+\section{Predefined Constant}
+
+
+下列常量作为 PHP 核心的一部分总是可用的。
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_START}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_WRITE}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_FLUSH}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_CLEAN}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_FINAL}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_CONT}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_END}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_CLEANABLE}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_FLUSHABLE}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_REMOVABLE}
+
+
+\subsection{PHP\_OUTPUT\_HANDLER\_STDFLAGS}
+
+
+\chapter{OutputBuffer Function}
+
+输出控制函数是PHP核心内置的功能。
+
+
+
+
