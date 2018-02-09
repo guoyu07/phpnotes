@@ -13,14 +13,20 @@ Xdebug（\url{https://xdebug.org}）是一个PHP的调试器，它可以被用�
 
 Xdebug(\url{https://github.com/xdebug/xdebug.git})最重要的「远程调试」特性可以让用户在本地开发，并在虚拟机或者其他服务器上进行远程调试。
 
+从源代码编译安装Xdebug时需要phpize和php-config，可以通过编译安装PHP来获得，或者通过安装php-all-dev来获得。
+
 
 \begin{lstlisting}[language=bash]
+$ sudo apt-get install php-all-dev
+$ git clone git://github.com/xdebug/xdebug.git
 $ cd xdebug-x.x.x
 $ phpize
 $ ./configure --enable-xdebug
 $ make
 $ sudo make install
 \end{lstlisting}
+
+注意，编译安装PHP扩展需要版本统一，否则可能出现不兼容的问题。
 
 通常，你需要修改Apache VHost 或者 .htaccess 文件的这些值:
 
@@ -53,13 +59,37 @@ xdebug.remote_port=9000
 xdebug.idekey=PHPSTORM
 \end{lstlisting}
 
-如果设置\texttt{extension=xdebug.so}会导致问题，而且xdebug必须在OPCache之后载入Xdebug。
+\begin{compactitem}
+\item 如果设置\texttt{extension=xdebug.so}会导致问题，而且xdebug必须在OPCache之后载入Xdebug。
+\item 如果需要使用线程安全的PHP扩展，则需要指定\texttt{zend\_extension\_ts=/path/to/xdebug.so}。
+\end{compactitem}
+
+
 
 图形化的调试器可以让你非常容易的逐步的查看代码、变量，以及运行时的 evel 代码。许多 IDE 已经内置或提供了插件支持 XDebug 图形化调试器。比如 MacGDBp 是 Mac 上的一个免费，开源的单机调试器。
 
 注意，Xdebug和Zend Optimizer、DBG、APD以及ioncube等扩展不兼容。
 
+为了安装调试客户端，需要在Xdebug的源代码目录中执行如下操作把debugclient安装到/usr/local/bin目录。
 
+\begin{lstlisting}[language=bash]
+$ cd debugclient
+$ ./configure --with-libedit
+$ make
+$ sudo make install
+\end{lstlisting}
+
+在编译配置时如果出现如下的错误，可以手动指定\texttt{\$ LDFLAGS=-lncurses ./configure -\/-with-libedit}。
+
+\begin{lstlisting}[language=bash]
+/usr/lib64/libedit.so: undefined reference to `tgetnum'
+/usr/lib64/libedit.so: undefined reference to `tgoto'
+/usr/lib64/libedit.so: undefined reference to `tgetflag'
+/usr/lib64/libedit.so: undefined reference to `tputs'
+/usr/lib64/libedit.so: undefined reference to `tgetent'
+/usr/lib64/libedit.so: undefined reference to `tgetstr'
+collect2: ld returned 1 exit status
+\end{lstlisting}
 
 Xdebug重写了PHP的var\_dump()来打印变量，可以根据数组/对象属性的类型/位置设置不同的颜色、最大深度以及字符串长度等，而且Xdebug还提供了其他的函数来处理变量打印。
 
@@ -74,13 +104,50 @@ Xdebug提供了不同的配置来对var\_dump()函数进行自定义，例如：
 
 
 
+\section{Homebrew}
 
+
+\begin{lstlisting}[language=bash]
+$ brew search xdebug
+\end{lstlisting}
+
+如果使用Homebrew安装PHP，那么也可以用来安装Xdebug扩展。
+
+\begin{lstlisting}[language=bash]
+$ sudo brew install homebrew/php/<php-version>-xdebug
+\end{lstlisting}
+
+使用Homebrew安装Xdebug后会默认激活Xdebug，可以在/usr/local/etc/php/<php-version>/conf.d/目录下增加xdebug.ini来手动配置Xdebug。
+
+\begin{lstlisting}[language=bash]
+$ sudo brew install homebrew/php/php71-xdebug
+\end{lstlisting}
 
 
 
 \section{Changelog}
 
 
+\subsection{0.9.0}
+
+从0.9.0开始支持通过PEAR/PECL安装Xdebug。
+
+
+\begin{lstlisting}[language=bash]
+# pecl install xdebug
+\end{lstlisting}
+
+php.ini中增加对应的配置来启用Xdebug（注意xdebug.so的路径可以使用绝对路径）。
+
+\begin{lstlisting}[language=bash]
+zend_extension=/path/to/xdebug.so
+\end{lstlisting}
+
+注意，禁止使用extension=xdebug.so来添加Xdebug扩展。
+
+\begin{lstlisting}[language=bash]
+zend_extension="/usr/local/php/modules/xdebug.so"
+\end{lstlisting}
 
 
 

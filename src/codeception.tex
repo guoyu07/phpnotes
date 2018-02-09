@@ -1,0 +1,309 @@
+\part{Codeception}
+
+
+\chapter{Overview}
+
+
+
+
+Codeception是在PHPUnit基础上开发的BDD风格的测试框架，同时Codeception定义了自己的领域测试语言来实现可描述的测试。
+
+
+\begin{lstlisting}[language=bash]
+$ composer require "codeception/codeception" --dev
+$ ./vendor/bin/codecept
+Codeception 2.3.6
+
+Usage:
+  command [options] [arguments]
+\end{lstlisting}
+
+如果以Phar形式运行，则执行：
+
+\begin{lstlisting}[language=bash]
+$ wget http://codeception.com/codecept.phar
+$ php codecept.phar
+Codeception 2.3.6
+
+Usage:
+  command [options] [arguments]
+\end{lstlisting}
+
+如果需要全局安装codecept，则可以执行：
+
+\begin{lstlisting}[language=bash]
+$ sudo curl -LsS http://codeception.com/codecept.phar -o /usr/local/bin/codecept
+$ sudo chmod a+x /usr/local/bin/codecept
+$ codecept
+Codeception 2.3.6
+
+Usage:
+  command [options] [arguments]
+\end{lstlisting}
+
+
+
+\section{验收测试}
+
+
+设想这样一个场景：当技术人员开发完毕, 其客户, 产品经理, 或者是测试人员, 他们怎么确定产品的可用性? 
+
+一般情况下, 他们都是执行以下几个步骤进行测试:
+
+\begin{compactenum}
+\item 打开浏览器;
+\item 输入 url;
+\item 看到一些信息, 并确定了这个页面是可用的;
+\item 点击某个 url;
+\item 填写表单, 并提交表单, 看到了某些信息, 并确定此功能是可用的
+\end{compactenum}
+
+和手动测试（或人工测试）相反，Codeception自动化测试的Acceptance Tests会利用浏览器的编程接口来执行上述的人工测试，涉及到的步骤完全自动化。
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+$I = new AcceptanceTester($scenario);
+$I->amOnPage('/');
+$I->click('Sign Up');
+$I->submitForm('#signup', array('username' => 'MilesDavis', 'email' => 'miles@davis.com'));
+$I->see('Thank you for Signing Up!');
+\end{lstlisting}
+
+验收测试的优点如下：
+
+\begin{compactitem}
+\item 可用来测试任何网站;
+\item 完全基于浏览器, 可以测试 Javascript 甚至是 ajax 请求;
+\item 可以把运行状态给 产品经理 或者 客户看, 让人信服;
+\item 不需要多余的配置, 对 App 源码修改要求最少, 代码适应性好, 可以当成整个应用来测试, 不在乎内部实现.
+\end{compactitem}
+
+验收测试的缺点：
+
+\begin{compactitem}
+\item 测试速度缓慢, 因为需要运行在浏览器和真实的数据库上;
+\item 相比单元测试, 做不到完全的测试, 有些细微的逻辑可能会错过;
+\item 在运行的时候有时候会发生不可控的事情, 因为浏览器的渲染, javascript 的运行, 有时候会有意想不到的情况发生.
+\end{compactitem}
+
+
+
+\section{功能测试}
+
+
+功能测试可以模拟一个Web请求（模拟\$\_GET和\$\_POST等变量），发送给API接口并接收返回结果，这样在功能测试过程中就可以进行分析和断言来判定返回的数据，或者检查数据是否正常存储到数据库。
+
+功能测试需要预先提供一个测试环境，例如Laravel提供了Package来集成测试环境。
+
+以下是一个简单的功能测试:
+
+\begin{lstlisting}[language=PHP]
+<?php
+$I = new FunctionalTester($scenario);
+$I->amOnPage('/');
+$I->click('Sign Up');
+$I->submitForm('#signup', array('username' => 'MilesDavis', 'email' => 'miles@davis.com'));
+$I->see('Thank you for Signing Up!');
+$I->seeEmailSent('miles@davis.com', 'Thank you for registration');
+$I->seeInDatabase('users', array('email' => 'miles@davis.com'));
+\end{lstlisting}
+
+和Acceptance Tests（验收测试）的语法类似，在测试环境中可以检查 email和数据库。
+
+功能测试的优点如下：
+
+\begin{compactitem}
+\item 跟 Acceptance tests 类似, 但是少了打开浏览器来渲染, 速度快多了;
+\item 能提供更详细的分析, 如数据库或者 email;
+\item 可读性很强, 虽然没法让测试人员看到打开浏览器模拟人工测试, 但是还是可以让别人信服;
+\item 比较稳定, 只有当大规模的代码变更, 或者把代码从一个框架转移到另一个框架的时候, 才会有影响.
+\end{compactitem}
+
+功能测试的缺点如下：
+
+\begin{compactitem}
+\item 无法测试 javascript 和 ajax;
+\item 因为使用代码相对简单的模拟一个浏览器请求, 测试的可行度, 或者说完整性, 会相对较差;
+\item 需要一个框架的支持。
+\end{compactitem}
+
+\section{单元测试}
+
+
+单元测试（又称为模块测试, Unit Testing）是针对程序模块（软件设计的最小单位）来进行正确性检验的测试工作, 当 functional 或者 acceptance 测试都检查不到 最小单位 的逻辑时, 还能通过 单元测试 确认深藏在代码里面的某些功能仍然可用, 单元测试能消除程序单元的不可靠性。
+
+
+Codeception 的单元测试功能是基于 PHPUnit 之上的，因此Codeception可以运行PHPUnit的测试代码。
+
+Codeception 在 PHPUnit 的基础上提供了一系列工具能让单元测试更加简单, 代码可读性更高. 单元测试是最复杂最繁琐的测试, 并且是会跟着业务逻辑代码的改变而改变, 在实际开发中技术人员会经常因为需求、业务的变更而修改单元测试, 提高其可读性和易用性可以帮助相关人员更加快速的跟上一切变化。
+
+
+以下是一个简单的 Unit test (单元测试)
+
+
+\begin{lstlisting}[language=PHP]
+<?php
+function testSavingUser()
+{
+    $user = new User();
+    $user->setName('Miles');
+    $user->setSurname('Davis');
+    $user->save();
+    $this->assertEquals('Miles Davis', $user->getFullName());
+    $this->unitTester->seeInDatabase('users',array('name' => 'Miles', 'surname' => 'Davis'));
+}
+\end{lstlisting}
+
+单元测试的优点如下：
+
+\begin{compactitem}
+\item 最快的测试, 当然, 在上面的示例代码中, 触碰到了数据库, 还是有点延迟;
+\item 能把测试覆盖到特别刁钻的程序逻辑上, 这是 functional 或者 acceptance 所做不到的;
+\item 允许你测试最核心代码, 确定核心代码的健壮性。
+\end{compactitem}
+
+单元测试的缺点如下：
+
+\begin{compactitem}
+\item 因为是单元测试, 会把代码分为多个小单元单独测试, 但是各个单元之间的对接测试不到;
+\item 对代码的修改非常敏感, 很多项目的 test 最后没用上就是因为测试跟不上业务逻辑代码的修改.
+\end{compactitem}
+
+
+\chapter{Bootstrap}
+
+
+
+
+
+
+
+在安装完成Codeception之后，执行\texttt{codecept bootstrap}初始化配置来生成codeception.yml配置文件和tests目录及其默认测试集（其中包含了验收测试/功能测试和单元测试等）。
+
+
+
+\begin{lstlisting}[language=bash]
+$ codecept bootstrap
+
+codecept bootstrap
+
+==== Redirecting to Composer-installed version in vendor/codeception ====
+ Bootstrapping Codeception 
+
+File codeception.yml created       <- global configuration
+> Unit helper has been created in tests/_support/Helper
+> UnitTester actor has been created in tests/_support
+> Actions have been loaded
+tests/unit created                 <- unit tests
+tests/unit.suite.yml written       <- unit tests suite configuration
+> Functional helper has been created in tests/_support/Helper
+> FunctionalTester actor has been created in tests/_support
+> Actions have been loaded
+tests/functional created           <- functional tests
+tests/functional.suite.yml written <- functional tests suite configuration
+> Acceptance helper has been created in tests/_support/Helper
+> AcceptanceTester actor has been created in tests/_support
+> Actions have been loaded
+tests/acceptance created           <- acceptance tests
+tests/acceptance.suite.yml written <- acceptance tests suite configuration
+ --- 
+
+ Codeception is installed for acceptance, functional, and unit testing 
+\end{lstlisting}
+
+
+接下来的步骤：
+
+\begin{compactenum}
+\item Edit tests/acceptance.suite.yml to set url of your application. Change PhpBrowser to WebDriver to enable browser testing
+\item Edit tests/functional.suite.yml to enable a framework module. Remove this file if you don't use a framework
+\item Create your first acceptance tests using \texttt{codecept g:cest acceptance First}
+\item Write first test in tests/acceptance/FirstCest.php
+\item Run tests using: \texttt{codecept run}
+\end{compactenum}
+
+Codeception支持验收测试、功能测试和单元测试。
+
+\begin{compactitem}
+\item Acceptance Tests（验收测试）
+\item Functional Tests（功能测试）
+\item Unit Tests（单元测试）
+\end{compactitem}
+
+在上面的示例中继续创建验收测试来模拟真实用户访问网站，例如：
+
+
+\begin{lstlisting}[language=bash]
+$ codecept generate:cest acceptance First
+
+==== Redirecting to Composer-installed version in vendor/codeception ====
+Test was created in tests/acceptance/FirstCest.php
+\end{lstlisting}
+
+上述的Codeception测试场景称为Cepts。
+
+在创建好Cepts后需要配置Codeception配置文件（例如tests/acceptance.suite.yml），例如：
+
+\begin{lstlisting}[language=bash]
+actor: AcceptanceTester
+modules:
+      enabled:
+              - PhpBrowser:
+                    url: http://dev.hitour.cc
+              - \Helper\Acceptance
+\end{lstlisting}
+
+接下来开始第一个测试（例如tests/acceptance/FirstCest.php）:
+
+\begin{lstlisting}[language=PHP]
+<?php
+class FirstCest 
+{
+    public function frontpageWorks(AcceptanceTester $I)
+    {
+        $I->amOnPage('/');
+        $I->see('Home');  
+    }
+}
+\end{lstlisting}
+
+
+上面测试将验证首页是否包含“Home”字符串，Codeception会使用PhpBrowser来请求和检查HTML内容、链接、表单并提交POST或GET请求。
+
+\begin{lstlisting}[language=PHP]
+$ codecept run --steps
+\end{lstlisting}
+
+更复杂的测试则需要使用包含WebDriver模块的Selenium的浏览器。
+
+
+\chapter{Template}
+
+除了使用默认的Boostrap命令来生成测试代码之外，Codeception也提供了预定义的模板来代替Bootstrap。
+
+\begin{compactitem}
+\item Acceptance Testing
+
+\begin{lstlisting}[language=PHP]
+$ codecept init acceptance
+\end{lstlisting}
+
+\item Rest API Testing
+
+
+\begin{lstlisting}[language=PHP]
+$ codecept init api
+\end{lstlisting}
+
+
+\item Unit Testing
+
+
+\begin{lstlisting}[language=PHP]
+$ codecept init unit
+\end{lstlisting}
+
+
+\end{compactitem}
+
