@@ -4,26 +4,28 @@
 
 \chapter{Overview}
 
-虽然PHP有很多库、框架和组件，但是PHP没有一个很好的方式来管理项目依赖，即使通过手动的方式去管理，依然需要解决自动加载器的问题。
+虽然PHP有很多库、框架和组件，但是PHP没有一个很好的方式来管理项目依赖，即使通过手动的方式去管理，依然需要解决自动加载器（Autoloader）的问题。
 
+Composer 是由Nils Adermann和Jordi Boggiano使用PHP开发的一个跨平台的应用程序级的PHP依赖管理工具，允许用户声明项目所依赖的代码和库，并且可以在项目中安装它们。
 
+虽然涉及 ``packages" 和 ``libraries"，但是Composer 不是一个包管理器，Composer只是在每个项目的基础上进行管理，并且在项目的某个指定目录（例如 vendor）中安装和更新依赖（尽管Composer也可以管理全局依赖）。
 
-Composer 是一个跨平台的PHP依赖管理工具，允许用户声明项目所依赖的代码库，并且可以在项目中安装它们。
+具体来说，Composer在本地安装一些资源包，一个包本质上就是一个包含东西的目录，虽然Composer存储 PHP 代码，但是在理论上它可以是任何东西。例如，Composer包含一个描述，其中有一个名称和一个版本号，其中这个名称和版本号用于识别该包。
 
-Composer 不是一个包管理器。虽然涉及 ``packages" 和 ``libraries"，但是composer在每个项目的基础上进行管理，在指定项目的某个目录中（例如 vendor）进行安装。
+默认情况下，Composer不会在全局安装任何东西，因此它仅仅是一个应用程序的依赖管理。
 
-具体来说，Composer在本地安装一些资源包。一个包本质上就是一个包含东西的目录。通常情况下它存储 PHP 代码，但在理论上它可以是任何东西。并且它包含一个描述，其中有一个名称和一个版本号，这个名称和版本号用于识别该包。
+Composer 受到了 node.js的npm和ruby的bundler的强烈启发，可以为指定自动加载信息的库、框架和程序提供自动加载功能，以简化第三方代码的使用。
 
-默认情况下，Composer不会在全局安装任何东西，因此它仅仅是一个依赖管理。
-
-Composer 受到了 node npm 和 ruby's bundler 的强烈启发，可以这样为用户解决问题：
+例如，Composer可以这样为用户解决问题：
 
 \begin{compactenum}
-\item 你有一个项目依赖于若干个库。
+\item 有一个项目依赖于若干个库。
 
 \item 其中一些库依赖于其他库。
 
-\item 声明所依赖的东西。
+\item 声明所依赖的项目代码和第三方代码。
+
+\item 安装和更新指定版本的依赖。
 \end{compactenum}
 
 Composer 会找出哪个版本的包需要安装，并安装它们（将它们下载到你的项目中）。例如，正在创建的一个项目需要一个库来做日志记录，当前决定使用 monolog。为了将它添加到项目中，用户所需要做的就是创建一个 composer.json 文件，其中描述了项目的依赖关系。
@@ -38,13 +40,17 @@ composer.json的内容指出当前的项目需要一些 monolog/monolog 的包�
 }
 \end{lstlisting}
 
-Composer使用PHP开发，因此运行 Composer 需要 PHP 5.3.2+ 以上版本。一些敏感的 PHP 设置和编译标志也是必须的，但是对于任何不兼容项安装程序都会抛出警告。
+运行 Composer 需要 PHP 5.3.2+ 以上版本，而且一些敏感的 PHP 设置和编译标志也是必须的，Composer安装程序对于任何不兼容项都会抛出警告。
 
-目前支持Composer的框架包括Symfony、Laravel、CodeIgniter、CakePHP、FuelPHP、Drupal和SilverStripe等。
 
-Security Advisories Checker 提供一个 web 服务和一个命令行工具，二者都会仔细检查你的 composer.lock 文件，并且告诉你任何你需要更新的依赖。
 
-VersionEye web 服务可以监控你的 Github 及 BitBucket 帐号中的 composer.json 文件，并且当包有新更新时会发送邮件给你。
+\begin{compactitem}
+\item Security Advisories Checker 提供一个 web 服务和一个命令行工具，二者都会仔细检查composer.lock 文件，并且报告需要更新的依赖。
+\item VersionEye web服务可以监控指定Github及BitBucket帐号中的 composer.json 文件，并且当包有新更新时会发送邮件给用户。
+\end{compactitem}
+
+
+
 
 
 
@@ -66,13 +72,36 @@ $ curl -sS https://getcomposer.org/installer | php
 $ php -r "readfile('https://getcomposer.org/installer');" | php
 \end{lstlisting}
 
-接下来将检查一些 PHP 的设置，然后下载 composer.phar 到工作目录中。这是 Composer 的二进制文件，也是一个 PHAR 包（PHP 的归档），composer.phar可以帮助用户在命令行中执行一些操作。
+接下来将检查一些 PHP 的设置，然后下载 composer.phar 到工作目录中。
 
-可以通过\texttt{-\/-install-dir}选项指定 Composer 的安装目录（它可以是一个绝对或相对路径）：
+composer.phar是 Composer 的二进制文件，也是一个 PHAR 包（PHP 的归档），可以用来帮助用户在命令行中执行一些操作。
+
+在安装Composer时，也可以通过\texttt{-\/-install-dir}选项指定 Composer 的安装目录（它可以是一个绝对或相对路径）：
 
 \begin{lstlisting}[language=bash]
 $ curl -sS https://getcomposer.org/installer | php -- --install-dir=bin
 \end{lstlisting}
+
+\begin{compactitem}
+\item \texttt{-\/-check}
+\item \texttt{-\/-help}
+\item \texttt{-\/-force}
+\item \texttt{-\/-quiet}
+\item \texttt{-\/-snapshot}
+\item \texttt{-\/-disable-tls}
+\item \texttt{-\/-install-dir}
+\item \texttt{-\/-filename}（默认为composer.phar）
+\item \texttt{-\/-cafile}
+\end{compactitem}
+
+\begin{lstlisting}[language=bash]
+$ php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+$ php -r "if (hash_file('SHA384', 'composer-setup.php') === '544e09ee996cdf60ece3804abc52599c22b1f40f4323403c44d44fdfdd586475ca9813a858088ffbc1f233e9b180f061') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+$ php composer-setup.php #默认安装
+$ php composer-setup.php --install-dir=bin --filename=composer #自定义安装
+$ php -r "unlink('composer-setup.php');"
+\end{lstlisting}
+
 
 \subsection{Global}
 
