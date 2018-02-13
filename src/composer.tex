@@ -302,13 +302,13 @@ $ composer global require phpunit/phpunit
 
 \section{Repository}
 
-packagist 是 Composer 的主要资源库，在没有指定package的来源时默认来源就是从packagist。
+packagist 是 Composer 的主要资源库，在没有指定package的来源时默认来源就是packagist。
 
 Packagist 是 Composer 主要的一个包信息存储库，它默认是启用的。任何在 packagist 上发布的包都可以直接被 Composer 使用。例如，monolog被发布在 packagist 上，用户就可以直接使用它，而不必指定任何额外的来源信息。
 
-一个 Composer 的库基本上是一个包的源：记录了可以得到包的地方。Packagist 的目标是成为大家使用库资源的中央存储平台。这意味着用户可以 require 那里的任何包。
+Packagist 的目标是成为大家使用库资源的中央存储平台。这意味着用户可以 require 那里的任何包。
 
-当访问 packagist.org时可以浏览和搜索资源包，而且可以通过向packagist.org提交自己的package的来源地址来让packagist抓取自己的包。一旦完成，自己的包将可以提供给任何人使用。
+一个 Composer 的库基本上是一个包的源：记录了可以得到包的地方，因此当访问 packagist.org时可以浏览和搜索资源包，而且可以通过向packagist.org提交自己的package的来源地址来让packagist抓取自己的包。一旦完成，自己的包将可以提供给任何人使用。
 
 任何支持 Composer 的开源项目应该发布自己的包在 packagist 上，虽然并不一定要发布在 packagist 上来使用 Composer。
 
@@ -331,7 +331,7 @@ Packagist 是 Composer 主要的一个包信息存储库，它默认是启用的
 
 \subsection{Packagist}
 
-packagist 的底层是开源的。这意味着你可以只安装你自己拷贝的 packagist，改造并使用它。这真的是很直接简单的事情。然而，由于其规模和复杂性，对于大多数中小型企业还是建议使用 Satis。
+packagist 的底层是开源的。这意味着用户可以只安装自己拷贝的 packagist，改造并使用它。不过，由于其规模和复杂性，对于大多数中小型企业还是建议使用 Satis。
 
 Packagist 是一个 Symfony2 应用程序，并且托管在 GitHub 上 github.com/composer/packagist。它内部使用了 composer 并作为 VCS 资源库与 composer 用户之间的代理。它拥有所有 VCS 资源包的列表，定期重新抓取它们，并将其作为一个 composer 资源库。
 
@@ -826,11 +826,11 @@ php表示用户的 PHP 版本要求，可以对其做出限制（例如 >=5.4.0�
 
 \item hhvm
 
-hhvm代表的是 HHVM（也就是 HipHop Virtual Machine） 运行环境的版本，并且允许设置一个版本限制，例如\texttt{'>=2.3.3'}。
+hhvm代表的是 HHVM（也就是 HipHop Virtual Machine） 运行环境的版本，并且允许设置一个版本限制，例如\texttt{>=2.3.3}。
 
 \item ext-<name>
 
-ext-<name>可以帮助指定需要的 PHP 扩展（包括核心扩展）。通常 PHP 拓展的版本可以是不一致的，将它们的版本约束为 * 是一个不错的主意。一个 PHP 扩展包的例子就是包名可以写成 ext-gd。
+ext-<name>可以帮助指定需要的 PHP 扩展（包括核心扩展）。通常 PHP 拓展的版本可以是不一致的，那么可以将它们的版本约束为 *。例如，PHP GD扩展包的包名可以写成 ext-gd。
 
 \item lib-<name>
 
@@ -1647,33 +1647,35 @@ $extra = $event->getComposer()->getPackage()->getExtra();
 
 在安装依赖后，Composer 将把安装时确切的版本号列表写入 composer.lock 文件。
 
-composer.lock将锁定该项目的特定版本，因此需要提交应用程序的 composer.lock （包括 composer.json）到版本库中
+composer.lock将锁定该项目的特定版本，因此需要提交应用程序的 composer.lock （包括 composer.json）到版本库中。
 
-这是非常重要的，因为 install 命令将会检查锁文件是否存在，如果存在就会下载指定的版本（忽略 composer.json 文件中的定义）。
-
-这意味着，任何人建立项目都将下载与指定版本完全相同的依赖。你的持续集成服务器、生产环境、你团队中的其他开发人员、每件事、每个人都使用相同的依赖，从而减轻潜在的错误对部署的影响。即使你独自开发项目，在六个月内重新安装项目时，你也可以放心的继续工作，即使从那时起你的依赖已经发布了许多新的版本。
+composer.lock是非常重要的，因为 install 命令将会检查锁文件是否存在，如果存在就会下载指定的版本（忽略 composer.json 文件中的定义），这意味着，任何人建立项目都将下载与指定版本完全相同的依赖。例如，持续集成服务器、生产环境、团队中的其他开发人员、每件事、每个人都使用相同的依赖，从而减轻潜在的错误对部署的影响。即使用户独自开发项目，在六个月内重新安装项目时，也可以放心的继续工作（即使从那时起你的依赖已经发布了许多新的版本）。
 
 如果不存在 composer.lock 文件，Composer 将读取 composer.json 并创建锁文件。
 
-这意味着如果你的依赖更新了新的版本，你将不会获得任何更新。此时要更新你的依赖版本请使用 update 命令。这将获取最新匹配的版本（根据你的 composer.json 文件）并将新版本更新进锁文件。
+如果依赖更新了新的版本，如果没有使用composer更新依赖，将不会获得任何更新，\texttt{composer update}命令可以更新依赖版本，从而获取最新匹配的版本（根据composer.json文件）并将新版本更新到锁文件中。
 
 \begin{lstlisting}[language=bash]
 $ php composer.phar update
 \end{lstlisting}
 
-如果只想安装或更新一个依赖，你可以白名单它们：
+
+
+
+锁文件将帮助团队始终针对同一个依赖版本进行测试，而且这个锁文件任何时候都只对于自己的项目产生影响。
+
+
+对于库，并不一定建议提交锁文件。如果愿意，可以在自己的项目中提交 composer.lock 文件。
+
+如果不想提交锁文件，并且正在使用 Git，那么需要将它添加到 .gitignore 文件中。
+
+实际上，如果composer.json和composer.lock未同步，那么执行\texttt{composer install}时有警告。
+
+如果只想安装或更新一个依赖，可以把它们放入白名单中：
 
 \begin{lstlisting}[language=bash]
 $ php composer.phar update monolog/monolog [...]
 \end{lstlisting}
-
-对于库，并不一定建议提交锁文件。如果愿意，可以在自己的项目中提交 composer.lock 文件。
-
-锁文件将帮助团队始终针对同一个依赖版本进行测试，而且这个锁文件任何时候都只对于自己的项目产生影响。
-
-如果不想提交锁文件，并且正在使用 Git，那么需要将它添加到 .gitignore 文件中。
-
-
 
 \section{Environment}
 
@@ -2262,7 +2264,7 @@ require 'vendor/autoload.php';
 \end{lstlisting}
 
 
-自动加载使得用户可以很容易的使用第三方代码。例如，如果项目依赖 monolog，那么就可以像这样开始使用这个类库，并且他们将被自动加载。
+自动加载使得用户可以很容易的使用第三方代码。例如，如果项目依赖 monolog，那么就可以像这样使用这个类库，并且它们将被自动加载。
 
 \begin{lstlisting}[language=PHP]
 $log = new Monolog\Logger('name');
@@ -2271,7 +2273,7 @@ $log->pushHander(new Monolog\Handler\StreamHandler('app.log',Monolog\Logger::WAR
 $log->addWarning('Foo');
 \end{lstlisting}
 
-可以在 composer.json 的 autoload 字段中增加自己的 autoloader。例如，下面的说明将指示Composer注册一个 PSR-4 autoloader 到 Acme 命名空间。
+在 composer.json 的 autoload 字段中，用户可以增加自己的 autoloader。例如，下面的说明将指示Composer注册一个 PSR-4 autoloader 到 Acme 命名空间。
 
 \begin{lstlisting}[language=bash]
 {
@@ -2282,24 +2284,28 @@ $log->addWarning('Foo');
 \end{lstlisting}
 
 
-可以定义一个从命名空间到目录的映射。此时 src 会在项目的根目录，与 vendor 文件夹同级。例如 src/Foo.php 文件应该包含 Acme\textbackslash Foo 类。
+在上面的示例中，Composer会定义一个从命名空间到目录的映射，此时 src 会在项目的根目录与 vendor 文件夹同级。例如 src/Foo.php 文件应该包含 Acme\textbackslash Foo 类。
 
 
-添加 autoload 字段后，应该再次运行 install 命令来生成 vendor/autoload.php 文件。
+注意，添加 autoload 字段后，应该再次运行 install或dump-autoload命令来重新生成 vendor/autoload.php 文件。
 
-引用这个文件也将返回 autoloader 的实例，可以将包含调用的返回值存储在变量中，并添加更多的命名空间。这个事实对于在一个测试套件中自动加载类文件是非常有用的，例如：
+引用vendor/autoload.php文件将返回 autoloader 的实例，可以将包含调用的返回值存储在变量中，并添加更多的命名空间，这个事实对于在一个测试套件中自动加载类文件是非常有用的，例如：
 
 \begin{lstlisting}[language=PHP]
-$loader = require 'vendor/autoload.php';
-$loader->add('Acme\\Test\\',__DIR__);
+$loader = require __DIR__ . 'vendor/autoload.php';
+$loader->add('Acme\\Test\\', __DIR__);
 \end{lstlisting}
 
 
-除了 PSR-4 自动加载，classmap 也是支持的，这样就允许类被自动加载（即使不符合 PSR-0 规范）。
+除了 PSR-4 自动加载，Composer也支持PSR-0、classmap和文件自动加载，这样即使不符合 PSR-0 规范，类就仍然可以被自动加载。
 
 Composer 提供了自己的 autoloader。如果不想使用它，可以仅仅引入 vendor/composer/autoload\_*.php 文件，它返回一个关联数组，可以通过这个关联数组配置自己的 autoloader。
 
 \section{Spec}
+
+为了使用Composer来管理自己的项目或库，首先需要把每一个项目或库都看做是一个包（package），而且一旦目录中包含了composer.json，那么这个目录就是这个包。
+
+每个项目或库都可能会依赖其他的包。
 
 
 \subsection{PSR-0}
