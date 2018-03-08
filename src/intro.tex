@@ -2,53 +2,72 @@
 
 \chapter{Overview}
 
-PHP\footnote{PHP：Hypertext Preprocessor（超文本预处理器）就是一种递归命名。}是一种开源的通用计算机脚本语言，尤其适用于网络开发并可嵌入HTML中使用。
 
 
-PHP针对大多数HTTP服务器都提供了相应的模块，而且PHP 支持 CGI 标准，因此PHP可以作为 CGI 处理器来使用。
+PHP\footnote{PHP：Hypertext Preprocessor（超文本预处理器）就是一种递归命名。}是一种开源的通用计算机脚本语言，尤其适用于网络开发（并可嵌入HTML中使用）。
 
-PHP开始注重程序运行性能和自身代码的模块性之后，PHP无疑成为了另一种高效率的选择。例如，PHP内置的标准库（SPL）提供了一组类和接口来支持常用的数据结构类（例如堆栈、队列和堆等）以及遍历这些数据结构的迭代器，或者用户可以自己实现 SPL 接口。
+PHP支持CGI\footnote{CGI是服务器和请求处理程序之间传输数据的一种标准。}标准，因此PHP可以作为 CGI 处理器来使用。具体来说，PHP可以实现让一个客户端从网页浏览器等向执行在网络服务器上的程序请求数据的功能，CGI则是一种负责描述服务器和请求处理程序之间传输数据的标准。
 
-
-
-
-PHP现在由PHP Group和开放源代码社区维护PHP标准，并以PHP License作为许可协议，限制了PHP名称的使用，和GPL（开放源代码许可协议）不兼容。
-
-``.php"是 PHP 的默认扩展名，所有以 .php 结尾的文件都将由 PHP 来处理，只需要把.php文件部署到支持PHP的服务器上的Web目录中，服务器将自动解析这些文件，无需编译也不用安装任何其它的工具，仅仅只需把这些使用了 PHP 的文件想象成简单的 HTML 文件，其中只不过多了一种新的标识符，在这里可以做各种各样的事情。
-
-PHP的语法借鉴了C、Java和Perl等语言，主要目标是允许网络开发人员快速编写动态页面。
-
-PHP针对不同层次的用户提供了相关的特性（包括高级特性），因此尽管 PHP 的开发是以服务端脚本为主，也可以被用于其他很多领域。
-
-PHP的跨平台特性使其可以在多数的服务器和操作系统上运行，而且的到了大多数Web服务器的支持，现在的云计算平台（Google App Engine、Amazon EC2和Microsoft Azure等）都提供了对PHP的支持。
-
-另外，PHP的扩展性使其除了可以向最终用户提供数据库、协议和API的基础结构之外，还允许开发者自己加入并提交新的模块。
+PHP针对大多数HTTP服务器都提供了相应的模块，而且PHP程序的运行性能和自身代码的模块性使其成为了一种高效率的选择。例如，PHP内置的标准库（SPL）提供了一组类和接口来支持常用的数据结构类（例如堆栈、队列和堆等）以及遍历这些数据结构的迭代器，用户也可以自己实现 SPL 接口。
 
 
+\section{History}
 
-PHP的应用范围相当广泛，尤其是在网页程序的开发上。
 
-\begin{compactenum}
-\item 服务器端程序
+PHP最初是Rasmus Lerdorf为了要维护个人网页，而用C语言开发的一些用以取代原先使用Perl封装的CGI工具程序集，主要用来显示Rasmus Lerdorf的个人履历以及统计网页流量。
 
-\begin{compactitem}
-\item PHP解析器（CGI或服务器模块）
-\item Web服务器（Nginx和Apache等）
-\item Web浏览器
-\end{compactitem}
+Rasmus Lerdorf将这些程序和一些窗体解释器集成起来并在1995年6月8日将PHP/FI公开发布，其中FI可以和数据库连接来让PHP可以产生简单的动态网页程序。
 
-\item 命令行脚本
+Rasmus Lerdorf希望可以通过社区来加速程序开发与查找错误，接下来发布的版本命名为PHP 2，提供了类似Perl的变量命名方式、窗体处理功能以及嵌入到HTML中运行的能力，而且程序语法上也类似Perl，虽然有较多的限制，不过更简单、更有弹性。
 
-\begin{compactitem}
-\item PHP命令行模式
-\item 定时任务（Cron或Tast Scheduler）
-\end{compactitem}
+Zeev Suraski和Andi Gutmans在1997年重写了PHP的语法分析器（PHP3），同时PHP改称为\texttt{PHP: Hypertext Preprocessor}。
 
-\end{compactenum}
+开发团队在1997年11月发布了PHP/FI 2之后就开始PHP 3的开放测试，随后于1998年6月正式发布PHP 3，接下来Zeev Suraski和Andi Gutmans开始改写PHP的核心。
 
-PHP丰富的功能并不局限于输出 HTML，还能被用来动态输出图像、PDF 文件、Flash 动画（使用 libswf 和 Ming），用户一般使用PHP来收集表单数据、生成动态网页或者发送/接收Cookies等。
+1999年发布的PHP语法分析器称为Zend Engine，同时Zeev Suraski和Andi Gutmans在以色列的Ramat Gan成立了Zend Technologies来管理PHP的开发。
 
-PHP在处理HTML表单时，表单的任何元素都在 PHP 脚本中自动生效。
+以Zend Engine 1.0为内核的PHP 4于2000年5月22日发布，增加了数组操作函数、完整的会话机制、对输出缓存的支持等。
+
+以Zend Engine 2.0为内核的PHP 5于2004年7月13日发布，强化了面向对象功能，引入PDO以及许多性能上的增强，而且PHP 5从2008年开始成为了PHP的稳定版本，同时PHP 4不再继续更新。
+
+PHP5后续的PHP 7主要的改进有PHPNG、JIT引擎、抽象语法树编译和异步编程等。
+
+
+
+PHP Group和开放源代码社区负责维护PHP标准，并以PHP License作为许可协议来发布PHP（仅限制PHP名称的使用），这一点和GPL（开放源代码许可协议）不兼容。
+
+\section{Feature}
+
+
+``.php"是 PHP 的默认扩展名\footnote{PHP的CLI SAPI指定的 PHP 脚本并非必须要以 .php 为扩展名，可以有任意的文件名和扩展名来运行任何文件。}，以 .php 结尾的文件都将由 PHP 来处理，只需要把.php文件部署到支持PHP的服务器上的Web目录中，服务器将自动解析这些文件。
+
+PHP项目文件无需编译也不用安装任何其它的工具，仅仅只需把PHP文件想象成简单的 HTML 文件即可，只不过多了一种新的标识符\texttt{<?php ... ?>}，最终可以被解析成代码流并输出执行结果。
+
+PHP的语法借鉴了C、Java和Perl等语言，而且针对不同层次的用户提供了相关的特性（包括高级特性），因此PHP可以被应用到服务端应用和其他领域中。
+
+PHP的跨平台特性使其可以在多数的服务器和操作系统上运行，而且PHP针对大多数HTTP服务器都提供了相应的模块来增强互操作性，因此云计算平台（例如Google App Engine、Amazon EC2和Microsoft Azure等）也都提供了对PHP的支持。
+
+PHP的扩展机制使其除了可以向最终用户提供数据库、协议和API的基础结构之外，还允许开发者自己加入并提交新的模块。
+
+要查看当前PHP信息，可以通过网页或者命令行，其中通过网页可以直观的显示。
+
+\begin{lstlisting}[language=PHP]
+<?php
+phpinfo();
+\end{lstlisting}
+
+或者在命令行中输入如下的命令：
+
+\begin{lstlisting}[language=bash]
+$ php -i
+//or
+$ php -r 'phpinfo();'
+\end{lstlisting}
+
+\texttt{phpinfo()}函数可以得到很多有关当前系统的有用信息，例如预定义变量、已经加载的 PHP 模块和配置信息。
+
+
+PHP可以用来收集表单数据、生成动态网页或者发送/接收Cookies等，而且PHP的功能并不局限于输出 HTML，还能被用来动态输出图像、PDF 文件、Flash 动画（使用 libswf 和 Ming）。其中，PHP在处理HTML表单时，表单的任何元素都在 PHP 脚本中自动生效。
 
 \begin{lstlisting}[language=PHP]
 <form action="action.php" method="post">
@@ -66,104 +85,81 @@ PHP在处理HTML表单时，表单的任何元素都在 PHP 脚本中自动生�
 你 <?php echo (int)$_POST['age']; ?> 岁了。
 \end{lstlisting}
 
-htmlspecialchars() 使得 HTML 之中的特殊字符被正确的编码，从而不会被使用者在页面注入 HTML 标签或者 Javascript 代码（例如 age 字段），也可以使用 PHP 的 filter 扩展来自动完成该工作，PHP会自动设置 \texttt{\$\_POST['name']}和\texttt{\$\_POST['age']}变量。
+\texttt{htmlspecialchars()}使得 HTML 之中的特殊字符被正确的编码，从而不会被使用者在页面注入 HTML 标签或者 Javascript 代码（例如 age 字段），也可以使用 PHP 的 filter 扩展来自动完成该工作，PHP会自动设置 \texttt{\$\_POST['name']}和\texttt{\$\_POST['age']}变量。
 
-用户也可以在 PHP 中处理 XForms 的输入，尽管用户可能更喜欢使用长久以来支持良好的 HTML 表单。
+用户也可以在 PHP 中处理 XForms 的输入，尽管用户可能更喜欢使用HTML 表单。
 
-PHP可以非常简便的输出文本（例如 XHTML 以及任何其它形式的 XML 文件），PHP还可以通过在服务端开辟出一块动态内容的缓存从而直接把它们打印出来，或者将它们存储到文件系统中。
+PHP可以非常简便的输出文本（例如 XHTML 以及任何其它形式的 XML 文件），PHP还可以在服务端开辟出一块动态内容的缓存从而直接把它们打印出来，或者将它们存储到文件系统中。
 
-
-
-PHP支持使用Perl 兼容正则表达式（PCRE）以及其他扩展和工具来解析和访问 XML 文档，同时PHP还将所有的 XML功能标准化在libxml2库中，并且还增加了 SimpleXML，XMLReader 以及 XMLWriter来支持并扩充功能。
+PHP支持使用PCRE（Perl兼容正则表达式）以及其他扩展和工具来解析和访问 XML 文档，同时PHP还将所有的 XML功能标准化在libxml2库中，并且还增加了SimpleXML、XMLReader以及XMLWriter来支持并扩充其功能，现在依赖libxml2的扩展包括DOM、SimpleXML、SOAP、WDDX、XSL、XML、XMLReader、XMLRPC和XMLWriter等。
 
 
-PHP可以在开发时选择使用过程和面向对象，或者两者混合的方式来开发。例如，从PHP 5开始引入了完全的对象模型，弥补了 PHP 4对OOP支持的不足。
+PHP 5开始引入了完全的对象模型，弥补了 PHP 4对OOP支持的不足，现在PHP可以支持过程式和面向对象，或者两者混合的方式来开发。
 
-PHP对数据库的支持很全面，用户可以使用任何针对某数据库的扩展（例如 mysql）编写数据库支持的网页，也可以使用抽象层（例如PDO）或者通过 ODBC 扩展连接到任何支持 ODBC 标准的数据库。其它一些数据库也可能会用 cURL 或者 sockets（例如 CouchDB）。
+PHP对数据库的支持可以让用户使用任何针对某数据库的扩展（例如 mysql）编写数据库支持的网页，也可以使用抽象层（例如PDO）或者通过 ODBC 扩展连接到任何支持 ODBC 标准的数据库，也可以使用cURL或者 sockets（例如 CouchDB）。
 
 
 
-PHP 还支持利用LDAP、IMAP、SNMP、NNTP、POP3、HTTP、COM（Windows 环境）等协议的服务，还可以通过开放原始网络端口来使得任何其它的协议能够协同工作。
+PHP支持利用LDAP、IMAP、SNMP、NNTP、POP3、HTTP、COM（Windows 环境）等协议的服务，还可以通过开放原始网络端口和任何其它的协议协同工作。
 
-PHP 支持和所有Web开发语言之间的 WDDX 复杂数据交换，而且PHP支持Java 对象的即时连接，可以透明地将其用作 PHP 对象。
-
-
-PHP框架可以使项目得到更快更简单的部署和更加敏捷的开发效率，因此在实际生产中框架的使用已非常普遍，例如PHP官方的框架为Zend framework。
-
-在使用框架进行开发时，绝大部分的上层代码以及项目结构都会基于所使用的框架，因此很多关于设计模式的决定已经由框架提前实现。
+PHP支持通过WDDX执行复杂的数据交换，也支持Java 对象的即时连接来透明地将Java对象用作 PHP 对象。
 
 
 
-\section{History}
+在实际生产中框架（例如Zend framework）的使用已非常普遍，很多关于设计模式的决定已经由框架提前实现，绝大部分的上层代码以及项目结构都会基于所使用的框架，因此PHP框架可以使项目得到更快更简单的部署和更加敏捷的开发效率。
 
 
+\begin{compactitem}
+\item 服务器端程序
 
+\begin{compactenum}
+\item PHP解析器（CGI或服务器模块）
+\item Web服务器（Nginx和Apache等）
+\item Web浏览器
+\end{compactenum}
 
-PHP最初是Rasmus Lerdorf为了要维护个人网页，而用C语言开发的一些用以取代原先使用Perl封装的CGI工具程序集。这些工具程序用来显示Rasmus Lerdorf的个人履历以及统计网页流量。他将这些程序和一些窗体解释器集成起来，称为PHP/FI，其中FI可以和数据库连接，从而让PHP可以产生简单的动态网页程序。
+\item 命令行脚本
 
-Rasmus Lerdorf在1995年6月8日将PHP/FI公开发布，希望可以通过社区来加速程序开发与查找错误。这个发布的版本命名为PHP 2，已经有今日PHP的一些雏型，像是类似Perl的变量命名方式、窗体处理功能、以及嵌入到HTML中运行的能力。程序语法上也类似Perl，有较多的限制，不过更简单、更有弹性。
+\begin{compactenum}
+\item PHP命令行模式
+\item 定时任务（Cron或Tast Scheduler）
+\end{compactenum}
 
-1997年，Zeev Suraski和Andi Gutmans不满足于PHP在大型项目中的表现，从而重写了PHP的语法分析器，这成为了PHP 3的基础，而PHP也在这个时候改称为PHP: Hypertext Preprocessor。
-
-1997年11月，开发团队发布了PHP/FI 2，随后就开始PHP 3的开放测试，并于1998年6月正式发布PHP 3。
-
-Zeev Suraski和Andi Gutmans在PHP 3发布后开始改写PHP的核心，这个在1999年发布的语法分析器称为Zend Engine，他们也在以色列的Ramat Gan成立了Zend Technologies来管理PHP的开发。
-
-2000年5月22日，以Zend Engine 1.0为基础的PHP 4正式发布，增加了数组操作函数、完整的会话机制、对输出缓存的支持等。
-
-2004年7月13日发布的PHP 5使用了第二代的Zend Engine，而且PHP5包含了许多新特色，比如强化的面向对象功能、引入PDO以及许多性能上的增强。
-
-
-
-从2008年开始，PHP 5成为了PHP唯一维护中的稳定版本，PHP 4已经不会继续更新，以鼓励用户迁移到PHP 5。
-
-PHP 7的开发正在进行中，主要的改进有PHPNG、JIT引擎、抽象语法树编译、异步编程。
+\end{compactitem}
 
 
 
 
 
-要查看当前PHP信息，可以通过网页或者命令行，其中通过网页可以直观的显示。
 
-\begin{lstlisting}[language=PHP]
-<?php
-	phpinfo();
-?>
-\end{lstlisting}
 
-或者在命令行中输入如下的命令：
 
-\begin{lstlisting}[language=bash]
-$ php -i
-//or
-$ php -r 'phpinfo();'
-\end{lstlisting}
 
-\texttt{phpinfo()}函数可以得到很多有关当前系统的有用信息，例如预定义变量、已经加载的 PHP 模块和配置信息。
 
 为了移除敏感信息，比如AUTH\_USER和AUTH\_PASSWORD，可以修改代码如下：
 
 \begin{lstlisting}[language=PHP]
 <?php
-  // start output buffering
-  ob_start();
+// start output buffering
+ob_start();
   
-  // send phpinfo content
-  phpinfo();
+// send phpinfo content
+phpinfo();
   
-  // get phpinfo content
-  $html = ob_get_contents();
+// get phpinfo content
+$html = ob_get_contents();
   
-  // flush the output buffer
-  ob_end_clean();
+// flush the output buffer
+ob_end_clean();
   
-  // remove auth data
-  if(isset($_SERVER['AUTH_USER']))
+// remove auth data
+if(isset($_SERVER['AUTH_USER'])) {
     $html = str_replace($_SERVER['AUTH_USER'], '<i>no value</i>',$html);
-  if(isset($_SERVER['AUTH_PASSWORD']))
+}
+if(isset($_SERVER['AUTH_PASSWORD'])) {
     $html = str_replace($_SERVER['AUTH_PASSWORD'], '<i>no value</i>', $html);
-  echo $html;
-?>
+}
+echo $html;
 \end{lstlisting}
 
 为了比较上述两种方法的异同，可以在一个页面中同时运行这两个测试页面：
@@ -177,7 +173,7 @@ $ php -r 'phpinfo();'
 </html>
 \end{lstlisting}
 
-在兼容性方面，PHP有可能影响到老版本的代码的最重要的两点改动分别是：
+在兼容性方面，PHP有可能影响到旧版本的代码的最重要的两点改动分别是：
 
 \begin{compactitem}
 \item 取消了旧的 \textcolor{red}{\texttt{\$HTTP\_*\_VARS}}数组（在函数或者方法中原本是全局变量）。
@@ -214,7 +210,7 @@ PHP保留的超全局变量\texttt{\$\_REQUEST}包含所有的GET、POST和COOKI
 PHP保留的超全局变量\texttt{\$\_SESSION}包含所有的SESSION数据。
 \end{compactitem}
 
-有些 \textcolor{red}{\texttt{\$HTTP\_*\_VARS}}数组（诸如 \texttt{\$HTTP\_POST\_VARS}等）从PHP 3就已经开始使用，从 PHP 5.4.0 开始将不再有效。
+有些 \textcolor{red}{\texttt{\$HTTP\_*\_VARS}}数组（诸如 \texttt{\$HTTP\_POST\_VARS}等）从PHP 3就已经开始使用，从 PHP 5.4.0 开始被废弃。
 
 
 自PHP 5.0.0起, 用 \texttt{register\_long\_arrays}设置选项可禁用长类型的PHP预定义变量数组。
@@ -231,7 +227,7 @@ PHP保留的超全局变量\texttt{\$\_SESSION}包含所有的SESSION数据。
 
 
 
-\section{Dynamic Parser}
+\section{Interpreter}
 
 无论以模块还是CGI的形式安装PHP，PHP的解释器都可以在服务器上执行访问文件、运行命令以及创建网络连接等操作，而且这些操作可能产生不安全隐患，因此需要正确地安装和配置PHP以及编写安全的代码。
 
@@ -263,20 +259,17 @@ $ php -q another_directory/test.php
 /tmp
 \end{lstlisting}
 
-用户在命令行运行PHP CGI应用程序时可以给CGI SAPI加上 -C 参数来使其支持 CLI SAPI 的功能。
+用户在命令行运行PHP CGI应用程序时可以给CGI SAPI加上\texttt{-C}参数来使其支持 CLI SAPI 的功能。
 
 CLI SAPI 模块有以下三种不同的方法来获取要运行的 PHP 代码：
 
 \begin{compactenum}
 \item 使用PHP 运行指定文件
 
-
 \begin{lstlisting}[language=PHP]
 $ php my_script.php
 $ php -f my_script.php
 \end{lstlisting}
-
-CLI SAPI指定的 PHP 脚本并非必须要以 .php 为扩展名，可以有任意的文件名和扩展名来运行任何文件。
 
 \item 使用PHP在命令行直接运行 PHP 代码
 
@@ -286,13 +279,11 @@ $ php -r 'print_r(get_defined_constants());'
 
 \item 使用PHP运行通过标准输入（stdin）提供的 PHP 代码
 
-
 \begin{lstlisting}[language=PHP]
 $ some_application | some_filter | php | sort -u >final_output.txt
 \end{lstlisting}
 
-
-CLI SAPI可以动态地生成 PHP 代码并通过命令行运行这些代码。
+CLI SAPI可以动态地生成 PHP代码并通过命令行运行这些代码。
 
 \end{compactenum}
 
@@ -303,11 +294,11 @@ CLI SAPI可以动态地生成 PHP 代码并通过命令行运行这些代码。
 
 \section{Template Engine}
 
-原生 PHP 模板就是指直接用 PHP 来写模板，这是很自然的选择，因为 PHP 本身其实是个模板语言。这代表你可以在其他的语言（比如 HTML）中结合 PHP 使用 。这对 PHP 开发者相当有利，因为不需要额外学习新的语法，他们熟知可以使用的函数，并且使用的编辑器也已经内置了语法高亮和自动补全。
+PHP 本身其实是个模板语言，原生 PHP 模板就是直接用 PHP 来写模板，可以在其他的语言（比如 HTML）中结合 PHP 使用，因此PHP 开发者不需要额外学习新的语法。
 
-原生的 PHP 模板没有了Blade等模板引擎的编译阶段，速度会更快。
+PHP框架使用的模板系统中大多数是使用原生的 PHP 语法，但是原生的PHP模板没有Blade等模板引擎的编译阶段，速度会更快。
 
-现今的 PHP 框架都会使用一些模板系统，其中大多数是使用原生的 PHP 语法。在框架之外，一些类库（比如 Plates 或 Aura.View）都提供了现代化模板的常见功能，比如继承、布局、扩展，让原生的 PHP 模板更容易使用。
+一些类库（比如 Plates 或 Aura.View）也提供了现代化模板的常见功能（例如继承、布局和扩展等），让原生的 PHP 模板更容易使用。
 
 \begin{compactitem}
 \item Aura.View(\url{https://github.com/auraphp/Aura.View})
@@ -323,12 +314,15 @@ CLI SAPI可以动态地生成 PHP 代码并通过命令行运行这些代码。
 \item Zend\textbackslash View(\url{https://github.com/zendframework/zend-view})
 \end{compactitem}
 
+Twig 或 Smarty提供了模板专用的新语法，改善了PHP模板性能。
+
 \subsection{Plates}
 
 \begin{lstlisting}[language=PHP]
-<?php // user_profile.php ?>
-
-<?php $this->insert('header', ['title' => 'User Profile']) ?>
+<?php
+// user_profile.php
+$this->insert('header', ['title' => 'User Profile']);
+?>
 
 <h1>User Profile</h1>
 <p>Hello, <?=$this->escape($name)?></p>
@@ -339,7 +333,9 @@ CLI SAPI可以动态地生成 PHP 代码并通过命令行运行这些代码。
 \begin{example}
 原生 PHP 模板使用 Plates类库实现继承
 \begin{lstlisting}[language=PHP]
-<?php // template.php ?>
+<?php
+// template.php
+?>
 
 <html>
 <head>
@@ -357,7 +353,9 @@ CLI SAPI可以动态地生成 PHP 代码并通过命令行运行这些代码。
 \end{example}
 
 \begin{lstlisting}[language=PHP]
-<?php // user_profile.php ?>
+<?php
+// user_profile.php
+?>
 
 <?php $this->layout('template', ['title' => 'User Profile']) ?>
 
@@ -367,12 +365,9 @@ CLI SAPI可以动态地生成 PHP 代码并通过命令行运行这些代码。
 
 \subsection{Smarty}
 
-
-尽管 PHP 不断升级为成熟的、面向对象的语言，但是作为模板语言的特性并没有改善多少。编译模板（比如 Twig 或 Smarty）提供了模板专用的新语法，填补了这片空白。
-
 从自动转义\footnote{虽然 Smarty 提供了自动转义的功能，不过这个功能默认是关闭的。}到继承以及简化控制结构，编译模板被设计地更容易编写，可读性更高，同时使用上也更加的安全。
 
-编译模板也可以在不同的语言中使用（例如Mustache），虽然这些编译模板时需要在性能上产生一些轻微的影响，不过如果适当的使用缓存，影响就变得非常小了。
+编译模板也可以在不同的语言中使用（例如Mustache），虽然这些编译模板时需要在性能上产生一些轻微的影响，不过如果适当的使用缓存可以减小性能影响。
 
 \begin{example}
 使用 Twig 类库编译模板

@@ -1,0 +1,46 @@
+\part{PHPBrew}
+
+\chapter{Overview}
+
+\begin{lstlisting}[language=bash]
+$ cd /tmp 
+$  curl -L -O https://github.com/phpbrew/phpbrew/raw/master/phpbrew
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   130  100   130    0     0     77      0  0:00:01  0:00:01 --:--:--    77
+100 1792k  100 1792k    0     0  42366      0  0:00:43  0:00:43 --:--:-- 34924
+$ file phpbrew 
+phpbrew: a /usr/bin/env php script executable (binary data)
+$ sudo chmod a+x ./phpbrew 
+[sudo] password for devops: 
+$  /tmp sudo mv ./phpbrew /usr/local/bin/
+$ cd
+$  ~ /usr/local/bin/phpbrew init
+Using root: /home/devops/.phpbrew
+Initialization successfully finished!
+<=====================================================>
+Phpbrew environment is initialized, required directories are created under
+
+    /home/devops/.phpbrew
+
+Paste the following line(s) to the end of your ~/.bashrc and start a
+new shell, phpbrew should be up and fully functional from there:
+
+    source /home/devops/.phpbrew/bashrc
+
+To enable PHP version info in your shell prompt, please set PHPBREW_SET_PROMPT=1
+in your `~/.bashrc` before you source `~/.phpbrew/bashrc`
+
+    export PHPBREW_SET_PROMPT=1
+
+To enable .phpbrewrc file searching, please export the following variable:
+
+    export PHPBREW_RC_ENABLE=1
+
+
+For further instructions, simply run `phpbrew` to see the help message.
+
+Enjoy phpbrew at $HOME!!
+
+<=====================================================>
+\end{lstlisting}
